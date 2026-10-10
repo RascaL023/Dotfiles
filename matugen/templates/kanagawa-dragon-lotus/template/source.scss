@@ -59,13 +59,13 @@ $status-critical:          {{ status.critical }};
 $status-info:              {{ status.info }};
 
 
-$fg-dim:                   {{ text.dim }};
-$fg-dim-muted:             {{ text.dim_muted }};
+$fg-dim:                   {{ text.subtle }};
+$fg-dim-muted:             {{ text.faint }};
 $fg-disabled:              {{ text.disabled }};
 
 
-$bg-conflict:              {{ bg.conflict }};
-$bg-disk-usage:            {{ bg.disk_usage }};
+$bg-conflict:              {{ status.warning_container }};
+$bg-disk-usage:            {{ surface.track }};
 
 
 $font-system:             "JetBrainsMono Nerd Font";

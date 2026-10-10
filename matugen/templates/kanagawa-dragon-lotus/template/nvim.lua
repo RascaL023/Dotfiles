@@ -17,7 +17,18 @@ return {
     accent = {
       primary = "{{ accent.primary }}",
       secondary = "{{ accent.secondary }}",
+      tertiary = "{{ accent.tertiary }}",
       on_accent = "{{ accent.on_primary }}",
+      on_tertiary = "{{ accent.on_tertiary }}",
+    },
+
+    container = {
+      primary = "{{ accent.primary_container }}",
+      on_primary = "{{ accent.on_primary_container }}",
+      secondary = "{{ accent.secondary_container }}",
+      on_secondary = "{{ accent.on_secondary_container }}",
+      tertiary = "{{ accent.tertiary_container }}",
+      on_tertiary = "{{ accent.on_tertiary_container }}",
     },
 
     text = {
@@ -52,14 +63,14 @@ return {
     },
 
     fg = {
-      dim = "{{ text.dim }}",
-      dim_muted = "{{ text.dim_muted }}",
+      dim = "{{ text.subtle }}",
+      dim_muted = "{{ text.faint }}",
       disabled = "{{ text.disabled }}",
     },
 
     bg = {
-      conflict = "{{ bg.conflict }}",
-      disk_usage = "{{ bg.disk_usage }}",
+      conflict = "{{ status.warning_container }}",
+      disk_usage = "{{ surface.track }}",
     },
 
     syntax = {
@@ -93,8 +104,8 @@ return {
     },
 
     ui = {
-      bg_statusline = "{{ ui.bg_statusline }}",
-      gutter = "{{ ui.gutter }}",
+      bg_statusline = "{{ surface.high }}",
+      gutter = "{{ surface.highest }}",
     },
   },
 }

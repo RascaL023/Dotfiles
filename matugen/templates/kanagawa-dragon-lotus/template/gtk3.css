@@ -14,7 +14,7 @@
 @define-color accent-shadow         {{ accent.primary | to_color | set_alpha: 0.35 | format: rgba }};
 @define-color accent-hover          {{ accent.primary | to_color | lighten: -8 | format: hex }};
 @define-color accent-bright         {{ accent.primary | to_color | lighten: 15 | format: hex }};
-@define-color accent-progress       #a8b7bb; /* Computed by Sass */
+@define-color accent-progress       {{ accent.tertiary }};
 @define-color accent-backdrop       {{ accent.primary | to_color | lighten: 10 | format: hex }};
 @define-color accent-focus          {{ text.secondary | to_color | set_alpha: 0.3 | format: rgba }};
 
@@ -30,8 +30,8 @@
 @define-color bg-input-deep         {{ surface.medium | to_color | lighten: 5 | format: hex }};
 @define-color bg-sidebar-hover      {{ surface.highest | to_color | lighten: 8 | format: hex }};
 @define-color bg-menu-selected      {{ surface.highest | to_color | lighten: 12 | format: hex }};
-@define-color bg-conflict           {{ bg.conflict }};
-@define-color disk-usage-bg         {{ bg.disk_usage }};
+@define-color bg-conflict           {{ status.warning_container }};
+@define-color disk-usage-bg         {{ surface.track }};
 @define-color surface-disabled      {{ text.primary | to_color | set_alpha: 0.04 | format: rgba }};
 
 /* ── Foreground (direct + derived) ── */
@@ -40,8 +40,8 @@
 @define-color fg-alt                {{ text.primary | to_color | set_alpha: 0.7 | format: rgba }};
 @define-color fg-muted              {{ text.primary | to_color | set_alpha: 0.5 | format: rgba }};
 @define-color fg-muted-strong       {{ text.primary | to_color | set_alpha: 0.32 | format: rgba }};
-@define-color fg-dim                {{ text.dim }};
-@define-color fg-dim-muted          {{ text.dim_muted }};
+@define-color fg-dim                {{ text.subtle }};
+@define-color fg-dim-muted          {{ text.faint }};
 @define-color fg-disabled           {{ text.disabled }};
 @define-color fg-invert             {{ surface.low | to_color | set_alpha: 0.87 | format: rgba }};
 @define-color fg-invert-alt         {{ surface.low | to_color | set_alpha: 0.6 | format: rgba }};
@@ -50,8 +50,8 @@
 @define-color fg-osd                {{ surface.lowest | to_color | lighten: -5 | set_alpha: 0.9 | format: rgba }};
 
 /* ── Selection ── */
-@define-color selection-bg          {{ accent.primary }};
-@define-color selection-fg          {{ surface.low | to_color | set_alpha: 0.87 | format: rgba }};
+@define-color selection-bg          {{ accent.primary_container }};
+@define-color selection-fg          {{ accent.on_primary_container }};
 
 /* ── Status ── */
 @define-color error                 {{ status.error }};
@@ -70,11 +70,6 @@
 @define-color border-light          {{ text.primary | to_color | set_alpha: 0.1 | format: rgba }};
 @define-color border-medium         {{ border.medium }};
 
-/* ── Shadow ── */
-/* @define-color shadow                rgba(0, 0, 0, 0.2); */
-/* @define-color shadow-light          rgba(0, 0, 0, 0.15); */
-/* @define-color shadow-medium         rgba(0, 0, 0, 0.18); */
-/* @define-color shadow-deep           rgba(0, 0, 0, 0.4); */
 @define-color shadow                {{ surface.low | to_color | set_alpha: 0.2 | format: rgba }};
 @define-color shadow-light          {{ surface.low | to_color | set_alpha: 0.15 | format: rgba }};
 @define-color shadow-medium         {{ surface.low | to_color | set_alpha: 0.18 | format: rgba }};

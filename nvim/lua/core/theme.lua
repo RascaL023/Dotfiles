@@ -163,6 +163,7 @@ local function build_colors(d)
   local fg = d.extra.fg
   local syntax = d.extra.syntax
   local accent = d.extra.accent
+  local containers = d.extra.container
   local ui = d.extra.ui
 
   local base = layer.base
@@ -242,8 +243,8 @@ local function build_colors(d)
     bg_sidebar = layer.mantle,
     bg_statusline = ui.bg_statusline,
 
-    bg_visual = blue7,
-    bg_search = blue0,
+    bg_visual = containers.primary,
+    bg_search = containers.secondary,
 
     fg_sidebar = text.muted,
     fg_float = d.foreground,
@@ -251,7 +252,7 @@ local function build_colors(d)
     error = status.error,
     warning = status.warning,
     info = status.info,
-    hint = teal,
+    hint = accent.tertiary,
     todo = blue,
 
     diff = {
@@ -459,6 +460,24 @@ function M.tokyonight_opts()
     end,
 
     on_highlights = function(hl, c)
+      -- ================================================================
+      -- Selection / search memakai role container (Material)
+      -- ================================================================
+
+      local acc = palette.extra.accent
+      local box = palette.extra.container
+
+      hl.Visual = { bg = box.primary, fg = box.on_primary }
+      hl.VisualNOS = { bg = box.primary, fg = box.on_primary }
+
+      hl.PmenuSel = { bg = box.primary, fg = box.on_primary }
+
+      hl.Search = { bg = box.secondary, fg = box.on_secondary }
+      hl.CurSearch = { bg = acc.tertiary, fg = acc.on_tertiary }
+      hl.IncSearch = { bg = acc.tertiary, fg = acc.on_tertiary }
+
+      hl.MatchParen = { bg = box.tertiary, fg = box.on_tertiary, bold = true }
+
       -- ================================================================
       -- Transparansi + plugin yang sudah ada
       -- ================================================================
@@ -824,7 +843,12 @@ function M.reload()
   package.loaded["theme"] = nil
   local ok_load, fresh = pcall(require, "theme")
 
-  if not ok_load or type(fresh) ~= "table" or not fresh.extra then
+  if
+    not ok_load
+    or type(fresh) ~= "table"
+    or not fresh.extra
+    or not fresh.extra.container
+  then
     package.loaded["theme"] = palette
     vim.notify(
       "[theme] reload dibatalkan, palet lama dipakai: " .. tostring(fresh),

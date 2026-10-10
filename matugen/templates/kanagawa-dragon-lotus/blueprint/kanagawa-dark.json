@@ -1,4 +1,11 @@
 {
+  "meta": {
+    "name": "kanagawa-dragon-lotus",
+    "variant": "dark",
+    "palette": "rebelot/kanagawa.nvim#dragon",
+    "origin": "Kanagawa Dark Dragon GTK CSS + kanagawa.nvim palette"
+  },
+
   "background": "#181616",
   "foreground": "#c5c9c5",
   "cursor": "#C8C093",
@@ -40,51 +47,77 @@
   "color14": "#7AA89F",
   "color15": "#c5c9c5",
 
+
   "accent": {
-    "primary": "#8ba4b0",
+    "primary":   "#8ba4b0",
     "secondary": "#a292a3",
-    "on_primary": "#0d0c0c",
-    "on_secondary": "#0d0c0c"
+    "tertiary":  "#7AA89F",
+
+    "on_primary":   "#0d0c0c",
+    "on_secondary": "#0d0c0c",
+    "on_tertiary":  "#0d0c0c",
+
+    "primary_container":   "#223249",
+    "secondary_container": "#252535",
+    "tertiary_container":  "#2B3328",
+
+    "on_primary_container":   "#c5c9c5",
+    "on_secondary_container": "#c5c9c5",
+    "on_tertiary_container":  "#c5c9c5"
   },
+
 
   "text": {
-    "primary": "#c5c9c5",
-    "secondary": "#C8C093",
-    "muted": "#a6a69c",
-    "link": "#8ba4b0",
-    "visited": "#7b6f8c",
-    "dim": "#6b6b64",
-    "dim_muted": "#7a7a74",
-    "disabled": "#5a5f63"
+    "primary":    "#c5c9c5",
+    "secondary":  "#C8C093",
+    "muted":      "#a6a69c",
+    "subtle":     "#7a8382",
+    "faint":      "#625e5a",
+    "disabled":   "#393836",
+
+    "link":       "#8ba4b0",
+    "visited":    "#938AA9",
+    "on_inverse": "#181616"
   },
+
 
   "surface": {
-    "base": "#181616",
-    "lowest": "#0d0c0c",
-    "low": "#12120f",
-    "medium": "#1D1C19",
-    "high": "#282727",
-    "highest": "#393836"
+    "lowest":  "#0d0c0c",
+    "low":     "#12120f",
+    "base":    "#181616",
+    "medium":  "#1D1C19",
+    "high":    "#282727",
+    "highest": "#393836",
+
+    "track":   "#393836",
+    "inverse": "#C8C093"
   },
+
 
   "border": {
-    "default": "#282727",
-    "active": "#8ba4b0",
-    "medium": "#4a4a49"
+    "default": "#393836",
+    "medium":  "#625e5a",
+    "active":  "#8ba4b0"
   },
+
 
   "status": {
-    "success": "#8a9a7b",
-    "warning": "#c4b28a",
-    "error": "#c4746e",
+    "info":     "#8ba4b0",
+    "success":  "#8a9a7b",
+    "warning":  "#c4b28a",
+    "error":    "#c4746e",
     "critical": "#E46876",
-    "info": "#8ba4b0"
+
+    "warning_container": "#49443C",
+    "error_container":   "#43242B"
   },
 
-  "bg": {
-    "conflict": "#635127",
-    "disk_usage": "#50504a"
+
+  "effect": {
+    "shadow": "#0d0c0c",
+    "scrim":  "#0d0c0c"
   },
+
 
   "syntax": {
     "comment": "#625E5A",
@@ -114,10 +147,5 @@
     "decorator": "#938AA9",
     "tag": "#E46876",
     "attribute": "#C8C093"
-  },
-
-  "ui": {
-    "bg_statusline": "#282727",
-    "gutter": "#393836"
   }
 }
