@@ -11,24 +11,27 @@ return {
   foreground = "{{ colors.on_surface.default.hex }}",
   cursor = "{{ colors.primary.default.hex }}",
 
+  -- ANSI 0..15. Normal slots are the MD3 accents, bright slots lift the
+  -- same jobs onto the `*_fixed`/container tones (like the other general
+  -- templates) so a normal color is never identical to its bright pair.
   colors = {
     "{{ colors.surface_container_lowest.default.hex }}",
     "{{ colors.error.default.hex }}",
-    "{{ colors.secondary.default.hex }}",
     "{{ colors.tertiary.default.hex }}",
+    "{{ colors.secondary.default.hex }}",
     "{{ colors.primary.default.hex }}",
-    "{{ colors.tertiary.default.hex }}",
-    "{{ colors.secondary.default.hex }}",
+    "{{ colors.tertiary.default.hex | lighten: -10 }}",
+    "{{ colors.secondary.default.hex | lighten: -10 }}",
     "{{ colors.on_surface.default.hex }}",
 
     "{{ colors.outline.default.hex }}",
-    "{{ colors.error.default.hex }}",
-    "{{ colors.secondary.default.hex }}",
-    "{{ colors.tertiary.default.hex }}",
-    "{{ colors.primary.default.hex }}",
-    "{{ colors.tertiary.default.hex }}",
-    "{{ colors.secondary.default.hex }}",
-    "{{ colors.on_surface_variant.default.hex }}",
+    "{{ colors.error_container.default.hex | blend: {{ colors.primary.default.hex }}, 0.6 | lighten: 40 }}",
+    "{{ colors.tertiary_container.default.hex }}",
+    "{{ colors.secondary_container.default.hex }}",
+    "{{ colors.primary_container.default.hex }}",
+    "{{ colors.tertiary_fixed.default.hex }}",
+    "{{ colors.secondary.default.hex | lighten: -8 }}",
+    "{{ colors.on_surface.default.hex | lighten: 10 }}",
   },
 
   extra = {
@@ -91,45 +94,51 @@ return {
       disk_usage = "{{ colors.secondary_container.default.hex }}",
     },
 
+    -- Setiap peran tetap berasal dari warna matugen. Keluarga aksen
+    -- (primary = violet, tertiary = rose) dibagi lagi lewat `lighten` negatif
+    -- yang menaikkan saturasi, sehingga token yang berkerabat punya nada
+    -- berbeda tanpa keluar dari aksen wallpaper. `blend` dipakai untuk
+    -- menggeser hue token "whisper" agar menyatu dengan aksen (blend di sini
+    -- menjaga terang/saturasi, jadi cuma menggeser hue).
     syntax = {
-      -- Whisper
-      comment = "{{ colors.outline.default.hex }}",
+      -- Whisper: tetap redup, tapi dihangatkan ke hue aksen
+      comment = "{{ colors.outline.default.hex | blend: {{ colors.tertiary.default.hex }}, 0.5 }}",
       punctuation = "{{ colors.outline.default.hex }}",
-      property = "{{ colors.on_surface_variant.default.hex }}",
-      parameter = "{{ colors.on_surface_variant.default.hex }}",
+      property = "{{ colors.on_surface.default.hex | lighten: -1 }}",
+      parameter = "{{ colors.on_surface.default.hex | lighten: -5 }}",
 
-      -- Hero
+      -- Hero: struktur kalimat (tiga nada violet)
       keyword = "{{ colors.primary.default.hex }}",
-      statement = "{{ colors.primary.default.hex }}",
+      statement = "{{ colors.tertiary.default.hex }}",
       ["return"] = "{{ colors.primary.default.hex }}",
-      import = "{{ colors.primary.default.hex }}",
-      decorator = "{{ colors.primary.default.hex }}",
+      import = "{{ colors.primary.default.hex | lighten: -10 }}",
+      decorator = "{{ colors.primary.default.hex | lighten: -6 }}",
 
-      -- Cast
-      ["function"] = "{{ colors.secondary.default.hex }}",
-      method = "{{ colors.secondary.default.hex }}",
-      type = "{{ colors.tertiary.default.hex }}",
-      class = "{{ colors.tertiary.default.hex }}",
-      builtin = "{{ colors.secondary.default.hex }}",
+      -- Cast: yang dipanggil vs tipe
+      ["function"] = "{{ colors.primary.default.hex | lighten: -10 }}",
+      method = "{{ colors.primary.default.hex | lighten: -9 }}",
+      type = "{{ colors.primary.default.hex | lighten: -5 }}",
+      class = "{{ colors.primary.default.hex | lighten: -13 }}",
+      builtin = "{{ colors.primary.default.hex | lighten: -15 }}",
 
-      -- Whisper / data
-      string = "{{ colors.on_surface_variant.default.hex }}",
-      number = "{{ colors.on_surface_variant.default.hex }}",
-      boolean = "{{ colors.tertiary.default.hex }}",
-      constant = "{{ colors.tertiary.default.hex }}",
+      -- Data: rose untuk string, lavender untuk angka/konstanta
+      string = "{{ colors.tertiary.default.hex | lighten: -14 }}",
+      number = "{{ colors.secondary.default.hex | lighten: -14 }}",
+      boolean = "{{ colors.tertiary.default.hex | lighten: -8 }}",
+      constant = "{{ colors.secondary.default.hex | lighten: -20 }}",
       variable = "{{ colors.on_surface.default.hex }}",
       identifier = "{{ colors.on_surface.default.hex }}",
 
       -- Special
-      operator = "{{ colors.primary.default.hex }}",
-      regex = "{{ colors.secondary.default.hex }}",
-      builtin_variable = "{{ colors.secondary.default.hex }}",
-      special = "{{ colors.tertiary.default.hex }}",
+      operator = "{{ colors.secondary.default.hex | lighten: -4 }}",
+      regex = "{{ colors.tertiary.default.hex | lighten: -26 }}",
+      builtin_variable = "{{ colors.secondary.default.hex | lighten: -8 }}",
+      special = "{{ colors.tertiary.default.hex | blend: {{ colors.secondary.default.hex }}, 0.5 | lighten: -10 }}",
 
       -- Diagnostics / destructive syntax
       exception = "{{ colors.error.default.hex }}",
       tag = "{{ colors.error.default.hex }}",
-      attribute = "{{ colors.tertiary.default.hex }}",
+      attribute = "{{ colors.primary.default.hex | lighten: -17 }}",
     },
 
     ui = {
