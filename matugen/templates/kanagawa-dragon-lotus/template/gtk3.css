@@ -89,7 +89,7 @@
 
 @define-color accent-primary        {{ accent.primary }};
 @define-color accent-secondary      {{ accent.secondary }};
-@define-color accent-on             {{ accent.on_accent }};
+@define-color accent-on             {{ accent.on_primary }};
 
 @define-color layer-base            {{ surface.base }};
 @define-color layer-mantle          {{ surface.lowest }};

@@ -43,7 +43,8 @@
   "accent": {
     "primary": "#8ba4b0",
     "secondary": "#a292a3",
-    "on_accent": "#0d0c0c"
+    "on_primary": "#0d0c0c",
+    "on_secondary": "#0d0c0c"
   },
 
   "text": {
@@ -52,7 +53,7 @@
     "muted": "#a6a69c",
     "link": "#8ba4b0",
     "visited": "#7b6f8c",
-    "dim": "#63635e",
+    "dim": "#6b6b64",
     "dim_muted": "#7a7a74",
     "disabled": "#5a5f63"
   },

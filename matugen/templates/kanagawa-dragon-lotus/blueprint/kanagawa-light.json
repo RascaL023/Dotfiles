@@ -22,50 +22,49 @@
     "#f2ecbc"
   ],
 
-  "color" : {
-    "0": "#1f1f28",
-    "1": "#c84053",
-    "2": "#6f894e",
-    "3": "#77713f",
-    "4": "#4d699b",
-    "5": "#b35b79",
-    "6": "#597b75",
-    "7": "#545464",
+  "color0": "#1f1f28",
+  "color1": "#c84053",
+  "color2": "#6f894e",
+  "color3": "#77713f",
+  "color4": "#4d699b",
+  "color5": "#b35b79",
+  "color6": "#597b75",
+  "color7": "#545464",
 
-    "8": "#8a8980",
-    "9": "#d7474b",
-    "10": "#6e915f",
-    "11": "#836f4a",
-    "12": "#6693bf",
-    "13": "#624c83",
-    "14": "#5e857a",
-    "15": "#f2ecbc"
-  },
+  "color8": "#8a8980",
+  "color9": "#d7474b",
+  "color10": "#6e915f",
+  "color11": "#836f4a",
+  "color12": "#6693bf",
+  "color13": "#624c83",
+  "color14": "#5e857a",
+  "color15": "#f2ecbc",
   
   "accent": {
     "primary": "#545464",
     "secondary": "#b35b79",
-    "on_accent": "#f2ecbc"
+    "on_primary": "#f2ecbc",
+    "on_secondary": "#f2efef"
   },
 
   "text": {
     "primary": "#545464",
-    "secondary": "#716e61",
-    "muted": "#8a8980",
+    "secondary": "#605d52",
+    "muted": "#6d6a5f",
     "link": "#4d699b",
     "visited": "#624c83",
-    "dim": "#8a8980",
-    "dim_muted": "#7c7b72",
+    "dim": "#7b786f",
+    "dim_muted": "#86837b",
     "disabled": "#9c9b93"
   },
 
   "surface": {
     "base": "#f2ecbc",
     "lowest": "#e5ddb0",
-    "low": "#dcd5ac",
-    "medium": "#e7dba0",
-    "high": "#d5cea3",
-    "highest": "#e4d794"
+    "low": "#e7dba0",
+    "medium": "#e4d794",
+    "high": "#dcd5ac",
+    "highest": "#d5cea3"
   },
 
   "border": {

@@ -29,7 +29,8 @@ $white-bright:             {{ color15 }};
 
 $primary-accent:           {{ accent.primary }};
 $secondary-accent:         {{ accent.secondary }};
-$on-primary:               {{ accent.on_accent }};
+$on-primary:               {{ accent.on_primary }};
+$on-secondary:             {{ accent.on_secondary }};
 
 $text-primary:             {{ foreground }};
 $text-secondary:           {{ text.secondary }};
@@ -46,9 +47,9 @@ $layer-high:               {{ surface.high }};
 $layer-highest:            {{ surface.highest }};
 
 
-$border-default:           {{ border.medium }};
-$border-active:            {{ accent.primary }};
-$border-medium:            {{ border.default }};
+$border-default:           {{ border.default }};
+$border-active:            {{ border.active }};
+$border-medium:            {{ border.medium }};
 
 
 $status-success:           {{ status.success }};

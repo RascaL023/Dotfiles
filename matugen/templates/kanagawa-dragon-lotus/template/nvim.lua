@@ -17,7 +17,7 @@ return {
     accent = {
       primary = "{{ accent.primary }}",
       secondary = "{{ accent.secondary }}",
-      on_accent = "{{ accent.on_accent }}",
+      on_accent = "{{ accent.on_primary }}",
     },
 
     text = {

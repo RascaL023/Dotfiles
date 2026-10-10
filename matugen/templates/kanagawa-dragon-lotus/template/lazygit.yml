@@ -34,7 +34,7 @@ gui:
 
     # Foreground color of copied commit (text on selection)
     cherryPickedCommitFgColor:
-      - "{{ accent.on_accent }}"
+      - "{{ accent.on_primary }}"
 
     # Background color of copied commit
     cherryPickedCommitBgColor:
@@ -42,7 +42,7 @@ gui:
 
     # Foreground color of marked base commit (for rebase)
     markedBaseCommitFgColor:
-      - "{{ accent.on_accent }}"
+      - "{{ accent.on_primary }}"
 
     # Background color of marked base commit (for rebase)
     markedBaseCommitBgColor:
