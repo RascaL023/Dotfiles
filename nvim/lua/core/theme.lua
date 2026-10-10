@@ -215,7 +215,10 @@ local function build_colors(d)
     dark3 = fg.dim,
     dark5 = dark5,
 
-    terminal_black = border.medium,
+    -- Latar halus (chip inline code `...`, ghost text saran AI, backdrop).
+    -- Di TokyoNight `terminal_black` adalah permukaan GELAP; memakai `border`
+    -- (abu terang) membuat teks di atas chip nyaris tak terbaca.
+    terminal_black = blend(accent.primary, layer.crust, 0.12),
 
     red = red,
     red1 = status.error,
@@ -500,6 +503,14 @@ function M.tokyonight_opts()
 
       hl.MatchParen = { bg = box.tertiary, fg = box.on_tertiary, bold = true }
 
+      -- Teks di dalam backtick (kode inline markdown). TokyoNight memberinya
+      -- aksen biru di atas latar chip gelap; dua warna itu berdekatan hue dan
+      -- kontrasnya cuma ~5:1, jadi sulit dibaca. Pakai warna teks utama.
+      hl["@markup.raw.markdown_inline"] = {
+        bg = c.terminal_black,
+        fg = c.fg,
+      }
+
       -- ================================================================
       -- Transparansi + plugin yang sudah ada
       -- ================================================================
@@ -518,11 +529,17 @@ function M.tokyonight_opts()
         fg = c.fg,
       }
 
+      -- Transparansi: menulis `{ bg = "none" }` saja akan MENGHAPUS fg/bold
+      -- bawaan TokyoNight, karena nvim_set_hl mengganti seluruh definisi group.
+      -- Jadi: group yang latarnya sudah tembus dari `transparent = true` cukup
+      -- dibiarkan, dan yang perlu dikosongkan manual harus menyertakan fg-nya.
       hl.NvimTreeNormal = {
+        fg = c.fg_sidebar,
         bg = "none",
       }
 
       hl.NvimTreeNormalNC = {
+        fg = c.fg_sidebar,
         bg = "none",
       }
 
@@ -530,31 +547,8 @@ function M.tokyonight_opts()
         bg = "none",
       }
 
-      hl.Normal = {
-        bg = "none",
-      }
-
-      hl.NormalNC = {
-        bg = "none",
-      }
-
       hl.NormalFloat = {
-        bg = "none",
-      }
-
-      hl.SignColumn = {
-        bg = "none",
-      }
-
-      hl.LineNr = {
-        bg = "none",
-      }
-
-      hl.CursorLineNr = {
-        bg = "none",
-      }
-
-      hl.EndOfBuffer = {
+        fg = c.fg_float,
         bg = "none",
       }
 
@@ -701,10 +695,10 @@ function M.apply_plugin_highlights()
     fg = c.magenta,
   })
 
-  -- markview inline code
+  -- markview inline code (teks di dalam backtick)
   set(0, "MarkviewInlineCode", {
     bg = c.terminal_black,
-    fg = c.green,
+    fg = c.fg,
   })
 
   -- zen-mode
