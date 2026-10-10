@@ -7,10 +7,10 @@
 - [x] Nvim
 - [x] Herdr
 - [x] GTK-3
-- [ ] Scss-based
-- [ ] Hyprland
-- [ ] Niri
-- [ ] Cava?
+- [x] Scss-based
 - [ ] Yazi
 - [ ] Firefox
 - [ ] Foot
+- [ ] Cava?
+- [ ] Hyprland
+- [ ] Niri

@@ -790,4 +790,71 @@ vim.api.nvim_create_autocmd("ColorScheme", {
   end,
 })
 
+-- ============================================================================
+-- HOT RELOAD
+-- ============================================================================
+
+--- Salin isi `src` ke `dst` secara in-place (rekursif).
+--- In-place penting: `palette` (upvalue), `M.palettes`, `M.syntax` dan
+--- `M.colors` sudah di-capture modul lain (mis. zen.lua), jadi identitas
+--- tabelnya tidak boleh berubah.
+local function sync_in_place(dst, src)
+  for k in pairs(dst) do
+    if src[k] == nil then
+      dst[k] = nil
+    end
+  end
+
+  for k, v in pairs(src) do
+    if type(v) == "table" then
+      if type(dst[k]) ~= "table" then
+        dst[k] = {}
+      end
+      sync_in_place(dst[k], v)
+    else
+      dst[k] = v
+    end
+  end
+end
+
+--- Baca ulang theme.lua hasil matugen lalu terapkan ke nvim yang sedang
+--- berjalan. Aman dipanggil kapan saja: bila file rusak/setengah tertulis,
+--- palet lama dipertahankan dan fungsi mengembalikan false.
+function M.reload()
+  package.loaded["theme"] = nil
+  local ok_load, fresh = pcall(require, "theme")
+
+  if not ok_load or type(fresh) ~= "table" or not fresh.extra then
+    package.loaded["theme"] = palette
+    vim.notify(
+      "[theme] reload dibatalkan, palet lama dipakai: " .. tostring(fresh),
+      vim.log.levels.WARN
+    )
+    return false
+  end
+
+  sync_in_place(palette, fresh)
+  package.loaded["theme"] = palette
+
+  sync_in_place(M.colors, build_colors(palette))
+  vim.g.markview_dark_bg = M.colors.bg
+  vim.g.markview_light_bg = M.colors.bg
+
+  require("tokyonight").setup(M.tokyonight_opts())
+  -- Memicu autocmd ColorScheme: apply_plugin_highlights() dan
+  -- re-setup lualine berjalan otomatis.
+  vim.cmd.colorscheme("tokyonight")
+
+  -- smear-cursor menerima warna sebagai string hex saat setup(), bukan
+  -- highlight group, jadi harus di-set ulang. Hanya bila sudah termuat
+  -- (jangan memicu lazy-load dari sini).
+  local smear = package.loaded["smear_cursor"]
+  if smear then
+    smear.cursor_color = M.colors.magenta
+    smear.transparent_bg_fallback_color = M.colors.bg_highlight
+  end
+
+  return true
+end
+
 return M

@@ -3,10 +3,15 @@
 [templates.nvim]
 input_path      = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/nvim.lua"
 output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua"
+post_hook       = "mkdir -p ~/.myenv/theme/current/alacritty"
 
 [templates.css]
 input_path = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/gtk3.css"
 output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/css/theme.css"
+post_hook       = """
+    dconf write /org/gnome/desktop/interface/gtk-theme "'Adwaita'"
+    dconf write /org/gnome/desktop/interface/gtk-theme "'Kanagawa-Dark-Dragon'"
+"""
 
 [templates.scss]
 input_path = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/source.scss"
@@ -19,3 +24,4 @@ output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/lazygit/config
 [templates.herdr]
 input_path      = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/herdr.toml"
 output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/herdr/config.toml"
+post_hook       = "herdr server reload-config"
