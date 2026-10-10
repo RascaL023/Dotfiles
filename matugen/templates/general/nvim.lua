@@ -35,7 +35,18 @@ return {
     accent = {
       primary = "{{ colors.primary.default.hex }}",
       secondary = "{{ colors.secondary.default.hex }}",
+      tertiary = "{{ colors.tertiary.default.hex }}",
       on_accent = "{{ colors.on_primary.default.hex }}",
+      on_tertiary = "{{ colors.on_tertiary.default.hex }}",
+    },
+
+    container = {
+      primary = "{{ colors.primary_container.default.hex }}",
+      on_primary = "{{ colors.on_primary_container.default.hex }}",
+      secondary = "{{ colors.secondary_container.default.hex }}",
+      on_secondary = "{{ colors.on_secondary_container.default.hex }}",
+      tertiary = "{{ colors.tertiary_container.default.hex }}",
+      on_tertiary = "{{ colors.on_tertiary_container.default.hex }}",
     },
 
     text = {

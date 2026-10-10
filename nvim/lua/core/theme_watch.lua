@@ -20,7 +20,7 @@ local ROOT = vim.fn.expand("~/.myenv/theme")
 local LINK = "current"
 local SUBDIR = "nvim"
 local FILE = "theme.lua"
-local DEBOUNCE_MS = 150
+local DEBOUNCE_MS = 300
 
 local root_handle, inner_handle, timer
 local inner_dir, inner_name

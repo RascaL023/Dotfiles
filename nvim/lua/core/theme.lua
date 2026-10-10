@@ -155,6 +155,25 @@ local function blend(fg, bg, alpha)
   )
 end
 
+--- Role container (selection/search) dari palet.
+--- Palet dari pipeline wallpaper versi lama dan palet legacy belum punya
+--- `extra.container`, jadi di situ dipakai perilaku lama: accent untuk
+--- seleksi, background untuk teks di atasnya.
+--- @param d table palet tergenerate
+--- @return table
+local function container_roles(d)
+  local accent = d.extra.accent
+
+  return d.extra.container or {
+    primary = accent.primary,
+    on_primary = d.background,
+    secondary = accent.secondary,
+    on_secondary = d.background,
+    tertiary = accent.tertiary or accent.secondary,
+    on_tertiary = d.background,
+  }
+end
+
 local function build_colors(d)
   local layer = d.extra.layer
   local text = d.extra.text
@@ -163,7 +182,7 @@ local function build_colors(d)
   local fg = d.extra.fg
   local syntax = d.extra.syntax
   local accent = d.extra.accent
-  local containers = d.extra.container
+  local containers = container_roles(d)
   local ui = d.extra.ui
 
   local base = layer.base
@@ -252,7 +271,7 @@ local function build_colors(d)
     error = status.error,
     warning = status.warning,
     info = status.info,
-    hint = accent.tertiary,
+    hint = accent.tertiary or teal,
     todo = blue,
 
     diff = {
@@ -465,7 +484,10 @@ function M.tokyonight_opts()
       -- ================================================================
 
       local acc = palette.extra.accent
-      local box = palette.extra.container
+      local box = container_roles(palette)
+      -- Palet yang belum punya accent.tertiary memakai secondary + background.
+      local tertiary = acc.tertiary or acc.secondary
+      local on_tertiary = acc.on_tertiary or palette.background
 
       hl.Visual = { bg = box.primary, fg = box.on_primary }
       hl.VisualNOS = { bg = box.primary, fg = box.on_primary }
@@ -473,8 +495,8 @@ function M.tokyonight_opts()
       hl.PmenuSel = { bg = box.primary, fg = box.on_primary }
 
       hl.Search = { bg = box.secondary, fg = box.on_secondary }
-      hl.CurSearch = { bg = acc.tertiary, fg = acc.on_tertiary }
-      hl.IncSearch = { bg = acc.tertiary, fg = acc.on_tertiary }
+      hl.CurSearch = { bg = tertiary, fg = on_tertiary }
+      hl.IncSearch = { bg = tertiary, fg = on_tertiary }
 
       hl.MatchParen = { bg = box.tertiary, fg = box.on_tertiary, bold = true }
 
@@ -843,12 +865,7 @@ function M.reload()
   package.loaded["theme"] = nil
   local ok_load, fresh = pcall(require, "theme")
 
-  if
-    not ok_load
-    or type(fresh) ~= "table"
-    or not fresh.extra
-    or not fresh.extra.container
-  then
+  if not ok_load or type(fresh) ~= "table" or not fresh.extra then
     package.loaded["theme"] = palette
     vim.notify(
       "[theme] reload dibatalkan, palet lama dipakai: " .. tostring(fresh),
