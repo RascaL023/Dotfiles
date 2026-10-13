@@ -1,5 +1,40 @@
-# Hasil dari matugen
+# Kosakata Warna Matugen (contoh keluaran)
 
+> Indeks: [`README.md`](README.md) · dokumen ini melengkapi
+> [`CHEATSHEETS.md`](CHEATSHEETS.md) (yang menjelaskan *perannya* untuk UI),
+> sedangkan halaman ini menunjukkan *daftar mentah* nama-nama warna.
+>
+> **Hanya berlaku untuk alur wallpaper (Material You).** Alur palet tetap
+> (`templates/kanagawa-dragon-lotus/`) tidak memakai nama-nama ini — lihat
+> [`../templates/kanagawa-dragon-lotus/blueprint/README.md`](../templates/kanagawa-dragon-lotus/blueprint/README.md).
+
+## Dari mana tabel ini
+
+```bash
+matugen color hex "#957FB8" --show-colors
+```
+
+Baris `source_color` di bawah menunjukkan sumber warnanya (`#957FB8`, ungu
+Kanagawa). **Semua nilai di tabel bergantung pada warna sumber itu** — ganti
+sumbernya, semua angka berubah. Jadi tabel ini bukan konstanta repo, hanya
+contoh untuk melihat *bentuk* kosakatanya.
+
+Kolom `LIGHT` dan `DARK` = dua keluaran dalam satu perintah; template memilih
+salah satunya lewat `{{ colors.<role>.light.hex }}` / `.<role>.dark.hex` (atau
+`default` untuk mode aktif — lihat `CHEATSHEETS.md` §2).
+
+## Yang perlu diperhatikan saat membaca
+
+- **Nama MD3** (`primary`, `on_primary`, `surface_container_high`, …) adalah
+  kosakata resmi yang dipakai `{{ colors.<role>.<scheme>.<format> }}`.
+- **Nama `base00`–`base0f`** bukan MD3: itu keluaran backend base16, urutannya
+  sama dengan indeks ANSI bila dipakai untuk terminal.
+- **`source_color`** = warna asal, bukan role; muncul di kolom light dan dark
+  karena memang sama.
+
+---
+
+```text
 ╭────────────────────────────┬─────────┬──┬─────────┬──╮
 │            NAME            │  LIGHT  │  │   DARK  │  │
 ╞════════════════════════════╪═════════╪══╪═════════╪══╡
@@ -69,5 +104,24 @@
 │ base0d                     │ #B98EFF │  │ #B98EFF │  │
 │ base0e                     │ #FF779D │  │ #FF779D │  │
 │ base0f                     │ #767278 │  │ #767278 │  │
-│ source_color               │ #957FB8 │  │ #957FB8 │  │
 ╰────────────────────────────┴─────────┴──┴─────────┴──╯
+```
+
+## Cara memakainya di template
+
+```toml
+# alur wallpaper
+background = "{{ colors.surface.default.hex }}"
+fg         = "{{ colors.on_surface.default.hex }}"
+accent     = "{{ colors.primary.default.hex }}"
+```
+
+Untuk melihat daftar nama pada mesin ini (tanpa menghafal tabel di atas):
+
+```bash
+matugen color hex "#957FB8" --show-colors   # tabel seperti di atas
+matugen color hex "#957FB8" -j hex          # dump JSON: untuk menemukan key
+```
+
+Pemetaan *role → pekerjaan UI* (mana yang untuk latar, teks, border, dsb.) ada
+di [`CHEATSHEETS.md`](CHEATSHEETS.md).

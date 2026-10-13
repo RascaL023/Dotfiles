@@ -6,6 +6,9 @@ itu dipakai untuk mewarnai bagian apa saja di nvim?**
 Ditulis agar bisa dibaca orang yang tidak tahu nvim. Tidak ada perubahan kode di
 dokumen ini — murni penjelasan.
 
+> Indeks dokumen: [`README.md`](README.md) · referensi key palet tetap:
+> [`../templates/kanagawa-dragon-lotus/blueprint/README.md`](../templates/kanagawa-dragon-lotus/blueprint/README.md).
+
 ---
 
 ## 1. Alur warnanya (3 lapis)
@@ -14,6 +17,11 @@ dokumen ini — murni penjelasan.
 wallpaper  ──►  matugen  ──►  template nvim.lua  ──►  theme.lua (nvim)
  (gambar)       (role MD3)     (pilih role)          (terjemah ke UI)
 ```
+
+> Ada dua "hulu" yang bisa mengisi kotak kedua, sisanya identik:
+> **alur wallpaper** (`matugen image` → `general/nvim.lua`) dan **alur palet
+> tetap** (`matugen json …/kanagawa-dark.json` → `…/kanagawa-dragon-lotus/template/nvim.lua`).
+> Keduanya menghasilkan bentuk file yang sama — lihat §12.
 
 1. **matugen** mengambil warna dari wallpaper dan menghasilkan satu set *role*
    (Material Design 3): `primary`, `tertiary`, `surface`, `on_surface`, dst.
@@ -174,9 +182,18 @@ Perhatikan: `success`, `warning`, `critical` masih **hardcode hex** di template
 
 | Kunci | Isi | Jadi | Muncul di |
 |---|---|---|---|
-| `dim` | `outline_variant` | `dark3` | Latar mode lompat (Leap/Flash), `NeoTreeTabInactive`, `NonText`/`SpecialKey`, placeholder `Conceal`, `TelescopeResultsComment`, `DiagnosticDeprecated` (teks dicoret) |
-| `dim_muted` | `outline` | `dark5` | Nilai di panel `which-key`, tab non-aktif (`MiniTablineHidden`), ekor animasi kursor (`smooth_tail`) |
+| `dim` | `outline_variant` | `dark3` | Latar mode lompat (Leap/Flash), `NeoTreeTabInactive`, `NonText`/`SpecialKey`, placeholder `Conceal`, `TelescopeResultsComment`, `DiagnosticDeprecated` (teks dicoret), `LspInlayHint` |
+| `dim_muted` | `outline` | `dark5` | Nilai di panel `which-key`, tab non-aktif (`MiniTablineHidden`), ekor animasi kursor (`smooth_tail`), `Conceal`, `BufferOffset` |
 | `disabled` | `outline` | — | Belum dipakai |
+
+> Nilai di kolom "Isi" mengikuti `templates/general/nvim.lua`. Di alur palet tetap
+> (`kanagawa-*.json`) ketiga kunci itu diisi role yang **setara tapi bukan sama**
+> (lihat tabel di `blueprint/README.md`): `dim` = `text.subtle`, `dim_muted` =
+> `text.faint`, `disabled` = `text.disabled` — pola yang sama dipakai
+> `template/gtk3.css` & `template/source.scss`. Jangan diseragamkan ke
+> `text.primary`: kalau itu terjadi, `dark3`/`dark5` jadi seterang teks biasa dan
+> elemen redup (`NonText`, `Conceal`, `WhichKeyValue`, `LspInlayHint`, backdrop
+> Flash/Leap) ikut menyala.
 
 ### `extra.bg`
 
@@ -268,12 +285,30 @@ diketahui supaya tidak bingung mencarinya di template:
 | `diff.add/changed/delete/text` | campuran `status.*` & `syntax.function` dengan `background` | **Latar blok diff** saat membandingkan file (`DiffAdd`, `DiffChange`, `DiffDelete`, `DiffText`) |
 | `rainbow[1..8]` | `function`, `constant`, `string`, `teal`, `statement`, `keyword`, `import`, `critical` | **Kurung/label berwarna bertingkat** (rainbow brackets di treesitter & headlines.nvim) |
 | `blue0`, `blue7` | `blend(syntax.function, background, …)` | Latar `diff` & ghost text saran AI |
-| `terminal_black` | `blend(accent.primary, layer.crust, 0.12)` | **Latar chip kode inline (`` `...` ``)** di .md — grup `@markup.raw.markdown_inline` dan `MarkviewInlineCode` — plus ghost text AI (Copilot/Codeium/Blink) dan latar `:help` |
-| teks kode inline | `on_highlights` menimpa `@markup.raw.markdown_inline` + `MarkviewInlineCode` dengan `fg = c.fg` | Huruf di dalam backtick memakai warna teks utama, bukan aksen, supaya kontrasnya ~10:1 di atas chip |
+| `terminal_black` | `blend(accent.primary, layer.crust, 0.12)` | **Latar chip kode inline (`` `...` ``)** di .md — grup `@markup.raw.markdown_inline` dan `MarkviewInlineCode` — dan latar `:help`. Kunci ini **hanya untuk latar**; pemakaian TokyoNight sebagai *foreground* ditimpa lewat `fg_faint` (lihat `fg_faint` di bawah dan catatan sesudah tabel) |
+| `fg_faint` | `blend(extra.text.muted, syntax.comment, 0.45)` | **Teks redup tapi terbaca**: `DiagnosticUnnecessary` (kode mati / belum dipakai dari LSP) + ghost text saran (`CmpGhostText`, `ComplHint`, `BlinkCmpGhostText`, `CopilotSuggestion`, `CopilotAnnotation`, `CodeiumSuggestion`, `SupermavenSuggestion`) |
+| teks kode inline | `on_highlights` menimpa `@markup.raw.markdown_inline` + `MarkviewInlineCode` dengan `fg = c.fg` | Huruf di dalam backtick memakai warna teks utama, bukan aksen, supaya kontrasnya tinggi di atas chip (~9:1 di tema gelap, ~4:1 di tema terang) |
 | `button` | `syntax.function` | Tombol di layar sambutan (`AlphaButtons`) |
 | `footer` | `syntax.comment` | Teks kaki layar sambutan (`AlphaFooter`) |
 | `smooth_body3` / `smooth_tail` | `teal` (ANSI 14) / `dim_muted` | Badan & ekor animasi kursor (SmoothCursor) |
 | `accent` / `accent2` | `accent.primary` / `accent.secondary` | `accent` belum ada konsumen; `accent2` = kepala SmoothCursor & badge mode Terminal |
+
+> **Jebakan — kenapa kode yang mati/belum dipakai bisa "menyatu" dengan latar?**
+>
+> Nvim mewarnai rentang diagnostik LSP yang bertag `unnecessary` dengan grup
+> `DiagnosticUnnecessary` (lihat `runtime/lua/vim/diagnostic.lua`), dan
+> TokyoNight mendefinisikan grup itu sebagai `fg = terminal_black`. Nilai kita
+> untuk `terminal_black` adalah warna **latar chip** yang sengaja digelapkan,
+> jadi sebagai teks kontrasnya cuma ~1.15:1 (gelap) dan ~1.41:1 (terang) —
+> praktis tak terbaca. Yang paling terasa di Rust: `dead_code`
+> ("function `x` is never used") dan `unused variable`; pada nvim 0.11 sinyal
+> lainnya (`virtual_text`) mati secara default, jadi warna itu satu-satunya petunjuk.
+>
+> Karena itu `on_highlights` menimpa **semua** pemakaian `terminal_black`
+> sebagai fg dengan `fg_faint`: ~4.45:1 di tema gelap, ~3.45:1 di tema terang —
+> tetap lebih redup dari teks biasa (~10.8:1 / ~6.2:1), tapi terbaca.
+> Kalau nilai chip (`terminal_black`) diubah di `build_colors()`, grup-grup itu
+> ikut aman karena tidak lagi memakai kunci yang sama.
 
 ---
 
@@ -334,7 +369,13 @@ Bukan bug — sebagian kunci sengaja disamakan bentuknya dengan template tool la
   `templates/kanagawa-dragon-lotus/template/nvim.lua` punya **nama kunci yang
   sama persis** (hanya sumber nilainya beda + tanpa `source`), jadi tabel
   "dipakai di mana" di atas berlaku untuk keduanya.
-- Ringkasnya: ubah **nilai warna** → `matugen/templates/general/nvim.lua`; ubah
+- Hasil render alur B mendarat di
+  `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua`, jadi ia baru
+  terbaca nvim kalau `~/.myenv/theme/current` menunjuk ke folder tema itu
+  (dilakukan `theme-switcher.sh` di luar repo ini). Perbedaan ini sudah
+  diverifikasi: daftar kunci kedua template identik, general hanya punya
+  tambahan `source`.
+- Ringkasnya: ubah **nilai warna** → template di `matugen/templates/`; ubah
   **tujuan pemakaian** → `nvim/lua/core/theme.lua`.
-- Perubahan template berlaku setelah `matugen image <wallpaper>` (atau reload
-  tema yang sedang jalan).
+- Perubahan alur A berlaku setelah `matugen image <wallpaper>`; perubahan alur B
+  setelah `matugen json <blueprint>` (atau reload tema yang sedang jalan).

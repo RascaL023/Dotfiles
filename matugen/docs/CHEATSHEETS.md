@@ -2,6 +2,15 @@
 
 > Pegangan praktis untuk memahami **arti semantic color Matugen** dan memilih warna yang cocok untuk aplikasi seperti Alacritty, Neovim, Waybar, Kitty, dll.
 > Fokus dokumen ini: **memetakan peran UI → semantic color Matugen**, bukan menghafalkan semua hex.
+>
+> Indeks dokumen: [`README.md`](README.md) · daftar nilai mentah:
+> [`VOCABULARY.md`](VOCABULARY.md) · contoh pemakaian di repo:
+> [`../templates/general/`](../templates/general/).
+>
+> **Cakupan:** dokumen ini hanya berlaku untuk alur **wallpaper → Material You**
+> (`matugen image`). Tema berpalet tetap tidak memakai nama role di sini;
+> kosakatanya ada di
+> [`../templates/kanagawa-dragon-lotus/blueprint/README.md`](../templates/kanagawa-dragon-lotus/blueprint/README.md).
 
 ---
 
@@ -192,7 +201,7 @@ on_tertiary
 
 ---
 
-# 6. `error`
+## 6. `error`
 
 **Peran:** kondisi error/danger.
 
@@ -284,7 +293,7 @@ on_container = text/icon di atasnya
 
 ---
 
-# 9. `surface` — Keluarga Background UI
+## 9. `surface` — Keluarga Background UI
 
 Ini salah satu kelompok **paling penting** untuk desktop/editor/terminal.
 
@@ -383,7 +392,7 @@ Matugen template resmi untuk terminal/tmux juga menggunakan berbagai `surface_*`
 
 ---
 
-# 12. `outline` dan `outline_variant`
+## 12. `outline` dan `outline_variant`
 
 ### `outline`
 
@@ -424,7 +433,7 @@ inactive border
 
 ---
 
-# 13. `inverse_*`
+## 13. `inverse_*`
 
 Kelompok ini digunakan ketika sebuah komponen membutuhkan **kombinasi permukaan dan teks dengan hubungan kontras terbalik**.
 
@@ -450,7 +459,7 @@ Tidak perlu memakai kelompok ini hanya karena tersedia. Gunakan ketika komponen/
 
 ---
 
-# 14. `*_fixed`
+## 14. `*_fixed`
 
 Contoh:
 
@@ -479,7 +488,7 @@ Cocok ketika sebuah komponen ingin mempertahankan identitas aksen yang konsisten
 
 ---
 
-# 15. `shadow` dan `scrim`
+## 15. `shadow` dan `scrim`
 
 ### `shadow`
 
@@ -495,7 +504,7 @@ Jangan memaksakan kedua role ini ke aplikasi yang tidak memiliki konsep tersebut
 
 ---
 
-# 16. `background` dan `on_background`
+## 16. `background` dan `on_background`
 
 Ada juga:
 
@@ -520,7 +529,7 @@ Untuk terminal, keduanya bisa sama atau hampir sama secara visual, tetapi jangan
 
 ---
 
-# 17. `source_color`
+## 17. `source_color`
 
 Ini bukan warna UI yang perlu dipetakan ke tombol/panel.
 
@@ -552,7 +561,7 @@ primary / secondary / surface / ...
 
 ---
 
-# 18. Base16 `base00`–`base0F`
+## 18. Base16 `base00`–`base0F`
 
 Ini perlu dipisahkan dari semantic Material colors.
 
@@ -599,7 +608,7 @@ base0F → special
 
 ---
 
-# 19. Practical Mapping untuk Terminal / Alacritty
+## 19. Practical Mapping untuk Terminal / Alacritty
 
 Sebagai titik awal, kamu bisa memakai mapping berikut.
 
@@ -632,7 +641,7 @@ Repository template resmi Matugen untuk Kitty menggunakan prinsip yang sangat mi
 
 ---
 
-# 20. Practical Mapping untuk Editor / IDE
+## 20. Practical Mapping untuk Editor / IDE
 
 Untuk editor seperti Neovim, pikirkan berdasarkan fungsi UI:
 
@@ -670,7 +679,7 @@ Matugen sebaiknya memasok warna semantic; TokyoNight/Catppuccin/custom theme lay
 
 ---
 
-# 21. Cara Memilih Warna: Decision Tree
+## 21. Cara Memilih Warna: Decision Tree
 
 Kalau kamu sedang melihat sebuah elemen UI dan bingung memilih warna, gunakan urutan ini.
 
@@ -754,7 +763,7 @@ Kalau kamu sedang melihat sebuah elemen UI dan bingung memilih warna, gunakan ur
 
 ---
 
-# 22. Jangan Memaksa Semantic Role
+## 22. Jangan Memaksa Semantic Role
 
 Contoh buruk:
 
@@ -783,7 +792,7 @@ Dengan begitu ketika wallpaper berubah, hubungan semantic-nya tetap konsisten.
 
 ---
 
-# 23. Kalau Warna Hasil Generator Tidak Cocok
+## 23. Kalau Warna Hasil Generator Tidak Cocok
 
 Jangan langsung hardcode:
 
@@ -818,7 +827,7 @@ Sering kali masalah sebenarnya adalah **B**.
 
 ---
 
-# 24. `default` vs `dark` vs `light`
+## 24. `default` vs `dark` vs `light`
 
 Untuk template:
 
@@ -848,7 +857,7 @@ Ini membuat niat template lebih jelas.
 
 ---
 
-# 25. Cara Melihat Data Matugen yang Sebenarnya
+## 25. Cara Melihat Data Matugen yang Sebenarnya
 
 Jangan hanya mengandalkan tabel `--show-colors` saat menganalisis struktur data.
 
@@ -878,7 +887,7 @@ Matugen mendukung dot notation, looping, conditional, arithmetic, dan color filt
 
 ---
 
-# 26. Contoh Alacritty Minimal
+## 26. Contoh Alacritty Minimal
 
 Template awal yang cukup aman:
 
@@ -920,7 +929,7 @@ Gunakan ini sebagai **starting point**, lalu koreksi mapping berdasarkan tampila
 
 ---
 
-# 27. Prinsip Utama yang Perlu Diingat
+## 27. Prinsip Utama yang Perlu Diingat
 
 ```text
 Matugen color
@@ -963,7 +972,7 @@ outline = border/divider
 
 ---
 
-# 28. Sumber
+## 28. Sumber
 
 - Matugen Templates: https://github.com/InioX/matugen/wiki/Templates
 - Matugen Configuration: https://github.com/InioX/matugen/wiki/Configuration
