@@ -6,6 +6,12 @@ return {
 
     config = function()
       require("nvim-treesitter.configs").setup({
+        -- Setiap bahasa yang dipakai harus ada di sini. Tanpa parser terpasang,
+        -- nvim-treesitter mematikan SEMUA modulnya untuk bahasa itu
+        -- (highlight, indent, incremental_selection) karena `is_enabled()`
+        -- digerbangi `parsers.has_parser(lang)`. Akibatnya <CR> (blok lalu
+        -- meluas), indentasi, dan pewarnaan jatuh ke mesin lama (regex syntax
+        -- + indent/<bahasa>.vim berbasis cindent) — terasa beda dari bahasa lain.
         ensure_installed = {
           "lua",
           "java",
@@ -14,6 +20,7 @@ return {
           "html",
           "css",
           "json",
+          "rust",
           "sql",
           "bash",
           "yaml",
