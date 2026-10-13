@@ -122,6 +122,10 @@ end
 local BLUE0_ALPHA = 0.35
 local BLUE7_ALPHA = 0.22
 
+--- Bobot `text.muted` saat membuat warna "redup tapi terbaca" (`fg_faint`).
+--- 0.0 = sepekat komentar, 1.0 = seterang teks muted.
+local FAINT_ALPHA = 0.45
+
 --- Campur `fg` ke `bg` dengan bobot `alpha` untuk `fg`.
 --- alpha = 0 -> bg
 --- alpha = 1 -> fg
@@ -200,6 +204,14 @@ local function build_colors(d)
   local red = status.critical
   local dark5 = fg.dim_muted
 
+  -- Warna teks "redup tapi terbaca".
+  -- Dipakai untuk grup yang TokyoNight warnai dengan `terminal_black` sebagai
+  -- *foreground*: `terminal_black` kita adalah LATAR chip kode inline (gelap,
+  -- ~1.1:1 terhadap bg), jadi teks di atasnya menyatu dengan latar. Yang
+  -- kena: `DiagnosticUnnecessary` (kode mati/tak terpakai dari LSP, mis.
+  -- `dead_code` Rust) dan ghost text saran (cmp/Copilot/Blink).
+  local fg_faint = blend(text.muted, syntax.comment, FAINT_ALPHA)
+
   return {
     -- Palet dasar (peran ditentukan oleh pemakaian di source TokyoNight).
     bg = layer.base,
@@ -215,9 +227,13 @@ local function build_colors(d)
     dark3 = fg.dim,
     dark5 = dark5,
 
-    -- Latar halus (chip inline code `...`, ghost text saran AI, backdrop).
+    -- Latar halus (chip inline code `...`, backdrop).
     -- Di TokyoNight `terminal_black` adalah permukaan GELAP; memakai `border`
     -- (abu terang) membuat teks di atas chip nyaris tak terbaca.
+    -- CATATAN: kunci ini hanya boleh dipakai sebagai *latar*. TokyoNight juga
+    -- memakainya sebagai fg (ghost text, `DiagnosticUnnecessary`) — pemakaian
+    -- itu ditimpa di `on_highlights` memakai `fg_faint`, karena nilai ini
+    -- terlalu dekat ke bg untuk dibaca sebagai teks.
     terminal_black = blend(accent.primary, layer.crust, 0.12),
 
     red = red,
@@ -270,6 +286,7 @@ local function build_colors(d)
 
     fg_sidebar = text.muted,
     fg_float = d.foreground,
+    fg_faint = fg_faint,
 
     error = status.error,
     warning = status.warning,
@@ -502,6 +519,32 @@ function M.tokyonight_opts()
       hl.IncSearch = { bg = tertiary, fg = on_tertiary }
 
       hl.MatchParen = { bg = box.tertiary, fg = box.on_tertiary, bold = true }
+
+      -- ================================================================
+      -- Teks redup (jangan pakai `terminal_black` sebagai fg)
+      -- ================================================================
+
+      -- TokyoNight memakai `terminal_black` sebagai fg di grup-grup ini,
+      -- padahal nilai kita untuk kunci itu adalah LATAR chip kode inline:
+      -- gelap dan hampir sama dengan bg, jadi teksnya tidak terbaca.
+      --
+      -- Yang paling terasa: `DiagnosticUnnecessary`. Nvim memakai grup itu
+      -- untuk meratakan warna teks rentang diagnostik LSP bertag
+      -- `unnecessary` — di Rust = kode mati / belum dipanggil, mis.
+      -- "function `foo` is never used". Tanpa override ini, nama fungsi,
+      -- struct, dan variabel yang belum dipakai tampil nyaris sewarna latar.
+      for _, group in ipairs({
+        "DiagnosticUnnecessary",
+        "ComplHint",
+        "CmpGhostText",
+        "BlinkCmpGhostText",
+        "CopilotSuggestion",
+        "CopilotAnnotation",
+        "CodeiumSuggestion",
+        "SupermavenSuggestion",
+      }) do
+        set_fg(hl, group, c.fg_faint)
+      end
 
       -- Teks di dalam backtick (kode inline markdown). TokyoNight memberinya
       -- aksen biru di atas latar chip gelap; dua warna itu berdekatan hue dan
