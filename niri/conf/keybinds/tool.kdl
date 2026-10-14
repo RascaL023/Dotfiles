@@ -1,0 +1,34 @@
+binds {
+    // app call
+    Mod+B               { spawn "firefox"; }
+    Mod+E               { spawn "nemo"; }
+    Mod+Return          { spawn "kitty"; }
+    Mod+Alt+Return hotkey-overlay-title="Floating Terminal" {
+        spawn-sh "kitty --class kitty-float";
+    }
+    Mod+Ctrl+Return     { spawn "alacritty"; }
+    Mod+Shift+Return    { spawn "foot"; }
+    Mod+Ctrl+T          { spawn "kitty" "--class" "ttyper" "-e" "ttyper"; }
+    Mod+Shift+E         { spawn "kitty" "-e" "yazi"; }
+
+    // script calls
+    Mod+C           { spawn "~/.config/hypr/sources/scripts/wifi-menu.sh"; }
+    Mod+O           { spawn "~/.config/hypr/sources/scripts/waybar-toggle.sh"; }
+    Mod+Escape      { spawn "~/.config/hypr/sources/scripts/wlogout-toggle.sh"; }
+    Mod+Space       { spawn "~/.config/hypr/sources/scripts/rofi-toggle.sh"; }
+    Mod+I           { spawn "~/.config/hypr/sources/scripts/idle-toggle.sh"; }
+    Mod+W           { spawn "~/.config/hypr/sources/scripts/nextwall.sh"; }
+    Mod+T           { spawn "~/.myenv/script/theme/theme-picker.sh"; }
+
+    // tool calls
+    Mod+X           { spawn "eww" "open" "--toggle" "profile"; }
+    Mod+D           { spawn "eww" "open" "--toggle" "distro"; }
+    Mod+Ctrl+X      { spawn "sh" "-c" "pkill eww; eww daemon --force-wayland"; }
+    Mod+Ctrl+P      { spawn "sh" "-c" "hyprpicker -a | wl-copy && notify-send \"Color picked!\" \"$(wl-paste)\""; }
+    // Mod+Ctrl+L      { spawn "hyprlock"; }
+    Mod+Alt+Print   { spawn "sh" "-c" "grim -o LVDS-1 ~/Pictures/Screenshots/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png && notify-send -t 2000 'Screenshot' 'Successfully take fullscreen screenshot!'" ; }
+    Mod+Print       { spawn "sh" "-c" "grim -g \"$(slurp)\" ~/Pictures/Screenshots/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png && notify-send -t 2000 'Screenshot' 'Successfully take partial screenshot!'" ; }
+    Mod+Shift+P     { spawn "mpc" "toggle"; }
+    Mod+Alt+P       { spawn "pkill" "mpd"; }
+    Mod+N           { spawn "swaync-client" "-t"; }
+}

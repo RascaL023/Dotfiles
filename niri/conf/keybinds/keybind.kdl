@@ -1,0 +1,8 @@
+include "tool.kdl"
+include "window.kdl"
+include "system.kdl"
+
+binds {
+    Mod+Shift+Slash { show-hotkey-overlay; }
+}
+

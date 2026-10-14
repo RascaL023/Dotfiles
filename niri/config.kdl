@@ -1,0 +1,742 @@
+include "conf/keybinds/keybind.kdl"
+include "conf/layouts/layout.kdl"
+
+// Auto start
+spawn-sh-at-startup "eww daemon --force-wayland"
+spawn-sh-at-startup "swww-daemon"
+spawn-sh-at-startup "swaync &"
+spawn-sh-at-startup "sleep 1 && waybar"
+
+// To run a shell command (with variables, pipes, etc.), use spawn-sh-at-startup:
+// spawn-sh-at-startup "qs -c ~/source/qs/MyAwesomeShell"
+
+input {
+    keyboard {
+        xkb {
+            // You can set rules, model, layout, variant and options.
+            // For more information, see xkeyboard-config(7).
+
+            // For example:
+            // layout "us,ru"
+            // options "grp:win_space_toggle,compose:ralt,ctrl:nocaps"
+
+            // If this section is empty, niri will fetch xkb settings
+            // from org.freedesktop.locale1. You can control these using
+            // localectl set-x11-keymap.
+        }
+
+        // Enable numlock on startup, omitting this setting disables it.
+        numlock
+    }
+
+    // Next sections include libinput settings.
+    // Omitting settings disables them, or leaves them at their default values.
+    // All commented-out settings here are examples, not defaults.
+    touchpad {
+        // off
+        tap
+        // dwt
+        // dwtp
+        // drag false
+        // drag-lock
+        natural-scroll
+        // accel-speed 0.2
+        // accel-profile "flat"
+        scroll-method "two-finger"
+        // disabled-on-external-mouse
+    }
+
+    mouse {
+        // off
+        // natural-scroll
+        // accel-speed 0.2
+        // accel-profile "flat"
+        // scroll-method "no-scroll"
+    }
+
+    trackpoint {
+        // off
+        // natural-scroll
+        // accel-speed 0.2
+        // accel-profile "flat"
+        // scroll-method "on-button-down"
+        // scroll-button 273
+        // scroll-button-lock
+        // middle-emulation
+    }
+
+    focus-follows-mouse max-scroll-amount="0%"
+}
+
+output "LVDS-1" {
+    mode "1366x768@59.996"
+    // scale 0.9
+    scale 1
+    transform "normal"
+    variable-refresh-rate
+}
+
+output "HDMI-A-1" {
+  mode "1920x1080@75.000"
+}
+
+hotkey-overlay {
+    // Uncomment this line to disable the "Important Hotkeys" pop-up at startup.
+    skip-at-startup
+}
+
+environment {
+    // Set variabel dengan format: NAMA_VAR "nilai"
+    GDK_BACKEND "wayland"
+    
+    // Contoh lain jika dibutuhkan:
+    XDG_CURRENT_DESKTOP "niri"
+}
+
+// Uncomment this line to ask the clients to omit their client-side decorations if possible.
+// If the client will specifically ask for CSD, the request will be honored.
+// Additionally, clients will be informed that they are tiled, removing some client-side rounded corners.
+// This option will also fix border/focus ring drawing behind some semitransparent windows.
+// After enabling or disabling this, you need to restart the apps for this to take effect.
+prefer-no-csd
+
+overview {
+    backdrop-color "#4c566a90"
+    // backdrop-color "#000000"
+}
+
+layer-rule {
+    place-within-backdrop true
+}
+
+// You can change the path where screenshots are saved.
+// A ~ at the front will be expanded to the home directory.
+// The path is formatted with strftime(3) to give you the screenshot date and time.
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+// You can also set this to null to disable saving screenshots to disk.
+// screenshot-path null
+
+
+// COMPOSITOR OVERRIDE
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+    opacity 0.9
+    background-effect {
+      blur true
+      xray true
+    }
+}
+
+window-rule {
+    // This regular expression is intentionally made as specific as possible,
+    // since this is the default config, and we want no false positives.
+    // You can get away with just app-id="wezterm" if you want.
+    match app-id=r#"^org\.wezfurlong\.wezterm$"#
+    default-column-width {}
+}
+
+// Open the Firefox picture-in-picture player as floating by default.
+window-rule {
+    // This app-id regular expression will work for both:
+    // - host Firefox (app-id is "firefox")
+    // - Flatpak Firefox (app-id is "org.mozilla.firefox")
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    open-floating true
+}
+
+window-rule {
+    match app-id="ttyper"
+    open-floating true
+    default-column-width { proportion 0.5; }
+    default-window-height { proportion 0.5; }
+}
+
+window-rule {
+    match app-id="kitty-float"
+    open-floating true
+    default-column-width { proportion 0.5; }
+    default-window-height { proportion 0.5; }
+}
+
+window-rule {
+    match app-id="foot"
+    opacity 0.9
+    background-effect {
+      blur true
+      xray true
+    }
+}
+
+window-rule {
+    match app-id="kitty"
+    opacity 1.0
+    background-effect {
+      blur true
+      xray true
+    }
+}
+
+// Example: block out two password managers from screen capture.
+// (This example rule is commented out with a "/-" in front.)
+/-window-rule {
+    match app-id=r#"^org\.keepassxc\.KeePassXC$"#
+    match app-id=r#"^org\.gnome\.World\.Secrets$"#
+
+    block-out-from "screen-capture"
+
+    // Use this instead if you want them visible on third-party screenshot tools.
+    // block-out-from "screencast"
+}
+
+// Example: enable rounded corners for all windows.
+// (This example rule is commented out with a "/-" in front.)
+window-rule {
+  match is-focused=false
+  opacity 0.85
+  background-effect {
+      blur false
+      xray false
+  }
+}
+
+// Default
+// Animation settings.
+// The wiki explains how to configure individual animations:
+// https://niri-wm.github.io/niri/Configuration:-Animations
+animations {
+    workspace-switch {
+        spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
+    }
+    window-open {
+        duration-ms 200
+        curve "ease-out-quad"
+    }
+    window-close {
+        duration-ms 200
+        curve "ease-out-cubic"
+    }
+    horizontal-view-movement {
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+    }
+    window-movement {
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+    }
+    window-resize {
+        spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
+    }
+    config-notification-open-close {
+        spring damping-ratio=0.6 stiffness=1200 epsilon=0.001
+    }
+    screenshot-ui-open {
+        duration-ms 300
+        curve "ease-out-quad"
+    }
+    overview-open-close {
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+    }
+}
+
+// // Bounce
+// animations {
+//     workspace-switch {
+//         spring damping-ratio=0.65 stiffness=500 epsilon=0.0001
+//     }
+//     window-open {
+//         spring damping-ratio=0.55 stiffness=600 epsilon=0.0001
+//     }
+//     window-close {
+//         duration-ms 150
+//         curve "ease-out-quad"
+//     }
+//     horizontal-view-movement {
+//         spring damping-ratio=0.65 stiffness=500 epsilon=0.0001
+//     }
+//     window-movement {
+//         spring damping-ratio=0.65 stiffness=500 epsilon=0.0001
+//     }
+//     window-resize {
+//         spring damping-ratio=0.65 stiffness=500 epsilon=0.0001
+//         custom-shader r"
+//             vec4 resize_color(vec3 coords_curr_geo, vec3 size_curr_geo) {
+//                 vec3 coords_tex_next = niri_geo_to_tex_next * coords_curr_geo;
+//                 vec4 color = texture2D(niri_tex_next, coords_tex_next.st);
+//                 return color;
+//             }
+//         "
+//     }
+//     config-notification-open-close {
+//         spring damping-ratio=0.65 stiffness=700 epsilon=0.001
+//     }
+//     screenshot-ui-open {
+//         duration-ms 200
+//         curve "ease-out-quad"
+//     }
+//     overview-open-close {
+//         spring damping-ratio=0.75 stiffness=400 epsilon=0.0003
+//     }
+// }
+
+// Portal
+// animations {
+//     slowdown 1.5
+//     window-open {
+//         duration-ms 400
+//         curve "linear"
+//         custom-shader r"
+//         float easeOutQuint(float t) {
+//             return 1.0 - pow(1.0 - t, 5.0);
+//         }
+//
+//         vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+//             float p = easeOutQuint(niri_clamped_progress);
+//             vec2 uv = coords_geo.xy;
+//             vec2 centered_uv = uv - 0.5;
+//             float aspect = size_geo.x / size_geo.y;
+//             centered_uv.x *= aspect;
+//             float d = length(centered_uv) * 2.0;
+//             float max_radius = length(vec2(aspect, 1.0));
+//             float current_radius = p * max_radius;
+//             float blur = 0.05;
+//             float content_mask = 1.0 - smoothstep(current_radius - blur, current_radius, d);
+//             float ring_thickness = 0.25 * (1.0 - p); // Starts thick, gets thinner until it vanishes
+//             float ring_mask = smoothstep(current_radius - blur - ring_thickness, current_radius - blur, d)
+//             - smoothstep(current_radius, current_radius + blur, d);
+//             ring_mask *= (1.0 - p) * 1.5;
+//             ring_mask = clamp(ring_mask, 0.0, 1.0);
+//             float angle = atan(centered_uv.y, centered_uv.x);
+//             vec3 neon_color = 0.5 + 0.5 * cos(angle * 2.0 - p * 15.0 + vec3(0.0, 2.0, 4.0));
+//             vec2 tex_uv = (uv - 0.5) * (1.0 + (1.0 - p) * 0.3) + 0.5;
+//             vec3 modified_geo = vec3(tex_uv, coords_geo.z);
+//             vec3 coords_tex = niri_geo_to_tex * modified_geo;
+//             vec4 oColor = texture2D(niri_tex, coords_tex.st);
+//             vec4 final_color = (oColor * content_mask) + (vec4(neon_color, 1.0) * ring_mask);
+//             return final_color;
+//         }
+//         "
+//     }
+//
+//     window-close {
+//         duration-ms 400
+//         curve "linear"
+//
+//         custom-shader r"
+//         float easeOutQuint(float t) {
+//             return 1.0 - pow(1.0 - t, 5.0);
+//         }
+//
+//         vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+//             float p = easeOutQuint(1.0 - niri_clamped_progress);
+//             vec2 uv = coords_geo.xy;
+//             vec2 centered_uv = uv - 0.5;
+//             float aspect = size_geo.x / size_geo.y;
+//             centered_uv.x *= aspect;
+//             float d = length(centered_uv) * 2.0;
+//             float max_radius = length(vec2(aspect, 1.0));
+//             float current_radius = p * max_radius;
+//             float blur = 0.05;
+//             float content_mask = 1.0 - smoothstep(current_radius - blur, current_radius, d);
+//             float ring_thickness = 0.25 * (1.0 - p);
+//             float ring_mask = smoothstep(current_radius - blur - ring_thickness, current_radius - blur, d)
+//             - smoothstep(current_radius, current_radius + blur, d);
+//             ring_mask *= (1.0 - p) * 1.5;
+//             ring_mask = clamp(ring_mask, 0.0, 1.0);
+//             float angle = atan(centered_uv.y, centered_uv.x);
+//             vec3 neon_color = 0.5 + 0.5 * cos(angle * 2.0 + p * 15.0 + vec3(0.0, 2.0, 4.0));
+//             vec2 tex_uv = (uv - 0.5) * (1.0 + (1.0 - p) * 0.3) + 0.5;
+//             vec3 modified_geo = vec3(tex_uv, coords_geo.z);
+//             vec3 coords_tex = niri_geo_to_tex * modified_geo;
+//             vec4 oColor = texture2D(niri_tex, coords_tex.st);
+//             vec4 final_color = (oColor * content_mask) + (vec4(neon_color, 1.0) * ring_mask);
+//             return final_color;
+//         }
+//         "
+//     }
+//
+//     window-resize {
+//         duration-ms 350
+//         curve "ease-out-cubic"
+//         custom-shader r"
+//         vec4 resize_color(vec3 coords_geo, vec3 size_geo) {
+//             vec2 uv = coords_geo.xy;
+//             float p = sin(niri_clamped_progress * 3.14159);
+//             float sweep = sin(uv.x * 15.0 + uv.y * 15.0 - niri_clamped_progress * 20.0);
+//             vec3 holo_color = 0.5 + 0.5 * cos(sweep + vec3(0.0, 1.5, 3.0));
+//             vec3 coords_tex_next = niri_geo_to_tex_next * coords_geo;
+//             vec4 oColor = texture2D(niri_tex_next, coords_tex_next.st);
+//             vec4 color_overlay = vec4(holo_color, 1.0) * p * 0.15;
+//             return oColor + color_overlay;
+//         }
+//         "
+//     }
+//     workspace-switch {
+//         spring damping-ratio=1.0 stiffness=760 epsilon=0.0001
+//     }
+//     horizontal-view-movement {
+//         spring damping-ratio=1.0 stiffness=640 epsilon=0.0001
+//     }
+//     window-movement {
+//         spring damping-ratio=1.0 stiffness=700 epsilon=0.0001
+//     }
+//     config-notification-open-close {
+//         spring damping-ratio=1.0 stiffness=820 epsilon=0.001
+//     }
+//     exit-confirmation-open-close {
+//         spring damping-ratio=1.0 stiffness=560 epsilon=0.01
+//     }
+//     screenshot-ui-open {
+//         duration-ms 220
+//         curve "cubic-bezier" 0.22 1.0 0.36 1.0
+//     }
+//     overview-open-close {
+//         spring damping-ratio=1.0 stiffness=620 epsilon=0.0001
+//     }
+//     recent-windows-close {
+//         spring damping-ratio=1.0 stiffness=680 epsilon=0.001
+//     }
+// }
+
+// Spontant
+// animations {
+//     slowdown 1.0
+//     window-open {
+//         duration-ms 400
+//         curve "cubic-bezier" 0.05 0.9 0.1 1.0
+//         custom-shader r"
+//         vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+//             float p = niri_clamped_progress;
+//             float y_offset = mix(0.15, 0.0, p);
+//             float scale = mix(0.85, 1.0, p);
+//             vec2 uv = coords_geo.xy;
+//             vec2 centered = uv - 0.5;
+//             centered.y -= y_offset;
+//             centered /= scale;
+//             vec2 tex_uv = centered + 0.5;
+//             vec3 coords_tex = niri_geo_to_tex * vec3(tex_uv, coords_geo.z);
+//             vec4 oColor = texture2D(niri_tex, coords_tex.st);
+//             float corner_radius = 12.0;
+//             vec2 pixel_pos = centered * size_geo.xy;
+//             vec2 box_size = size_geo.xy * 0.5;
+//             float radius = min(corner_radius, min(box_size.x, box_size.y));
+//             vec2 q = abs(pixel_pos) - box_size + vec2(radius);
+//             float dist = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;
+//             float mask = 1.0 - smoothstep(-0.5, 0.5, dist);
+//             float alpha = clamp(p * 2.0, 0.0, 1.0);
+//             return oColor * mask * alpha;
+//         }
+//         "
+//     }
+//
+//     window-close {
+//         duration-ms 400
+//         curve "cubic-bezier" 0.05 0.9 0.1 1.0
+//         custom-shader r"
+//         vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+//             float p = 1.0 - niri_clamped_progress;
+//             float y_offset = mix(0.15, 0.0, p);
+//             float scale = mix(0.85, 1.0, p);
+//             vec2 uv = coords_geo.xy;
+//             vec2 centered = uv - 0.5;
+//             centered.y -= y_offset;
+//             centered /= scale;
+//             vec2 tex_uv = centered + 0.5;
+//             vec3 coords_tex = niri_geo_to_tex * vec3(tex_uv, coords_geo.z);
+//             vec4 oColor = texture2D(niri_tex, coords_tex.st);
+//             float corner_radius = 12.0;
+//             vec2 pixel_pos = centered * size_geo.xy;
+//             vec2 box_size = size_geo.xy * 0.5;
+//             float radius = min(corner_radius, min(box_size.x, box_size.y));
+//             vec2 q = abs(pixel_pos) - box_size + vec2(radius);
+//             float dist = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;
+//             float mask = 1.0 - smoothstep(-0.5, 0.5, dist);
+//             float alpha = clamp(p * 2.0, 0.0, 1.0);
+//             return oColor * mask * alpha;
+//         }
+//         "
+//     }
+//
+//     window-resize {
+//         duration-ms 400
+//         curve "cubic-bezier" 0.05 0.9 0.1 1.0
+//     }
+//     workspace-switch {
+//         duration-ms 400
+//         curve "cubic-bezier" 0.05 0.9 0.1 1.0
+//     }
+//     horizontal-view-movement {
+//         duration-ms 400
+//         curve "cubic-bezier" 0.05 0.9 0.1 1.0
+//     }
+//     window-movement {
+//         duration-ms 400
+//         curve "cubic-bezier" 0.05 0.9 0.1 1.0
+//     }
+//     config-notification-open-close {
+//         duration-ms 350
+//         curve "cubic-bezier" 0.05 0.9 0.1 1.0
+//     }
+//     exit-confirmation-open-close {
+//         duration-ms 300
+//         curve "ease-out-quad"
+//     }
+//     screenshot-ui-open {
+//         duration-ms 300
+//         curve "cubic-bezier" 0.05 0.9 0.1 1.0
+//     }
+//     overview-open-close {
+//         duration-ms 400
+//         curve "cubic-bezier" 0.05 0.9 0.1 1.0
+//     }
+//     recent-windows-close {
+//         duration-ms 400
+//         curve "cubic-bezier" 0.05 0.9 0.1 1.0
+//     }
+// }
+
+// Liquid
+// animations {
+//     slowdown 1.5
+//     window-open {
+//         duration-ms 500
+//         curve "linear"
+//         custom-shader r"
+//         vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+//             float p = niri_clamped_progress;
+//             vec2 uv = coords_geo.xy;
+//             float settle = 1.0 - p;
+//             float settle_curve = pow(settle, 3.0);
+//             vec2 fluid_uv = uv * 6.0;
+//             float time = p * 12.0;
+//             for (int i = 1; i < 4; i++) {
+//                 float fi = float(i);
+//                 fluid_uv.x += (0.6 / fi) * sin(fi * fluid_uv.y + time);
+//                 fluid_uv.y += (0.6 / fi) * cos(fi * fluid_uv.x + time);
+//             }
+//             vec2 wobbly_uv = uv;
+//             wobbly_uv.x += sin(fluid_uv.y) * 0.06 * settle_curve;
+//             wobbly_uv.y += cos(fluid_uv.x) * 0.06 * settle_curve;
+//             vec2 pixel_pos = (wobbly_uv - 0.5) * size_geo.xy;
+//             vec2 box_size = (size_geo.xy * 0.5) * (p * 1.15);
+//             float corner_radius = 16.0;
+//             float radius = min(corner_radius, min(box_size.x, box_size.y));
+//             vec2 q = abs(pixel_pos) - box_size + vec2(radius);
+//             float dist = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;
+//             float edge_blur = mix(15.0, 1.0, p);
+//             float alpha_mask = 1.0 - smoothstep(-edge_blur, edge_blur, dist);
+//             vec2 refraction = vec2(sin(fluid_uv.x), cos(fluid_uv.y)) * 0.03 * settle_curve;
+//             vec2 tex_uv = uv + (refraction * alpha_mask);
+//             vec3 coords_tex = niri_geo_to_tex * vec3(tex_uv, coords_geo.z);
+//             vec4 oColor = texture2D(niri_tex, coords_tex.st);
+//             vec4 final_color = oColor * alpha_mask;
+//             float caustic = max(0.0, sin(fluid_uv.x - fluid_uv.y));
+//             caustic = pow(caustic, 3.0);
+//             vec3 water_tint = vec3(0.5, 0.9, 1.0);
+//             final_color.rgb += water_tint * caustic * alpha_mask * settle_curve * 1.2;
+//             return final_color;
+//         }
+//         "
+//     }
+//     window-close {
+//         duration-ms 500
+//         curve "linear"
+//         custom-shader r"
+//         vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+//             float p = 1.0 - niri_clamped_progress;
+//             vec2 uv = coords_geo.xy;
+//             float settle = 1.0 - p;
+//             float settle_curve = pow(settle, 3.0);
+//             vec2 fluid_uv = uv * 6.0;
+//             float time = p * -12.0; // Reverse flow direction
+//             for (int i = 1; i < 4; i++) {
+//                 float fi = float(i);
+//                 fluid_uv.x += (0.6 / fi) * sin(fi * fluid_uv.y + time);
+//                 fluid_uv.y += (0.6 / fi) * cos(fi * fluid_uv.x + time);
+//             }
+//             vec2 wobbly_uv = uv;
+//             wobbly_uv.x += sin(fluid_uv.y) * 0.06 * settle_curve;
+//             wobbly_uv.y += cos(fluid_uv.x) * 0.06 * settle_curve;
+//             vec2 pixel_pos = (wobbly_uv - 0.5) * size_geo.xy;
+//             vec2 box_size = (size_geo.xy * 0.5) * (p * 1.15);
+//             float corner_radius = 16.0;
+//             float radius = min(corner_radius, min(box_size.x, box_size.y));
+//             vec2 q = abs(pixel_pos) - box_size + vec2(radius);
+//             float dist = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;
+//             float edge_blur = mix(15.0, 1.0, p);
+//             float alpha_mask = 1.0 - smoothstep(-edge_blur, edge_blur, dist);
+//             vec2 refraction = vec2(sin(fluid_uv.x), cos(fluid_uv.y)) * 0.03 * settle_curve;
+//             vec2 tex_uv = uv + (refraction * alpha_mask);
+//             vec3 coords_tex = niri_geo_to_tex * vec3(tex_uv, coords_geo.z);
+//             vec4 oColor = texture2D(niri_tex, coords_tex.st);
+//             vec4 final_color = oColor * alpha_mask;
+//             float caustic = max(0.0, sin(fluid_uv.x - fluid_uv.y));
+//             caustic = pow(caustic, 3.0);
+//             vec3 water_tint = vec3(0.5, 0.9, 1.0);
+//             final_color.rgb += water_tint * caustic * alpha_mask * settle_curve * 1.2;
+//             return final_color;
+//         }
+//         "
+//     }
+//     window-resize {
+//         duration-ms 400
+//         curve "linear"
+//         custom-shader r"
+//         vec4 resize_color(vec3 coords_geo, vec3 size_geo) {
+//             float p = niri_clamped_progress;
+//             float env = sin(p * 3.14159265);
+//             vec2 uv = coords_geo.xy;
+//             vec2 fluid_uv = uv * 8.0;
+//             float time = p * 15.0;
+//             for (int i = 1; i < 4; i++) {
+//                 float fi = float(i);
+//                 fluid_uv.x += (0.5 / fi) * sin(fi * fluid_uv.y + time);
+//                 fluid_uv.y += (0.5 / fi) * cos(fi * fluid_uv.x + time);
+//             }
+//             vec2 refraction = vec2(sin(fluid_uv.x), cos(fluid_uv.y)) * 0.01 * env;
+//             vec2 tex_uv = uv + refraction;
+//             vec3 coords_tex_next = niri_geo_to_tex_next * vec3(tex_uv, coords_geo.z);
+//             vec4 oColor = texture2D(niri_tex_next, coords_tex_next.st);
+//             float caustic = max(0.0, sin(fluid_uv.x - fluid_uv.y));
+//             caustic = pow(caustic, 2.0);
+//             vec3 water_tint = vec3(0.5, 0.9, 1.0);
+//             return oColor + vec4(water_tint * caustic * env * 0.25 * oColor.a, 0.0);
+//         }
+//         "
+//     }
+//     workspace-switch {
+//         spring damping-ratio=1.0 stiffness=760 epsilon=0.0001
+//     }
+//     horizontal-view-movement {
+//         spring damping-ratio=1.0 stiffness=640 epsilon=0.0001
+//     }
+//     window-movement {
+//         spring damping-ratio=1.0 stiffness=700 epsilon=0.0001
+//     }
+//     config-notification-open-close {
+//         spring damping-ratio=1.0 stiffness=820 epsilon=0.001
+//     }
+//     exit-confirmation-open-close {
+//         spring damping-ratio=1.0 stiffness=560 epsilon=0.01
+//     }
+//     screenshot-ui-open {
+//         duration-ms 220
+//         curve "cubic-bezier" 0.22 1.0 0.36 1.0
+//     }
+//     overview-open-close {
+//         spring damping-ratio=1.0 stiffness=620 epsilon=0.0001
+//     }
+//     recent-windows-close {
+//         spring damping-ratio=1.0 stiffness=680 epsilon=0.001
+//     }
+// }
+
+
+// // Combine
+// animations {
+//     slowdown 1.5
+//     window-open {
+//         duration-ms 400
+//         curve "linear"
+//         custom-shader r"
+//         float easeOutQuint(float t) {
+//             return 1.0 - pow(1.0 - t, 5.0);
+//         }
+//
+//         vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+//             float p = easeOutQuint(niri_clamped_progress);
+//             vec2 uv = coords_geo.xy;
+//             vec2 centered_uv = uv - 0.5;
+//             float aspect = size_geo.x / size_geo.y;
+//             centered_uv.x *= aspect;
+//             float d = length(centered_uv) * 2.0;
+//             float max_radius = length(vec2(aspect, 1.0));
+//             float current_radius = p * max_radius;
+//             float blur = 0.05;
+//             float content_mask = 1.0 - smoothstep(current_radius - blur, current_radius, d);
+//             float ring_thickness = 0.25 * (1.0 - p); // Starts thick, gets thinner until it vanishes
+//             float ring_mask = smoothstep(current_radius - blur - ring_thickness, current_radius - blur, d)
+//             - smoothstep(current_radius, current_radius + blur, d);
+//             ring_mask *= (1.0 - p) * 1.5;
+//             ring_mask = clamp(ring_mask, 0.0, 1.0);
+//             float angle = atan(centered_uv.y, centered_uv.x);
+//             vec3 neon_color = 0.5 + 0.5 * cos(angle * 2.0 - p * 15.0 + vec3(0.0, 2.0, 4.0));
+//             vec2 tex_uv = (uv - 0.5) * (1.0 + (1.0 - p) * 0.3) + 0.5;
+//             vec3 modified_geo = vec3(tex_uv, coords_geo.z);
+//             vec3 coords_tex = niri_geo_to_tex * modified_geo;
+//             vec4 oColor = texture2D(niri_tex, coords_tex.st);
+//             vec4 final_color = (oColor * content_mask) + (vec4(neon_color, 1.0) * ring_mask);
+//             return final_color;
+//         }
+//         "
+//     }
+//
+//     window-close {
+//         duration-ms 400
+//         curve "cubic-bezier" 0.05 0.9 0.1 1.0
+//         custom-shader r"
+//         vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+//             float p = 1.0 - niri_clamped_progress;
+//             float y_offset = mix(0.15, 0.0, p);
+//             float scale = mix(0.85, 1.0, p);
+//             vec2 uv = coords_geo.xy;
+//             vec2 centered = uv - 0.5;
+//             centered.y -= y_offset;
+//             centered /= scale;
+//             vec2 tex_uv = centered + 0.5;
+//             vec3 coords_tex = niri_geo_to_tex * vec3(tex_uv, coords_geo.z);
+//             vec4 oColor = texture2D(niri_tex, coords_tex.st);
+//             float corner_radius = 12.0;
+//             vec2 pixel_pos = centered * size_geo.xy;
+//             vec2 box_size = size_geo.xy * 0.5;
+//             float radius = min(corner_radius, min(box_size.x, box_size.y));
+//             vec2 q = abs(pixel_pos) - box_size + vec2(radius);
+//             float dist = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;
+//             float mask = 1.0 - smoothstep(-0.5, 0.5, dist);
+//             float alpha = clamp(p * 2.0, 0.0, 1.0);
+//             return oColor * mask * alpha;
+//         }
+//         "
+//     }
+//
+//     window-resize {
+//         duration-ms 350
+//         curve "ease-out-cubic"
+//         custom-shader r"
+//         vec4 resize_color(vec3 coords_geo, vec3 size_geo) {
+//             vec2 uv = coords_geo.xy;
+//             float p = sin(niri_clamped_progress * 3.14159);
+//             float sweep = sin(uv.x * 15.0 + uv.y * 15.0 - niri_clamped_progress * 20.0);
+//             vec3 holo_color = 0.5 + 0.5 * cos(sweep + vec3(0.0, 1.5, 3.0));
+//             vec3 coords_tex_next = niri_geo_to_tex_next * coords_geo;
+//             vec4 oColor = texture2D(niri_tex_next, coords_tex_next.st);
+//             vec4 color_overlay = vec4(holo_color, 1.0) * p * 0.15;
+//             return oColor + color_overlay;
+//         }
+//         "
+//     }
+//     workspace-switch {
+//         spring damping-ratio=1.0 stiffness=760 epsilon=0.0001
+//     }
+//     horizontal-view-movement {
+//         spring damping-ratio=1.0 stiffness=640 epsilon=0.0001
+//     }
+//     window-movement {
+//         spring damping-ratio=1.0 stiffness=700 epsilon=0.0001
+//     }
+//     config-notification-open-close {
+//         spring damping-ratio=1.0 stiffness=820 epsilon=0.001
+//     }
+//     exit-confirmation-open-close {
+//         spring damping-ratio=1.0 stiffness=560 epsilon=0.01
+//     }
+//     screenshot-ui-open {
+//         duration-ms 220
+//         curve "cubic-bezier" 0.22 1.0 0.36 1.0
+//     }
+//     overview-open-close {
+//         spring damping-ratio=1.0 stiffness=620 epsilon=0.0001
+//     }
+//     recent-windows-close {
+//         spring damping-ratio=1.0 stiffness=680 epsilon=0.001
+//     }
+// }

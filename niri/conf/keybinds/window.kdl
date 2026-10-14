@@ -1,0 +1,132 @@
+binds {
+    // Window/workspace focus
+    Mod+J               { focus-window-or-workspace-down; }
+    Mod+K               { focus-window-or-workspace-up; }
+    Mod+H               { focus-column-left; }
+    Mod+L               { focus-column-right; }
+    // alternative 
+    Mod+Down            { focus-window-or-workspace-down; }
+    Mod+Up              { focus-window-or-workspace-up; }
+    Mod+Left            { focus-column-left; }
+    Mod+Right           { focus-column-right; }
+    // moused
+    Mod+WheelScrollUp   cooldown-ms=180 { focus-workspace-up; }
+    Mod+WheelScrollDown cooldown-ms=180 { focus-workspace-down; }
+    Mod+Shift+WheelScrollUp             { focus-column-left; }
+    Mod+Shift+WheelScrollDown           { focus-column-right; }
+
+
+    // Move focused window 
+    Mod+Ctrl+Down       { move-window-down-or-to-workspace-down; }
+    Mod+Ctrl+Up         { move-window-up-or-to-workspace-up; }
+    Mod+Ctrl+Left       { move-column-left; }
+    Mod+Ctrl+Right      { move-column-right; }
+    // alternative
+    Alt+Shift+J         { move-window-down-or-to-workspace-down; }
+    Alt+Shift+K         { move-window-up-or-to-workspace-up; } 
+    Alt+Shift+H         { move-column-left; } 
+    Alt+Shift+L         { move-column-right; } 
+    // moused
+    Mod+Ctrl+WheelScrollUp             { move-column-to-workspace-up; }
+    Mod+Ctrl+WheelScrollDown           { move-column-to-workspace-down; }
+    Mod+Ctrl+Shift+WheelScrollUp       { move-column-left; }
+    Mod+Ctrl+Shift+WheelScrollDown     { move-column-right; }
+
+    // Move window with no focus
+    // Mod+Shift+J { move-window-to-workspace 1 focus=false; }
+    // Mod+Shift+K { move-window-to-workspace 2 focus=false; }
+    // Mod+Shift+L { move-window-to-workspace 3 focus=false; }
+    // Mod+Shift+U { move-window-to-workspace 4 focus=false; }
+    // Mod+Shift+I { move-window-to-workspace 5 focus=false; }
+    // Mod+Shift+O { move-window-to-workspace 6 focus=false; }
+    // alternative
+    Mod+Shift+1 { move-window-to-workspace 1 focus=false; }
+    Mod+Shift+2 { move-window-to-workspace 2 focus=false; }
+    Mod+Shift+3 { move-window-to-workspace 3 focus=false; }
+    Mod+Shift+4 { move-window-to-workspace 4 focus=false; }
+    Mod+Shift+5 { move-window-to-workspace 5 focus=false; }
+    Mod+Shift+6 { move-window-to-workspace 6 focus=false; }
+    // with control 
+    Mod+Shift+J { move-window-to-workspace-down focus=false; }
+    Mod+Shift+K { move-window-to-workspace-up focus=false; }
+
+    // Move window with focus
+    Alt+Shift+1 { move-window-to-workspace 1; }
+    Alt+Shift+2 { move-window-to-workspace 2; }
+    Alt+Shift+3 { move-window-to-workspace 3; }
+    Alt+Shift+4 { move-window-to-workspace 4; }
+    Alt+Shift+5 { move-window-to-workspace 5; }
+    Alt+Shift+6 { move-window-to-workspace 6; }
+    // alternative 
+    // Alt+Shift+J { move-window-to-workspace 1; }
+    // Alt+Shift+K { move-window-to-workspace 2; }
+    // Alt+Shift+L { move-window-to-workspace 3; }
+    // Alt+Shift+U { move-window-to-workspace 4; }
+    // Alt+Shift+I { move-window-to-workspace 5; }
+    // Alt+Shift+O { move-window-to-workspace 6; }
+
+    // Jump to workspaace 
+    Mod+1       { focus-workspace 1; }
+    Mod+2       { focus-workspace 2; }
+    Mod+3       { focus-workspace 3; }
+    Mod+4       { focus-workspace 4; }
+    Mod+5       { focus-workspace 5; }
+    Mod+6       { focus-workspace 6; }
+    // alternative 
+    Mod+Alt+J   { focus-workspace 1; }
+    Mod+Alt+K   { focus-workspace 2; }
+    Mod+Alt+L   { focus-workspace 3; }
+    Mod+Alt+U   { focus-workspace 4; }
+    Mod+Alt+I   { focus-workspace 5; }
+    Mod+Alt+O   { focus-workspace 6; }
+
+    // Jump focus
+    Mod+Home        { focus-column-first; }
+    Mod+End         { focus-column-last; }
+    Mod+Ctrl+Home   { move-column-to-first; }
+    Mod+Ctrl+End    { move-column-to-last; }
+
+    // Consume 
+    Mod+BracketLeft     { consume-or-expel-window-left; }
+    Mod+BracketRight    { consume-or-expel-window-right; }
+    // Consume one window from the right to the bottom of the focused column.
+    Mod+Comma           { consume-window-into-column; }
+    // Expel the bottom window from the focused column to the right.
+    Mod+Period          { expel-window-from-column; }
+
+    // Cycle window width and height.
+    Mod+R               { switch-preset-column-width; }
+    // Cycling through the presets in reverse order is also possible.
+    Mod+Shift+R         { switch-preset-column-width-back; }
+    Mod+Ctrl+Shift+R    { switch-preset-window-height; }
+    Mod+Ctrl+R          { reset-window-height; }
+
+    // Fullscreen 
+    Mod+F               { maximize-column; }
+    Mod+Shift+F         { fullscreen-window; }
+    Mod+M               { maximize-window-to-edges; }
+
+
+    // CONTROL ZONE
+    Mod+Q               { close-window; }
+    Mod+Shift+Space     { toggle-window-floating; }
+    Mod+Shift+Alt+Space { switch-focus-between-floating-and-tiling; }
+    Alt+Tab repeat=false{ toggle-overview; }
+    Mod+Backslash       { center-visible-columns; }
+    Mod+Alt+W           { toggle-column-tabbed-display; } // Stacked
+
+    // Finer width adjustments.
+    // This command can also:
+    // * set width in pixels: "1000"
+    // * adjust width in pixels: "-5" or "+5"
+    // * set width as a percentage of screen width: "25%"
+    // * adjust width as a percentage of screen width: "-10%" or "+10%"
+    // Pixel sizes use logical, or scaled, pixels. I.e. on an output with scale 2.0,
+    // set-column-width "100" will make the column occupy 200 physical screen pixels.
+    Mod+Minus           { set-column-width "-5%"; }
+    Mod+Equal           { set-column-width "+10%"; }
+    // Finer height adjustments when in column with other windows.
+    Mod+Shift+Minus     { set-window-height "-5%"; }
+    Mod+Shift+Equal     { set-window-height "+10%"; }
+
+}
