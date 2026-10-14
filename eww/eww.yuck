@@ -39,5 +39,4 @@
 (include "windows/power-user.yuck")
 (include "windows/distro.yuck")
 (include "windows/try.yuck")
-(include "windows/bar.yuck")
 
