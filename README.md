@@ -42,7 +42,7 @@ each entry is.
 
 | Tool | What it is | Themed by |
 |---|---|---|
-| `kitty` | GPU terminal emulator | wallpaper flow (`kitty/theme.conf`) |
+| `kitty` | GPU terminal emulator | both flows (`kitty/theme.conf`) |
 | `foot` | Lightweight Wayland terminal | pinned include, no template here¹ |
 | `alacritty` | GPU terminal emulator | both flows (`alacritty/theme.toml`) |
 | `cava` | Audio visualizer | — |
@@ -50,7 +50,7 @@ each entry is.
 | `waybar` | Status bar | wallpaper flow, GTK CSS (`css/theme.css`) |
 | `eww` | Widget system | wallpaper flow, SCSS (`scss/theme`) |
 | `wlogout` | Logout menu | wallpaper flow, GTK CSS (`css/theme.css`) |
-| `rofi` | App launcher | wallpaper flow (`rasi/theme.rasi`) |
+| `rofi` | App launcher | both flows (`rasi/theme.rasi`) |
 | `nvim` | Neovim editor | both flows (`nvim/theme.lua`) |
 | `yazi` | Terminal file manager | — |
 | `lazygit` | Terminal Git UI | both flows (`lazygit/config.yml`) |

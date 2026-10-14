@@ -6,7 +6,7 @@
 > [x] = template exists in this repo · [ ] = consumer reads a generated file,
 > but the file is produced elsewhere (or the tool is not themed yet).
 
-Last verified against the repo: 2026-10-11.
+Last verified against the repo: 2026-10-14.
 
 ---
 
@@ -45,13 +45,19 @@ Config: `templates/kanagawa-dragon-lotus/config.toml` · blueprints:
 | Tool | Template | Output |
 |---|---|---|
 | [x] Neovim | `nvim.lua` | `nvim/theme.lua` |
+| [x] Kitty | `kitty.conf` | `kitty/theme.conf` (+ `pkill -SIGUSR1` post_hook) |
 | [x] Alacritty | `alacritty.toml` | `alacritty/theme.toml` |
+| [x] Rofi | `source.rasi` | `rasi/theme.rasi` |
 | [x] Lazygit | `lazygit.yml` | `lazygit/config.yml` |
 | [x] Herdr | `herdr.toml` | `herdr/config.toml` |
 | [x] GTK-3 | `gtk3.css` | `css/theme.css` (+ `dconf` post_hook) |
 | [x] SCSS | `source.scss` | `scss/_theme.scss` |
-| [ ] Kitty | — | — |
-| [ ] Rofi | — | — |
+
+Konsumen Kitty & Rofi membaca lewat `~/.myenv/theme/current/…`:
+`kitty/kitty.conf` (`include`) dan `rofi/themes/{theme,apps,wallpaper}.rasi`
+(`@import`). Sebelum template di atas ada, dua berkas itu diisi mesin lama
+`~/.myenv`; sekarang alur B yang memilikinya, jadi `current` boleh menunjuk ke
+folder kanagawa tanpa kehilangan warna.
 
 Key reference for the JSON these templates read:
 [`blueprint/README.md`](../templates/kanagawa-dragon-lotus/blueprint/README.md).

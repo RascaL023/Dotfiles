@@ -1,0 +1,29 @@
+// ############################
+// ## Generated with Matugen ##
+// ############################
+// ## Manual edit is not recomended,
+// ## Except for testing.
+
+// Variabel di bawah dipakai oleh rofi/themes/{theme,apps,wallpaper}.rasi
+// lewat `@import`. Nama variabelnya harus tetap sama.
+
+* {
+  // ── Latar ──
+  bg-col                : {{ surface.base }};
+  bg-selected-col       : {{ surface.medium }};
+  alt-bg-selected-col   : {{ accent.primary }};
+  bg-transparent-col    : {{ effect.scrim | to_color | set_alpha: 0.45 | format: rgba }};
+  surface-1             : {{ surface.low }};
+
+  // ── Teks ──
+  fg-col                : {{ text.primary }};
+  fg-selected-col       : {{ text.primary }};
+
+  // ── Aksen & border ──
+  accent-1              : {{ accent.primary }};
+  border-col            : {{ border.active }};
+
+  // ── Ukuran (statis, bukan warna) ──
+  app-width             : 45%;
+  wallpaper-width       : 100%;
+}

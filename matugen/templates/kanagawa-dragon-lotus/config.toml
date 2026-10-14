@@ -29,3 +29,12 @@ post_hook       = "herdr server reload-config"
 input_path      = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/alacritty.toml"
 output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/alacritty/theme.toml"
 post_hook       = "mkdir -p ~/.myenv/theme/current/alacritty"
+
+[templates.kitty]
+input_path      = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/kitty.conf"
+output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/kitty/theme.conf"
+post_hook       = "pkill -SIGUSR1 kitty"
+
+[templates.rasi]
+input_path      = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/source.rasi"
+output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/rasi/theme.rasi"

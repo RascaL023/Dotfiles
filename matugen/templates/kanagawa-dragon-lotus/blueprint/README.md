@@ -49,7 +49,9 @@ template/nvim.lua          ← "{{ accent.primary }}"  →  "#8ba4b0"
 template/alacritty.toml
 template/gtk3.css
 template/herdr.toml
+template/kitty.conf
 template/lazygit.yml
+template/source.rasi
 template/source.scss
         │
         ▼
@@ -120,9 +122,9 @@ varian dan jejak asal warna. Aman diubah, tidak berpengaruh ke hasil render.
 
 | Key | Contoh (dark) | Arti | Dipakai di |
 |---|---|---|---|
-| `background` | `#181616` | Latar utama | `alacritty.toml`, `source.scss`, `nvim.lua` |
+| `background` | `#181616` | Latar utama | `alacritty.toml`, `kitty.conf`, `nvim.lua`, `source.scss` |
 | `foreground` | `#c5c9c5` | Teks utama | sama seperti `background` |
-| `cursor` | `#C8C093` | Warna kursor terminal | `alacritty.toml`, `nvim.lua` |
+| `cursor` | `#C8C093` | Warna kursor terminal | `alacritty.toml`, `kitty.conf`, `nvim.lua` |
 
 Tiga key ini sengaja diduplikasi di akar supaya template yang cuma butuh "latar
 dan teks" tidak perlu tahu soal `surface.*` / `text.*`.
@@ -151,8 +153,8 @@ terang). `color0`…`color15` adalah nilai yang sama, tapi diberi nama satu-satu
 | 14 | `color14` | cyan terang | `#7AA89F` | `#5e857a` |
 | 15 | `color15` | putih terang | `#c5c9c5` | `#43436c` |
 
-- Dipakai di: `alacritty.toml` & `source.scss` (16 key eksplisit), `nvim.lua`
-  (lewat loop `<* for c in colors *>`).
+- Dipakai di: `alacritty.toml`, `kitty.conf` & `source.scss` (16 key eksplisit),
+  `nvim.lua` (lewat loop `<* for c in colors *>`).
 - **Kenapa dobel?** Template berbasis loop butuh array; template yang menyebut
   slot satu per satu (alacritty) butuh nama key. Keduanya harus tetap sinkron.
 - Array **tidak bisa diindeks** (`colors[0]` = error parse), hanya bisa
@@ -165,7 +167,7 @@ terang). `color0`…`color15` adalah nilai yang sama, tapi diberi nama satu-satu
 | `accent.primary` | Aksen utama (fokus, tombol, border aktif) | semua template |
 | `accent.secondary` | Aksen kedua | `alacritty.toml`, `gtk3.css`, `herdr.toml`, `source.scss` |
 | `accent.tertiary` | Aksen ketiga | `gtk3.css` |
-| `accent.on_primary` | Teks **di atas** `accent.primary` | `alacritty.toml`, `gtk3.css`, `lazygit.yml`, `nvim.lua`, `source.scss` |
+| `accent.on_primary` | Teks **di atas** `accent.primary` | `alacritty.toml`, `gtk3.css`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss` |
 | `accent.on_secondary` | Teks di atas `accent.secondary` | `alacritty.toml`, `source.scss` |
 | `accent.on_tertiary` | Teks di atas `accent.tertiary` | `nvim.lua` |
 | `accent.primary_container` | Latar "berisi" aksen (badge, item terpilih) | `gtk3.css`, `nvim.lua` |
@@ -182,8 +184,8 @@ atasnya. Ini yang menjaga kontras tetap terbaca.
 
 | Key | Arti | Dipakai di |
 |---|---|---|
-| `text.primary` | Teks utama | `gtk3.css`, `herdr.toml`, `nvim.lua` |
-| `text.secondary` | Teks kedua (judul, aksen teks) | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss` |
+| `text.primary` | Teks utama | `gtk3.css`, `herdr.toml`, `kitty.conf`, `nvim.lua`, `source.rasi` |
+| `text.secondary` | Teks kedua (judul, aksen teks) | `gtk3.css`, `herdr.toml`, `kitty.conf`, `nvim.lua`, `source.scss` |
 | `text.muted` | Teks redup | `gtk3.css`, `nvim.lua`, `source.scss` |
 | `text.subtle` | Lebih redup lagi (→ `extra.fg.dim` nvim) | `gtk3.css`, `nvim.lua`, `source.scss` |
 | `text.faint` | Paling redup (→ `extra.fg.dim_muted` nvim) | sama seperti `text.subtle` |
@@ -197,10 +199,10 @@ atasnya. Ini yang menjaga kontras tetap terbaca.
 | Key | Arti | Padanan umum | Dipakai di |
 |---|---|---|---|
 | `surface.lowest` | Paling bawah/gelap | `mantle` | `gtk3.css`, `nvim.lua`, `source.scss` |
-| `surface.low` | Satu tingkat di atasnya | `crust` | `gtk3.css`, `nvim.lua`, `source.scss` |
-| `surface.base` | Latar utama (window) | `base` | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss` |
-| `surface.medium` | Panel | `surface` | `gtk3.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss` |
-| `surface.high` | Panel menonjol / statusline | `surface_raised` | `gtk3.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss` |
+| `surface.low` | Satu tingkat di atasnya | `crust` | `gtk3.css`, `kitty.conf`, `nvim.lua`, `source.rasi`, `source.scss` |
+| `surface.base` | Latar utama (window) | `base` | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.rasi`, `source.scss` |
+| `surface.medium` | Panel | `surface` | `gtk3.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss` |
+| `surface.high` | Panel menonjol / statusline | `surface_raised` | `gtk3.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.scss` |
 | `surface.highest` | Paling menonjol / gutter | `surface_overlay` | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss` |
 | `surface.track` | Jalur progres (disk usage) | — | `gtk3.css`, `nvim.lua`, `source.scss` |
 | `surface.inverse` | Permukaan terbalik (tooltip) | — | —ⁱ |
@@ -211,7 +213,7 @@ atasnya. Ini yang menjaga kontras tetap terbaca.
 |---|---|---|
 | `border.default` | Garis/tepi biasa | `gtk3.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss` |
 | `border.medium` | Garis pemisah (split) | sama seperti `border.default` |
-| `border.active` | Garis saat fokus | sama seperti `border.default` |
+| `border.active` | Garis saat fokus | `gtk3.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss` |
 
 ### 3.8 `status.*`
 
@@ -230,10 +232,11 @@ atasnya. Ini yang menjaga kontras tetap terbaca.
 | Key | Contoh | Arti | Dipakai di |
 |---|---|---|---|
 | `effect.shadow` | `#0d0c0c` | Warna bayangan jendela/menu | —ⁱ |
-| `effect.scrim` | `#0d0c0c` | Lapisan gelap di belakang dialog | —ⁱ |
+| `effect.scrim` | `#0d0c0c` | Lapisan gelap di belakang dialog | `source.rasi` (`bg-transparent-col`, alpha 0.45) |
 
-Disediakan untuk tool yang butuh (mis. compositor/hyprlock bila nanti
-ditambahkan). Belum ada template yang memakainya.
+`effect.shadow` masih disediakan untuk tool yang butuh (mis.
+compositor/hyprlock bila nanti ditambahkan). `effect.scrim` dipakai oleh picker
+wallpaper rofi (`wallpaper.rasi`) sebagai lapisan gelap layar penuh.
 
 ### 3.10 `syntax.*` — kosakata kode (27 token)
 
@@ -294,9 +297,9 @@ Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu),
    dikerjakan template lewat filter matugen, mis.
    `{{ accent.primary | to_color | set_alpha: 0.2 | format: rgba }}` di
    `gtk3.css`. Blueprint tidak menyimpan `rgba()` sendiri.
-6. **Key yang belum dipakai bukan sampah.** `effect.*`, `surface.inverse`,
-   `text.on_inverse`, `status.error_container`, dan `meta.*` adalah slot siap
-   pakai untuk template berikutnya.
+6. **Key yang belum dipakai bukan sampah.** `effect.shadow`,
+   `surface.inverse`, `text.on_inverse`, `status.error_container`, dan `meta.*`
+   adalah slot siap pakai untuk template berikutnya.
 7. **Menambah tool baru:** buat `template/<tool>.<ext>` lalu daftarkan di
    `config.toml` folder ini:
    ```toml
