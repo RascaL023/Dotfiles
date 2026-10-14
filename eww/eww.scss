@@ -1,5 +1,9 @@
 @import "/home/rascal/.myenv/theme/current/scss/theme";
 
+/* Bar tiruan waybar. Warnanya memakai variabel dari _theme.scss di atas;
+   tabel pemetaan waybar -> scss ada di kepala bar.scss. */
+@import "bar";
+
 * {
   all: unset;
 }

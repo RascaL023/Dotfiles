@@ -1,0 +1,218 @@
+;; ############################################################################
+;; Bar - tiruan waybar
+;; ############################################################################
+;; Susunan, glif, dan ukuran disalin dari waybar/config.jsonc +
+;; waybar/style.css. Warnanya dari eww/bar.scss yang membaca _theme.scss hasil
+;; matugen (tidak ada field scss baru; lihat tabel pemetaan di bar.scss).
+;;
+;; String format waybar dipetakan apa adanya: `{icon} {percent}%` jadi
+;; "${icon} ${percent}%". Kelas state waybar (.warning/.critical/.charging/
+;; .muted) jadi kelas GTK pada label, diwarnai di bar.scss.
+;;
+;; LEBAR MODUL (min-length waybar)
+;; waybar TIDAK menambah spasi. `min-length` dipetakan ke
+;; `gtk_label_set_width_chars()` (lihat src/ALabel.cpp: set_width_chars), yaitu
+;; lebar MINIMUM label sebesar N karakter, sementara teksnya tetap di tengah
+;; (xalign bawaan GTK = 0.5). Padanannya di eww adalah atribut `:width`, yang
+;; dokumentasinya juga menyebut "can not restrict the size if the contents
+;; stretch it" - jadi sama-sama minimum, bukan lebar paksa.
+;;
+;; Monocraft pada 9.2px = 6.00px/karakter (diukur dari waybar: "14:23" = 30px,
+;; "rascal" = 36px), sehingga secara model N karakter = N x 6.0px. Nilai
+;; `:width` di bawah ini adalah hasil KALIBRASI terhadap bar waybar sungguhan
+;; (dua bar dijalankan bersamaan, lebar modul diukur per warna - harness ada di
+;; catatan akhir berkas ini), karena lebar efektif `set_width_chars` di waybar
+;; tidak persis N x 6.0px (GTK memakai perkiraan lebar karakter dari Pango,
+;; bukan lebar digit):
+;;
+;;   modul        min-length  model   ukur waybar  dipakai
+;;   ----------   ----------  -----   -----------  -------
+;;   temperature      8        48px      43px        43px
+;;   memory           7        42px      36px        36px
+;;   cpu              7        42px      36px        36px
+;;   time             5        30px      30px        30px
+;;   date             8        48px      47px        48px
+;;   network          2        12px      12px        12px
+;;   volume           7        42px      42px        42px
+;;   backlight        7        42px      42px        42px
+;;   battery          7        42px      30px        30px
+;;
+;; Catatan keandalan angka "ukur": lebar modul diukur dari warna latarnya, dan
+;; warna itu juga dipakai oleh glif pembatas di sebelahnya, jadi angkanya bisa
+;; menyerap sebagian geometri pembatas (galat ±6px). Yang sudah dipastikan sama
+;; persis dengan waybar: tinggi pill, inset, penengahan tiga bagian, posisi dan
+;; ukuran tinta tiap teks/ikon, serta warna tiap modul.
+;;
+;; Isi teks ditulis TANPA spasi tambahan, supaya penengahan otomatis GTK
+;; menaruh glif di posisi yang sama dengan waybar.
+;; `max-length` waybar (set_max_width_chars + ellipsize) tidak perlu ditiru:
+;; teks format di sini selalu lebih pendek daripada max-length-nya.
+
+;; ------------------------------ data ------------------------------
+
+;; Satu array JSON per perubahan workspace (lihat scripts/bar/workspaces.sh).
+(deflisten bar-ws
+  :initial "[]"
+  "./scripts/bar/workspaces.sh")
+
+;; `:initial` = nilai JSON awal, supaya label tidak kosong (dan tidak memicu
+;; error "Failed to turn `` into a value of type json-value") selama selang
+;; polling pertama. Isinya sengaja kosong/nol, bukan angka karangan: hanya
+;; ikonnya yang dipakai supaya bentuk modul sudah benar sejak frame pertama.
+
+(defpoll bar-temp   :interval "10s" :initial '{"c":0,"icon":"󱃃","class":"","critical":false}' "./scripts/bar/temperature.sh")
+(defpoll bar-sys    :interval "2s"  :initial '{"cpu":0,"ram":0,"cpu_state":{"class":"","icon":"󰍛"},"ram_state":{"class":"","icon":"󰘚"}}' "./scripts/bar/sysinfo.sh")
+(defpoll bar-net    :interval "10s" :initial '{"icon":"󰤯","ssid":"","signal":0,"state":"disconnected"}' "./scripts/bar/network.sh")
+(defpoll bar-vol    :interval "1s"  :initial '{"percent":0,"muted":false,"icon":"󰕿"}' "./scripts/bar/volume.sh")
+(defpoll bar-bright :interval "2s"  :initial '{"percent":0,"icon":""}' "./scripts/bar/backlight.sh")
+(defpoll bar-bat    :interval "10s" :initial '{"percent":0,"status":"","icon":"󰂎","class":""}' "./scripts/bar/battery.sh")
+
+;; waybar: clock#time format "{:%H:%M}", clock#date "󰸗 {:%m-%d}".
+(defpoll bar-time :interval "1s"  "date +%H:%M")
+(defpoll bar-date :interval "60s" "date +%m-%d")
+
+;; waybar: custom/user exec "whoami".
+(defpoll bar-user :interval "1h" "whoami")
+
+;; ----------------------------- pembatas -----------------------------
+;; Divider powerline waybar: glyph diwarnai oleh segmen *berikutnya*, dan pada
+;; transisi berlawanan latarnya diisi warna segmen *sebelumnya*. Kelas .div-*
+;; ada di label (bukan kotak) karena `* { all: unset; }` me-reset color per
+;; node - lihat catatan spesifisitas di bar.scss.
+
+(defwidget bar-div [cls glyph]
+  (box :class "bar-div"
+    (label :class "bar-div-glyph ${cls}" :text "${glyph}")))
+
+;; ---------------------------- workspace ----------------------------
+;; waybar: bg @layer-mantle, padding 0 1px; tombol radius 16px padding 0 10px;
+;;         ikon aktif  (U+EAAB), non-aktif  (U+EB8A);
+;;         workspace aktif -> label 15px + warna accent.
+
+(defwidget bar-workspaces []
+  (box :class "bar-workspaces" :orientation "h" :space-evenly false
+    (for w in {bar-ws}
+      (eventbox
+        :class "bar-ws-btn ${w.active ? "active" : ""} ${w.occupied ? "occupied" : ""}"
+        :cursor "pointer"
+        :onclick "niri msg action focus-workspace ${w.idx}"
+        (label :class "bar-ws-label"
+          :text "${w.active ? "" : ""}")))))
+
+;; ------------------------------ kiri ------------------------------
+
+(defwidget bar-left []
+  (box :class "bar-left" :orientation "h" :space-evenly false
+       :halign "start"
+    (eventbox :class "bar-user-box" :cursor "pointer"
+              :onclick "eww open --toggle profile"
+      (label :class "bar-user" :text "${bar-user}"))
+
+    (bar-div :cls "div-l1" :glyph "")
+    (bar-workspaces)
+    (bar-div :cls "div-l2" :glyph "")))
+
+;; ----------------------------- tengah -----------------------------
+
+(defwidget bar-center []
+  (box :class "bar-center" :orientation "h" :space-evenly false
+       :halign "center"
+
+    (bar-div :cls "div-c1" :glyph "")
+
+    ;; temperature: format "{icon} {temperatureC}°C", min-length 8 -> :width 43
+    (label :class "bar-temperature ${bar-temp.class}" :width 43
+      :text "${bar-temp.icon} ${bar-temp.c}°C")
+
+    (bar-div :cls "div-c2" :glyph "")
+
+    ;; memory: "{icon} {percentage}%", min-length 7 -> :width 36
+    (label :class "bar-memory ${bar-sys.ram_state.class}" :width 36
+      :text "${bar-sys.ram_state.icon} ${bar-sys.ram}%")
+
+    (bar-div :cls "div-c3" :glyph "")
+
+    ;; cpu: "{icon} {usage}%", min-length 7 -> :width 36
+    (label :class "bar-cpu ${bar-sys.cpu_state.class}" :width 36
+      :text "${bar-sys.cpu_state.icon} ${bar-sys.cpu}%")
+
+    (bar-div :cls "div-c4" :glyph "")
+    (bar-div :cls "div-c5" :glyph "")
+
+    ;; distro: glyph  (U+F313), diklik untuk membuka jendela `distro`.
+    ;; Tidak ber-min-length di waybar.
+    (eventbox :class "bar-distro-box" :cursor "pointer"
+              :onclick "eww open --toggle distro"
+      (label :class "bar-distro" :text ""))
+
+    (bar-div :cls "div-c6" :glyph "")
+    (bar-div :cls "div-c7" :glyph "")
+
+    ;; clock#time "{:%H:%M}", min-length 5 -> :width 30
+    (label :class "bar-time" :width 30 :text "${bar-time}")
+
+    (bar-div :cls "div-c8" :glyph "")
+
+    ;; clock#date "󰸗 {:%m-%d}", min-length 8 -> :width 48
+    (label :class "bar-date" :width 48 :text "󰸗 ${bar-date}")
+
+    (bar-div :cls "div-c9" :glyph "")
+
+    ;; network: format-wifi "{icon}", min-length 2 -> :width 12
+    (eventbox :class "bar-network-box" :cursor "pointer"
+              :onclick "nmcli radio wifi on && notify-send 'Wi-Fi Enabled' -r 1125"
+              :onrightclick "nmcli radio wifi off && notify-send 'Wi-Fi Disabled' -r 1125"
+      (label :class "bar-network" :width 12 :text "${bar-net.icon}"))
+
+    (bar-div :cls "div-c10" :glyph "")))
+
+;; ------------------------------ kanan ------------------------------
+
+(defwidget bar-right []
+  (box :class "bar-right" :orientation "h" :space-evenly false
+       :halign "end"
+
+    (bar-div :cls "div-r1" :glyph "")
+
+    ;; pulseaudio#output: "{icon} {volume}%", min-length 7 -> :width 42; klik = mute
+    (eventbox :class "bar-volume-box" :cursor "pointer"
+              :onclick "pamixer -t"
+      (label :class "bar-volume ${bar-vol.muted ? "muted" : ""}" :width 42
+        :text "${bar-vol.icon} ${bar-vol.percent}%"))
+
+    (bar-div :cls "div-r2" :glyph "")
+
+    ;; backlight: "{icon} {percent}%", min-length 7 -> :width 42
+    (label :class "bar-backlight" :width 42
+      :text "${bar-bright.icon} ${bar-bright.percent}%")
+
+    (bar-div :cls "div-r3" :glyph "")
+
+    ;; battery: "{icon} {capacity}%", min-length 7 -> :width 30
+    (label :class "bar-battery ${bar-bat.class}" :width 30
+      :text "${bar-bat.icon} ${bar-bat.percent}%")
+
+    (bar-div :cls "div-r4" :glyph "")
+
+    ;; custom/power_menu: glyph 󰤄 (U+F0904)
+    (eventbox :class "bar-power-box" :cursor "pointer"
+              :onclick "exec ~/.myenv/script/theme/theme-picker.sh"
+      (label :class "bar-power" :text "󰤄"))))
+
+;; ------------------------------- bar -------------------------------
+
+;; Tiga bagian waybar (`modules-left` / `modules-center` / `modules-right`)
+;; dipetakan ke `centerbox` - widget yang memang menyusun tiga anaknya di awal,
+;; tengah, dan akhir. Ini penting: dengan cara lama (bar-left/bar-right
+;; `:hexpand true`) bagian tengah hanya terpusat pada SISA ruang antar kedua
+;; tetangganya, sehingga bergeser ke kiri karena sisi kanan bar jauh lebih lebar
+;; daripada sisi kiri. `centerbox` memusatkannya ke seluruh lebar pill, sama
+;; seperti waybar (terukur: sebelum perbaikan bagian tengah meleset ~60px).
+
+(defwidget bar []
+  (box :class "bar-outer"
+    (box :class "bar-pill" :orientation "h" :space-evenly false
+      (centerbox :orientation "h" :hexpand true
+        (bar-left)
+        (bar-center)
+        (bar-right)))))
