@@ -2,6 +2,7 @@
 
 # Folder wallpaper
 DIR="$HOME/Pictures/Wallpaper"
+WALLPAPER_ENGINE=awww
 
 # Ambil semua file gambar (pakai array bash, lebih aman dari ls)
 shopt -s nullglob  # Kalau gak ada file, array kosong (gak error)
@@ -15,7 +16,7 @@ fi
 
 # Mode "first" → set wallpaper pertama
 if [[ $1 == "first" ]]; then
-    swww img "${FILES[0]}" \
+    $WALLPAPER_ENGINE img "${FILES[0]}" \
         --transition-type center \
         --transition-fps 60 \
         --transition-step 200
@@ -41,11 +42,11 @@ SELECTED=$(echo -e "$LIST" | rofi -theme "$HOME/.config/rofi/themes/wallpaper.ra
 # Set wallpaper
 CHOSEN="$DIR/$SELECTED"
 
-# Init swww kalau belum jalan
-swww query || swww init
+# Init $WALLPAPER_ENGINE kalau belum jalan
+$WALLPAPER_ENGINE query || $WALLPAPER_ENGINE init
 
 # Set wallpaper dengan transisi
-swww img "$CHOSEN" \
+$ENGINE img "$CHOSEN" \
     --transition-type center \
     --transition-fps 60 \
     --transition-step 200
