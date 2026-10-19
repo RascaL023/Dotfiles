@@ -29,6 +29,8 @@ a wallpaper or a hand-written palette.
 │   │       ├── template/   #   templates for the fixed palette
 │   │       └── config.toml #   renders the fixed palette
 │   └── docs/               # documentation (start at docs/README.md)
+├── hypr/                   # compositor config (Lua)
+│   └── docs/               #   backlog fitur 0.56 yang belum dipakai
 ├── nvim/ kitty/ foot/ alacritty/ …   # one directory per tool
 └── AGENTS.md               # rules for AI agents working in this repo
 ```
