@@ -1,56 +1,70 @@
-@import url("source.css");
-
-* {
-	background-image: none;
-	box-shadow: none;
-}
+@import url("/home/rascal/.myenv/theme/current/css/theme.css");
 
 window {
-	background-color: @window-bg;
-}
+    font-family: "Fira Code Medium";
+    font-size: 16pt;
+    color:  @fg-main; /* text */
+    background-color: @shadow-deep;
+
+} 
 
 button {
-    border-radius: 23px;
-    background-color: @button-bg;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 25%;
-    min-width: 200px;
-    min-height: 150px;
+    background-size: 30%;
+    background-color: transparent;
+    animation: gradient_f 20s ease-in infinite;
+    transition: all 0.3s ease-in;
+    box-shadow: 0 0 10px 2px transparent;
+    border-radius: 36px;
+    margin: 10px;
 }
 
-button:focus, button:active, button:hover {
-	background-color: @button-focus-bg;
-    outline-style: none;
-	border-color: @button-focus-border;
-}
+/* button:focus { */
+/*     box-shadow: none; */
+/*     background-size : 20%; */
+/* } */
 
-#lock, #logout, #suspend, #shutdown, #reboot, #hibernate {
-	margin: 10px;
-	padding: 5px;
-}
-
-/* ikon tetap sama */
-#lock {
-    background-image: image(url("/home/rascal/Pictures/Icons/Lock.png"), url("/home/rascal/Pictures/Icons/Lock.png"));
-}
-
-#logout {
-    background-image: image(url("/home/rascal/Pictures/Icons/Log-out.png"), url("/home/rascal/Pictures/Icons/Log-out.png"));
-}
-
-#suspend {
-    background-image: image(url("/home/rascal/Pictures/Icons/Sleep.png"), url("/home/rascal/Pictures/Icons/Sleep.png"));
-}
-
-#hibernate {
-    background-image: image(url("/home/rascal/Pictures/Icons/Pause.png"), url("/home/rascal/Pictures/Icons/Pause.png"));
+button:focus, button:hover {
+    background-size: 50%;
+    box-shadow: 0 0 10px 3px @shadow-deep;
+    background-color: @accent;
+    color: transparent;
+    transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.5s ease-in;
 }
 
 #shutdown {
-    background-image: image(url("/home/rascal/Pictures/Icons/Shutdown.png"), url("/home/rascal/Pictures/Icons/Shutdown.png"));
+    background-image: image(url("./icons/power.png"));
+}
+#shutdown:hover, #shutdown:focus {
+  background-image: image(url("./icons/power-hover.png"));
+}
+
+#logout {
+    background-image: image(url("./icons/logout.png"));
+
+}
+#logout:hover, #logout:focus {
+  background-image: image(url("./icons/logout-hover.png"));
 }
 
 #reboot {
-    background-image: image(url("/home/rascal/Pictures/Icons/Reboot.png"), url("/home/rascal/Pictures/Icons/Reboot.png"));
+    background-image: image(url("./icons/restart.png"));
+}
+#reboot:hover, #reboot:focus {
+  background-image: image(url("./icons/restart-hover.png"));
+}
+
+#lock {
+    background-image: image(url("./icons/lock.png"));
+}
+#lock:hover, #lock:focus {
+  background-image: image(url("./icons/lock-hover.png"));
+}
+
+#hibernate {
+    background-image: image(url("./icons/hibernate.png"));
+}
+#hibernate:hover, #hibernate:focus {
+  background-image: image(url("./icons/hibernate-hover.png"));
 }

@@ -1,36 +1,25 @@
 {
-    "label" : "lock",
-    "action" : "hyprlock",
-    "keybind" : "u"
-}
-
-{
-    "label" : "logout",
-    "action" : "loginctl terminate-user $USER",
-    "keybind" : "j"
-}
-
-{
     "label" : "shutdown",
     "action" : "systemctl poweroff",
-    "keybind" : "i"
+    "text" : "Shutdown",
+    "keybind" : "s"
 }
-
-
-{
-    "label" : "suspend",
-    "action" : "systemctl suspend",
-    "keybind" : "k"
-}
-
 {
     "label" : "reboot",
     "action" : "systemctl reboot",
-    "keybind" : "o"
+    "text" : "Reboot",
+    "keybind" : "r"
 }
-
 {
-    "label" : "hibernate",
+    "label" : "logout",
+    "action" : "loginctl kill-session $XDG_SESSION_ID",
+    "text" : "Logout",
+    "keybind" : "e"
+}
+{
+    "label" : "lock",
     "action" : "hyprlock",
+    "text" : "Lock",
     "keybind" : "l"
 }
+

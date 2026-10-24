@@ -1,7 +1,0 @@
-@import url("/home/rascal/.myenv/theme/current/css/theme.css");
-
-@define-color window-bg             @alpha-crust;
-
-@define-color button-bg             @tr-crust;
-@define-color button-focus-bg       @accent-primary;
-@define-color button-focus-border   @accent-primary;
