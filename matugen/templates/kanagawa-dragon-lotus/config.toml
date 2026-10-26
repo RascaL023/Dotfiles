@@ -50,4 +50,3 @@ output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/yazi/tmtheme.xml"
 [templates.foot]
 input_path  = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/foot.ini"
 output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/foot/theme.ini"
-post_hook   = "pkill -SIGUSR1 foot 2>/dev/null || true"
