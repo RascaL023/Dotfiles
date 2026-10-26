@@ -33,7 +33,10 @@
 --     hl.get_config() supaya tidak ada proses eksternal di dalam bind.
 --   * Tombol volume/brightness dulu memakai `code:122`/`code:232` (keycode
 --     mentah) + notify-send. Keycode mentah bermasalah di config Lua, jadi
---     sekarang memakai nama keysym XF86* dan OSD eww yang sama dengan niri.
+--     sekarang memakai nama keysym XF86*. Notifikasinya kembali ke
+--     notify-send (wpctl/brightnessctl, sama dengan niri) dan swaync yang
+--     menampilkannya; OSD eww tidak dipanggil dari hyprland lagi — skrip +
+--     widget OSD-nya ada di branch eww-temp, bukan di branch ini.
 --   * Alt+Tab dulu `hyprexpo:expo toggle`; plugin itu tidak ada di build ini,
 --     jadi diganti siklus jendela.
 --   * `{ mouse = true }` pada bind mouse: DIBUANG. Di 0.56.2 opsi itu belum
@@ -46,11 +49,34 @@
 local mod  = "SUPER"
 local home = os.getenv("HOME") or ""
 
+-- Animasi pemilih wallpaper (fade) ada di modul terpisah, lihat rofi.lua.
+local rofi = require("config.core.rofi")
+
 -- Pembungkus singkat supaya baris bind tetap terbaca.
 local function exec(cmd)      return hl.dsp.exec_cmd(cmd) end
 local function layout(msg)    return hl.dsp.layout(msg) end
 local function script(name)   return hl.dsp.exec_cmd(home .. "/.config/hypr/sources/scripts/" .. name) end
-local function osd(action)    return hl.dsp.exec_cmd(home .. "/.config/eww/scripts/osd.sh " .. action) end
+
+-- Volume & brightness: perintah yang sama dengan niri/conf/keybinds/system.kdl.
+-- `exec_cmd` sudah dijalankan lewat `sh -c`, jadi `&&` dan `$(...)` aman tanpa
+-- dibungkus sh -c lagi. Hint canonical-private-synchronous membuat swaync
+-- menimpa notifikasi sebelumnya, jadi angkanya terasa seperti OSD yang ikut
+-- naik/turun saat tombol ditahan.
+local function volume(step)
+    return exec("wpctl set-volume @DEFAULT_AUDIO_SINK@ " .. step .. " -l 1.0 && " ..
+        "notify-send -h string:x-canonical-private-synchronous:volume " ..
+        "\"Volume: $(pamixer --get-volume)%\" -t 800")
+end
+
+local function brightness(step)
+    return exec("brightnessctl -q set " .. step .. " && " ..
+        "notify-send -h string:x-canonical-private-synchronous:brightness " ..
+        "\"Brightness: $((100 * $(brightnessctl g) / $(brightnessctl m)))%\" -t 800")
+end
+
+local function mute(source, label)
+    return exec("wpctl set-mute " .. source .. " toggle && notify-send \"" .. label .. "\" -t 1000")
+end
 
 -- ------------------------------------------------------------------ layout --
 -- Bind di bawah ini banyak yang cuma berlaku di layout "scrolling". Untuk
@@ -299,15 +325,20 @@ hl.define_submap("resize", function()
 end)
 
 -- =========================================================
--- VOLUME / BRIGHTNESS (OSD eww, sama dengan niri)
+-- VOLUME / BRIGHTNESS (wpctl + brightnessctl + notify-send, sama dengan niri)
 -- =========================================================
+-- Teks dan opsi tiap perintah disamakan dengan niri/conf/keybinds/system.kdl
+-- supaya kedua sesi berperilaku sama. Niri memakai `;` untuk brightness, di
+-- sini `&&` supaya notifikasi hanya muncul kalau perintahnya berhasil.
+-- XF86AudioMicMute tidak ada di niri, jadi memakai bentuk XF86AudioMute dengan
+-- sumber microphone.
 
-hl.bind("XF86AudioRaiseVolume",  osd("vol-up"),      { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume",  osd("vol-down"),    { locked = true, repeating = true })
-hl.bind("XF86AudioMute",         osd("vol-mute"),    { locked = true, repeating = true })
-hl.bind("XF86AudioMicMute",      osd("mic-mute"),    { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessUp",   osd("bright-up"),   { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", osd("bright-down"), { locked = true, repeating = true })
+hl.bind("XF86AudioRaiseVolume",  volume("0.05+"), { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume",  volume("0.05-"), { locked = true, repeating = true })
+hl.bind("XF86AudioMute",         mute("@DEFAULT_AUDIO_SINK@",   "Volume toggled"), { locked = true, repeating = true })
+hl.bind("XF86AudioMicMute",      mute("@DEFAULT_AUDIO_SOURCE@", "Mic toggled"),    { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessUp",   brightness("+5%"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", brightness("5%-"), { locked = true, repeating = true })
 
 -- =========================================================
 -- MUSIC

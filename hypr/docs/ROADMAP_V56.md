@@ -143,12 +143,6 @@ hl.gesture({
 })
 ```
 
-**Prasyarat untuk versi repo ini:** `eww/scripts/osd.sh` sekarang hanya menerima
-6 aksi diskret (`vol-up`, `vol-down`, `vol-mute`, `mic-mute`, `bright-up`,
-`bright-down`) — lihat `case` di skrip itu. Supaya OSD ikut tampil untuk gesture
-kontinu, tambahkan satu aksi baru (mis. `vol-set <persen>` / `bright-set <persen>`)
-di grup `vol-*`/`bright-*` yang sudah ada, baru gesture memanggilnya.
-
 **Risiko:** butuh hardware trackpad untuk verifikasi; `hl.gesture` didaftarkan
 ulang tiap reload, jadi jangan menaruh gesture duplikat dengan arah/fingers sama.
 
@@ -352,7 +346,7 @@ local farben = hl.get_windows({ class = "firefox", mapped = true })
 | 8 | `hl.device` per-device (touchpad natural scroll, keyboard eksternal) | tinggi | kecil | ya (device) | `hyprland.lua` |
 | 9 | Rule mengambang dinamis lewat event `window.title` | sedang | sedang | tidak | `hypr/events.lua` |
 | 10 | Gesture `cursor_zoom` + swipe `close`/`float`/`fullscreen` | sedang | kecil | ya (trackpad) | `hyprland.lua` |
-| 11 | Gesture live untuk volume/brightness (+ aksi baru di `osd.sh`) | tinggi | sedang | ya (trackpad) | `hyprland.lua` + `eww/scripts/osd.sh` |
+| 11 | Gesture live untuk volume/brightness (+ notify-send sekali di akhir gesture) | tinggi | sedang | ya (trackpad) | `hyprland.lua` |
 | 12 | `render.cm_*`, tuning monitor (`reserved`, `icc`) | kecil | sedang | tidak | `hyprland.lua` |
 | 13 | Layout sendiri via `hl.layout.register` | tinggi (eksperimen) | besar | tidak | `hypr/layout.lua` |
 
@@ -364,12 +358,31 @@ local farben = hl.get_windows({ class = "firefox", mapped = true })
 - Pesan layout itu spesifik per layout. Untuk scrolling: `togglesplit`,
   `preselect`, `movetoroot`, `splitratio`, `swapsplit` **tidak ada** (itu milik
   dwindle). Daftar lengkap yang sah ada di komentar kepala
-  [`../keybinding.lua`](../keybinding.lua).
+  [`../config/core/keybinding.lua`](../config/core/keybinding.lua).
 - `move +col` di 0.56 = **menggulir tape satu kolom**, bukan memindahkan kolom.
   Memindahkan kolom = `swapcol l` / `swapcol r`. Di kolom terakhir `move +col`
   menghilangkan fokus jendela.
 - `dwindle.pseudotile` sudah tidak ada (pseudo kini properti per-jendela).
 - Pesan layout yang salah tidak muncul di `hyprctl configerrors`.
+- Layer rule **hanya** bisa `match = { namespace = … }`; tidak ada properti
+  match lain, dan `hyprctl layerrules` (subcommand untuk melihat/menghapus
+  rule) tidak ada. Semua varian rofi melaporkan namespace `rofi` — sudah diuji
+  `-dmenu`, `-name`, `-window-title`, `-normal-window`, dan `-theme
+  wallpaper.rasi`; `-normal-window` pun tetap layer, bukan jendela biasa.
+- Untuk gaya per-varian, **jangan** pakai `hl.on("layer.opened")` + membuat rule
+  di dalamnya: event-nya jalan (terbukti), tapi rule-nya terlambat — animasi
+  tetap memakai rule lama (diukur dari tangkapan frame: kurva tepi kotak masih
+  slide). Yang dipakai: rule bernama yang dibuat sekali dengan
+  `set_enabled(false)`, dinyalakan dari bind sebelum prosesnya diluncurkan,
+  lalu dimatikan lagi di event `layer.closed` (lihat
+  [`../config/core/rofi.lua`](../config/core/rofi.lua)). Nol proses tambahan,
+  dan rule yang menang = yang **terakhir dibuat**.
+- `hyprctl eval` tidak memvalidasi string style animasi: nama style yang salah
+  tetap dijawab `ok` dan diam-diam tidak berefek (jangan andalkan pesan error).
+- `hyprctl dispatch` di 0.56 menerjemahkan argumennya sebagai Lua, jadi
+  `hyprctl dispatch workspace 9` gagal dengan `')' expected near '9'`. Pakai
+  `hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = 9 }))'` (gagal ini
+  sunyi kalau output-nya dibuang ke `/dev/null`, sudah pernah menipu saat uji).
 
 ## 15. Batasan pengujian
 
