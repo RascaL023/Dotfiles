@@ -1,0 +1,118 @@
+############################
+## Generated with Matugen ##
+############################
+# Manual edit is not recomended,
+# Except for testing.
+
+[mgr]
+cwd             = { fg = "{{ accent.primary }}", bold = true }
+hovered         = { bg = "{{ surface.high }}" }
+preview_hovered = { fg = "{{ accent.primary }}", underline = true }
+find_keyword    = { fg = "{{ status.warning }}", bold = true, italic = true, underline = true }
+find_position   = { fg = "{{ text.muted }}", bold = true, italic = true }
+symlink_target  = { fg = "{{ accent.secondary }}", italic = true }
+
+marker_copied   = { fg = "{{ accent.secondary }}", bg = "{{ surface.high }}" }
+marker_cut      = { fg = "{{ status.error }}", bg = "{{ surface.high }}" }
+marker_marked   = { fg = "{{ status.warning }}", bg = "{{ surface.high }}" }
+marker_selected = { fg = "{{ accent.primary }}", bg = "{{ surface.high }}" }
+
+count_copied    = { fg = "{{ accent.on_tertiary }}", bg = "{{ accent.secondary }}" }
+count_cut       = { fg = "{{ surface.lowest }}", bg = "{{ status.error }}" }
+count_selected  = { fg = "{{ accent.on_secondary }}", bg = "{{ status.warning }}" }
+
+border_style    = { fg = "{{ border.medium }}" }
+
+[tabs]
+active   = { fg = "{{ accent.on_primary }}", bg = "{{ accent.primary }}", bold = true }
+inactive = { fg = "{{ text.secondary }}", bg = "{{ surface.low }}" }
+
+[mode]
+normal_main = { fg = "{{ accent.on_primary }}", bg = "{{ accent.primary }}", bold = true }
+normal_alt  = { fg = "{{ accent.primary }}", bg = "{{ surface.high }}" }
+
+select_main = { fg = "{{ accent.on_tertiary }}", bg = "{{ accent.secondary }}", bold = true }
+select_alt  = { fg = "{{ accent.secondary }}", bg = "{{ surface.high }}" }
+
+unset_main  = { fg = "{{ accent.on_secondary }}", bg = "{{ status.warning }}", bold = true }
+unset_alt   = { fg = "{{ status.warning }}", bg = "{{ surface.high }}" }
+
+[status]
+overall         = { fg = "{{ text.secondary }}", bg = "{{ surface.lowest }}" }
+
+perm_sep        = { fg = "{{ border.medium }}" }
+perm_type       = { fg = "{{ accent.secondary }}" }
+perm_read       = { fg = "{{ status.warning }}" }
+perm_write      = { fg = "{{ status.error }}" }
+perm_exec       = { fg = "{{ accent.primary }}" }
+
+progress_normal = { fg = "{{ accent.primary }}", bg = "{{ surface.high }}" }
+progress_error  = { fg = "{{ status.error }}", bg = "{{ surface.high }}" }
+
+[which]
+mask            = { bg = "{{ surface.lowest }}" }
+cand            = { fg = "{{ accent.primary }}" }
+rest            = { fg = "{{ text.secondary }}" }
+desc            = { fg = "{{ text.muted }}" }
+separator_style = { fg = "{{ border.medium }}" }
+
+[confirm]
+border  = { fg = "{{ border.medium }}" }
+title   = { fg = "{{ accent.primary }}", bold = true }
+content = {}
+list    = {}
+btn_yes = { fg = "{{ accent.on_primary }}", bg = "{{ accent.primary }}" }
+btn_no  = { fg = "{{ foreground }}", bg = "{{ surface.high }}" }
+
+[spot]
+border   = { fg = "{{ border.medium }}" }
+title    = { fg = "{{ accent.primary }}", bold = true }
+tbl_col  = { fg = "{{ accent.secondary }}" }
+tbl_cell = { fg = "{{ foreground }}", reversed = true }
+
+[notify]
+title_info  = { fg = "{{ accent.secondary }}" }
+title_warn  = { fg = "{{ status.warning }}" }
+title_error = { fg = "{{ status.error }}" }
+
+[pick]
+border   = { fg = "{{ border.medium }}" }
+active   = { fg = "{{ accent.on_primary }}", bg = "{{ accent.primary }}", bold = true }
+inactive = {}
+
+[input]
+border   = { fg = "{{ border.medium }}" }
+title    = { fg = "{{ accent.primary }}" }
+value    = { fg = "{{ foreground }}" }
+selected = { reversed = true }
+
+[cmp]
+border   = { fg = "{{ border.medium }}" }
+active   = { fg = "{{ accent.on_primary }}", bg = "{{ accent.primary }}", bold = true }
+inactive = {}
+
+[tasks]
+border  = { fg = "{{ border.medium }}" }
+title   = { fg = "{{ accent.primary }}" }
+hovered = { fg = "{{ accent.secondary }}", bold = true }
+
+[help]
+on      = { fg = "{{ accent.primary }}" }
+run     = { fg = "{{ accent.secondary }}" }
+desc    = { fg = "{{ text.secondary }}" }
+hovered = { fg = "{{ accent.on_primary }}", bg = "{{ accent.primary }}", bold = true }
+footer  = { fg = "{{ foreground }}", bg = "{{ surface.highest }}" }
+
+[filetype]
+rules = [
+	{ mime = "image/*", fg = "{{ accent.secondary }}" },
+	{ mime = "{audio,video}/*", fg = "{{ status.warning }}" },
+	{ mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", fg = "{{ text.muted }}" },
+	{ mime = "application/{pdf,doc,rtf}", fg = "{{ text.secondary }}" },
+	{ mime = "vfs/{absent,stale}", fg = "{{ text.muted }}" },
+	{ name = "*", is = "orphan", bg = "{{ status.error }}" },
+	{ name = "*", is = "exec", fg = "{{ accent.primary }}" },
+	{ name = "*", is = "dummy", bg = "{{ status.error }}" },
+	{ name = "*/", is = "dummy", bg = "{{ status.error }}" },
+	{ name = "*/", fg = "{{ accent.primary }}" },
+]

@@ -36,8 +36,17 @@ output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/kitty/theme.co
 post_hook       = "pkill -SIGUSR1 kitty"
 
 [templates.rasi]
-input_path      = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/source.rasi"
-output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/rasi/theme.rasi"
+input_path = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/source.rasi"
+output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/rasi/theme.rasi"
+
+[templates.yazi]
+input_path = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/yazi-flavor.toml"
+output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/yazi/flavor.toml"
+
+[templates.yazi-tmtheme]
+input_path = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/yazi-tmtheme.xml"
+output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/yazi/tmtheme.xml"
+
 [templates.foot]
 input_path  = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/foot.ini"
 output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/foot/theme.ini"

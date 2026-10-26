@@ -43,6 +43,15 @@ output_path     = "~/.myenv/theme/current/nvim/theme.lua"
 input_path      = "~/.config/matugen/templates/general/herdr.toml"
 output_path     = "~/.myenv/theme/generated/live.bak/herdr/config.toml"
 post_hook       = "herdr server reload-config"
+
+[templates.yazi]
+input_path      = "~/.config/matugen/templates/general/yazi-flavor.toml"
+output_path     = "~/.myenv/theme/generated/live.bak/yazi/flavor.toml"
+
+[templates.yazi-tmtheme]
+input_path      = "~/.config/matugen/templates/general/yazi-tmtheme.xml"
+output_path     = "~/.myenv/theme/generated/live.bak/yazi/tmtheme.xml"
+
 [templates.foot]
 input_path      = "~/.config/matugen/templates/general/foot.ini"
 output_path     = "~/.myenv/theme/generated/live.bak/foot/theme.ini"
