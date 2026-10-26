@@ -1,110 +1,42 @@
 # Blueprint JSON — `kanagawa-dragon-lotus`
 
-> Indeks dokumen: [`matugen/docs/README.md`](../../../docs/README.md) ·
-> terkait: [`NVIM_MAPPING.md`](../../../docs/NVIM_MAPPING.md),
-> [`MATUGEN_SKILLS.md`](../../../docs/MATUGEN_SKILLS.md)
+> Indeks dokumen: [`matugen/docs/README.md`](../../../docs/README.md) · terkait: [`NVIM_MAPPING.md`](../../../docs/NVIM_MAPPING.md), [`MATUGEN_SKILLS.md`](../../../docs/MATUGEN_SKILLS.md)
 
-Dokumen ini menjelaskan **isi `kanagawa-dark.json` dan `kanagawa-light.json`**:
-apa arti setiap key, nilainya dipakai untuk apa, dan di file mana nilainya
-mendarat. Ditulis supaya bisa dibaca tanpa hafal matugen.
+Dokumen ini menjelaskan **isi `kanagawa-dark.json` dan `kanagawa-light.json`**: apa arti setiap key, nilainya dipakai untuk apa, dan di file mana nilainya mendarat. Ditulis supaya bisa dibaca tanpa hafal matugen.
 
 ---
 
 ## 1. Apa itu "blueprint"?
 
-Blueprint = **palet warna yang ditulis tangan**, bukan hasil matugen. Ini
-kebalikannya dari alur wallpaper:
+Blueprint = **palet warna yang ditulis tangan**, bukan hasil matugen. Ini kebalikannya dari alur wallpaper:
 
 | | Alur wallpaper (`general`) | Blueprint (`kanagawa-dragon-lotus`) |
 |---|---|---|
 | Sumber warna | gambar wallpaper | JSON yang ditulis manusia |
-| Warna ditentukan oleh | matugen (Material You) | kamu, di editor |
+| Yang menentukan warna | matugen (Material You) | kamu, di editor |
 | Perintah | `matugen image <gambar> -c matugen/config.toml` | `matugen json <blueprint.json> -c .../config.toml` |
 | Kosakata template | `{{ colors.<role>.default.hex }}` | `{{ accent.primary }}`, `{{ syntax.keyword }}`, dst. |
 | Output | `~/.myenv/theme/generated/live.bak/<tool>/…` | `~/.myenv/theme/generated/kanagawa-dragon-lotus/<tool>/…` |
 
-Karena warnanya sudah pasti, blueprint dipakai untuk tema **bernama** yang tidak
-mau berubah-ubah tiap ganti wallpaper (di sini: Kanagawa).
-
-### Dua berkas = dua varian
-
-| Berkas | `meta.variant` | Palet asal |
-|---|---|---|
-| `kanagawa-dark.json` | `dark` | Kanagawa **Dragon** |
-| `kanagawa-light.json` | `light` | Kanagawa **Lotus** |
-
-Berbeda dari palet lama yang menaruh `dark` **dan** `light` dalam satu berkas,
-sekarang **satu berkas = satu varian**. Template tidak memilih varian; kamu
-memilihnya di perintah render (mana JSON yang dikasih).
+Karena warnanya sudah ditetapkan di sini, alur `matugen json …` cukup **mengirim** nilainya ke template, bukan menemukan warnanya.
 
 ---
 
 ## 2. Alur render
 
-```
-blueprint/kanagawa-dark.json
-        │  (matugen json …)
-        ▼
-template/nvim.lua          ← "{{ accent.primary }}"  →  "#8ba4b0"
-template/alacritty.toml
-template/gtk3.css
-template/herdr.toml
-template/kitty.conf
-template/lazygit.yml
-template/source.rasi
-template/source.scss
-        │
-        ▼
-~/.myenv/theme/generated/kanagawa-dragon-lotus/<tool>/…
-        │  (theme-switcher.sh — di luar repo ini)
-        ▼
-~/.myenv/theme/current  →  dipakai semua aplikasi
-```
+1. **Blueprint → matugen context:** `matugen json kanagawa-dark.json` memuat isi JSON ini ke dalam konteks render.
+2. **Template → file keluaran:** setiap `[templates.<tool>]` di `config.toml` ini mengambil file template dan mengisi placeholder-nya.
+3. **Post-hook:** bila ada, dijalankan setelah file tertulis (mis. `pkill -SIGUSR1 kitty`, `herdr server reload-config`). Foot tidak punya post-hook reload: foot tidak menyediakan sinyal reload, jadi warna barunya muncul di jendela foot berikutnya.
+4. **Konsumen:** file yang dihasilkan lalu di-*include* oleh alat bersangkutan (atau disalin/disinlink oleh alur tema di pihak lain).
 
-Isi JSON di-ekspos matugen **di akar data template**. Jadi `{{ accent.primary }}`
-membaca key `accent.primary` dari JSON ini secara langsung — tanpa lapisan
-`colors.<role>.<scheme>` seperti alur wallpaper.
-
-### Perintah
-
-```bash
-# render tema penuh (output ke ~/.myenv/theme/generated/…)
-matugen json ~/.dotfile/matugen/templates/kanagawa-dragon-lotus/blueprint/kanagawa-dark.json \
-  -c ~/.dotfile/matugen/templates/kanagawa-dragon-lotus/config.toml
-
-# varian terang
-matugen json ~/.dotfile/matugen/templates/kanagawa-dragon-lotus/blueprint/kanagawa-light.json \
-  -c ~/.dotfile/matugen/templates/kanagawa-dragon-lotus/config.toml
-```
-
-⚠️ **Jangan** tambahkan template blueprint ini ke `matugen/config.toml`
-(config wallpaper). Setiap `matugen image` akan gagal karena `accent.*` /
-`syntax.*` tidak ada di palet Material You.
-
-### Uji dulu tanpa menyentuh `~/.myenv`
-
-```bash
-mkdir -p /tmp/bpcheck/out
-cat > /tmp/bpcheck/config.toml <<EOF
-[config]
-
-[templates.t]
-input_path  = "$HOME/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/nvim.lua"
-output_path = "/tmp/bpcheck/out/theme.lua"
-EOF
-
-matugen json "$HOME/.dotfile/matugen/templates/kanagawa-dragon-lotus/blueprint/kanagawa-dark.json" \
-  -c /tmp/bpcheck/config.toml
-grep -nE '\{\{|\}\}|<\*|\*>' /tmp/bpcheck/out/theme.lua   # harus tidak mencetak apa pun
-luac -p /tmp/bpcheck/out/theme.lua                         # template Lua harus lolos parse
-```
+Catatan teknis penting:
+- Template **tidak boleh** mengandalkan key yang tidak ada di blueprint. Jika sebuah key hilang, placeholder-nya tetap tertulis apa adanya atau render gagal — bukan warna default.
+- Blueprint ini **tidak menyimpan** turunan `rgba()` atau alpha sendiri. Kalau template butuh alpha, hitungnya dilakukan di template (mis. `{{ effect.scrim | to_color | set_alpha: 0.45 | format: rgba }}`).
+- Tool yang jalan dengan alur wallpaper (`general`) dan blueprint (`kanagawa-dragon-lotus`) **berbagi kosakata template yang sama**, tapi membaca dari blueprint yang berbeda.
 
 ---
 
 ## 3. Referensi key
-
-Kolom **Dipakai di** = template di `template/` yang membaca key tersebut
-(diverifikasi dengan menyalin daftar placeholder semua template).
 
 ### 3.1 `meta` — kartu identitas
 
@@ -115,24 +47,21 @@ Kolom **Dipakai di** = template di `template/` yang membaca key tersebut
 | `meta.palette` | `rebelot/kanagawa.nvim#dragon` | Sumber palet | —ⁱ |
 | `meta.origin` | `Kanagawa Dark Dragon GTK CSS + kanagawa.nvim palette` | Asal-usul nilai | —ⁱ |
 
-ⁱ **Tidak ada template yang membacanya.** Ini metadata untuk manusia: penanda
-varian dan jejak asal warna. Aman diubah, tidak berpengaruh ke hasil render.
+ⁱ **Tidak ada template yang membacanya.** Ini metadata untuk manusia: penanda varian dan jejak asal warna. Aman diubah, tidak berpengaruh ke hasil render.
 
 ### 3.2 Akar: warna dasar terminal
 
 | Key | Contoh (dark) | Arti | Dipakai di |
 |---|---|---|---|
-| `background` | `#181616` | Latar utama | `alacritty.toml`, `kitty.conf`, `nvim.lua`, `source.scss` |
-| `foreground` | `#c5c9c5` | Teks utama | sama seperti `background` |
+| `background` | `#181616` | Latar utama | `alacritty.toml`, `kitty.conf`, `nvim.lua`, `source.scss`, `foot.ini` |
+| `foreground` | `#c5c9c5` | Teks utama | `alacritty.toml`, `kitty.conf`, `nvim.lua`, `source.scss`, `foot.ini`, `yazi-flavor.toml`, `yazi-tmtheme.xml` |
 | `cursor` | `#C8C093` | Warna kursor terminal | `alacritty.toml`, `kitty.conf`, `nvim.lua` |
 
-Tiga key ini sengaja diduplikasi di akar supaya template yang cuma butuh "latar
-dan teks" tidak perlu tahu soal `surface.*` / `text.*`.
+Tiga key ini sengaja diduplikasi di akar supaya template yang cuma butuh "latar dan teks" tidak perlu tahu soal `surface.*` / `text.*`.
 
 ### 3.3 `colors[]` dan `color0`–`color15` — palet ANSI
 
-`colors` = array 16 warna **dalam urutan ANSI** (indeks 0 = hitam, 15 = putih
-terang). `color0`…`color15` adalah nilai yang sama, tapi diberi nama satu-satu.
+`colors` = array 16 warna **dalam urutan ANSI** (indeks 0 = hitam, 15 = putih terang). `color0`…`color15` adalah nilai yang sama, tapi diberi nama satu-satu.
 
 | Indeks | Key | Warna | Dark | Light |
 |---|---|---|---|---|
@@ -153,23 +82,20 @@ terang). `color0`…`color15` adalah nilai yang sama, tapi diberi nama satu-satu
 | 14 | `color14` | cyan terang | `#7AA89F` | `#5e857a` |
 | 15 | `color15` | putih terang | `#c5c9c5` | `#43436c` |
 
-- Dipakai di: `alacritty.toml`, `kitty.conf` & `source.scss` (16 key eksplisit),
-  `nvim.lua` (lewat loop `<* for c in colors *>`).
-- **Kenapa dobel?** Template berbasis loop butuh array; template yang menyebut
-  slot satu per satu (alacritty) butuh nama key. Keduanya harus tetap sinkron.
-- Array **tidak bisa diindeks** (`colors[0]` = error parse), hanya bisa
-  di-loop. Karena itu `color0`…`color15` tetap ada.
+- Dipakai di: `alacritty.toml`, `kitty.conf` & `source.scss` (16 key eksplisit), `nvim.lua` (lewat loop `<* for c in colors *>`), **`foot.ini`** (lewat `regular0`–`regular7` dan `bright0`–`bright7`).
+- **Kenapa dobel?** Template berbasis loop butuh array; template yang menyebut slot satu per satu (alacritty) butuh nama key. Keduanya harus tetap sinkron.
+- Array **tidak bisa diindeks** (`colors[0]` = error parse), hanya bisa di-loop. Karena itu `color0`…`color15` tetap ada.
 
 ### 3.4 `accent.*` — warna aksen & seleksi
 
 | Key | Arti | Dipakai di |
 |---|---|---|
 | `accent.primary` | Aksen utama (fokus, tombol, border aktif) | semua template |
-| `accent.secondary` | Aksen kedua | `alacritty.toml`, `gtk3.css`, `herdr.toml`, `source.scss` |
+| `accent.secondary` | Aksen kedua | `alacritty.toml`, `gtk3.css`, `herdr.toml`, `source.scss`, `yazi-flavor.toml` |
 | `accent.tertiary` | Aksen ketiga | `gtk3.css` |
-| `accent.on_primary` | Teks **di atas** `accent.primary` | `alacritty.toml`, `gtk3.css`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss` |
-| `accent.on_secondary` | Teks di atas `accent.secondary` | `alacritty.toml`, `source.scss` |
-| `accent.on_tertiary` | Teks di atas `accent.tertiary` | `nvim.lua` |
+| `accent.on_primary` | Teks **di atas** `accent.primary` | `alacritty.toml`, `gtk3.css`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss`, `yazi-flavor.toml` |
+| `accent.on_secondary` | Teks di atas `accent.secondary` | `alacritty.toml`, `source.scss`, `yazi-flavor.toml` |
+| `accent.on_tertiary` | Teks di atas `accent.tertiary` | `nvim.lua`, `yazi-flavor.toml` |
 | `accent.primary_container` | Latar "berisi" aksen (badge, item terpilih) | `gtk3.css`, `nvim.lua` |
 | `accent.on_primary_container` | Teks di atas `primary_container` | `gtk3.css`, `nvim.lua` |
 | `accent.secondary_container` | Latar berisi aksen kedua | `nvim.lua` |
@@ -177,16 +103,15 @@ terang). `color0`…`color15` adalah nilai yang sama, tapi diberi nama satu-satu
 | `accent.tertiary_container` | Latar berisi aksen ketiga | `nvim.lua` |
 | `accent.on_tertiary_container` | Teks di atasnya | `nvim.lua` |
 
-Pola `X` + `on_X` selalu berpasangan: `X` untuk latar, `on_X` untuk teks di
-atasnya. Ini yang menjaga kontras tetap terbaca.
+Pola `X` + `on_X` selalu berpasangan: `X` untuk latar, `on_X` untuk teks di atasnya. Ini yang menjaga kontras tetap terbaca.
 
 ### 3.5 `text.*` — teks & tautan
 
 | Key | Arti | Dipakai di |
 |---|---|---|
 | `text.primary` | Teks utama | `gtk3.css`, `herdr.toml`, `kitty.conf`, `nvim.lua`, `source.rasi` |
-| `text.secondary` | Teks kedua (judul, aksen teks) | `gtk3.css`, `herdr.toml`, `kitty.conf`, `nvim.lua`, `source.scss` |
-| `text.muted` | Teks redup | `gtk3.css`, `nvim.lua`, `source.scss` |
+| `text.secondary` | Teks kedua (judul, aksen teks) | `gtk3.css`, `herdr.toml`, `kitty.conf`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
+| `text.muted` | Teks redup | `gtk3.css`, `nvim.lua`, `source.scss`, `yazi-flavor.toml`, `yazi-tmtheme.xml` |
 | `text.subtle` | Lebih redup lagi (→ `extra.fg.dim` nvim) | `gtk3.css`, `nvim.lua`, `source.scss` |
 | `text.faint` | Paling redup (→ `extra.fg.dim_muted` nvim) | sama seperti `text.subtle` |
 | `text.disabled` | Teks nonaktif | sama seperti `text.subtle` |
@@ -198,12 +123,12 @@ atasnya. Ini yang menjaga kontras tetap terbaca.
 
 | Key | Arti | Padanan umum | Dipakai di |
 |---|---|---|---|
-| `surface.lowest` | Paling bawah/gelap | `mantle` | `gtk3.css`, `nvim.lua`, `source.scss` |
-| `surface.low` | Satu tingkat di atasnya | `crust` | `gtk3.css`, `kitty.conf`, `nvim.lua`, `source.rasi`, `source.scss` |
-| `surface.base` | Latar utama (window) | `base` | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.rasi`, `source.scss` |
-| `surface.medium` | Panel | `surface` | `gtk3.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss` |
-| `surface.high` | Panel menonjol / statusline | `surface_raised` | `gtk3.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.scss` |
-| `surface.highest` | Paling menonjol / gutter | `surface_overlay` | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss` |
+| `surface.lowest` | Paling bawah/gelap | `mantle` | `gtk3.css`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
+| `surface.low` | Satu tingkat di atasnya | `crust` | `gtk3.css`, `kitty.conf`, `nvim.lua`, `source.rasi`, `source.scss`, `yazi-flavor.toml` |
+| `surface.base` | Latar utama (window) | `base` | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.rasi`, `source.scss`, `yazi-tmtheme.xml` |
+| `surface.medium` | Panel | `surface` | `gtk3.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss`, `yazi-tmtheme.xml` |
+| `surface.high` | Panel menonjol / statusline | `surface_raised` | `gtk3.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml`, `yazi-tmtheme.xml` |
+| `surface.highest` | Paling menonjol / gutter | `surface_overlay` | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
 | `surface.track` | Jalur progres (disk usage) | — | `gtk3.css`, `nvim.lua`, `source.scss` |
 | `surface.inverse` | Permukaan terbalik (tooltip) | — | —ⁱ |
 
@@ -212,7 +137,7 @@ atasnya. Ini yang menjaga kontras tetap terbaca.
 | Key | Arti | Dipakai di |
 |---|---|---|
 | `border.default` | Garis/tepi biasa | `gtk3.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss` |
-| `border.medium` | Garis pemisah (split) | sama seperti `border.default` |
+| `border.medium` | Garis pemisah (split) | `gtk3.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml`, `yazi-tmtheme.xml` |
 | `border.active` | Garis saat fokus | `gtk3.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss` |
 
 ### 3.8 `status.*`
@@ -221,8 +146,8 @@ atasnya. Ini yang menjaga kontras tetap terbaca.
 |---|---|---|
 | `status.info` | Informasi | `gtk3.css`, `nvim.lua`, `source.scss` |
 | `status.success` | Sukses (git add, dsb.) | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss` |
-| `status.warning` | Peringatan | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss` |
-| `status.error` | Galat | `gtk3.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss` |
+| `status.warning` | Peringatan | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
+| `status.error` | Galat | `gtk3.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
 | `status.critical` | Galat berat | `gtk3.css`, `nvim.lua`, `source.scss` |
 | `status.warning_container` | Latar peringatan | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss` |
 | `status.error_container` | Latar galat | —ⁱ |
@@ -234,16 +159,11 @@ atasnya. Ini yang menjaga kontras tetap terbaca.
 | `effect.shadow` | `#0d0c0c` | Warna bayangan jendela/menu | —ⁱ |
 | `effect.scrim` | `#0d0c0c` | Lapisan gelap di belakang dialog | `source.rasi` (`bg-transparent-col`, alpha 0.45) |
 
-`effect.shadow` masih disediakan untuk tool yang butuh (mis.
-compositor/hyprlock bila nanti ditambahkan). `effect.scrim` dipakai oleh picker
-wallpaper rofi (`wallpaper.rasi`) sebagai lapisan gelap layar penuh.
+`effect.shadow` masih disediakan untuk tool yang butuh (mis. compositor/hyprlock bila nanti ditambahkan). `effect.scrim` dipakai oleh picker wallpaper rofi (`wallpaper.rasi`) sebagai lapisan gelap layar penuh.
 
 ### 3.10 `syntax.*` — kosakata kode (27 token)
 
-Nama token sengaja **universal** (bukan nama plugin) supaya semua tool
-memetakan dari kosakata yang sama. Semua 27 key di bawah dipakai oleh
-`nvim.lua`; `herdr.toml` membaca `string` & `type`, sementara `lazygit.yml`
-membaca `keyword`.
+Nama token sengaja **universal** (bukan nama plugin) supaya semua tool memetakan dari kosakata yang sama. Semua 27 key di bawah dipakai oleh `nvim.lua`; `herdr.toml` membaca `string` & `type`, `lazygit.yml` membaca `keyword`, dan `yazi-tmtheme.xml` membaca 26 key (semua kecuali `statement`).
 
 | Kelompok | Key |
 |---|---|
@@ -254,13 +174,9 @@ membaca `keyword`.
 | Tipe & nama | `type`, `class`, `variable`, `parameter`, `property`, `identifier` |
 | Lain-lain | `operator`, `punctuation`, `special`, `exception`, `builtin_variable`, `tag`, `attribute` |
 
-Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu),
-`function` `#7FB4CA` (biru), `string` `#87A987` (hijau), `constant` `#E6C384`
-(kuning).
+Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu), `function` `#7FB4CA` (biru), `string` `#87A987` (hijau), `constant` `#E6C384` (kuning).
 
-> Di `template/nvim.lua`, key yang namanya bentrok dengan kata kunci Lua harus
-> ditulis berkurung: `["function"]` dan `["return"]`. Di JSON tidak perlu apa-apa
-> — JSON tidak punya kata kunci.
+> Di `template/nvim.lua`, key yang namanya bentrok dengan kata kunci Lua harus ditulis berkurung: `["function"]` dan `["return"]`. Di JSON tidak perlu apa-apa — JSON tidak punya kata kunci.
 
 ---
 
@@ -280,28 +196,19 @@ Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu),
 | Palet terminal mentah | `color0` … `color15` |
 | Bayangan & backdrop dialog | `effect.shadow`, `effect.scrim` |
 
+Tabel ini tidak lengkap untuk semua tool (ada tool yang memakai kombinasi sendiri), tapi mewakili pola umum yang konsisten di blueprint ini.
+
 ---
 
 ## 5. Aturan & jebakan
 
-1. **Satu berkas satu varian.** Kalau mengubah dark, tanyakan apakah light ikut
-   berubah — dua berkas ini tidak saling menyinkron otomatis.
-2. **Jangan mengubah nama key** tanpa mengubah template; key yang hilang membuat
-   placeholder tidak terisi (atau render gagal), bukan sekadar warna default.
-3. **`colors[]` dan `color0`…`color15` harus sama isinya.** `alacritty.toml` dan
-   `source.scss` membaca yang bernama; `nvim.lua` membaca array-nya.
-4. **Kapitalisasi hex tidak konsisten** di berkas ini (`#c5c9c5` vs `#C8C093`) —
-   tidak berpengaruh ke hasil render (nilai diteruskan apa adanya), tapi jangan
-   jadikan pembanding string.
-5. **Nilai = string hex polos.** Semua turunan (alpha, dipermudah/digelapkan)
-   dikerjakan template lewat filter matugen, mis.
-   `{{ accent.primary | to_color | set_alpha: 0.2 | format: rgba }}` di
-   `gtk3.css`. Blueprint tidak menyimpan `rgba()` sendiri.
-6. **Key yang belum dipakai bukan sampah.** `effect.shadow`,
-   `surface.inverse`, `text.on_inverse`, `status.error_container`, dan `meta.*`
-   adalah slot siap pakai untuk template berikutnya.
-7. **Menambah tool baru:** buat `template/<tool>.<ext>` lalu daftarkan di
-   `config.toml` folder ini:
+1. **Satu berkas satu varian.** Kalau mengubah dark, tanyakan apakah light ikut berubah — dua berkas ini tidak saling menyinkron otomatis.
+2. **Jangan mengubah nama key** tanpa mengubah template; key yang hilang membuat placeholder tidak terisi (atau render gagal), bukan sekadar warna default.
+3. **Sinkronkan `colors[]` dengan `color0`…`color15`.** Kalau salah satu berubah, ubah yang lain juga. Cara termudah: ubah `colors[]`, lalu salin ulang ke `color0`…`color15` berurutan.
+4. **Alpha / `rgba()` tidak boleh jadi sisa di blueprint.** Canvas render matugen pada template, bukan pada JSON ini.
+5. **Portabilitas key masih terbatas.** `colors.surface.default.hex` adalah bentuk yang dipakai alur wallpaper (`general`). Blueprint ini **tidak punya** bentuk grouping itu — gunakan `surface.base`, `text.primary`, dst. secara langsung.
+6. **Key yang belum dipakai bukan sampah.** `effect.shadow`, `surface.inverse`, `text.on_inverse`, `status.error_container`, dan `meta.*` adalah slot siap pakai untuk template berikutnya.
+7. **Menambah tool baru:** buat `template/<tool>.<ext>` lalu daftarkan di `config.toml` folder ini:
    ```toml
    [config]
 
@@ -309,10 +216,8 @@ Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu),
    input_path  = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/tool.conf"
    output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/tool/theme.conf"
    ```
-   Config matugen **wajib** diawali `[config]`. Selalu uji ke `/tmp` dulu
-   (bagian 2), baru render ke jalur sebenarnya.
-8. **Kontras tetap tanggung jawabmu.** Blueprint tidak mengoreksi kontras;
-   pastikan pasangan `X` / `on_X` benar-benar terbaca.
+   Config matugen **wajib** diawali `[config]`. Selalu uji ke `/tmp` dulu (bagian 2), baru render ke jalur sebenarnya.
+8. **Kontras tetap tanggung jawabmu.** Blueprint tidak mengoreksi kontras; pastikan pasangan `X` / `on_X` benar-benar terbaca.
 
 ---
 
@@ -324,3 +229,42 @@ Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu),
 - [ ] Tidak ada sisa `{{ }}`, `<* *>` di hasil render.
 - [ ] `luac -p` untuk template Lua.
 - [ ] Baru setelah itu: render ke `~/.myenv/theme/generated/kanagawa-dragon-lotus/`.
+
+---
+
+## 7. Catatan khusus Foot
+
+Foot memuat hasil blueprint lewat `include`, pola yang sama dengan `kitty/kitty.conf` (`include ~/.myenv/theme/current/kitty/theme.conf`).
+Jalurnya:
+
+- Blueprint `kanagawa-dark.json`
+- → template `template/foot.ini`
+- → output `generated/kanagawa-dragon-lotus/foot/theme.ini`
+- → dibaca lewat tema aktif: `~/.myenv/theme/current/foot/theme.ini`
+- → pemuat repo: `foot/foot.ini` (`include=.../current/foot/theme.ini`)
+
+Alur wallpaper punya pasangan yang sama: `general/foot.ini` → `generated/live.bak/foot/theme.ini`. Karena pemuatnya menunjuk ke `current`, foot ikut tema yang sedang aktif, bukan terpaku pada folder kanagawa.
+
+Pola render Foot sederhana:
+- `foreground`, `background` → `[colors]` utama.
+- `color0`…`color7` → `regular0`…`regular7`.
+- `color8`…`color15` → `bright0`…`bright7`.
+
+Format yang sudah diverifikasi pada foot 1.22.3 (`foot --check-config -c ~/.dotfile/foot/foot.ini` → exit 0): section `[colors]` (bukan `[colors-dark]`/`[colors-light]`) dan nilai `RRGGBB` tanpa `#` (`hex_stripped`) diterima apa adanya.
+
+Foot tidak punya sinyal reload: jangan memberi post-hook `pkill -SIGUSR1 foot` — SIGUSR1 tidak ditangani foot, jadi prosesnya berhenti, bukan me-reload. Warna baru muncul di jendela foot berikutnya.
+
+Jangan menambah layout `[group]` atau key non-standar ke template Foot; Foot memuat ini sebagai konfigurasi `foot.ini`, jadi strukturnya harus tetap merupakan file `foot.ini` yang sah.
+
+Blueprint `cursor` belum dipakai template Foot: foot menyimpan warna kursor di section `[cursor]` (`[cursor] color=fg bg`), bukan di `[colors]`. Kalau nanti dipetakan, tempatnya di template Foot, bukan di blueprint secara langsung — kecuali template memang memetakannya sendiri.
+
+---
+
+## 8. Cara membaca tabel warna di sini
+
+Nilai di tabel di atas adalah **contoh**, bukan rumus. Pada dasarnya:
+- Dark dan light punya nilai berbeda untuk key yang sama.
+- Nomor indeks `color0`…`color15` **harus** sesuai dengan urutan ANSI.
+- Warna di tabel tidak menjamin kontras; lihat aturan & jebakan di bagian 5.
+
+Jika kamu ragu apakah sebuah key masih dipakai, cari nama key-nya di `template/` yang bersangkutan. Kalau tidak ada di template mana pun, berarti belum dipakai — dan aman untuk dipertahankan sebagai slot masa depan.
