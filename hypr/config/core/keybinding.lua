@@ -101,7 +101,9 @@ hl.bind(mod .. " + O",              script("waybar-toggle.sh"))
 hl.bind(mod .. " + ESCAPE",         script("wlogout-toggle.sh"))
 hl.bind(mod .. " + SPACE",          script("rofi-toggle.sh"))
 hl.bind(mod .. " + I",              script("idle-toggle.sh"))
-hl.bind(mod .. " + W",              script("nextwall.sh"))
+-- Pemilih wallpaper: rofi biasa tetap slide bottom (rule `rofi` di
+-- hyprland.lua), khusus yang ini memakai fade lewat rule bernama di rofi.lua.
+hl.bind(mod .. " + W",              function() rofi.pick_wallpaper() end)
 hl.bind(mod .. " + T",              exec(home .. "/.myenv/script/theme/theme-picker.sh"))
 hl.bind(mod .. " + SHIFT + N",      script("bluelight-toggle.sh"))
 

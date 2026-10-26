@@ -3,7 +3,7 @@ include "conf/layouts/layout.kdl"
 
 // Auto start
 spawn-sh-at-startup "eww daemon --force-wayland"
-spawn-sh-at-startup "swww-daemon"
+spawn-sh-at-startup "awww-daemon"
 spawn-sh-at-startup "swaync &"
 spawn-sh-at-startup "sleep 1 && waybar"
 

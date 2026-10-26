@@ -46,7 +46,7 @@ CHOSEN="$DIR/$SELECTED"
 $WALLPAPER_ENGINE query || $WALLPAPER_ENGINE init
 
 # Set wallpaper dengan transisi
-$ENGINE img "$CHOSEN" \
+$WALLPAPER_ENGINE img "$CHOSEN" \
     --transition-type center \
     --transition-fps 60 \
     --transition-step 200
