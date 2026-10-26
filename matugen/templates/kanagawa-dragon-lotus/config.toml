@@ -38,3 +38,7 @@ post_hook       = "pkill -SIGUSR1 kitty"
 [templates.rasi]
 input_path      = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/source.rasi"
 output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/rasi/theme.rasi"
+[templates.foot]
+input_path  = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/foot.ini"
+output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/foot/theme.ini"
+post_hook   = "pkill -SIGUSR1 foot 2>/dev/null || true"

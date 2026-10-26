@@ -43,3 +43,6 @@ output_path     = "~/.myenv/theme/current/nvim/theme.lua"
 input_path      = "~/.config/matugen/templates/general/herdr.toml"
 output_path     = "~/.myenv/theme/generated/live.bak/herdr/config.toml"
 post_hook       = "herdr server reload-config"
+[templates.foot]
+input_path      = "~/.config/matugen/templates/general/foot.ini"
+output_path     = "~/.myenv/theme/generated/live.bak/foot/theme.ini"
