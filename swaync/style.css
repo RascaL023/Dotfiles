@@ -148,41 +148,48 @@
   color: alpha(@icon_secondary, 0.3);
 }
 
-/* ── 5. Sliders (Volume, Backlight) ─────────────────────────────── */
-.widget-volume label, .widget-backlight label {
-  /* font-size: 24px; */
+/* ── 5. Sliders: Volume & Backlight ─────────────────── */
+
+.widget-volume label,
+.widget-backlight label {
   color: @icon_primary;
   min-width: 24px;
   margin-right: 14px;
 }
-scale trough {
+
+/* Track / background */
+.widget-volume scale trough,
+.widget-backlight scale trough {
   min-height: 12px;
   border-radius: 6px;
   background-color: @slider_trough_bg;
 }
-scale trough progress {
-  min-height: 12px;
+
+/* Filled area */
+.widget-volume scale trough highlight,
+.widget-backlight scale trough highlight {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
   border-radius: 6px;
   background-color: @accent_color;
-  transition: background-color 0.15s ease;
-}
-scale:hover trough progress {
-  background-color: @accent_color;
-}
-trough highlight {
-  padding: 5px;
-  background: @accent_color;
-  border-radius: 20px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, .5);
-  transition: all 0.7s ease;
-}
-scale slider {
-  min-width: 14px;
-  min-height: 14px;
-  border-radius: 7px;
-  background-color: @slider_thumb_bg;
+  box-shadow: none;
 }
 
+/* Thumb */
+.widget-volume scale slider,
+.widget-backlight scale slider {
+  min-width: 14px;
+  min-height: 14px;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background-color: @slider_thumb_bg;
+  border: none;
+  box-shadow: none;
+}
 /* ── 6. Button Grid ─────────────────────────────────────────────── */
 .widget-buttons-grid > flowbox {
   padding: 0;

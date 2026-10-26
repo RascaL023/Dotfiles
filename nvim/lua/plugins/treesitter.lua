@@ -28,6 +28,7 @@ return {
           "svelte",
           "markdown",
           "markdown_inline",
+          "yuck",
         },
 
         highlight = { enable = true },
