@@ -1,341 +1,695 @@
-/* ==================================================================
-   SwayNC Refined CSS for Cohesive Visuals - github: @iyiolacak
-   ================================================================== */
+/* ==========================================================================
+   SwayNC — tema untuk swaync 0.12.6 (GTK 4.22)
+   ==========================================================================
+   Ditulis mengikuti pohon CSS asli swaync 0.12.6 (data/style/style.scss dan
+   data/ui/*.blp), bukan tema versi lama. Yang paling sering bikin tampilan
+   rusak, dan sudah dihindari di bawah:
 
-/* ── 1. Palette & Globals (Using @define-color) ──────────────────── */
+     * `.control-center` adalah ScrolledWindow-nya, bukan kotak dalamnya:
+         window.blank-window > scrolledwindow.control-center > viewport >
+         box.widgets > .widget
+       Karena `hscrollbar-policy: never`, isi yang lebih lebar dari panel tidak
+       bisa digeser — jangan menaruh apa pun yang lebih lebar dari lebarnya.
+       Tidak ada satu pun `min-width` di berkas ini; lebarnya diatur di
+       config.json, dan itu lebar *isi* (lihat butir terakhir di bawah).
+     * Notifikasi: `.notification-row > .notification-background >
+       .notification > .notification-default-action > .notification-content`.
+     * Slider GTK4: `scale > trough > (highlight, slider)` — slider ada DI
+       DALAM trough, dan tidak ada lagi node `progress` seperti di GTK3 tema
+       lama. Yang mengisi jalur adalah `highlight`.
+     * MPris: sampul buram di `.mpris-background`, isi di `.mpris-overlay`;
+       `.widget-mpris-player` hanya pembungkus (punya `overflow: hidden`).
+     * Ukuran ikon tidak lagi lewat config.json (`notification-icon-size`
+       deprecated di 0.12.6) — semuanya variabel di blok `:root`.
+     * `control-center-width` / `notification-window-width` di config.json itu
+       lebar *isi*: padding dan border di CSS menambah lebar luar. Panel versi
+       tema ini 350 px (340 + border 2 + padding 8), persis seperti tema bawaan
+       swaync yang tanpa padding/border menghasilkan 340 px.
+   ── Menyambung ke matugen nanti ──────────────────────────────────────────
+   Semua warna mentah ada di satu blok bertanda MATUGEN:BEGIN / MATUGEN:END.
+   Nama variabelnya sengaja memakai kosakata yang sudah dipakai bar lain
+   (hasil `matugen/templates/general/source.css` yang dibaca lewat
+   `~/.myenv/theme/current/css/theme.css`), jadi menyambung ke matugen cukup
+   menimpa blok itu dengan `@define-color` bernama sama — tidak ada satu pun
+   aturan di bawah yang perlu diubah. GTK4 tidak punya `@import`, jadi
+   penyambungannya berupa penimpaan blok (atau symlink file ini), bukan import.
+   ========================================================================== */
 
-@define-color theme_fg rgba(248, 248, 252, 0.98); /* Primary Text */
-@define-color theme_fg_secondary rgba(215, 220, 225, 0.78); /* Secondary Text */
-@define-color theme_bg rgba(22, 22, 28, 0.22); /* Panel/Background */
-@define-color popup_bg rgba(20, 25, 25, 0.5); /* Floating Notification Background */
-@define-color module_bg rgba(20, 20, 20, 0.46); /* Default Module Background */
-@define-color module_hover_bg rgba(210, 215, 225, 0.35); /* Module Hover */
-@define-color button_bg rgba(130, 135, 145, 0.28); /* Button Default */
-@define-color button_hover_bg rgba(150, 155, 165, 0.40); /* Button Hover */
-@define-color accent_color rgba(10, 132, 255, 0.8); /* Accent Active */
-@define-color accent_color_hover #198de5; /* Accent Hover */
-@define-color border_light rgba(255, 255, 255, 0.18);
-@define-color border_dark rgba(0, 0, 0, 0.06);
-@define-color border_medium alpha(@border_light, 0.5); /* Approx rgba(255, 255, 255, 0.09) */
-@define-color icon_primary @theme_fg;
-@define-color icon_secondary rgba(215, 220, 225, 0.88);
-@define-color slider_trough_bg rgba(50, 55, 65, 0.35);
-@define-color slider_thumb_bg white;
-@define-color close_button_bg rgba(110, 110, 115, 0.15);
-@define-color close_button_hover_bg rgba(130, 130, 135, 0.30);
-@define-color mpris_player_bg rgba(0, 0, 0, 0.5);
+/* ── 1. Palet mentah (target matugen) ───────────────────────────────────── */
+/* MATUGEN:BEGIN — nilainya masih tulisan tangan; ini yang nanti ditimpa */
+@define-color accent          #8ba4b0;  /* accent.primary   / colors.primary   */
+@define-color accent-hover    #9bb2be;  /* accent.primary | terang 8%          */
+@define-color accent-on       #0d0c0c;  /* accent.on_primary                   */
+@define-color accent-2        #a292a3;  /* accent.secondary                    */
+@define-color accent-3        #7aa89f;  /* accent.tertiary                     */
+@define-color selection-bg    #223249;  /* accent.primary_container            */
+@define-color selection-fg    #c5c9c5;  /* accent.on_primary_container         */
 
-/* ── Base Reset ───────────────────────────────────────────────────── */
+@define-color bg-main         #181616;  /* surface.base                        */
+@define-color bg-raised       #1d1c19;  /* surface.medium                      */
+@define-color bg-surface      #282727;  /* surface.high                        */
+@define-color bg-deep         #0d0c0c;  /* surface.lowest                      */
+
+@define-color fg-main         #c5c9c5;  /* text.primary    / colors.on_surface */
+@define-color fg-alt          #a6a69c;  /* text.muted                          */
+@define-color fg-dim          #625e5a;  /* text.faint                          */
+@define-color fg-disabled     #393836;  /* text.disabled                       */
+
+@define-color border          #393836;  /* border.default  / outline_variant   */
+@define-color border-medium   #625e5a;  /* border.medium                       */
+@define-color border-active   #8ba4b0;  /* border.active                       */
+
+@define-color shadow          #0d0c0c;  /* effect.shadow                       */
+@define-color success         #8a9a7b;  /* status.success                      */
+@define-color warning         #c4b28a;  /* status.warning                      */
+@define-color error           #c4746e;  /* status.error                        */
+@define-color critical        #e46876;  /* status.critical                     */
+/* MATUGEN:END */
+
+/* ── 2. Turunan + nama lama swaync ──────────────────────────────────────── */
+/* Ditulis tangan (bukan hasil matugen), semuanya turunan dari blok di atas.
+   Nama `cc-bg`, `noti-bg`, `noti-bg-hover`, ... sengaja dipertahankan karena
+   itu variabel bawaan gaya bawaan swaync; potongan CSS pihak ketiga yang
+   memakainya tetap jalan. */
+@define-color cc-bg              alpha(@bg-main, 0.92);
+@define-color cc-card            alpha(@bg-surface, 0.45);
+@define-color cc-card-hover      alpha(@bg-surface, 0.75);
+@define-color noti-bg            alpha(@bg-raised, 0.90);
+@define-color noti-bg-hover      alpha(@bg-surface, 0.95);
+@define-color noti-bg-focus      alpha(@accent, 0.18);
+@define-color noti-bg-darker     @bg-deep;
+@define-color noti-close-bg      alpha(@fg-main, 0.08);
+@define-color noti-close-bg-hover alpha(@fg-main, 0.16);
+@define-color text-color         @fg-main;
+@define-color text-color-disabled @fg-disabled;
+@define-color bg-selected        @selection-bg;
+@define-color fg-faint           alpha(@fg-alt, 0.65);
+
+/* ── 3. Ukuran & jarak ─────────────────────────────────────────────────── */
+/* Semua angka yang biasanya perlu diutak-atik ada di sini, bukan tersebar
+   di dalam aturan. `--notification-*`, `--mpris-*` dan `--widget-volume-*`
+   adalah nama variabel yang dipakai gaya bawaan swaync, jadi menimpanya di
+   sini pasti berpengaruh. */
+:root {
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-lg: 12px;
+  --gap: 4px;
+  --card-pad: 8px 10px;
+
+  --font-size-body: 12px;
+  --font-size-summary: 13px;
+  --font-size-time: 10px;
+  --font-size-title: 14px;
+  --font-size-widget-icon: 15px;
+
+  --notification-icon-size: 40px;
+  --notification-group-icon-size: 26px;
+  --mpris-album-art-icon-size: 68px;
+  --widget-volume-row-icon-size: 22px;
+
+  --hover-transition: background-color 120ms ease-out, border-color 120ms ease-out;
+}
+
+/* ── 4. Dasar ───────────────────────────────────────────────────────────── */
 * {
-  font-family: "Maple Mono NF", "Inter", sans-serif;
+  font-family: "Maple Mono NF", "JetBrainsMono Nerd Font", monospace;
   font-size: 12px;
-  color: @theme_fg;
-  border: none;
-  border-radius: 0;
+  color: @fg-main;
+  text-shadow: none;
+}
+
+/* Jendela hanya bingkai: latarnya digambar oleh .control-center dan kartu
+   notifikasi. `.blank-window` dipakai jendela CC maupun jendela penutup
+   layar, jadi keduanya wajib tembus pandang. */
+window,
+.blank-window,
+.floating-notifications {
+  background: transparent;
+}
+
+/* ── 5. Kerangka control center ─────────────────────────────────────────── */
+.control-center {
+  background-color: @cc-bg;
+  border: 1px solid @border;
+  border-radius: var(--radius-lg);
+  padding: var(--gap);
+}
+
+/* Kotak pembungkus semua widget. Kartu tiap widget digambar oleh `.widget`
+   di bawah, jadi wadahnya sendiri tetap polos. */
+.control-center .widgets {
+  background: transparent;
+}
+
+.widget {
+  margin: var(--gap) 0;
+  border-radius: var(--radius);
+}
+
+/* Kartu widget. Semua widget dapat kartu di sini, lalu yang tidak boleh
+   berkartu direset di bawah. Dua aturan itu sengaja ditulis berurutan dan
+   tanpa `:not()`: aturan kartu ini bernilai 3 kelas, sementara penimpaan
+   per-widget nanti bernilai 4 kelas — kalau aturannya digabung pakai
+   `:not()`, spesifisitasnya naik jadi 5 dan justru mengalahkan penimpaan
+   per-widget (`padding` widget-mpris, sudut slider yang dirapatkan, dll). */
+.control-center .widgets > .widget {
+  background-color: @cc-card;
+  border: 1px solid @border;
+  padding: var(--card-pad);
+}
+/* Daftar notifikasi tidak berkartu (barisnya sudah berkartu sendiri) dan
+   judul tidak berkartu supaya terbaca sebagai header. */
+.control-center .widgets > .widget.widget-notifications,
+.control-center .widgets > .widget.widget-title {
   background: none;
+  border: none;
+}
+.control-center .widgets > .widget.widget-notifications {
   padding: 0;
-  margin: 0;
+}
+.control-center .widgets > .widget.widget-title {
+  padding: 2px;
+}
+
+/* Scrollbar ramping; jendelanya sendiri yang menggulung, bukan daftarnya. */
+scrollbar {
+  background: transparent;
+}
+scrollbar slider {
+  background-color: @border-medium;
+  border-radius: var(--radius-sm);
+  min-width: 4px;
+  min-height: 4px;
+}
+scrollbar slider:hover {
+  background-color: @accent;
+}
+
+/* ── 6. Notifikasi (dipakai CC dan notifikasi melayang) ─────────────────── */
+.notification-row {
+  background: none;
+  outline: none;
+  padding: 0;
+}
+.notification-row:focus .notification-background .notification {
+  border-color: @border-active;
+}
+.notification-row .notification-background {
+  padding: 3px 0;
+}
+/* 7px = jarak yang sama dengan margin panel, jadi sudut kiri-atas kartu
+   notifikasi melayang persis menempel di sudut kiri-atas panel CC, dan masih
+   menyisakan ruang untuk bayangannya. */
+.floating-notifications .notification-row .notification-background {
+  padding: 7px;
+}
+
+.notification-row .notification-background .notification {
+  background-color: @noti-bg;
+  border: 1px solid @border;
+  border-radius: var(--radius);
+  padding: 0;
+  transition: var(--hover-transition);
+}
+.notification-row .notification-background .notification.critical {
+  border-color: @error;
+}
+
+.notification-default-action {
+  background: transparent;
+  border: none;
+  border-radius: var(--radius);
+  padding: 2px;
+  color: @fg-main;
+  transition: var(--hover-transition);
+}
+.notification-default-action:hover {
+  background-color: @noti-bg-hover;
+}
+/* Saat ada tombol aksi tambahan, sudut bawah kartu diratakan. */
+.notification-default-action:not(:only-child) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.notification-content {
+  background: transparent;
+  border-radius: var(--radius);
+  padding: 6px 8px;
+}
+.notification-content .text-box label {
+  filter: none;   /* GTK4 memasang opacity 50% di sini; itu yang bikin teks pudar */
+}
+.notification-content .text-box .summary {
+  font-size: var(--font-size-summary);
+  font-weight: bold;
+  color: @fg-main;
+}
+.notification-content .text-box .body {
+  font-size: var(--font-size-body);
+  color: @fg-alt;
+}
+.notification-content .text-box .time {
+  font-size: var(--font-size-time);
+  color: @fg-faint;
+  margin-right: 22px;   /* jangan bertabrakan dengan tombol tutup */
+}
+
+/* Ikon utama + ikon aplikasi kecil di sudutnya. */
+.notification-content .image {
+  -gtk-icon-size: var(--notification-icon-size);
+  -gtk-icon-filter: none;
+  border-radius: var(--radius);
+  margin: 2px 8px 2px 2px;
+}
+.notification-content .app-icon {
+  -gtk-icon-size: calc(var(--notification-icon-size) / 3);
+  -gtk-icon-filter: none;
+  -gtk-icon-shadow: 0 1px 3px @shadow;
+  margin: 2px;
+}
+
+/* Gambar isi notifikasi (opsional, di bawah teks). */
+.notification-content .body-image {
+  margin-top: 6px;
+  border-radius: var(--radius-sm);
+  -gtk-icon-filter: none;
+}
+
+/* Bilah progres opsional di dalam notifikasi. */
+.notification-content progressbar trough {
+  min-height: 4px;
+  border-radius: 2px;
+  background-color: @bg-deep;
+}
+.notification-content progressbar progress {
+  min-height: 4px;
+  border-radius: 2px;
+  background-color: @accent;
+}
+
+/* Balasan langsung (inline reply). */
+.notification-content .inline-reply {
+  margin-top: 6px;
+}
+.inline-reply-entry {
+  background-color: @noti-bg-darker;
+  color: @fg-main;
+  caret-color: @fg-main;
+  border: 1px solid @border;
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+}
+.inline-reply-button {
+  margin-left: 4px;
+  background-color: @cc-card;
+  border: 1px solid @border;
+  border-radius: var(--radius-sm);
+  color: @fg-main;
+  padding: 2px 10px;
+  transition: var(--hover-transition);
+}
+.inline-reply-button:hover {
+  background-color: @noti-bg-hover;
+}
+.inline-reply-button:disabled {
+  background: none;
+  border-color: transparent;
+  color: @fg-disabled;
+}
+
+/* Tombol aksi tambahan di bawah kartu notifikasi. */
+.notification-alt-actions {
+  background: none;
+  padding: 2px;
+  border-bottom-left-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+}
+.notification-action {
+  margin: 2px;
+  padding: 0;
+}
+.notification-action > button {
+  border-radius: var(--radius-sm);
+  color: @fg-alt;
+  background-color: @cc-card;
+  padding: 4px 10px;
+  transition: var(--hover-transition);
+}
+.notification-action > button:hover {
+  background-color: @noti-bg-hover;
+  color: @fg-main;
+}
+
+/* Tombol tutup bulat di sudut kanan atas. */
+.close-button {
+  background-color: @noti-close-bg;
+  color: @fg-alt;
+  border: none;
+  border-radius: 100%;
   box-shadow: none;
   text-shadow: none;
-  outline: none;
+  padding: 0;
+  min-width: 20px;
+  min-height: 20px;
+  margin-top: 6px;
+  margin-right: 6px;
+  transition: var(--hover-transition);
+}
+.close-button:hover {
+  background-color: @noti-close-bg-hover;
+  color: @error;
 }
 
-/* ── 2. Control Center Container ─────────────────────────────────── */
-.control-center {
-  background-color: rgba(22, 22, 28, 0.8);
-  border: 1px solid @border_medium;
-  border-top-color: @border_light;
-  border-bottom-color: @border_dark;
-  border-radius: 20px;
-  padding: 28px;
-  min-width: 380px;
+/* ── 7. Notifikasi melayang ─────────────────────────────────────────────── */
+.floating-notifications .notification-row .notification {
+  background-color: @cc-bg;
+  box-shadow: 0 2px 8px 1px @shadow;
+}
+.floating-notifications .notification-row:hover .notification {
+  background-color: @noti-bg-hover;
 }
 
-/* ── 3. Widget Modules ───────────────────────────────────────────── */
-.widget-mpris,
-.widget-volume,
-.widget-backlight,
-.widget-buttons-grid,
-.control-center-list > box > *:not(.widget-title) {
-  background-color: @module_bg;
-  border-radius: 18px;
-  padding: 18px;
-  margin-bottom: 14px;
-  border: 1px solid @border_medium;
+/* ── 8. Grup notifikasi ─────────────────────────────────────────────────── */
+.notification-group {
+  transition: opacity 200ms ease-out;
 }
-.widget-volume, .widget-backlight { padding: 14px 18px; }
-.widget-buttons-grid { padding: 12px; }
-.control-center > box > *:last-child { margin-bottom: 0; }
-
-/* Widget Titles */
-.widget-title {
-  background: transparent;
-  border: none;
-  padding: 4px 6px 12px 6px;
-  margin-bottom: 8px;
-}
-.widget-title label {
-  font-family: 'Inter';
-  font-size: 17px;
-  font-weight: 500;
-  color: @theme_fg_secondary;
-  margin-left: 4px;
+.notification-group:focus {
   background: none;
 }
-.widget-title button {
-  font-family: inherit;
-  font-size: 16px;
-  color: @theme_fg;
-  background-color: @button_bg;
-  border: none;
-  border-radius: 10px;
-  padding: 7px 16px;
-  transition: background-color 0.15s ease;
+.notification-group .notification-group-headers {
+  color: @fg-alt;
+  margin: 0 8px;
 }
-.widget-title button:hover,
-.widget-title button:active {
-  background-color: @button_hover_bg;
+.notification-group .notification-group-icon {
+  color: @fg-alt;
+  -gtk-icon-size: var(--notification-group-icon-size);
+}
+.notification-group .notification-group-header {
+  color: @fg-alt;
+  font-size: var(--font-size-body);
+}
+.notification-group .notification-group-buttons {
+  margin: 0 8px;
+}
+.notification-group .notification-group-collapse-button,
+.notification-group .notification-group-close-all-button {
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: @fg-dim;
+  padding: 2px;
+  min-width: 18px;
+  min-height: 18px;
+  transition: var(--hover-transition);
+}
+.notification-group .notification-group-collapse-button:hover,
+.notification-group .notification-group-close-all-button:hover {
+  color: @fg-main;
+}
+.notification-group .notification-group-close-button .close-button {
+  margin: 6px 8px;
+}
+/* Grup yang mengecil saat grup lain dibuka. */
+.notification-group.collapsed.not-expanded {
+  opacity: 0.45;
+}
+.notification-group.collapsed .notification-row .notification {
+  background-color: @noti-bg;
+}
+.notification-group.collapsed .notification-row:not(:last-child) .notification-action,
+.notification-group.collapsed .notification-row:not(:last-child) .notification-default-action {
+  opacity: 0;
+}
+.notification-group.collapsed:hover .notification-row:not(:only-child) .notification {
+  background-color: @noti-bg-hover;
 }
 
-/* ── 4. MPRIS Widget ────────────────────────────────────────────── */
-.widget-mpris {
+/* ── 9. Widget: judul ───────────────────────────────────────────────────── */
+.widget-title > label {
+  font-size: var(--font-size-title);
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  color: @fg-main;
+  margin-left: 2px;
+}
+.widget-title > button {
+  background-color: @cc-card;
+  border: 1px solid @border;
+  border-radius: var(--radius-sm);
+  color: @fg-alt;
+  font-size: var(--font-size-body);
+  padding: 3px 10px;
+  transition: var(--hover-transition);
+}
+.widget-title > button:hover {
+  background-color: @noti-bg-hover;
+  border-color: @accent;
+  color: @fg-main;
+}
+
+/* ── 10. Widget: daftar notifikasi ──────────────────────────────────────── */
+.control-center .widget-notifications {
   padding: 0;
-  border: none;
-  border-radius: 18px;
+}
+.control-center .control-center-list {
   background: transparent;
+}
+.control-center .control-center-list-placeholder {
+  color: @fg-dim;
+  font-size: var(--font-size-body);
+  padding: 16px 0;
+}
+
+/* ── 11. Widget: pemutar musik (MPris) ──────────────────────────────────── */
+/* Pembungkusnya tanpa padding supaya sampul buram mengisi sudut kartu. */
+.control-center .widgets > .widget.widget-mpris {
+  padding: 0;
 }
 .widget-mpris .widget-mpris-player {
-  background-color: @mpris_player_bg;
-  border-radius: 12px;
-  border: 1px solid @border_medium;
-  padding: 16px;
+  border-radius: var(--radius);
+  box-shadow: none;
+}
+.widget-mpris .mpris-background {
+  filter: blur(12px);
+  opacity: 0.55;
+}
+.widget-mpris .mpris-overlay {
+  background-color: alpha(@bg-deep, 0.55);
+  padding: 10px;
 }
 .widget-mpris .widget-mpris-album-art {
-  background: none;
-  min-width: 60px;
-  min-height: 60px;
-  border-radius: 16px;
-  margin-right: 12px;
+  border-radius: var(--radius-sm);
+  -gtk-icon-size: var(--mpris-album-art-icon-size);
 }
 .widget-mpris .widget-mpris-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: @theme_fg;
-  margin-bottom: 4px;
-  background: none;
+  font-size: var(--font-size-summary);
+  font-weight: bold;
+  color: @fg-main;
 }
 .widget-mpris .widget-mpris-subtitle {
-  font-size: 16px;
-  color: @theme_fg_secondary;
+  font-size: var(--font-size-body);
+  color: @fg-alt;
+}
+/* Tombol kontrol pemutar (shuffle/prev/play/next/repeat). */
+.widget-mpris .mpris-overlay button,
+.widget-mpris > box > button {
   background: none;
+  border: none;
+  box-shadow: none;
+  color: @fg-alt;
+  border-radius: 100%;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 2px;
+  transition: var(--hover-transition);
 }
-.widget-mpris .widget-mpris-player button {
-  all: unset;
-  background: transparent;
-  border-radius: 50%;
-  padding: 7px;
-  color: @icon_secondary;
-  font-size: 16px;
-  min-width: 34px;
-  min-height: 34px;
-  transition: background-color 0.15s ease, color 0.15s ease;
+.widget-mpris .mpris-overlay button:hover,
+.widget-mpris > box > button:hover {
+  background-color: alpha(@accent, 0.30);
+  color: @fg-main;
 }
-.widget-mpris .widget-mpris-player button:hover {
-  background-color: @button_hover_bg;
-  color: @icon_primary;
-}
-.widget-mpris .widget-mpris-player button:disabled {
-  color: alpha(@icon_secondary, 0.3);
-}
-
-/* ── 5. Sliders: Volume & Backlight ─────────────────── */
-
-.widget-volume label,
-.widget-backlight label {
-  color: @icon_primary;
-  min-width: 24px;
-  margin-right: 14px;
+.widget-mpris .mpris-overlay button:disabled,
+.widget-mpris > box > button:disabled {
+  color: @fg-disabled;
 }
 
-/* Track / background */
-.widget-volume scale trough,
-.widget-backlight scale trough {
+/* ── 12. Widget: volume, brightness & per-app ───────────────────────────── */
+/* Volume dan brightness dirapatkan jadi satu grup: sudut yang bertemu
+   diratakan supaya terbaca sebagai satu kartu dua baris. */
+.control-center .widgets > .widget.widget-volume {
+  margin-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.control-center .widgets > .widget.widget-backlight {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top-color: transparent;
+}
+
+/* Label pasangan slider. Volume menaruh label+slider di dalam satu box
+   (`main_volume_slider_container`, karena masih ada tombol per-app), sedangkan
+   brightness dan slider bawaan menempel langsung ke widget-nya. `min-width`
+   yang sama bikin kedua slider mulai di x yang sama. */
+.widget-volume > box > label,
+.widget-backlight > label,
+.widget-slider > label {
+  color: @fg-dim;
+  min-width: 20px;
+  margin-right: 8px;
+}
+
+/* Jalur slider. Gaya bawaan GTK untuk `trough` dihilangkan seluruhnya. */
+scale trough {
+  min-height: 6px;
+  border-radius: 3px;
+  background-color: @bg-deep;
+  border: none;
+}
+/* Bagian terisi. Di GTK4 namanya `highlight` (bukan `progress`). */
+scale trough highlight {
+  min-height: 6px;
+  border-radius: 3px;
+  background-color: @accent;
+  box-shadow: none;
+}
+/* Gagang. Letaknya di dalam `trough`. */
+scale trough slider {
+  min-width: 12px;
   min-height: 12px;
-  border-radius: 6px;
-  background-color: @slider_trough_bg;
-}
-
-/* Filled area */
-.widget-volume scale trough highlight,
-.widget-backlight scale trough highlight {
-  min-width: 0;
-  min-height: 0;
-  padding: 0;
-  margin: 0;
-  border: none;
-  border-radius: 6px;
-  background-color: @accent_color;
-  box-shadow: none;
-}
-
-/* Thumb */
-.widget-volume scale slider,
-.widget-backlight scale slider {
-  min-width: 14px;
-  min-height: 14px;
-  padding: 0;
-  margin: 0;
-  border-radius: 50%;
-  background-color: @slider_thumb_bg;
+  margin: -4px 0;
+  border-radius: 100%;
+  background-color: @accent-hover;
   border: none;
   box-shadow: none;
 }
-/* ── 6. Button Grid ─────────────────────────────────────────────── */
-.widget-buttons-grid > flowbox {
-  padding: 0;
+scale:hover trough highlight {
+  background-color: @accent-hover;
+}
+
+/* Kontrol volume per aplikasi (aktif kalau widget-config.volume.show-per-app). */
+.per-app-volume {
+  background-color: @bg-deep;
+  border-radius: var(--radius-sm);
+  margin: 6px 0 0 0;
+  padding: 2px;
+}
+.per-app-volume row {
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  transition: var(--hover-transition);
+}
+.per-app-volume row:hover {
+  background-color: @cc-card-hover;
+}
+.per-app-volume row image {
+  -gtk-icon-size: var(--widget-volume-row-icon-size);
+}
+.per-app-volume row label {
+  font-size: var(--font-size-body);
+  color: @fg-alt;
+}
+.per-app-volume row scale trough {
+  min-height: 4px;
+  border-radius: 2px;
+}
+.per-app-volume row scale trough highlight {
+  min-height: 4px;
+  border-radius: 2px;
+}
+.per-app-volume row scale trough slider {
+  min-width: 10px;
+  min-height: 10px;
+}
+
+/* ── 13. Widget: tombol-tombol ──────────────────────────────────────────── */
+.control-center .widgets > .widget.widget-buttons-grid {
+  padding: 6px;
+}
+.widget-buttons-grid flowbox {
   background: none;
 }
-.widget-buttons-grid > flowbox > flowboxchild {
+.widget-buttons-grid flowboxchild {
   padding: 3px;
   background: none;
 }
-.widget-buttons-grid > flowbox > flowboxchild > button {
-  background-color: rgba(0,0,0, 0.7);
-  border-radius: 66px;
-  padding: 14px;
-  min-width: 24px;
-  min-height: 24px;
-  color: @icon_secondary;
-  transition: background-color 0.15s ease, color 0.15s ease;
+.widget-buttons-grid flowboxchild > button {
+  background-color: @bg-deep;
+  border: 1px solid @border;
+  border-radius: var(--radius-sm);
+  color: @fg-alt;
+  font-size: var(--font-size-widget-icon);
+  min-height: 34px;
+  padding: 0 8px;
+  transition: var(--hover-transition);
 }
-.widget-buttons-grid > flowbox > flowboxchild > button:hover {
-  background-color: rgba(20,20,20, 0.45);
-  color: @icon_primary;
+.widget-buttons-grid flowboxchild > button:hover {
+  background-color: @cc-card-hover;
+  border-color: @accent;
+  color: @fg-main;
 }
-.widget-buttons-grid > flowbox > flowboxchild > button.toggle:checked {
-  background-color: @accent_color;
-  color: white;
+/* Tombol toggle yang sedang aktif (mis. DND). swaync memakai
+   Gtk.ToggleButton dan tidak menambah kelas apa pun, jadi yang menentukan
+   keadaan aktif adalah pseudo-class `:checked`; `.toggle` cuma jaring
+   pengaman kalau suatu saat GTK menambahkannya. */
+.widget-buttons-grid flowboxchild > button:checked {
+  background-color: @accent;
+  border-color: @accent;
+  color: @accent-on;
 }
-.widget-buttons-grid > flowbox > flowboxchild > button.toggle:checked:hover {
-  background-color: @accent_color_hover;
-}
-
-/* ── 7. Notification Center ─────────────────────────────────────── */
-.control-center-list {
-  padding-bottom: 1px;
-  background-color: transparent;
-}
-.control-center .notification-row {
-  margin-bottom: 12px;
-}
-.control-center .notification-background {
-  background-color: @module_bg;
-  border: 1px solid @border_medium;
-  padding: 16px;
-  border-radius: 18px;
-  transition: background-color 0.15s ease;
-}
-.control-center .notification-row:hover .notification-background {
-  border-radius: 18px;
-  background-color: @module_hover_bg;
-}
-.control-center .notification .summary {
-  font-weight: 600;
-  color: @theme_fg;
-  margin-bottom: 5px;
-}
-.control-center .notification .body { color: @theme_fg_secondary; }
-.control-center .notification .time {
-  font-size: 15px;
-  font-weight: 500;
-  color: @theme_fg_secondary;
-  margin-left: 12px;
-}
-.control-center .close-button {
-  background-color: @close_button_bg;
-  border-radius: 50%;
-  min-width: 24px;
-  min-height: 24px;
-  transition: background-color 0.15s ease;
-}
-.control-center .close-button:hover {
-  background-color: @close_button_hover_bg;
-}
-.control-center .close-button image {
-  margin-right: 12px; /* Adjust this value for desired spacing */
-  color: @icon_secondary;
+.widget-buttons-grid flowboxchild > button:checked:hover {
+  background-color: @accent-hover;
+  border-color: @accent-hover;
 }
 
-.control-center .notification image {
-  margin-right: 12px; /* Space between image and text */
-  min-width: 36px;    /* Define a minimum width */
-  min-height: 36px;   /* Define a minimum height */
-  /* Add or adjust the border-radius property here */
-  border-radius: 8px; /* <<< THIS LINE controls the rounding */
+/* ── 14. Widget lain (kalau ditambahkan ke daftar `widgets`) ────────────── */
+.widget-dnd label {
+  color: @fg-alt;
+  font-size: var(--font-size-body);
+  margin-right: 8px;
 }
-/* ── 8. Floating Notifications ─────────────────────────────────── */
-.floating-notifications .notification-row {
-  margin-bottom: 12px;
+.widget-dnd switch {
+  border-radius: 100%;
+  min-width: 34px;
+  min-height: 18px;
+  background-color: @bg-deep;
+  border: 1px solid @border;
 }
-.floating-notifications .notification-background {
-  background-color: rgba(0, 0, 0, .7);
-  /* border: 1px solid @border_light; */
-  border-radius: 15px;
-  padding: 18px;
-  margin: 8px 14px;
-  transition: background-color 0.15s ease;
+.widget-dnd switch:checked {
+  background-color: @accent;
+  border-color: @accent;
 }
-.floating-notifications .notification-row:hover .notification-background {
-  background-color: alpha(@popup_bg, 1.1);
+.widget-dnd switch slider {
+  border-radius: 100%;
+  min-width: 14px;
+  min-height: 14px;
+  margin: 1px;
+  background-color: @fg-alt;
+  border: none;
 }
-.floating-notifications .notification .summary {
-	font-size: 15px;
-  font-weight: 700;
-  color: @theme_fg;
+.widget-dnd switch:checked slider {
+  background-color: @accent-on;
 }
-.floating-notifications .notification .body {
-  color: @theme_fg;
+.widget-label > label {
+  font-size: var(--font-size-body);
+  color: @fg-alt;
 }
-.floating-notifications .notification .time {
-  font-size: 15px;
-  color: @icon_secondary;
-  margin-left: 10px;
+.widget-inhibitors > label {
+  font-size: var(--font-size-body);
+  color: @fg-alt;
+  margin-right: 8px;
 }
-.floating-notifications .notification image {
-  min-width: 48px;
-  min-height: 48px;
-  margin-right: 14px;
-  border-radius: 10px;
+.widget-inhibitors > button {
+  background-color: @cc-card;
+  border: 1px solid @border;
+  border-radius: var(--radius-sm);
+  color: @fg-alt;
+  padding: 3px 10px;
+  transition: var(--hover-transition);
 }
-.floating-notifications .close-button {
-  background-color: @close_button_bg;
-  border-radius: 50%;
-  min-width: 28px;
-  min-height: 28px;
-  transition: background-color 0.15s ease;
-}
-.floating-notifications .close-button:hover {
-  background-color: @close_button_hover_bg;
-}
-.floating-notifications .close-button image {
-    margin-right: 12px; /* Adjust this value for desired spacing */
-  color: @icon_secondary;
-}
-.floating-notifications .notification-alt-actions {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid @border_medium;
-}
-.floating-notifications .notification-action button,
-.floating-notifications .notification-alt-actions button {
-  font-size: 16px;
-  color: @theme_fg;
-  background-color: @button_bg;
-  border-radius: 12px;
-  padding: 8px 18px;
-  transition: background-color 0.15s ease;
-}
-.floating-notifications .notification-action button:hover,
-.floating-notifications .notification-alt-actions button:hover {
-  background-color: @button_hover_bg;
+.widget-inhibitors > button:hover {
+  background-color: @noti-bg-hover;
+  color: @fg-main;
 }
