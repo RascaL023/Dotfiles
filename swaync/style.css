@@ -23,8 +23,20 @@
        deprecated di 0.12.6) — semuanya variabel di blok `:root`.
      * `control-center-width` / `notification-window-width` di config.json itu
        lebar *isi*: padding dan border di CSS menambah lebar luar. Panel versi
-       tema ini 350 px (340 + border 2 + padding 8), persis seperti tema bawaan
-       swaync yang tanpa padding/border menghasilkan 340 px.
+       tema ini 340 + border 2 + padding 16 = 358 px, dengan hitungan yang sama
+       seperti tema bawaan swaync (tanpa padding/border → 340 px).
+
+   ── Kelompok widget (dari config.json) ───────────────────────────────────
+   Nama setelah `#` di daftar `widgets` menjadi kelas CSS tambahan
+   (baseWidget.vala: `add_css_class (suffix)`), jadi tiap bagian bisa punya
+   gayanya sendiri tanpa menyentuh yang lain:
+
+     mpris / title / volume / backlight      → kartu biasa
+     label#SectionQuick  → .widget-label.SectionQuick   (judul bagian)
+     label#SectionSystem → .widget-label.SectionSystem
+     buttons-grid#QuickActions  → .widget-buttons-grid.QuickActions
+     buttons-grid#SystemActions → .widget-buttons-grid.SystemActions
+
    ── Menyambung ke matugen nanti ──────────────────────────────────────────
    Semua warna mentah ada di satu blok bertanda MATUGEN:BEGIN / MATUGEN:END.
    Nama variabelnya sengaja memakai kosakata yang sudah dipakai bar lain
@@ -74,6 +86,7 @@
 @define-color cc-bg              alpha(@bg-main, 0.92);
 @define-color cc-card            alpha(@bg-surface, 0.45);
 @define-color cc-card-hover      alpha(@bg-surface, 0.75);
+@define-color cc-inset           alpha(@bg-deep, 0.55);
 @define-color noti-bg            alpha(@bg-raised, 0.90);
 @define-color noti-bg-hover      alpha(@bg-surface, 0.95);
 @define-color noti-bg-focus      alpha(@accent, 0.18);
@@ -84,6 +97,9 @@
 @define-color text-color-disabled @fg-disabled;
 @define-color bg-selected        @selection-bg;
 @define-color fg-faint           alpha(@fg-alt, 0.65);
+@define-color accent-soft        alpha(@accent, 0.14);
+@define-color accent-halo        alpha(@accent, 0.28);
+@define-color accent-halo-hover  alpha(@accent, 0.45);
 
 /* ── 3. Ukuran & jarak ─────────────────────────────────────────────────── */
 /* Semua angka yang biasanya perlu diutak-atik ada di sini, bukan tersebar
@@ -94,14 +110,18 @@
   --radius: 10px;
   --radius-sm: 6px;
   --radius-lg: 12px;
-  --gap: 4px;
+  --pill: 100px;
+
+  --cc-pad: 8px;
   --card-pad: 8px 10px;
+  --card-gap: 4px;
 
   --font-size-body: 12px;
   --font-size-summary: 13px;
   --font-size-time: 10px;
   --font-size-title: 14px;
-  --font-size-widget-icon: 15px;
+  --font-size-section: 11px;
+  --font-size-widget-icon: 16px;
 
   --notification-icon-size: 40px;
   --notification-group-icon-size: 26px;
@@ -133,7 +153,7 @@ window,
   background-color: @cc-bg;
   border: 1px solid @border;
   border-radius: var(--radius-lg);
-  padding: var(--gap);
+  padding: var(--cc-pad);
 }
 
 /* Kotak pembungkus semua widget. Kartu tiap widget digambar oleh `.widget`
@@ -143,7 +163,7 @@ window,
 }
 
 .widget {
-  margin: var(--gap) 0;
+  margin: var(--card-gap) 0;
   border-radius: var(--radius);
 }
 
@@ -158,9 +178,11 @@ window,
   border: 1px solid @border;
   padding: var(--card-pad);
 }
-/* Daftar notifikasi tidak berkartu (barisnya sudah berkartu sendiri) dan
-   judul tidak berkartu supaya terbaca sebagai header. */
+/* Daftar notifikasi dan tombol tidak berkartu (isinya sudah berkartu sendiri),
+   begitu pula judul bagian yang cuma teks. */
 .control-center .widgets > .widget.widget-notifications,
+.control-center .widgets > .widget.widget-buttons-grid,
+.control-center .widgets > .widget.widget-label,
 .control-center .widgets > .widget.widget-title {
   background: none;
   border: none;
@@ -168,8 +190,14 @@ window,
 .control-center .widgets > .widget.widget-notifications {
   padding: 0;
 }
-.control-center .widgets > .widget.widget-title {
+.control-center .widgets > .widget.widget-buttons-grid {
   padding: 2px;
+}
+.control-center .widgets > .widget.widget-label {
+  padding: 10px 2px 2px 2px;
+}
+.control-center .widgets > .widget.widget-title {
+  padding: 4px 2px;
 }
 
 /* Scrollbar ramping; jendelanya sendiri yang menggulung, bukan daftarnya. */
@@ -195,8 +223,9 @@ scrollbar slider:hover {
 .notification-row:focus .notification-background .notification {
   border-color: @border-active;
 }
+/* Jarak antar kartu di dalam daftar. */
 .notification-row .notification-background {
-  padding: 3px 0;
+  padding: 4px 0;
 }
 /* 7px = jarak yang sama dengan margin panel, jadi sudut kiri-atas kartu
    notifikasi melayang persis menempel di sudut kiri-atas panel CC, dan masih
@@ -220,7 +249,7 @@ scrollbar slider:hover {
   background: transparent;
   border: none;
   border-radius: var(--radius);
-  padding: 2px;
+  padding: 3px;
   color: @fg-main;
   transition: var(--hover-transition);
 }
@@ -235,7 +264,7 @@ scrollbar slider:hover {
 .notification-content {
   background: transparent;
   border-radius: var(--radius);
-  padding: 6px 8px;
+  padding: 8px 10px;
 }
 .notification-content .text-box label {
   filter: none;   /* GTK4 memasang opacity 50% di sini; itu yang bikin teks pudar */
@@ -248,6 +277,7 @@ scrollbar slider:hover {
 .notification-content .text-box .body {
   font-size: var(--font-size-body);
   color: @fg-alt;
+  margin-top: 3px;
 }
 .notification-content .text-box .time {
   font-size: var(--font-size-time);
@@ -260,7 +290,7 @@ scrollbar slider:hover {
   -gtk-icon-size: var(--notification-icon-size);
   -gtk-icon-filter: none;
   border-radius: var(--radius);
-  margin: 2px 8px 2px 2px;
+  margin: 2px 10px 2px 2px;
 }
 .notification-content .app-icon {
   -gtk-icon-size: calc(var(--notification-icon-size) / 3);
@@ -298,15 +328,15 @@ scrollbar slider:hover {
   caret-color: @fg-main;
   border: 1px solid @border;
   border-radius: var(--radius-sm);
-  padding: 2px 6px;
+  padding: 3px 8px;
 }
 .inline-reply-button {
   margin-left: 4px;
   background-color: @cc-card;
   border: 1px solid @border;
-  border-radius: var(--radius-sm);
+  border-radius: var(--pill);
   color: @fg-main;
-  padding: 2px 10px;
+  padding: 3px 12px;
   transition: var(--hover-transition);
 }
 .inline-reply-button:hover {
@@ -321,19 +351,19 @@ scrollbar slider:hover {
 /* Tombol aksi tambahan di bawah kartu notifikasi. */
 .notification-alt-actions {
   background: none;
-  padding: 2px;
+  padding: 3px;
   border-bottom-left-radius: var(--radius);
   border-bottom-right-radius: var(--radius);
 }
 .notification-action {
-  margin: 2px;
+  margin: 3px;
   padding: 0;
 }
 .notification-action > button {
-  border-radius: var(--radius-sm);
+  border-radius: var(--pill);
   color: @fg-alt;
   background-color: @cc-card;
-  padding: 4px 10px;
+  padding: 4px 12px;
   transition: var(--hover-transition);
 }
 .notification-action > button:hover {
@@ -352,8 +382,8 @@ scrollbar slider:hover {
   padding: 0;
   min-width: 20px;
   min-height: 20px;
-  margin-top: 6px;
-  margin-right: 6px;
+  margin-top: 7px;
+  margin-right: 7px;
   transition: var(--hover-transition);
 }
 .close-button:hover {
@@ -431,15 +461,16 @@ scrollbar slider:hover {
   font-weight: bold;
   letter-spacing: 0.5px;
   color: @fg-main;
-  margin-left: 2px;
+  margin-left: 4px;
 }
 .widget-title > button {
   background-color: @cc-card;
   border: 1px solid @border;
-  border-radius: var(--radius-sm);
+  border-radius: var(--pill);
   color: @fg-alt;
   font-size: var(--font-size-body);
-  padding: 3px 10px;
+  padding: 3px 12px;
+  min-height: 24px;
   transition: var(--hover-transition);
 }
 .widget-title > button:hover {
@@ -448,7 +479,25 @@ scrollbar slider:hover {
   color: @fg-main;
 }
 
-/* ── 10. Widget: daftar notifikasi ──────────────────────────────────────── */
+/* ── 10. Widget: judul bagian (label#SectionQuick, label#SectionSystem) ─── */
+.widget-label > label {
+  font-size: var(--font-size-section);
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: @fg-alt;
+  margin-left: 4px;
+}
+/* Judul bagian didahului kartu/grid di atasnya, jadi jarak atasnya lebih besar
+   daripada jaraknya ke isi yang dijelaskan. Garis tipis di bawahnya memisahkan
+   bagian (label punya hexpand, jadi garisnya selebar panel). */
+.SectionQuick > label,
+.SectionSystem > label {
+  color: @accent;
+  padding-bottom: 5px;
+  border-bottom: 1px solid alpha(@border, 0.7);
+}
+
+/* ── 11. Widget: daftar notifikasi ──────────────────────────────────────── */
 .control-center .widget-notifications {
   padding: 0;
 }
@@ -458,10 +507,10 @@ scrollbar slider:hover {
 .control-center .control-center-list-placeholder {
   color: @fg-dim;
   font-size: var(--font-size-body);
-  padding: 16px 0;
+  padding: 20px 0;
 }
 
-/* ── 11. Widget: pemutar musik (MPris) ──────────────────────────────────── */
+/* ── 12. Widget: pemutar musik (MPris) ──────────────────────────────────── */
 /* Pembungkusnya tanpa padding supaya sampul buram mengisi sudut kartu. */
 .control-center .widgets > .widget.widget-mpris {
   padding: 0;
@@ -476,7 +525,7 @@ scrollbar slider:hover {
 }
 .widget-mpris .mpris-overlay {
   background-color: alpha(@bg-deep, 0.55);
-  padding: 10px;
+  padding: 12px;
 }
 .widget-mpris .widget-mpris-album-art {
   border-radius: var(--radius-sm);
@@ -499,8 +548,8 @@ scrollbar slider:hover {
   box-shadow: none;
   color: @fg-alt;
   border-radius: 100%;
-  min-width: 28px;
-  min-height: 28px;
+  min-width: 30px;
+  min-height: 30px;
   padding: 2px;
   transition: var(--hover-transition);
 }
@@ -514,9 +563,13 @@ scrollbar slider:hover {
   color: @fg-disabled;
 }
 
-/* ── 12. Widget: volume, brightness & per-app ───────────────────────────── */
-/* Volume dan brightness dirapatkan jadi satu grup: sudut yang bertemu
-   diratakan supaya terbaca sebagai satu kartu dua baris. */
+/* ── 13. Widget: volume & brightness ────────────────────────────────────── */
+/* Keduanya dirapatkan jadi satu kartu dua baris: sudut yang bertemu diratakan
+   dan garis pemisahnya dihilangkan. */
+.control-center .widgets > .widget.widget-volume,
+.control-center .widgets > .widget.widget-backlight {
+  padding: 6px 10px;
+}
 .control-center .widgets > .widget.widget-volume {
   margin-bottom: 0;
   border-bottom-left-radius: 0;
@@ -529,56 +582,64 @@ scrollbar slider:hover {
   border-top-color: transparent;
 }
 
-/* Label pasangan slider. Volume menaruh label+slider di dalam satu box
-   (`main_volume_slider_container`, karena masih ada tombol per-app), sedangkan
-   brightness dan slider bawaan menempel langsung ke widget-nya. `min-width`
-   yang sama bikin kedua slider mulai di x yang sama. */
+/* Label pasangan slider dibuat chip ikon. Volume menaruh label+slider di dalam
+   satu box (`main_volume_slider_container`, karena masih ada tombol per-app),
+   sedangkan brightness dan slider bawaan menempel langsung ke widget-nya.
+   `min-width` yang sama bikin kedua slider mulai di x yang sama. */
 .widget-volume > box > label,
 .widget-backlight > label,
 .widget-slider > label {
-  color: @fg-dim;
-  min-width: 20px;
-  margin-right: 8px;
+  color: @accent;
+  background-color: @accent-soft;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  min-width: 18px;
+  padding: 3px 6px;
+  margin-right: 10px;
 }
 
 /* Jalur slider. Gaya bawaan GTK untuk `trough` dihilangkan seluruhnya. */
 scale trough {
-  min-height: 6px;
-  border-radius: 3px;
-  background-color: @bg-deep;
+  min-height: 8px;
+  border-radius: var(--pill);
+  background-color: @cc-inset;
   border: none;
 }
 /* Bagian terisi. Di GTK4 namanya `highlight` (bukan `progress`). */
 scale trough highlight {
-  min-height: 6px;
-  border-radius: 3px;
+  min-height: 8px;
+  border-radius: var(--pill);
   background-color: @accent;
   box-shadow: none;
 }
-/* Gagang. Letaknya di dalam `trough`. */
+/* Gagang. Letaknya di dalam `trough`; margin negatif bikin gagangnya keluar
+   dari jalur tanpa ikut menaikkan tinggi jalur. */
 scale trough slider {
-  min-width: 12px;
-  min-height: 12px;
+  min-width: 14px;
+  min-height: 14px;
   margin: -4px 0;
   border-radius: 100%;
-  background-color: @accent-hover;
+  background-color: @fg-main;
   border: none;
-  box-shadow: none;
+  box-shadow: 0 0 0 3px @accent-halo;
 }
 scale:hover trough highlight {
   background-color: @accent-hover;
 }
+scale:hover trough slider {
+  box-shadow: 0 0 0 4px @accent-halo-hover;
+}
 
 /* Kontrol volume per aplikasi (aktif kalau widget-config.volume.show-per-app). */
 .per-app-volume {
-  background-color: @bg-deep;
+  background-color: @cc-inset;
   border-radius: var(--radius-sm);
-  margin: 6px 0 0 0;
-  padding: 2px;
+  margin: 8px 0 0 0;
+  padding: 3px;
 }
 .per-app-volume row {
   border-radius: var(--radius-sm);
-  padding: 2px 4px;
+  padding: 3px 5px;
   transition: var(--hover-transition);
 }
 .per-app-volume row:hover {
@@ -592,22 +653,22 @@ scale:hover trough highlight {
   color: @fg-alt;
 }
 .per-app-volume row scale trough {
-  min-height: 4px;
-  border-radius: 2px;
+  min-height: 5px;
+  border-radius: var(--pill);
 }
 .per-app-volume row scale trough highlight {
-  min-height: 4px;
-  border-radius: 2px;
+  min-height: 5px;
+  border-radius: var(--pill);
 }
 .per-app-volume row scale trough slider {
-  min-width: 10px;
-  min-height: 10px;
+  min-width: 11px;
+  min-height: 11px;
+  margin: -3px 0;
 }
 
-/* ── 13. Widget: tombol-tombol ──────────────────────────────────────────── */
-.control-center .widgets > .widget.widget-buttons-grid {
-  padding: 6px;
-}
+/* ── 14. Widget: grid tombol (QuickActions, SystemActions) ──────────────── */
+/* Kontainer gridnya sengaja transparan (lihat reset di bagian 5) — yang jadi
+   "kartu" adalah tombolnya, jadi grid terbaca sebagai deretan pil. */
 .widget-buttons-grid flowbox {
   background: none;
 }
@@ -616,13 +677,13 @@ scale:hover trough highlight {
   background: none;
 }
 .widget-buttons-grid flowboxchild > button {
-  background-color: @bg-deep;
+  background-color: @cc-card;
   border: 1px solid @border;
-  border-radius: var(--radius-sm);
+  border-radius: var(--pill);
   color: @fg-alt;
   font-size: var(--font-size-widget-icon);
-  min-height: 34px;
-  padding: 0 8px;
+  min-height: 38px;
+  padding: 0 10px;
   transition: var(--hover-transition);
 }
 .widget-buttons-grid flowboxchild > button:hover {
@@ -644,17 +705,17 @@ scale:hover trough highlight {
   border-color: @accent-hover;
 }
 
-/* ── 14. Widget lain (kalau ditambahkan ke daftar `widgets`) ────────────── */
+/* ── 15. Widget lain (kalau ditambahkan ke daftar `widgets`) ────────────── */
 .widget-dnd label {
   color: @fg-alt;
   font-size: var(--font-size-body);
   margin-right: 8px;
 }
 .widget-dnd switch {
-  border-radius: 100%;
-  min-width: 34px;
-  min-height: 18px;
-  background-color: @bg-deep;
+  border-radius: var(--pill);
+  min-width: 36px;
+  min-height: 20px;
+  background-color: @cc-inset;
   border: 1px solid @border;
 }
 .widget-dnd switch:checked {
@@ -672,10 +733,6 @@ scale:hover trough highlight {
 .widget-dnd switch:checked slider {
   background-color: @accent-on;
 }
-.widget-label > label {
-  font-size: var(--font-size-body);
-  color: @fg-alt;
-}
 .widget-inhibitors > label {
   font-size: var(--font-size-body);
   color: @fg-alt;
@@ -684,9 +741,9 @@ scale:hover trough highlight {
 .widget-inhibitors > button {
   background-color: @cc-card;
   border: 1px solid @border;
-  border-radius: var(--radius-sm);
+  border-radius: var(--pill);
   color: @fg-alt;
-  padding: 3px 10px;
+  padding: 3px 12px;
   transition: var(--hover-transition);
 }
 .widget-inhibitors > button:hover {

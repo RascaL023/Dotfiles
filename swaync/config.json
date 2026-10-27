@@ -38,10 +38,13 @@
   "widgets": [
     "title",
     "mpris",
-    "notifications",
     "volume",
     "backlight",
-    "buttons-grid"
+    "label#SectionQuick",
+    "buttons-grid#QuickActions",
+    "label#SectionSystem",
+    "buttons-grid#SystemActions",
+    "notifications"
   ],
 
   "widget-config": {
@@ -49,7 +52,7 @@
       "vexpand": true
     },
     "title": {
-      "text": "Ra$caL",
+      "text": "Notification Center",
       "clear-all-button": true,
       "button-text": "Clear"
     },
@@ -61,16 +64,22 @@
       ]
     },
     "volume": {
-      "label": ""
+      "label": "󰕾"
     },
     "backlight": {
-      "label": "󰃞"
+      "label": "󰃠"
     },
-    "buttons-grid": {
+    "label#SectionQuick": {
+      "text": "Quick Actions"
+    },
+    "label#SectionSystem": {
+      "text": "System Actions"
+    },
+    "buttons-grid#QuickActions": {
       "buttons-per-row": 3,
       "actions": [
         {
-          "label": "",
+          "label": "󰖩",
           "command": "kitty nmtui",
           "tooltip": "Network"
         },
@@ -81,12 +90,17 @@
           "tooltip": "Do Not Disturb"
         },
         {
-          "label": "󰈙",
+          "label": "󰉋",
           "command": "kitty yazi",
           "tooltip": "Files"
-        },
+        }
+      ]
+    },
+    "buttons-grid#SystemActions": {
+      "buttons-per-row": 3,
+      "actions": [
         {
-          "label": "",
+          "label": "󰌾",
           "command": "hyprlock",
           "tooltip": "Lock"
         },
@@ -96,7 +110,7 @@
           "tooltip": "Reboot"
         },
         {
-          "label": "⏻",
+          "label": "󰐥",
           "command": "shutdown now",
           "tooltip": "Power Off"
         }
