@@ -206,8 +206,18 @@ def volume_state(output):
         return None
     percent = round(float(match[1]) * 100)
     muted = "[MUTED]" in output
+    if muted:
+        icon = "󰝟"
+    elif percent == 0:
+        icon = "󰖁"
+    elif percent <= 33:
+        icon = "󰕿"
+    elif percent <= 66:
+        icon = "󰖀"
+    else:
+        icon = "󰕾"
     return {"available": True, "muted": muted, "percent": percent,
-            "text": f"{percent}%", "icon": "󰝟" if muted or percent == 0 else "󰕾",
+            "text": f"{percent}%", "icon": icon,
             "tooltip": f"Volume {percent}%{' · mute' if muted else ''}\nKlik: mute · gulir: ±5%"}
 
 
@@ -258,8 +268,12 @@ def battery_state(root=Path("/sys/class/power_supply")):
         return None
     percent = round(sum(x[1] for x in batteries) / len(batteries))
     charging = any(x[2] == "Charging" for x in batteries)
+    # Nerd Font battery levels: outline, 10%, 20%, ... 100%.
+    icons = (("󰢟", "󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅")
+             if charging else
+             ("󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"))
     return {"available": True, "warning": percent <= 20 and not charging,
-            "text": f"{percent}%", "icon": "󰂄" if charging else ("󰁺" if percent <= 20 else "󰁹"),
+            "text": f"{percent}%", "icon": icons[percent // 10],
             "tooltip": "\n".join(f"{n}: {c}% · {s}" for n, c, s in batteries)}
 
 

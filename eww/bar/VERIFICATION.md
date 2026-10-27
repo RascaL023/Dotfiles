@@ -1,14 +1,33 @@
 # Hasil verifikasi — 27 Oktober 2026
 
 Pengujian dilakukan pada Eww **0.6.0**, Python 3.12, output **LVDS-1
-1366×768 @ scale 1**. Sesi awal memakai Hyprland 0.56.2 dengan konfigurasi Lua;
-sesi akhir memakai Niri 26.04. Konfigurasi lama, Waybar, autostart, dan Matugen
+1366×768 @ scale 1**. Implementasi awal diuji pada Hyprland 0.56.2 dengan
+konfigurasi Lua dan Niri 26.04; penyesuaian ukuran berikutnya diperiksa di
+Hyprland. Konfigurasi lama, Waybar, autostart, dan Matugen
 tidak diubah oleh implementasi bar ini.
 
-## Tampilan dan lifecycle
+## Penyesuaian ukuran dan ikon
+
+- Pulau diperkecil dari 36 menjadi **30 px**, dengan padding atas/bawah tetap
+  3/0 px. `hyprctl -j layers` mengonfirmasi layer `eww-islands` pada
+  `x=0, y=0, w=1366, h=33`. Margin kiri/kanan menjadi **4 px**.
+- Teks 11 px, ikon 14 px, radius 10 px, dan spacing lebih rapat. Pil workspace
+  menjadi 6 px dan memanjang menjadi 22 px saat aktif; area klik 24 px tinggi.
+- Screenshot langsung memverifikasi ikon NixOS, teks dan ikon yang tidak
+  terpotong, serta jam tetap di tengah. Log Eww setelah reload tidak memuat
+  kesalahan konfigurasi. Font lokal menyediakan seluruh glyph yang digunakan.
+- **21 tes otomatis lolos**. Volume membedakan mute, 0%, 1–33%, 34–66%, dan
+  ≥67%; baterai mengikuti tingkat kapasitas per 10% dan varian pengisian.
+  Pengujian mencakup batas tingkat, pengisian, kapasitas penuh, dan multi-baterai.
+- Ikon baru memakai snapshot yang sudah tersedia. Tidak ada listener, timer,
+  scan Wi-Fi, atau dependensi tambahan. Wi-Fi tetap mengikuti status koneksi.
+- Penyesuaian visual ini belum diperiksa ulang dalam sesi Niri. Data performa
+  dan pengujian lifecycle di bawah berasal dari implementasi awal.
+
+## Tampilan dan lifecycle implementasi awal
 
 - Eww memuat Yuck, ekspresi, atribut widget, dan SCSS tanpa kesalahan konfigurasi.
-- Pada Niri, tampilan akhir memiliki pulau 36 px, padding atas 3 px dan bawah
+- Pada Niri, iterasi awal memiliki pulau 36 px, padding atas 3 px dan bawah
   0 px, total 39 px. Layer `eww-islands` berada di `Top` dengan
   `keyboard_interactivity: None`. Aplikasi berada di bawah bar; gap tambahan
   tetap mengikuti konfigurasi compositor.
@@ -30,7 +49,7 @@ ketika pembukaan jendela melewati timeout IPC klien 100 ms. Controller memakai
 identitas proses. Ini mencegah daemon ganda yang ditemukan pada pengujian awal.
 Pesan tersebut bukan kesalahan parser Yuck/SCSS.
 
-## Data dan interaksi
+## Data dan interaksi implementasi awal
 
 **20 tes otomatis lolos**, termasuk metadata kutip/backslash/Unicode/newline,
 layanan kosong, deduplikasi bridge MPD, pemutar aktif dan pilihan yang tetap,

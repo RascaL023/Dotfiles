@@ -59,3 +59,8 @@ tooltip {
   font-family: $font;
   font-size: $font-size;
 }
+
+.distro-icon {
+  margin-right: $distro-margin-right;
+  padding-right: $distro-padding-right;
+}

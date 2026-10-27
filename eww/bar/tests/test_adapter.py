@@ -71,6 +71,11 @@ class Parsers(unittest.TestCase):
     def test_volume_and_notifications(self):
         self.assertTrue(volume_state("Volume: 0.45 [MUTED]")["muted"])
         self.assertEqual(volume_state("Volume: 1.20")["percent"], 120)
+        for percent, icon in ((0, "󰖁"), (1, "󰕿"), (33, "󰕿"), (34, "󰖀"),
+                              (50, "󰖀"), (66, "󰖀"), (67, "󰕾"), (100, "󰕾"), (120, "󰕾")):
+            with self.subTest(percent=percent):
+                self.assertEqual(volume_state(f"Volume: {percent / 100:.2f}")["icon"], icon)
+                self.assertEqual(volume_state(f"Volume: {percent / 100:.2f} [MUTED]")["icon"], "󰝟")
         self.assertIsNone(volume_state(""))
         self.assertEqual(notification_state('{"count":3,"dnd":true}')["count"], 3)
         self.assertTrue(notification_state('{"dnd":"true"}')["dnd"])
@@ -104,12 +109,32 @@ class Parsers(unittest.TestCase):
                     (path / key).write_text(value)
             state = battery_state(root)
             self.assertEqual(state["text"], "40%")
-            self.assertEqual(state["icon"], "󰂄")
+            self.assertEqual(state["icon"], "󰂈")
             self.assertFalse(state["warning"])
             (root / "CMB1/present").write_text("0")
             self.assertTrue(battery_state(root)["warning"])
             (root / "BAT7/capacity").write_text("invalid")
             self.assertIsNone(battery_state(root))
+
+    def test_battery_icons_follow_capacity_and_charging(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            battery = root / "BAT7"
+            battery.mkdir()
+            (battery / "type").write_text("Battery")
+            cases = ((0, "󰂎", "󰢟"), (9, "󰂎", "󰢟"), (10, "󰁺", "󰢜"),
+                     (19, "󰁺", "󰢜"), (20, "󰁻", "󰂆"), (37, "󰁼", "󰂇"),
+                     (50, "󰁾", "󰢝"), (99, "󰂂", "󰂋"), (100, "󰁹", "󰂅"))
+            for percent, normal, charging in cases:
+                (battery / "capacity").write_text(str(percent))
+                for status, icon in (("Discharging", normal), ("Charging", charging)):
+                    with self.subTest(percent=percent, status=status):
+                        (battery / "status").write_text(status)
+                        state = battery_state(root)
+                        self.assertEqual(state["icon"], icon)
+                        self.assertEqual(state["warning"], percent <= 20 and status != "Charging")
+            (battery / "status").write_text("Full")
+            self.assertEqual(battery_state(root)["icon"], "󰁹")
 
     def test_player_priority_sticky_and_bridge_deduplication(self):
         cfg = self.cfg["music"]

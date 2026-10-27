@@ -1,10 +1,11 @@
 # Bar Eww — tiga pulau
 
 Bar mandiri untuk **Eww 0.6.0 + Wayland**, dengan adapter **Hyprland dan Niri**,
-target awal 1366×768. Satu jendela transparan menampung tiga pulau 36 px;
-padding atas 3 px dan bawah 0 px membuat area eksklusif **39 px**. Margin horizontal
-10 px, radius 12 px, border 1 px. Jam tetap di tengah layar. Workspace berupa
-pil tanpa angka: 8 px ketika tidak aktif, memanjang menjadi 26 px ketika aktif,
+target awal 1366×768. Satu jendela transparan menampung tiga pulau 30 px;
+padding atas 3 px dan bawah 0 px membuat area eksklusif **33 px**. Margin horizontal
+4 px, radius 10 px, border 1 px; teks 11 px dan ikon 14 px. Launcher memakai ikon
+NixOS. Jam tetap di tengah layar. Workspace berupa
+pil tanpa angka: 6 px ketika tidak aktif, memanjang menjadi 22 px ketika aktif,
 dengan transisi 160 ms. Tooltip tetap menampilkan identitas workspace.
 Padding bawah bar sudah nol; jarak tambahan dari pengaturan gap compositor
 tetap mengikuti konfigurasi Niri/Hyprland Anda.
@@ -94,15 +95,18 @@ volume/notifikasi tidak dapat diklik; jaringan tetap dapat membuka `nmtui`.
 | Musik | Klik play/pause; gulir atas sebelumnya, bawah berikutnya; tooltip artis/judul/sumber lengkap |
 | Jam | Waktu 24 jam, tanggal singkat; tooltip tanggal lengkap dan zona waktu |
 | Tray | Chevron membuka/menutup; area ikon bisa digulir horizontal |
-| Volume | Klik mute; gulir ±5%, maksimum 100% |
+| Volume | Klik mute; gulir ±5%, maksimum 100%; ikon berbeda untuk mute, 0%, 1–33%, 34–66%, dan ≥67% |
 | Jaringan | Tooltip koneksi aktif; klik membuka nmtui di Kitty |
-| Baterai | Persentase, ikon pengisian; tooltip tiap baterai; rendah ≤20% mendapat warna warning |
+| Baterai | Ikon kapasitas per 10% (dibulatkan ke bawah), dengan varian petir saat mengisi; tooltip tiap baterai; rendah ≤20% mendapat warna warning |
 | Notifikasi | Klik panel SwayNC; klik kanan DND; tooltip jumlah dan status DND |
 | Daya | Rofi: kunci, suspend, logout, restart, shutdown; tiga aksi terakhir memerlukan pilihan konfirmasi |
 
 Bila beberapa baterai tersedia, angka ringkas adalah rata-rata persentasenya;
 tooltip tetap menampilkan nilai dan status masing-masing. Nama interface,
 nama baterai, UID, dan socket Hyprland tidak di-hardcode.
+Ikon volume/baterai memakai data yang sudah dibaca, tanpa proses atau timer
+tambahan. Wi-Fi tetap menampilkan status koneksi; tidak memantau kekuatan
+sinyal atau melakukan scan berkala.
 
 ## Tema
 
@@ -110,11 +114,11 @@ Semua warna, font, ukuran, spacing, dan radius ada di
 **`styles/_tokens.scss`**. Komponen di `_bar.scss` hanya memakai token semantik.
 `$tray-icon-size` berupa bilangan tanpa unit karena diteruskan ke atribut Eww;
 ukuran lain memakai px. Tinggi geometri Yuck 1 px hanya batas minimum;
-tinggi sebenarnya berasal dari token SCSS, sehingga tidak ada salinan 39 px
+tinggi sebenarnya berasal dari token SCSS, sehingga tidak ada salinan 33 px
 yang perlu disinkronkan di Yuck.
 Lebar area pil mengikuti jumlah workspace hingga batas `$workspace-area`;
-lebih dari batas itu dapat digulir. Area klik tetap 26 px tinggi meskipun pil
-hanya setinggi 8 px. Transisi hanya berjalan ketika status workspace berubah.
+lebih dari batas itu dapat digulir. Area klik tetap 24 px tinggi meskipun pil
+hanya setinggi 6 px. Transisi hanya berjalan ketika status workspace berubah.
 
 Palet lokal gelap hangat langsung bekerja tanpa theme store. Integrasi Matugen
 bersifat opsional: kedua template yang sudah ada,
@@ -264,6 +268,7 @@ pages dapat terhitung lebih dari sekali). Hasil sesi implementasi ada di
 - [Implementasi widget Eww v0.6.0](https://github.com/elkowar/eww/blob/v0.6.0/crates/eww/src/widgets/widget_definitions.rs)
 - [API dispatcher Hyprland](https://wiki.hypr.land/Configuring/Basics/Dispatchers/)
 - [Protokol IPC Niri](https://github.com/YaLTeR/niri/blob/main/niri-ipc/src/lib.rs)
+- [Pemetaan ikon Nerd Fonts](https://github.com/ryanoasis/nerd-fonts/blob/master/css/nerd-fonts-generated.css) — NixOS, volume, dan tingkat baterai
 - [`../monasm-config.example/`](../monasm-config.example/) — pola tray/workspace lokal
 - [Arin oleh adi1090x](https://github.com/adi1090x/widgets/tree/main/eww/arin) — referensi kelompok visual
 
