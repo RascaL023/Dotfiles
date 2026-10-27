@@ -1,0 +1,17 @@
+;; Complete fallback schema. Keep in sync with scripts/common.py:initial_state.
+(deflisten bar :initial "{\"modules\":{\"launcher\":true,\"workspaces\":true,\"music\":true,\"clock\":true,\"tray\":true,\"volume\":true,\"network\":true,\"battery\":true,\"notifications\":true,\"power\":true},\"tray_open\":false,\"ui\":{\"tray_icon_size\":16},\"workspaces\":{\"available\":false,\"items\":[{\"id\":1,\"name\":\"1\",\"label\":\"1\",\"active\":false,\"occupied\":false},{\"id\":2,\"name\":\"2\",\"label\":\"2\",\"active\":false,\"occupied\":false},{\"id\":3,\"name\":\"3\",\"label\":\"3\",\"active\":false,\"occupied\":false},{\"id\":4,\"name\":\"4\",\"label\":\"4\",\"active\":false,\"occupied\":false},{\"id\":5,\"name\":\"5\",\"label\":\"5\",\"active\":false,\"occupied\":false}],\"width\":138},\"clock\":{\"time\":\"--:--\",\"date\":\"\",\"tooltip\":\"\"},\"music\":{\"available\":false,\"source\":\"\",\"title\":\"\",\"tooltip\":\"\",\"icon\":\"󰎈\",\"limit\":24},\"volume\":{\"available\":false,\"muted\":false,\"percent\":0,\"text\":\"--\",\"icon\":\"󰝟\",\"tooltip\":\"Audio tidak tersedia\"},\"network\":{\"available\":false,\"icon\":\"󰤭\",\"tooltip\":\"Jaringan tidak tersedia\"},\"battery\":{\"available\":false,\"warning\":false,\"text\":\"\",\"icon\":\"\",\"tooltip\":\"\"},\"notifications\":{\"available\":false,\"dnd\":false,\"count\":0,\"icon\":\"󰂛\",\"tooltip\":\"SwayNC tidak tersedia\"}}"
+  "exec python3 ./scripts/adapter.py listen")
+
+(include "widgets/islands.yuck")
+
+(defwindow islands
+  :monitor 0
+  :geometry (geometry :x "0px" :y "0px" :width "100%" :height "1px" :anchor "top center")
+  :exclusive true
+  :focusable false
+  :stacking "fg"
+  :namespace "eww-islands"
+  (centerbox :class "bar-frame islands-window" :orientation "h"
+    (left-island)
+    (clock-island)
+    (right-island)))

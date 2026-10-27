@@ -1,0 +1,42 @@
+// Local palette; see README.md for the optional Matugen mapping.
+$surface: #1d1c19;
+$text: #dcd7ba;
+$muted: #a6a69c;
+$accent: #8ba4b0;
+$on-accent: #181616;
+$border: #393832;
+$warning: #c4b28a;
+$hover: #30302b;
+$clear: transparent;
+
+$font: "Inter";
+$icon-font: "JetBrainsMono Nerd Font";
+$font-size: 12px;
+$icon-size: 15px;
+$font-weight: 500;
+$clock-weight: 600;
+$island-height: 36px;
+$outer-top: 3px;
+$outer-bottom: 0px;
+$outer-x: 10px;
+$radius: 12px;
+$button-radius: 9px;
+$border-width: 1px;
+$island-padding: 5px;
+$button-padding: 8px;
+$button-height: 26px;
+$workspace-dot-width: 8px;
+$workspace-active-width: 26px;
+$workspace-dot-height: 8px;
+$workspace-hit-padding: 6px;
+$workspace-area: 160px;
+$workspace-gap: 4px;
+$workspace-transition: 160ms;
+$module-gap: 5px;
+$clock-padding: 16px;
+$tray-area: 96px;
+// Unitless because Eww's systray attribute accepts an integer.
+$tray-icon-size: 16;
+$tooltip-padding: 8px;
+$scroll-size: 2px;
+$zero: 0;

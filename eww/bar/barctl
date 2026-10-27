@@ -1,0 +1,211 @@
+#!/usr/bin/env python3
+"""Control only the Eww instance belonging to this canonical config directory."""
+import argparse
+import asyncio
+import fcntl
+import json
+import os
+from pathlib import Path
+import shutil
+import signal
+import subprocess
+import sys
+import time
+
+ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT / "scripts"))
+from common import compositor_name, initial_state, runtime_dir, settings
+from actions import local_action, request
+
+
+def eww(*args, check=True):
+    # Eww 0.6.0 otherwise forks a second daemon on a 100 ms IPC read timeout.
+    argv = ["eww", "--config", str(ROOT), "--force-wayland", "--no-daemonize", *args]
+    result = subprocess.run(argv, text=True, capture_output=True, timeout=10)
+    if check and result.returncode:
+        raise RuntimeError((result.stderr or "").strip() or (result.stdout or "").strip() or "Eww command failed")
+    return result
+
+
+def alive():
+    return eww("ping", check=False).returncode == 0
+
+
+def identity(pid):
+    try:
+        path = Path("/proc") / str(pid)
+        argv = (path / "cmdline").read_bytes().split(b"\0")
+        stat = (path / "stat").read_text().rsplit(")", 1)[1].split()
+        if os.fsencode(ROOT) in argv and argv[0].split(b"/")[-1] == b"eww" and stat[0] != "Z":
+            return int(stat[19])
+    except (OSError, ValueError):
+        pass
+    return None
+
+
+def managed_pid():
+    try:
+        info = json.loads((runtime_dir() / "daemon.pid").read_text())
+        if identity(info["pid"]) == info["start"]:
+            return info["pid"]
+    except (OSError, ValueError, KeyError):
+        pass
+    return None
+
+
+def stop():
+    pid = managed_pid()
+    requested = False
+    if alive():
+        requested = eww("kill", check=False).returncode == 0
+    if pid and not requested and identity(pid) is not None:
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+    # Also covers a collector whose parent was killed unexpectedly.
+    try:
+        asyncio.run(request("stop"))
+    except (OSError, RuntimeError, ValueError, asyncio.TimeoutError):
+        pass
+    directory = runtime_dir()
+    with (directory / "collector.lock").open("a") as lock:
+        for _ in range(100):
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError:
+                time.sleep(.05)
+        else:
+            raise RuntimeError("collector did not stop; inspect Eww logs")
+    for _ in range(100):
+        if not managed_pid() and not alive():
+            (runtime_dir() / "daemon.pid").unlink(missing_ok=True)
+            return
+        time.sleep(.05)
+    raise RuntimeError("Eww daemon did not stop")
+
+
+def start(cfg, monitor):
+    if alive() and "islands: islands" in eww("active-windows").stdout:
+        if monitor is None:
+            return
+        stop()
+    monitor = str(cfg["monitor"] if monitor is None else monitor)
+    runtime_dir().joinpath("monitor").write_text(monitor)
+    if not managed_pid() and not alive():
+        with (runtime_dir() / "daemon.log").open("a") as log:
+            proc = subprocess.Popen(["eww", "--config", str(ROOT), "--force-wayland",
+                                     "--no-daemonize", "daemon"], stdin=subprocess.DEVNULL,
+                                    stdout=log, stderr=log, start_new_session=True)
+        # Wait until the exec has replaced the child before recording its identity.
+        for _ in range(100):
+            stamp = identity(proc.pid)
+            if stamp is not None:
+                (runtime_dir() / "daemon.pid").write_text(json.dumps({"pid": proc.pid, "start": stamp}))
+                break
+            if proc.poll() is not None:
+                raise RuntimeError("Eww daemon exited; inspect daemon.log")
+            time.sleep(.02)
+    for _ in range(50):
+        if alive():
+            break
+        time.sleep(.1)
+    else:
+        stop()
+        raise RuntimeError("Eww daemon did not become ready; inspect daemon.log")
+    result = eww("open", "islands", "--screen", monitor, check=False)
+    # A slow open can succeed on the GTK thread after the CLI's 100 ms timeout.
+    for _ in range(50):
+        windows = eww("active-windows", check=False)
+        if windows.returncode == 0 and "islands: islands" in windows.stdout:
+            break
+        time.sleep(.1)
+    else:
+        stop()
+        raise RuntimeError(result.stderr.strip() or "Eww failed to open islands")
+    for _ in range(100):
+        try:
+            asyncio.run(request("state"))
+            return
+        except (OSError, ValueError, RuntimeError):
+            time.sleep(.05)
+    stop()
+    raise RuntimeError("collector did not start; inspect daemon.log")
+
+
+def doctor(cfg):
+    initial_state(cfg)
+    backend = compositor_name(cfg)
+    print(f"Config: {ROOT}\nSettings: OK\nCompositor: {backend}\nMonitor: {cfg['monitor']}\nRuntime: {runtime_dir()}")
+    names = {"eww", "python3"}
+    dependencies = {"workspaces": ("niri" if backend == "niri" else "hyprctl",), "volume": ("wpctl", "pw-dump"),
+                    "network": ("nmcli",), "notifications": ("swaync-client",)}
+    for module, tools in dependencies.items():
+        if cfg["modules"][module]:
+            names.update(tools)
+    if cfg["modules"]["music"]:
+        if cfg["music"]["mpris"]:
+            names.update(("playerctl", "dbus-monitor"))
+        if cfg["music"]["mpd"]:
+            names.add("mpc")
+    names.update(argv[0] for argv in cfg["commands"].values())
+    for name in sorted(names):
+        print(f"{'OK' if shutil.which(name) else 'MISSING'}  {name}")
+    for name in ("WAYLAND_DISPLAY", "XDG_RUNTIME_DIR", "NIRI_SOCKET" if backend == "niri" else "HYPRLAND_INSTANCE_SIGNATURE", "DBUS_SESSION_BUS_ADDRESS"):
+        print(f"{'OK' if os.environ.get(name) else 'MISSING'}  {name}")
+    print(eww("--version").stdout.strip())
+    for family in ("Inter", "JetBrainsMono Nerd Font"):
+        if shutil.which("fc-match"):
+            result = subprocess.run(["fc-match", family], capture_output=True, text=True, timeout=3)
+            print(f"Font {family}: {result.stdout.strip()}")
+    print("Instance: " + ("running" if alive() else "stopped"))
+    if alive():
+        try:
+            state = asyncio.run(request("state"))["state"]
+            for name in ("workspaces", "music", "volume", "network", "battery", "notifications"):
+                print(f"{name}: {'available' if state[name]['available'] else 'unavailable / disabled'}")
+        except (OSError, RuntimeError):
+            print("Collector unavailable")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("start", "stop", "toggle", "reload", "status", "doctor", "action"))
+    parser.add_argument("name", nargs="?")
+    parser.add_argument("argument", nargs="?")
+    parser.add_argument("--monitor", help="connector name or Eww monitor index (start/toggle)")
+    args = parser.parse_args()
+    if args.command == "action":
+        if not local_action(args.name, settings()):
+            asyncio.run(request(args.name, args.argument))
+        return
+    if args.command == "doctor":
+        doctor(settings())
+        return
+    if args.command == "status":
+        print(eww("active-windows").stdout.strip() or "stopped") if alive() else print("stopped")
+        return
+    with (runtime_dir() / "control.lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if args.command == "stop":
+            stop()
+        elif args.command == "toggle" and alive():
+            stop()
+        elif args.command == "reload":
+            cfg = settings()  # Validate before stopping a working bar.
+            if alive():
+                selected = runtime_dir() / "monitor"
+                monitor = selected.read_text().strip() if selected.exists() else str(cfg["monitor"])
+                stop()
+                start(cfg, monitor)
+        else:
+            start(settings(), args.monitor)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, KeyError, RuntimeError, subprocess.TimeoutExpired) as exc:
+        print(f"barctl: {exc}", file=sys.stderr)
+        sys.exit(1)

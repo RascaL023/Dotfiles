@@ -1,0 +1,56 @@
+(defwidget left-island []
+  (box :halign "start" :valign "center" :class "island" :space-evenly false
+    (button :visible {bar.modules.launcher} :class "control icon accent"
+      :tooltip "Aplikasi" :onclick "./barctl action launcher" :timeout "5s" "󰣇")
+    (scroll :visible {bar.modules.workspaces} :class "workspace-scroll" :width {bar.workspaces.width}
+      :hscroll true :vscroll false
+      (box :space-evenly false
+        (for ws in {bar.workspaces.items}
+          (button :valign "center" :class "workspace ${ws.active ? 'active' : (ws.occupied ? 'occupied' : '')}"
+            :active {bar.workspaces.available} :tooltip {ws.name}
+            :onclick "./barctl action workspace ${ws.id}" :timeout "5s"
+            (box :class "workspace-dot" :valign "center")))))
+    (eventbox :visible {bar.modules.music && bar.music.available}
+      :onscroll "./barctl action music-scroll {}" :timeout "5s"
+      (button :class "control music" :tooltip {bar.music.tooltip}
+        :onclick "./barctl action music-toggle" :timeout "5s"
+        (box :space-evenly false
+          (label :class "icon accent" :text {bar.music.icon})
+          (label :class "module-text" :text {bar.music.title} :limit-width {bar.music.limit}))))))
+
+(defwidget clock-island []
+  (box :halign "center" :valign "center" :visible {bar.modules.clock}
+    :class "island clock" :space-evenly false :tooltip {bar.clock.tooltip}
+    (label :text {bar.clock.time})
+    (label :class "clock-date" :text {bar.clock.date})))
+
+(defwidget right-island []
+  (box :halign "end" :valign "center" :class "island" :space-evenly false
+    (box :visible {bar.modules.tray} :space-evenly false
+      (button :class "control icon muted" :tooltip "Lipat / buka tray"
+        :onclick "./barctl action tray" :timeout "5s"
+        (label :text {bar.tray_open ? '󰅂' : '󰅁'}))
+      (scroll :visible {bar.tray_open} :class "tray-scroll" :hscroll true :vscroll false
+        (systray :class "tray" :icon-size {bar.ui.tray_icon_size} :space-evenly false)))
+    (eventbox :visible {bar.modules.volume}
+      :onscroll "./barctl action volume-scroll {}" :timeout "5s"
+      (button :class "control ${bar.volume.muted ? 'muted' : ''}"
+        :active {bar.volume.available} :tooltip {bar.volume.tooltip}
+        :onclick "./barctl action volume-mute" :timeout "5s"
+        (box :space-evenly false
+          (label :class "icon" :text {bar.volume.icon})
+          (label :class "module-text" :text {bar.volume.text}))))
+    (button :visible {bar.modules.network} :class "control icon"
+      :tooltip {bar.network.tooltip} :onclick "./barctl action network" :timeout "5s"
+      (label :text {bar.network.icon}))
+    (box :visible {bar.modules.battery && bar.battery.available}
+      :class "control ${bar.battery.warning ? 'warning' : ''}" :space-evenly false
+      :tooltip {bar.battery.tooltip}
+      (label :class "icon" :text {bar.battery.icon})
+      (label :class "module-text" :text {bar.battery.text}))
+    (button :visible {bar.modules.notifications} :class "control icon"
+      :active {bar.notifications.available} :tooltip {bar.notifications.tooltip}
+      :onclick "./barctl action notifications" :onrightclick "./barctl action dnd" :timeout "5s"
+      (label :text {bar.notifications.icon}))
+    (button :visible {bar.modules.power} :class "control icon muted"
+      :tooltip "Daya" :onclick "./barctl action power" :timeout "5s" "⏻")))

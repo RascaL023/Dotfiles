@@ -1,0 +1,42 @@
+{
+  "monitor": "LVDS-1",
+  "compositor": "auto",
+  "modules": {
+    "launcher": true,
+    "workspaces": true,
+    "music": true,
+    "clock": true,
+    "tray": true,
+    "volume": true,
+    "network": true,
+    "battery": true,
+    "notifications": true,
+    "power": true
+  },
+  "workspaces": [1, 2, 3, 4, 5],
+  "intervals": {
+    "battery": 30,
+    "debounce": 0.15,
+    "reconnect_max": 30,
+    "command_timeout": 3
+  },
+  "music": {
+    "mpris": true,
+    "mpd": true,
+    "preferred": ["mpd"],
+    "mpd_bridges": ["mpd", "mpd-mpris"],
+    "title_limit": 24
+  },
+  "commands": {
+    "launcher": ["rofi", "-show", "drun"],
+    "network": ["kitty", "--class", "bar-network", "nmtui"],
+    "notifications": ["swaync-client", "-t"],
+    "dnd": ["swaync-client", "-d"],
+    "menu": ["rofi", "-dmenu", "-i", "-no-custom"],
+    "lock": ["hyprlock"],
+    "suspend": ["systemctl", "suspend"],
+    "logout": null,
+    "reboot": ["systemctl", "reboot"],
+    "shutdown": ["systemctl", "poweroff"]
+  }
+}

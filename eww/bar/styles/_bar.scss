@@ -1,0 +1,61 @@
+* { all: unset; }
+
+.islands-window {
+  background: $clear;
+  color: $text;
+  font-family: $font;
+  font-size: $font-size;
+  font-weight: $font-weight;
+}
+.bar-frame { padding: $outer-top $outer-x $outer-bottom; }
+.island {
+  background: $surface;
+  border: $border-width solid $border;
+  border-radius: $radius;
+  min-height: $island-height - 2 * $border-width;
+  padding: $zero $island-padding;
+}
+.control {
+  min-height: $button-height;
+  padding: $zero $button-padding;
+  border-radius: $button-radius;
+}
+.control:hover { background: $hover; color: $text; }
+.icon { font-family: $icon-font; font-size: $icon-size; }
+.accent { color: $accent; }
+.muted { color: $muted; }
+.warning { color: $warning; }
+.workspace {
+  min-height: $button-height;
+  padding: $zero $workspace-hit-padding;
+  margin-right: $workspace-gap;
+}
+.workspace-dot {
+  min-width: $workspace-dot-width;
+  min-height: $workspace-dot-height;
+  border-radius: $button-radius;
+  background: $border;
+  transition: min-width $workspace-transition ease, background-color $workspace-transition ease;
+}
+.workspace.occupied .workspace-dot { background: $muted; }
+.workspace:hover .workspace-dot { background: $text; }
+.workspace.active .workspace-dot { min-width: $workspace-active-width; background: $accent; }
+.music { margin-left: $module-gap; }
+.module-text { margin-left: $module-gap; }
+.clock { padding: $zero $clock-padding; font-weight: $clock-weight; }
+.clock-date { margin-left: 2 * $module-gap; color: $muted; font-weight: $font-weight; }
+.tray-scroll { min-width: $tray-area; }
+.tray menu { background: $surface; padding: $island-padding; border: $border-width solid $border; }
+.tray menuitem { padding: $tooltip-padding; }
+.tray menuitem:hover { background: $hover; }
+scrollbar { min-height: $scroll-size; min-width: $scroll-size; }
+scrollbar slider { background: $border; min-height: $scroll-size; min-width: $scroll-size; }
+tooltip {
+  background: $surface;
+  color: $text;
+  border: $border-width solid $border;
+  border-radius: $button-radius;
+  padding: $tooltip-padding;
+  font-family: $font;
+  font-size: $font-size;
+}
