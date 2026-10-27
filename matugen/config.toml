@@ -13,7 +13,7 @@ post_hook       = "mkdir -p ~/.myenv/theme/current/alacritty"
 [templates.kitty]
 input_path      = "~/.config/matugen/templates/general/kitty.conf"
 output_path     = "~/.myenv/theme/generated/live.bak/kitty/theme.conf"
-post_hook       = "pkill -SIGUSR1 kitty"
+post_hook       = "pkill -SIGUSR1 kitty || true"
 
 [templates.lazygit]
 input_path      = "~/.config/matugen/templates/general/lazygit.yml"
@@ -25,6 +25,7 @@ output_path     = "~/.myenv/theme/generated/live.bak/css/theme.css"
 post_hook       = """
     dconf write /org/gnome/desktop/interface/gtk-theme "'Adwaita'"
     dconf write /org/gnome/desktop/interface/gtk-theme "'Kanagawa-Dark-Dragon'"
+    swaync-client -rs 2>/dev/null || true
 """
 
 [templates.scss]
@@ -42,7 +43,7 @@ output_path     = "~/.myenv/theme/current/nvim/theme.lua"
 [templates.herdr]
 input_path      = "~/.config/matugen/templates/general/herdr.toml"
 output_path     = "~/.myenv/theme/generated/live.bak/herdr/config.toml"
-post_hook       = "herdr server reload-config"
+post_hook       = "herdr server reload-config || true"
 
 [templates.yazi]
 input_path      = "~/.config/matugen/templates/general/yazi-flavor.toml"

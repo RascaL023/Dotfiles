@@ -175,6 +175,20 @@ Rules:
   incremental-selection `<CR>` mapping — falling back to regex
   `syntax/<lang>.vim` plus `indent/<lang>.vim`. Check the parser before
   debugging selection, indent, or color for a single language.
+- **GTK 4 has `@import`** (verified: GTK 4.22 + swaync 0.12.6 — the imported
+  value reached the rendered pixel). `swaync/style.css` therefore carries **no**
+  palette literals: it imports
+  `/home/rascal/.myenv/theme/current/css/theme.css`, the same file
+  `waybar/style.css` and `wlogout/source.css` read. Add colors to the theme,
+  never to that stylesheet.
+- **`swaync-client -rs` reloads CSS; `-R` only reloads `config.json`.** Both
+  flows' `[templates.css]` post_hook already ends with `-rs`.
+- **`post_hook` runs through `$SHELL` (fish here), not bash.** Keep hooks
+  shell-agnostic: `swaync-client -rs 2>/dev/null || true` is fine, `$?` is a
+  fish syntax error and fails the whole hook.
+- A missing named color in GTK 4 is **silent** — it falls back to the widget
+  default instead of warning. Verify an import by rendering (probe rule +
+  pixel), not by grepping logs.
 
 ---
 

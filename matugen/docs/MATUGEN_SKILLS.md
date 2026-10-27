@@ -499,6 +499,14 @@ Notes:
 - Format: `hex` via `@define-color`.
 - Reload: `pkill -SIGUSR2 waybar || true` (reloads the style).
 - GTK CSS supports `alpha(@surface, 0.8)` for transparency. Prefer it to hand-written rgba.
+- **GTK 4 has `@import` too** (VERIFIED: GTK 4.22 + swaync 0.12.6 — a color defined in the imported file reached the widget pixel). So a GTK 4 app needs no block-splicing or a full-file template; one line is enough:
+  ```css
+  @import url("/home/<user>/.myenv/theme/current/css/theme.css");
+  ```
+  Use an absolute path (there is no `~` expansion and relative paths are unreliable).
+- **A missing named color is silent in GTK 4.** Unlike a syntax error, `@undeclared` produces no warning; it just falls back to the widget default. Do not "verify" an import by grepping the log — render a probe rule (e.g. `.control-center { background: @accent; }`) and read the pixel, or check the app's own reload output.
+- `swaync` details: stylesheet is `~/.config/swaync/style.css`, palette comes from the shared `css/theme.css`; reload with `swaync-client -rs` — `-R` only reloads `config.json` and leaves the stylesheet untouched.
+- `post_hook` is executed through the user's `$SHELL` (fish on this machine), not bash: keep hooks shell-agnostic. `swaync-client -rs 2>/dev/null || true` works; `$?` is a fish syntax error and fails the whole hook.
 
 Template `waybar-colors.css`:
 
@@ -761,7 +769,7 @@ return {
 }
 ```
 
-### 6.15 Everything else (swaync, wlogout, zathura, yazi, spicetify, vesktop, quickshell, ags, eww, starship, cava...)
+### 6.15 Everything else (wlogout, zathura, yazi, spicetify, vesktop, quickshell, ags, eww, starship, cava...)
 
 Use this procedure for any app not listed:
 

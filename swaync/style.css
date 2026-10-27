@@ -37,46 +37,32 @@
      buttons-grid#QuickActions  → .widget-buttons-grid.QuickActions
      buttons-grid#SystemActions → .widget-buttons-grid.SystemActions
 
-   ── Menyambung ke matugen nanti ──────────────────────────────────────────
-   Semua warna mentah ada di satu blok bertanda MATUGEN:BEGIN / MATUGEN:END.
-   Nama variabelnya sengaja memakai kosakata yang sudah dipakai bar lain
-   (hasil `matugen/templates/general/source.css` yang dibaca lewat
-   `~/.myenv/theme/current/css/theme.css`), jadi menyambung ke matugen cukup
-   menimpa blok itu dengan `@define-color` bernama sama — tidak ada satu pun
-   aturan di bawah yang perlu diubah. GTK4 tidak punya `@import`, jadi
-   penyambungannya berupa penimpaan blok (atau symlink file ini), bukan import.
+   ── Palet: dari matugen ──────────────────────────────────────────────────
+   Tidak ada satu pun nilai warna di berkas ini. Semua `@define-color` mentah
+   datang dari `~/.myenv/theme/current/css/theme.css` — berkas yang sama yang
+   dibaca waybar dan wlogout, hasil `[templates.css]` di `matugen/config.toml`
+   (varian `general/source.css` maupun `kanagawa-dragon-lotus/template/
+   gtk3.css`). Tema berganti → warna swaync ikut berganti tanpa menyentuh
+   berkas ini. Yang ditulis tangan hanya turunannya (bagian 2) dan ukuran
+   (bagian 3).
+
+   Catatan: GTK 4 *punya* `@import` (diuji di GTK 4.22 + swaync 0.12.6: warna
+   dari berkas yang di-import benar-benar sampai ke widget). Karena itu
+   penyambungannya cukup satu baris import, bukan penimpaan blok.
    ========================================================================== */
 
-/* ── 1. Palet mentah (target matugen) ───────────────────────────────────── */
-/* MATUGEN:BEGIN — nilainya masih tulisan tangan; ini yang nanti ditimpa */
-@define-color accent          #8ba4b0;  /* accent.primary   / colors.primary   */
-@define-color accent-hover    #9bb2be;  /* accent.primary | terang 8%          */
-@define-color accent-on       #0d0c0c;  /* accent.on_primary                   */
-@define-color accent-2        #a292a3;  /* accent.secondary                    */
-@define-color accent-3        #7aa89f;  /* accent.tertiary                     */
-@define-color selection-bg    #223249;  /* accent.primary_container            */
-@define-color selection-fg    #c5c9c5;  /* accent.on_primary_container         */
+/* ── 1. Palet — satu sumber, dari matugen ───────────────────────────────── */
+/* Satu baris ini menggantikan seluruh blok palet yang tadinya ditulis tangan.
+   Nama yang dipakai aturan di bawah semuanya sudah ada di theme.css: accent,
+   accent-hover, accent-on, selection-bg, bg-main, bg-raised, bg-surface,
+   bg-deep, fg-main, fg-alt, fg-dim, fg-disabled, border, border-medium,
+   border-active, shadow, error. Tidak ada pemetaan/alias yang perlu dirawat:
+   yang di-import memakai kosakata yang sama dengan waybar.
 
-@define-color bg-main         #181616;  /* surface.base                        */
-@define-color bg-raised       #1d1c19;  /* surface.medium                      */
-@define-color bg-surface      #282727;  /* surface.high                        */
-@define-color bg-deep         #0d0c0c;  /* surface.lowest                      */
-
-@define-color fg-main         #c5c9c5;  /* text.primary    / colors.on_surface */
-@define-color fg-alt          #a6a69c;  /* text.muted                          */
-@define-color fg-dim          #625e5a;  /* text.faint                          */
-@define-color fg-disabled     #393836;  /* text.disabled                       */
-
-@define-color border          #393836;  /* border.default  / outline_variant   */
-@define-color border-medium   #625e5a;  /* border.medium                       */
-@define-color border-active   #8ba4b0;  /* border.active                       */
-
-@define-color shadow          #0d0c0c;  /* effect.shadow                       */
-@define-color success         #8a9a7b;  /* status.success                      */
-@define-color warning         #c4b28a;  /* status.warning                      */
-@define-color error           #c4746e;  /* status.error                        */
-@define-color critical        #e46876;  /* status.critical                     */
-/* MATUGEN:END */
+   Kalau `~/.myenv/theme/current` belum pernah di-generate, baris ini gagal
+   dimuat dan semua @warna di bawah jatuh ke warna bawaan GTK: panel tetap
+   jalan, hanya tidak bertema. */
+@import url("/home/rascal/.myenv/theme/current/css/theme.css");
 
 /* ── 2. Turunan + nama lama swaync ──────────────────────────────────────── */
 /* Ditulis tangan (bukan hasil matugen), semuanya turunan dari blok di atas.

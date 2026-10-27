@@ -6,7 +6,7 @@
 > [x] = template exists in this repo · [ ] = consumer reads a generated file,
 > but the file is produced elsewhere (or the tool is not themed yet).
 
-Last verified against the repo: 2026-10-26.
+Last verified against the repo: 2026-10-28.
 
 ---
 
@@ -22,7 +22,7 @@ Config: `matugen/config.toml` · output root:
 | [x] Neovim | `nvim.lua` | `nvim/theme.lua` ¹ | `nvim/lua/core/theme.lua` (`require`) |
 | [x] Lazygit | `lazygit.yml` | `lazygit/config.yml` | —² |
 | [x] Herdr | `herdr.toml` | `herdr/config.toml` | —² |
-| [x] GTK / CSS | `source.css` | `css/theme.css` | `waybar/style.css`, `wlogout/source.css` |
+| [x] GTK / CSS | `source.css` | `css/theme.css` (+ `dconf` + `swaync-client -rs` post_hooks) | `waybar/style.css`, `wlogout/source.css`, `swaync/style.css` |
 | [x] SCSS | `source.scss` | `scss/_theme.scss` | `eww/eww.scss` |
 | [x] Rofi | `source.rasi` | `rasi/theme.rasi` | `rofi/themes/*.rasi` |
 | [x] Yazi | `yazi-flavor.toml`, `yazi-tmtheme.xml` | `yazi/flavor.toml`, `yazi/tmtheme.xml` | `yazi/theme.toml` (`[flavor] dark = "matugen"`) ³ |
@@ -64,14 +64,15 @@ Config: `templates/kanagawa-dragon-lotus/config.toml` · blueprints:
 | [x] Rofi | `source.rasi` | `rasi/theme.rasi` |
 | [x] Lazygit | `lazygit.yml` | `lazygit/config.yml` |
 | [x] Herdr | `herdr.toml` | `herdr/config.toml` |
-| [x] GTK-3 | `gtk3.css` | `css/theme.css` (+ `dconf` post_hook) |
+| [x] GTK-3 | `gtk3.css` | `css/theme.css` (+ `dconf` + `swaync-client -rs` post_hooks) |
 | [x] SCSS | `source.scss` | `scss/_theme.scss` |
 | [x] Yazi | `yazi-flavor.toml`, `yazi-tmtheme.xml` | `yazi/flavor.toml`, `yazi/tmtheme.xml` (colors only; see ³) |
 | [x] Foot | `foot.ini` | `foot/theme.ini` |
 
 Konsumen yang membaca lewat `~/.myenv/theme/current/…`: `kitty/kitty.conf`
 (`include`), `foot/foot.ini` (`include`),
-`rofi/themes/{theme,apps,wallpaper}.rasi` (`@import`), dan flavor Yazi
+`rofi/themes/{theme,apps,wallpaper}.rasi` (`@import`), `swaync/style.css`
+(`@import`, GTK 4 — fiturnya ada, bukan cuma di GTK 3), dan flavor Yazi
 `yazi/flavors/matugen.yazi/{flavor.toml,tmtheme.xml}` (symlink). Sebelum template
 kedua alur ada, berkas-berkas itu diisi mesin lama `~/.myenv`; sekarang kedua alur
 yang memilikinya, jadi `current` boleh menunjuk ke folder kanagawa tanpa

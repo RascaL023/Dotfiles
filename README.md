@@ -52,6 +52,7 @@ each entry is.
 | `waybar` | Status bar | wallpaper flow, GTK CSS (`css/theme.css`) |
 | `eww` | Widget system | wallpaper flow, SCSS (`scss/theme`) |
 | `wlogout` | Logout menu | wallpaper flow, GTK CSS (`css/theme.css`) |
+| `swaync` | Notification daemon + control center | both flows, GTK 4 CSS (`css/theme.css`) |
 | `rofi` | App launcher | both flows (`rasi/theme.rasi`) |
 | `nvim` | Neovim editor | both flows (`nvim/theme.lua`) |
 | `yazi` | Terminal file manager | both flows, colors only (`yazi/flavor.toml`)² |
@@ -180,7 +181,7 @@ color ──┤                              ├─► template ─► ~/.myenv/
                                               ~/.myenv/theme/current  ◄─ symlink
                                                               │
                                           kitty, foot, alacritty, waybar, wlogout,
-                                          rofi, eww, nvim, yazi, …
+                                          swaync, rofi, eww, nvim, yazi, …
 ```
 
 `~/.myenv` is the theme store **outside** this repo; the repo only renders into
@@ -225,13 +226,20 @@ matugen json matugen/templates/kanagawa-dragon-lotus/blueprint/kanagawa-dark.jso
 |---|---|
 | `kitty/kitty.conf` | `~/.myenv/theme/current/kitty/theme.conf` |
 | `alacritty/alacritty.toml` | `~/.myenv/theme/current/alacritty/theme.toml` |
-| `waybar/style.css`, `wlogout/source.css` | `~/.myenv/theme/current/css/theme.css` |
+| `waybar/style.css`, `wlogout/source.css`, `swaync/style.css` | `~/.myenv/theme/current/css/theme.css` |
 | `rofi/themes/*.rasi` | `~/.myenv/theme/current/rasi/theme.rasi` |
 | `eww/eww.scss` | `~/.myenv/theme/current/scss/theme` |
 | `nvim/lua/core/theme.lua` | `~/.myenv/theme/current/nvim/theme.lua` |
 | `foot/foot.ini` | `~/.myenv/theme/current/foot/theme.ini` |
 | `yazi/flavors/matugen.yazi/flavor.toml` | `~/.myenv/theme/current/yazi/flavor.toml` (symlink) |
 | `yazi/flavors/matugen.yazi/tmtheme.xml` | `~/.myenv/theme/current/yazi/tmtheme.xml` (symlink) |
+
+`swaync/style.css` is GTK 4 but reaches the palette exactly like waybar and
+wlogout do, because GTK 4 does support `@import` (verified with GTK 4.22 +
+swaync 0.12.6): the file holds one import line and then only derived colors and
+metrics, no palette literals. Both flows' `[templates.css]` post_hook ends with
+`swaync-client -rs`, so a re-render repaints the notification center as well
+(`-R` alone reloads `config.json` only and leaves the stylesheet alone).
 
 `nvim/lua/core/theme.lua` maps the generated palette onto TokyoNight keys and
 owns every plugin highlight group; when the generated file is missing it falls
