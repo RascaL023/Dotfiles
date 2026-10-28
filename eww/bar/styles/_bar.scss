@@ -44,10 +44,40 @@
 .module-text { margin-left: $module-gap; }
 .clock { padding: $zero $clock-padding; font-weight: $clock-weight; }
 .clock-date { margin-left: 2 * $module-gap; color: $muted; font-weight: $font-weight; }
-.tray-scroll { min-width: $tray-area; }
-.tray menu { background: $surface; padding: $island-padding; border: $border-width solid $border; }
-.tray menuitem { padding: $tooltip-padding; }
-.tray menuitem:hover { background: $hover; }
+.right-button {
+  min-width: $right-hit-width;
+  min-height: $button-height;
+  padding: $zero;
+  border-radius: $button-radius;
+}
+button.right-button:hover { background: $hover; color: $text; }
+.slider-control:hover .level-icon { color: $accent; }
+.inline-slider {
+  min-height: $button-height;
+  padding-left: $slider-padding;
+  padding-right: $slider-padding;
+}
+.slider-percent { min-width: $slider-percent-width; margin-right: $slider-padding; }
+.control-slider { min-height: $button-height; }
+.control-slider trough {
+  min-width: $slider-width;
+  min-height: $slider-height;
+  border-radius: $radius;
+  background: $border;
+}
+.control-slider highlight {
+  min-height: $slider-height;
+  border-radius: $radius;
+  background: $accent;
+}
+.control-slider slider {
+  min-width: $slider-thumb;
+  min-height: $slider-thumb;
+  margin: ($slider-height - $slider-thumb) / 2;
+  border-radius: $radius;
+  background: $text;
+}
+.control-slider:hover slider { background: $accent; }
 scrollbar { min-height: $scroll-size; min-width: $scroll-size; }
 scrollbar slider { background: $border; min-height: $scroll-size; min-width: $scroll-size; }
 tooltip {

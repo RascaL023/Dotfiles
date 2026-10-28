@@ -24,33 +24,4 @@
     (label :text {bar.clock.time})
     (label :class "clock-date" :text {bar.clock.date})))
 
-(defwidget right-island []
-  (box :halign "end" :valign "center" :class "island" :space-evenly false
-    (box :visible {bar.modules.tray} :space-evenly false
-      (button :class "control icon muted" :tooltip "Lipat / buka tray"
-        :onclick "./barctl action tray" :timeout "5s"
-        (label :text {bar.tray_open ? '󰅂' : '󰅁'}))
-      (scroll :visible {bar.tray_open} :class "tray-scroll" :hscroll true :vscroll false
-        (systray :class "tray" :icon-size {bar.ui.tray_icon_size} :space-evenly false)))
-    (eventbox :visible {bar.modules.volume}
-      :onscroll "./barctl action volume-scroll {}" :timeout "5s"
-      (button :class "control ${bar.volume.muted ? 'muted' : ''}"
-        :active {bar.volume.available} :tooltip {bar.volume.tooltip}
-        :onclick "./barctl action volume-mute" :timeout "5s"
-        (box :space-evenly false
-          (label :class "icon" :text {bar.volume.icon})
-          (label :class "module-text" :text {bar.volume.text}))))
-    (button :visible {bar.modules.network} :class "control icon"
-      :tooltip {bar.network.tooltip} :onclick "./barctl action network" :timeout "5s"
-      (label :text {bar.network.icon}))
-    (box :visible {bar.modules.battery && bar.battery.available}
-      :class "control ${bar.battery.warning ? 'warning' : ''}" :space-evenly false
-      :tooltip {bar.battery.tooltip}
-      (label :class "icon" :text {bar.battery.icon})
-      (label :class "module-text" :text {bar.battery.text}))
-    (button :visible {bar.modules.notifications} :class "control icon"
-      :active {bar.notifications.available} :tooltip {bar.notifications.tooltip}
-      :onclick "./barctl action notifications" :onrightclick "./barctl action dnd" :timeout "5s"
-      (label :text {bar.notifications.icon}))
-    (button :visible {bar.modules.power} :class "control icon muted"
-      :tooltip "Daya" :onclick "./barctl action power" :timeout "5s" "⏻")))
+(include "widgets/right.yuck")

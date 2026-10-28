@@ -12,7 +12,7 @@ import time
 
 from actions import dispatch, local_action, power_menu, request
 from common import initial_state, runtime_dir, settings, workspace_layout
-from sources import (Commands, PipeWireEvents, battery_state, choose_player, clock_state, compositor,
+from sources import (Commands, PipeWireEvents, battery_state, brightness_state, choose_player, clock_state, compositor,
                      music_players, music_state, network_state, notification_state, volume_state)
 
 DBUS_MATCHES = [
@@ -37,6 +37,12 @@ class Collector:
         self.last = None
         self.output = output or (lambda value: print(value, flush=True))
         self.action_lock = asyncio.Lock()
+        self.control_values = {}
+        self.control_changed = asyncio.Event()
+        self.event_queue = asyncio.Queue(maxsize=128)
+        self.event_buffer = b""
+        self.event_pipe = None
+        self.event_fd = None
 
     def mark(self, module):
         self.dirty.add(module)
@@ -58,6 +64,80 @@ class Collector:
         task.add_done_callback(self.tasks.discard)
         return task
 
+    async def apply_control(self, module, percent):
+        state = self.state[module]
+        if not state["available"]:
+            return
+        if module == "volume":
+            result = await self.commands.run("wpctl", "set-volume", "-l", "1.0",
+                                             "@DEFAULT_AUDIO_SINK@", str(percent / 100))
+        else:
+            result = await self.commands.run("brightnessctl", "--quiet", "--class=backlight",
+                                             "--device=" + state["device"], "--min-value=0",
+                                             "set", f"{percent}%")
+        if result is None:
+            print(f"bar: {module}: setting value failed", file=sys.stderr)
+        await self.snapshot(module)
+        self.emit()
+
+    async def control_updates(self):
+        while True:
+            await self.control_changed.wait()
+            # Keep the latest drag value; never queue a subprocess for every pixel.
+            await asyncio.sleep(.05)
+            values, self.control_values = self.control_values, {}
+            self.control_changed.clear()
+            for module, percent in values.items():
+                await self.apply_control(module, percent)
+
+    def open_event_pipe(self, directory):
+        self.event_pipe = directory / "events.fifo"
+        self.event_pipe.unlink(missing_ok=True)
+        os.mkfifo(self.event_pipe, 0o600)
+        self.event_fd = os.open(self.event_pipe, os.O_RDWR | os.O_NONBLOCK)
+        asyncio.get_running_loop().add_reader(self.event_fd, self.read_events)
+
+    def close_event_pipe(self):
+        if self.event_fd is not None:
+            asyncio.get_running_loop().remove_reader(self.event_fd)
+            os.close(self.event_fd)
+            self.event_fd = None
+        if self.event_pipe:
+            self.event_pipe.unlink(missing_ok=True)
+
+    def read_events(self):
+        try:
+            self.event_buffer += os.read(self.event_fd, 65536)
+        except BlockingIOError:
+            return
+        while b"\n" in self.event_buffer:
+            line, self.event_buffer = self.event_buffer.split(b"\n", 1)
+            fields = line.decode(errors="replace").split(maxsplit=1)
+            if not fields:
+                continue
+            item = (fields[0], fields[1] if len(fields) == 2 else None)
+            if fields[0] in ("volume-set", "brightness-set"):
+                # These actions only change memory and never await a device command.
+                self.task(self.event_action(*item))
+            else:
+                if self.event_queue.full():
+                    self.event_queue.get_nowait()
+                self.event_queue.put_nowait(item)
+        if len(self.event_buffer) > 8192:
+            self.event_buffer = b""
+
+    async def event_action(self, name, argument):
+        try:
+            await dispatch(self, name, argument)
+        except (ValueError, RuntimeError, OSError, asyncio.TimeoutError) as exc:
+            print(f"bar: event {name}: {exc}", file=sys.stderr)
+
+    async def event_actions(self):
+        while True:
+            item = await self.event_queue.get()
+            async with self.action_lock:
+                await self.event_action(*item)
+
     async def snapshot(self, module):
         run = self.commands.run
         value = None
@@ -66,6 +146,8 @@ class Collector:
                 value = await self.compositor.snapshot(run, self.cfg)
             elif module == "volume":
                 value = volume_state(await run("wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"))
+            elif module == "brightness":
+                value = brightness_state(self.cfg["brightness"]["device"])
             elif module == "network":
                 value = network_state(await run("nmcli", "-t", "-e", "yes", "-f",
                                                 "DEVICE,TYPE,STATE,CONNECTION", "device", "status"))
@@ -129,6 +211,9 @@ class Collector:
                             self.emit()
                         except (ValueError, TypeError, AttributeError):
                             pass
+                    elif mode == "backlight":
+                        if line.startswith(("UDEV ", "KERNEL ")):
+                            self.mark(module)
                     elif mode != "mpris" or "member=NameOwnerChanged" in line or line in (
                             'string "Metadata"', 'string "PlaybackStatus"'):
                         self.mark(module)
@@ -228,6 +313,7 @@ class Collector:
             path = directory / "actions.sock"
             path.unlink(missing_ok=True)
             server = await asyncio.start_unix_server(self.client, path=path, limit=8192)
+            self.open_event_pipe(directory)
             loop = asyncio.get_running_loop()
             for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
                 loop.add_signal_handler(sig, self.stop.set)
@@ -235,6 +321,8 @@ class Collector:
             self.emit()
             enabled = self.cfg["modules"]
             self.task(self.refresh())
+            self.task(self.control_updates())
+            self.task(self.event_actions())
             for module in ("clock", "battery"):
                 if enabled[module]:
                     self.task(self.timer(module))
@@ -242,6 +330,9 @@ class Collector:
                 self.task(self.workspace_events())
             if enabled["volume"]:
                 self.task(self.stream("volume", ["pw-dump", "--monitor", "--no-colors"], "pipewire"))
+            if enabled["brightness"]:
+                self.task(self.stream("brightness", ["udevadm", "monitor", "--udev",
+                                                      "--subsystem-match=backlight"], "backlight"))
             if enabled["network"]:
                 self.task(self.stream("network", ["nmcli", "monitor"]))
             if enabled["notifications"]:
@@ -260,6 +351,7 @@ class Collector:
                 for task in tasks:
                     task.cancel()
                 await asyncio.gather(*tasks, return_exceptions=True)
+                self.close_event_pipe()
                 path.unlink(missing_ok=True)
                 (directory / "collector.pid").unlink(missing_ok=True)
 

@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SETTINGS = ROOT / "settings.json"
-MODULES = ("launcher", "workspaces", "music", "clock", "tray", "volume",
+MODULES = ("launcher", "workspaces", "music", "clock", "volume", "brightness",
            "network", "battery", "notifications", "power")
 
 
@@ -31,6 +31,9 @@ def settings(path=SETTINGS):
     for name in MODULES:
         if not isinstance(cfg["modules"][name], bool):
             raise ValueError(f"modules.{name} must be boolean")
+    device = cfg["brightness"]["device"]
+    if not isinstance(device, str) or not re.fullmatch(r"[A-Za-z0-9_.:-]+", device):
+        raise ValueError("brightness.device must be auto or an exact sysfs device name")
     if not cfg["workspaces"] or any(type(n) is not int or n < 1 for n in cfg["workspaces"]):
         raise ValueError("workspaces must contain positive integers")
     for key, minimum in (("battery", 5), ("debounce", .05),
@@ -90,12 +93,16 @@ def workspace_layout(value):
 
 def initial_state(cfg):
     tokens = (ROOT / "styles/_tokens.scss").read_text()
-    match = re.search(r"^\$tray-icon-size:\s*(\d+)\s*;", tokens, re.M)
-    if not match:
-        raise ValueError("_tokens.scss needs a numeric $tray-icon-size")
+    def token(name, unit):
+        match = re.search(r"^\$" + name + r":\s*(\d+)" + unit + r"\s*;", tokens, re.M)
+        if not match:
+            raise ValueError(f"_tokens.scss needs numeric ${name} in {unit}")
+        return int(match[1])
     return {
-        "modules": cfg["modules"].copy(), "tray_open": False,
-        "ui": {"tray_icon_size": int(match[1])},
+        "modules": cfg["modules"].copy(),
+        "ui": {"icon_box": token("right-icon-box", "px"),
+               "island_gap": token("right-island-gap", "px"),
+               "reveal_duration": str(token("control-transition", "ms")) + "ms"},
         "workspaces": workspace_layout({"available": False, "items": [
             {"id": n, "name": str(n), "label": str(n), "active": False, "occupied": False}
             for n in sorted(set(cfg["workspaces"]))]}),
@@ -104,6 +111,8 @@ def initial_state(cfg):
                   "icon": "󰎈", "limit": cfg["music"]["title_limit"]},
         "volume": {"available": False, "muted": False, "percent": 0,
                    "text": "--", "icon": "󰝟", "tooltip": "Audio tidak tersedia"},
+        "brightness": {"available": False, "device": "", "percent": 0,
+                       "text": "--", "icon": "󰃞", "tooltip": "Backlight tidak tersedia"},
         "network": {"available": False, "icon": "󰤭", "tooltip": "Jaringan tidak tersedia"},
         "battery": {"available": False, "warning": False, "text": "", "icon": "",
                     "tooltip": ""},

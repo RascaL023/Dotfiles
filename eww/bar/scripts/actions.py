@@ -1,6 +1,7 @@
 """Allowlisted actions; application commands are argv arrays, never shell code."""
 import asyncio
 import json
+import math
 import os
 import subprocess
 import sys
@@ -46,9 +47,18 @@ def local_action(name, cfg):
 
 async def dispatch(collector, name, argument=None):
     cfg, run = collector.cfg, collector.commands.run
-    if name == "tray":
-        collector.state["tray_open"] = not collector.state["tray_open"]
-        collector.emit()
+    if name in ("volume-set", "brightness-set"):
+        try:
+            value = float(argument)
+        except (TypeError, ValueError):
+            raise ValueError("slider requires a percentage from 0 to 100") from None
+        if not math.isfinite(value) or not 0 <= value <= 100:
+            raise ValueError("slider requires a percentage from 0 to 100")
+        module = name.removesuffix("-set")
+        if not cfg["modules"][module] or not collector.state[module]["available"]:
+            raise ValueError("control unavailable")
+        collector.control_values[module] = round(value)
+        collector.control_changed.set()
         return
     if name == "workspace":
         try:
@@ -68,6 +78,16 @@ async def dispatch(collector, name, argument=None):
         result = await run("wpctl", "set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@",
                            "5%+" if argument == "up" else "5%-")
         collector.mark("volume")
+    elif name == "brightness-scroll":
+        if argument not in ("up", "down"):
+            raise ValueError("scroll must be up or down")
+        state = collector.state["brightness"]
+        if not state["available"]:
+            raise ValueError("backlight unavailable")
+        result = await run("brightnessctl", "--quiet", "--class=backlight",
+                           "--device=" + state["device"], "--min-value=0", "set",
+                           "5%+" if argument == "up" else "5%-")
+        collector.mark("brightness")
     elif name in ("music-toggle", "music-scroll"):
         player = collector.selected
         if not player:

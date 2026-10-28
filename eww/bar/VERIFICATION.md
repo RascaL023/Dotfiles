@@ -1,4 +1,50 @@
-# Hasil verifikasi — 27 Oktober 2026
+# Hasil verifikasi
+
+## Pembaruan Right — 28 Oktober 2026
+
+- Bagian kanan kini terdiri dari tiga widget dalam satu jendela: kontrol
+  volume/brightness, status jaringan/baterai, serta aksi notifikasi/daya.
+  Pulau berjarak 8 px; ikon berada di kotak 16×16 px dengan area 28×24 px.
+  Tray dihapus, baterai hanya menampilkan ikon dan tooltip persentase/status.
+- Font Monocraft 11 px, ikon 13 px, padding atas 4 px dan bawah 0 px mengikuti
+  pengaturan pengguna. Layer Hyprland tetap 1366×34 px; pulau setinggi 30 px.
+- Volume dan brightness memiliki `revealer` masing-masing, di kiri ikon
+  terkait. Hover memakai `defvar` + `eww update`; animasi native Eww 200 ms,
+  tanpa status hover atau timer tutup tambahan di Python.
+- Uji pointer asli pada Hyprland memastikan ikon volume → slider volume
+  tetap membuka volume, dan ikon brightness → slider brightness tetap
+  membuka brightness. Meninggalkan kontrol menutup slider. Screenshot
+  memastikan slider brightness berada di antara ikon volume dan brightness.
+- Callback slider dari Yuck diuji sampai ke `wpctl` dan `brightnessctl`.
+  Perubahan brightness dari luar bar diterima melalui udev, tanpa polling.
+  Volume dan brightness dikembalikan ke nilai sebelum tes.
+- **25 tes otomatis lolos**, termasuk deteksi backlight, validasi persentase,
+  penggabungan drag, FIFO callback, serta cleanup. Tes status hover Python
+  dihapus karena hover kini milik Eww; interaksi tersebut diperiksa langsung.
+- Tiga siklus start → reload → stop setelah pembaruan lolos tanpa proses lama
+  yang tertinggal, termasuk listener brightness. Bar ditinggalkan berjalan.
+- Callback perangkat menggunakan builtin `printf` ke FIFO privat. Collector
+  memakai nilai terakhir per kontrol dalam jendela 50 ms, tanpa interpreter
+  baru pada setiap perubahan slider. Startup Python di callback hover pernah
+  melampaui timeout Eww; pengelolaan hover tersebut telah dihapus.
+- Pemeriksaan visual/interaksi pembaruan ini dilakukan pada Hyprland 0.56.2
+  dan Eww 0.6.0. Sesi Niri belum diuji ulang untuk perubahan Right ini.
+
+Pengukuran idle 60,511 detik pada Hyprland, semua modul diaktifkan dan musik
+tidak tersedia saat sampel. Pengukuran mencakup pohon proses bar dari `/proc`:
+
+| Komponen | CPU rata-rata, satu core | RSS rata-rata |
+|---|---:|---:|
+| Seluruh bar dan listener | 0,297% | 109,95 MiB |
+| Collector Python, termasuk CPU child yang di-reap | 0,182% | 25,87 MiB |
+
+Collector termasuk dalam total bar. Listener brightness `udevadm` memiliki
+RSS 7,04 MiB pada akhir pengukuran. Tidak ada proses Python tambahan untuk
+hover. RSS menjumlahkan memori proses sehingga shared pages dapat terhitung
+lebih dari sekali. Ini pengukuran idle versi saat ini; belum merupakan
+perbandingan A/B terhadap versi tanpa collector atau pengukuran peak saat drag.
+
+## Lingkungan implementasi awal — 27 Oktober 2026
 
 Pengujian dilakukan pada Eww **0.6.0**, Python 3.12, output **LVDS-1
 1366×768 @ scale 1**. Implementasi awal diuji pada Hyprland 0.56.2 dengan

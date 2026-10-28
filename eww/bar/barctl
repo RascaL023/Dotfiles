@@ -5,6 +5,7 @@ import asyncio
 import fcntl
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import signal
@@ -97,7 +98,8 @@ def start(cfg, monitor):
         with (runtime_dir() / "daemon.log").open("a") as log:
             proc = subprocess.Popen(["eww", "--config", str(ROOT), "--force-wayland",
                                      "--no-daemonize", "daemon"], stdin=subprocess.DEVNULL,
-                                    stdout=log, stderr=log, start_new_session=True)
+                                    stdout=log, stderr=log, start_new_session=True,
+                                    env={**os.environ, "EWW_BAR_EVENTS": str(runtime_dir() / "events.fifo")})
         # Wait until the exec has replaced the child before recording its identity.
         for _ in range(100):
             stamp = identity(proc.pid)
@@ -140,6 +142,7 @@ def doctor(cfg):
     print(f"Config: {ROOT}\nSettings: OK\nCompositor: {backend}\nMonitor: {cfg['monitor']}\nRuntime: {runtime_dir()}")
     names = {"eww", "python3"}
     dependencies = {"workspaces": ("niri" if backend == "niri" else "hyprctl",), "volume": ("wpctl", "pw-dump"),
+                    "brightness": ("brightnessctl", "udevadm"),
                     "network": ("nmcli",), "notifications": ("swaync-client",)}
     for module, tools in dependencies.items():
         if cfg["modules"][module]:
@@ -155,7 +158,9 @@ def doctor(cfg):
     for name in ("WAYLAND_DISPLAY", "XDG_RUNTIME_DIR", "NIRI_SOCKET" if backend == "niri" else "HYPRLAND_INSTANCE_SIGNATURE", "DBUS_SESSION_BUS_ADDRESS"):
         print(f"{'OK' if os.environ.get(name) else 'MISSING'}  {name}")
     print(eww("--version").stdout.strip())
-    for family in ("Inter", "JetBrainsMono Nerd Font"):
+    families = re.findall(r'^\$(?:font|icon-font):\s*"([^"]+)"',
+                          (ROOT / "styles/_tokens.scss").read_text(), re.M)
+    for family in dict.fromkeys(families):
         if shutil.which("fc-match"):
             result = subprocess.run(["fc-match", family], capture_output=True, text=True, timeout=3)
             print(f"Font {family}: {result.stdout.strip()}")
@@ -163,7 +168,7 @@ def doctor(cfg):
     if alive():
         try:
             state = asyncio.run(request("state"))["state"]
-            for name in ("workspaces", "music", "volume", "network", "battery", "notifications"):
+            for name in ("workspaces", "music", "volume", "brightness", "network", "battery", "notifications"):
                 print(f"{name}: {'available' if state[name]['available'] else 'unavailable / disabled'}")
         except (OSError, RuntimeError):
             print("Collector unavailable")

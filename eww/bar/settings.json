@@ -6,8 +6,8 @@
     "workspaces": true,
     "music": true,
     "clock": true,
-    "tray": true,
     "volume": true,
+    "brightness": true,
     "network": true,
     "battery": true,
     "notifications": true,
@@ -19,6 +19,9 @@
     "debounce": 0.15,
     "reconnect_max": 30,
     "command_timeout": 3
+  },
+  "brightness": {
+    "device": "auto"
   },
   "music": {
     "mpris": true,

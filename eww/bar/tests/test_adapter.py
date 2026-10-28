@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -9,7 +10,7 @@ from unittest.mock import AsyncMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from common import ROOT, compositor_name, initial_state, settings
-from sources import (Commands, Hyprland, Niri, PipeWireEvents, battery_state, choose_player, music_players,
+from sources import (Commands, Hyprland, Niri, PipeWireEvents, battery_state, brightness_state, choose_player, music_players,
                      music_state, network_state, nm_fields, notification_state,
                      volume_state, workspace_state, niri_workspace_state)
 from adapter import Collector
@@ -136,6 +137,28 @@ class Parsers(unittest.TestCase):
             (battery / "status").write_text("Full")
             self.assertEqual(battery_state(root)["icon"], "󰁹")
 
+    def test_backlight_detection_selection_and_bounds(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            self.assertIsNone(brightness_state(root=root))
+            for name, kind, level, maximum in (("acpi0", "firmware", 25, 100),
+                                               ("panel9", "raw", 500, 1000)):
+                path = root / name
+                path.mkdir()
+                for key, value in {"type": kind, "brightness": level, "max_brightness": maximum}.items():
+                    (path / key).write_text(str(value))
+            self.assertEqual(brightness_state(root=root)["device"], "panel9")
+            self.assertEqual(brightness_state(root=root)["percent"], 50)
+            self.assertEqual(brightness_state("acpi0", root)["percent"], 25)
+            self.assertIsNone(brightness_state("missing", root))
+            for level, expected in ((-5, 0), (0, 0), (2000, 100)):
+                (root / "panel9/brightness").write_text(str(level))
+                self.assertEqual(brightness_state(root=root)["percent"], expected)
+            (root / "panel9/max_brightness").write_text("0")
+            self.assertEqual(brightness_state(root=root)["device"], "acpi0")
+            (root / "acpi0/brightness").write_text("invalid")
+            self.assertIsNone(brightness_state(root=root))
+
     def test_player_priority_sticky_and_bridge_deduplication(self):
         cfg = self.cfg["music"]
         native = player()
@@ -198,6 +221,67 @@ class AsyncTests(unittest.IsolatedAsyncioTestCase):
                                  ("volume-scroll", "$(x)"), ("shutdown", None)):
             with self.assertRaises(ValueError):
                 await dispatch(self.collector, action, argument)
+
+    async def test_slider_bursts_keep_latest_and_reject_bad_values(self):
+        self.collector.state["volume"]["available"] = True
+        self.collector.apply_control = AsyncMock()
+        task = asyncio.create_task(self.collector.control_updates())
+        try:
+            for value in range(101):
+                await dispatch(self.collector, "volume-set", str(value))
+            await asyncio.sleep(.1)
+            self.collector.apply_control.assert_awaited_once_with("volume", 100)
+            for value in ("nan", "inf", "-1", "101", "50; command", None):
+                with self.subTest(value=value), self.assertRaises(ValueError):
+                    await dispatch(self.collector, "volume-set", value)
+            with self.assertRaises(ValueError):
+                await dispatch(self.collector, "brightness-set", "50")
+        finally:
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+
+    async def test_slider_setters_use_displayed_backlight_and_bounded_volume(self):
+        self.collector.state["volume"]["available"] = True
+        self.collector.state["brightness"].update(available=True, device="panel9")
+        self.collector.snapshot = AsyncMock()
+        run = self.collector.commands.run = AsyncMock(return_value="")
+        await self.collector.apply_control("volume", 50)
+        run.assert_awaited_with("wpctl", "set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@", "0.5")
+        await self.collector.apply_control("brightness", 50)
+        run.assert_awaited_with("brightnessctl", "--quiet", "--class=backlight", "--device=panel9",
+                               "--min-value=0", "set", "50%")
+        await dispatch(self.collector, "brightness-scroll", "down")
+        run.assert_awaited_with("brightnessctl", "--quiet", "--class=backlight", "--device=panel9",
+                               "--min-value=0", "set", "5%-")
+
+    async def test_fifo_gui_callback_and_slider_burst(self):
+        with tempfile.TemporaryDirectory() as folder:
+            self.collector.state["volume"]["available"] = True
+            self.collector.apply_control = AsyncMock()
+            self.collector.open_event_pipe(Path(folder))
+            worker = asyncio.create_task(self.collector.control_updates())
+            try:
+                yuck = (ROOT / "widgets/right.yuck").read_text()
+                callback, _ = json.JSONDecoder().raw_decode(yuck.split(":onchange ", 1)[1])
+                callback = callback.replace("{}", "50")
+                child = await asyncio.create_subprocess_exec(
+                    "/bin/sh", "-c", callback,
+                    env={**os.environ, "EWW_BAR_EVENTS": str(self.collector.event_pipe)})
+                await asyncio.wait_for(child.wait(), 2)
+                self.assertEqual(child.returncode, 0)
+                await asyncio.sleep(.1)
+                self.collector.apply_control.assert_awaited_once_with("volume", 50)
+                self.collector.apply_control.reset_mock()
+                os.write(self.collector.event_fd, b"volume-set 25\nvolume-set 75\n")
+                await asyncio.sleep(.1)
+                self.collector.apply_control.assert_awaited_once_with("volume", 75)
+            finally:
+                self.collector.close_event_pipe()
+                worker.cancel()
+                for task in list(self.collector.tasks):
+                    task.cancel()
+                await asyncio.gather(worker, *list(self.collector.tasks), return_exceptions=True)
+            self.assertFalse((Path(folder) / "events.fifo").exists())
 
     async def test_player_handoff_only_when_published(self):
         self.collector.selected = player()

@@ -1,11 +1,12 @@
-# Bar Eww — tiga pulau
+# Bar Eww — pulau minimalis
 
 Bar mandiri untuk **Eww 0.6.0 + Wayland**, dengan adapter **Hyprland dan Niri**,
-target awal 1366×768. Satu jendela transparan menampung tiga pulau 30 px;
-padding atas 3 px dan bawah 0 px membuat area eksklusif **33 px**. Margin horizontal
-4 px, radius 10 px, border 1 px; teks 11 px dan ikon 14 px. Launcher memakai ikon
+target awal 1366×768. Satu jendela transparan menampung kelompok kiri, jam,
+dan tiga pulau kanan, masing-masing setinggi 30 px. Padding atas 4 px dan bawah
+0 px membuat area eksklusif **34 px**. Margin horizontal 4 px, radius 10 px,
+border 1 px; teks Monocraft 11 px dan ikon 13 px. Launcher memakai ikon
 NixOS. Jam tetap di tengah layar. Workspace berupa
-pil tanpa angka: 6 px ketika tidak aktif, memanjang menjadi 22 px ketika aktif,
+pil tanpa angka: 6 px ketika tidak aktif, memanjang menjadi 20 px ketika aktif,
 dengan transisi 160 ms. Tooltip tetap menampilkan identitas workspace.
 Padding bawah bar sudah nol; jarak tambahan dari pengaturan gap compositor
 tetap mengikuti konfigurasi Niri/Hyprland Anda.
@@ -24,8 +25,8 @@ tetap mengikuti konfigurasi Niri/Hyprland Anda.
 
 `--monitor` menerima nama konektor atau indeks Eww dan berlaku untuk
 `start`/`toggle`. Dukungan awal satu monitor pilihan. `reload` melakukan
-stop/start yang bersih, mempertahankan monitor terakhir, dan mengembalikan tray
-ke keadaan terlipat. Setelah mengganti monitor default di pengaturan, gunakan
+stop/start yang bersih, mempertahankan monitor terakhir, dan menutup slider.
+Setelah mengganti monitor default di pengaturan, gunakan
 `stop` lalu `start`. Reload ketika bar berhenti tidak membuka bar.
 
 Semua perintah menggunakan `eww --config <path absolut bar/> --force-wayland
@@ -56,6 +57,10 @@ Edit **`settings.json`**, lalu jalankan `barctl reload`:
   30 detik, timeout per perintah 3 detik. Jam mengikuti batas menit berikutnya.
 - `music`: aktifkan MPD/MPRIS, urutan preferensi, nama bridge MPD, batas judul
   1–24 karakter. MPD memakai `MPD_HOST`/`MPD_PORT` dari lingkungan `mpc`.
+- `brightness.device`: `auto` memilih backlight sysfs (raw, platform, firmware),
+  atau isi nama perangkat persis seperti `intel_backlight`. Mengontrol panel
+  melalui `/sys/class/backlight`; monitor eksternal yang memerlukan DDC tidak
+  termasuk adapter ini. Modul tersembunyi jika tidak ada backlight.
 - `commands`: **array argv**, misalnya `["kitty", "nmtui"]`. `~` diekspansi.
   Pipe, `&&`, `$HOME`, dan substitusi shell tidak dievaluasi. Gunakan path
   executable/script jika memerlukan logika tambahan.
@@ -68,18 +73,19 @@ Niri. Konfirmasi tetap dilakukan terlebih dahulu oleh menu Rofi. Untuk
 Hyprland dengan konfigurasi lama, override dengan `["hyprctl", "dispatch", "exit"]`.
 
 Wajib: Eww dengan dukungan Wayland, Python **3.10+** (standard library saja),
-Hyprland atau Niri. Font: Inter dan JetBrainsMono Nerd Font. Dependensi modul:
+Hyprland atau Niri. Font: Monocraft Nerd Font dan JetBrainsMono Nerd Font.
+Dependensi modul:
 
 | Modul | Perintah / sumber |
 |---|---|
 | Workspace | `hyprctl` + socket Hyprland, atau `niri` + socket JSON `$NIRI_SOCKET` |
 | Volume | `wpctl`, `pw-dump` (PipeWire/WirePlumber) |
+| Brightness | `brightnessctl`, `udevadm`, `/sys/class/backlight/*` |
 | Jaringan | `nmcli`, NetworkManager; `kitty` + `nmtui` untuk klik |
 | Musik | `playerctl` + `dbus-monitor` untuk MPRIS; `mpc` untuk MPD |
 | Baterai | `/sys/class/power_supply/*` |
 | Notifikasi | `swaync-client`, SwayNC |
 | Launcher / daya | `rofi`, `hyprlock`, `systemctl`, perintah logout compositor aktif |
-| Tray | StatusNotifierItem melalui D-Bus sesi |
 
 `barctl doctor` memeriksa pengaturan, executable, lingkungan sesi, resolusi font,
 dan ketersediaan modul pada instance berjalan. Modul yang kehilangan layanan
@@ -88,16 +94,28 @@ volume/notifikasi tidak dapat diklik; jaringan tetap dapat membuka `nmtui`.
 
 ## Interaksi
 
+Kelompok kanan terdiri dari `[volume · brightness]`, `[jaringan · baterai]`,
+dan `[notifikasi · daya]`, dengan jarak 8 px antarpulau. Area ikon seragam
+16×16 px dalam target 28×24 px. Tray dan chevron telah dihapus.
+
+Masing-masing kontrol memiliki slider di sebelah kiri ikonnya. Hover volume
+membuka `[slider volume · ikon volume]`; hover brightness membuka
+`[slider brightness · ikon brightness]`, sehingga pointer tidak perlu melewati
+volume untuk meraih slider brightness. Hanya satu slider terbuka pada satu
+waktu. Status hover memakai `defvar` dan `eww update`; animasi `revealer`
+200 ms dikerjakan Eww. Meninggalkan kontrol memulai animasi menutup, tanpa
+timer penutupan tambahan. Area hover mencakup ikon beserta slidernya.
+
 | Area | Aksi |
 |---|---|
 | Launcher | Klik membuka Rofi drun |
 | Workspace | Pil aktif memanjang; klik berpindah, tooltip menunjukkan nomor/nama, gulir horizontal/touchpad untuk workspace tambahan |
 | Musik | Klik play/pause; gulir atas sebelumnya, bawah berikutnya; tooltip artis/judul/sumber lengkap |
 | Jam | Waktu 24 jam, tanggal singkat; tooltip tanggal lengkap dan zona waktu |
-| Tray | Chevron membuka/menutup; area ikon bisa digulir horizontal |
-| Volume | Klik mute; gulir ±5%, maksimum 100%; ikon berbeda untuk mute, 0%, 1–33%, 34–66%, dan ≥67% |
-| Jaringan | Tooltip koneksi aktif; klik membuka nmtui di Kitty |
-| Baterai | Ikon kapasitas per 10% (dibulatkan ke bawah), dengan varian petir saat mengisi; tooltip tiap baterai; rendah ≤20% mendapat warna warning |
+| Volume | Hover: slider 0–100% dan persentase; klik ikon: mute; gulir ±5%, maksimum 100%; ikon mengikuti level dan mute |
+| Brightness | Hover: slider 0–100% dan persentase; gulir ±5%; ikon mengikuti level, tanpa aksi klik |
+| Jaringan | Ikon Wi-Fi dengan lengkungan membulat; tooltip koneksi aktif; klik membuka nmtui di Kitty |
+| Baterai | Hanya ikon kapasitas per 10%, dengan varian petir saat mengisi; persentase/status tiap baterai di tooltip; rendah ≤20% mendapat warna warning |
 | Notifikasi | Klik panel SwayNC; klik kanan DND; tooltip jumlah dan status DND |
 | Daya | Rofi: kunci, suspend, logout, restart, shutdown; tiga aksi terakhir memerlukan pilihan konfirmasi |
 
@@ -112,9 +130,10 @@ sinyal atau melakukan scan berkala.
 
 Semua warna, font, ukuran, spacing, dan radius ada di
 **`styles/_tokens.scss`**. Komponen di `_bar.scss` hanya memakai token semantik.
-`$tray-icon-size` berupa bilangan tanpa unit karena diteruskan ke atribut Eww;
-ukuran lain memakai px. Tinggi geometri Yuck 1 px hanya batas minimum;
-tinggi sebenarnya berasal dari token SCSS, sehingga tidak ada salinan 33 px
+Ukuran memakai px dan durasi memakai ms. Token `$right-*`, `$slider-*`
+dan `$control-transition` mengatur kelompok kanan.
+Tinggi geometri Yuck 1 px hanya batas minimum;
+tinggi sebenarnya berasal dari token SCSS, sehingga tidak ada salinan 34 px
 yang perlu disinkronkan di Yuck.
 Lebar area pil mengikuti jumlah workspace hingga batas `$workspace-area`;
 lebih dari batas itu dapat digulir. Area klik tetap 24 px tinggi meskipun pil
@@ -124,7 +143,8 @@ Palet lokal gelap hangat langsung bekerja tanpa theme store. Integrasi Matugen
 bersifat opsional: kedua template yang sudah ada,
 `../../matugen/templates/general/source.scss` dan
 `../../matugen/templates/kanagawa-dragon-lotus/template/source.scss`, menyediakan
-variabel berikut. Setelah memastikan `~/.myenv/theme/current/scss/theme.scss`
+variabel berikut. Setelah memastikan `~/.myenv/theme/current/scss/_theme.scss`
+(partial Sass — karena itu `@import` di bawah menulis `theme` tanpa underscore)
 tersedia, tambahkan import **sebelum** definisi token warna dan ganti nilainya:
 
 ```scss
@@ -139,7 +159,7 @@ $warning: $status-warning;
 $hover: $layer-high;
 ```
 
-Biarkan token font Inter/ikon tetap lokal jika ingin mempertahankan desain.
+Biarkan token font/ikon tetap lokal jika ingin mempertahankan desain.
 Import memakai path absolut; sesuaikan home pada mesin lain. Jangan menulis
 ulang berkas generated. Perubahan theme symlink dari switcher eksternal perlu
 `barctl reload`; bar ini tidak mengelola switcher atau template Matugen.
@@ -153,6 +173,8 @@ cd ~/.dotfile/eww/bar
 python3 scripts/adapter.py listen      # satu objek JSON lengkap per baris
 python3 scripts/adapter.py snapshot    # baca state instance berjalan
 ./barctl action volume-mute
+./barctl action volume-set 50
+./barctl action brightness-set 50
 ./barctl action music-scroll down
 ```
 
@@ -160,10 +182,22 @@ python3 scripts/adapter.py snapshot    # baca state instance berjalan
 `sources.py` memisahkan parser, snapshot dan adapter compositor `Hyprland`/`Niri`.
 `adapter.py` mengatur event loop, penggabungan peristiwa, timer, reconnect,
 dan socket aksi. `actions.py` membatasi nama aksi serta menjalankan argv tanpa
-shell. Yuck menggunakan `for` biasa dan `label :text`; tidak ada `literal`,
+shell. `widgets/right.yuck` memisahkan kelompok kontrol, status, dan aksi;
+semuanya tetap berada dalam satu jendela. Yuck menggunakan `for` biasa dan `label :text`; tidak ada `literal`,
 Pango markup dari metadata, atau penyisipan nama jaringan/judul ke command.
-Satu-satunya nilai dinamis dalam command Yuck adalah ID workspace numerik dan
-arah scroll Eww; keduanya divalidasi kembali oleh adapter.
+Nilai dinamis dalam command Yuck berupa ID workspace, arah scroll, pilihan
+dan persentase slider. Adapter memvalidasi allowlist,
+rentang 0–100 dan angka finite; metadata tidak masuk ke command.
+
+Callback perubahan nilai, scroll, mute, dan notifikasi menulis pesan pendek melalui builtin shell `printf` ke
+`$EWW_BAR_EVENTS`, FIFO privat yang disiapkan `barctl` dan dibaca collector.
+Ini menghindari startup interpreter pada setiap pergeseran slider. Callback
+hover langsung menjalankan `eww --config . --no-daemonize update` pada instance
+bar yang sama; setiap kontrol memiliki variabel buka/tutupnya sendiri.
+Eww 0.6.0 memakai timeout 200 ms pada callback hover/scroll yang diperiksa;
+`timeout "5s"` pada eventbox tidak diterapkan ke handler tersebut di binary
+ini. Perintah perangkat dikerjakan collector, sementara callback segera selesai.
+`barctl action` tetap memakai socket JSON dengan respons untuk CLI.
 
 Untuk compositor lain, implementasikan `snapshot`, `socket_path`, `subscribe`,
 `relevant`, dan `focus` sebagai adapter baru; perbarui pemilihan adapter dan validasi
@@ -181,6 +215,14 @@ Alur data:
   Parser incremental hanya meneruskan perubahan volume/mute sink, penambahan/
   penghapusan sink, dan metadata default sink. Event klien `wpctl` sendiri
   diabaikan agar pembacaan volume tidak membuat loop event.
+- Brightness: `udevadm monitor --udev --subsystem-match=backlight` memberi
+  event perubahan, kemudian nilai dibaca dari sysfs. Perubahan lewat tombol
+  keyboard ikut tersinkron tanpa polling berkala. Penulisan melalui
+  `brightnessctl` ke perangkat yang ditampilkan. Driver perlu mengirim uevent
+  backlight agar perubahan dari luar bar langsung terbaca.
+- Drag slider: hanya nilai terakhir per kontrol yang disimpan. Worker
+  menggabungkan masukan selama 50 ms sebelum menulis, sehingga pergeseran
+  pointer tidak membuat antrean perintah perangkat yang panjang.
 - Jaringan: `nmcli monitor`, snapshot status perangkat; tidak ada scan Wi-Fi.
 - MPRIS: D-Bus `PropertiesChanged` untuk Metadata/PlaybackStatus dan
   `NameOwnerChanged`. Perubahan posisi saja diabaikan. Metadata/kontrol melalui
@@ -235,7 +277,7 @@ python3 bar/tests/live_checks.py music-measure --seconds 60
 
 Jalankan dari direktori `eww/`. `cycles` meninggalkan bar berjalan. `controls`
 memerlukan MPD paused dan bridge MPRIS; menguji workspace, volume/mute, DND,
-tray, play/pause dan next/previous, lalu mengembalikan pengaturan serta posisi
+play/pause dan next/previous, lalu mengembalikan pengaturan serta posisi
 lagu. Tidak menjalankan aksi daya.
 `measure` tidak mengubah playback. `music-measure` memerlukan MPD paused,
 memainkan musik dengan sink di-mute, lalu memulihkan lagu, posisi, dan mute.
@@ -251,10 +293,11 @@ pages dapat terhitung lebih dari sekali). Hasil sesi implementasi ada di
   pada proses yang menjalankan bar.
 - Jaringan/notifikasi kosong: cek service pengguna dan D-Bus sesi. Modul lain
   tetap berjalan; setelah service kembali, stream reconnect otomatis.
-- Tray kosong: buka chevron; aplikasi harus menyediakan StatusNotifierItem.
-  Kehadiran host tray lain dapat memengaruhi aplikasi tertentu.
+- Brightness tersembunyi: periksa `/sys/class/backlight`, `brightnessctl -l`,
+  `modules.brightness`, dan `brightness.device`. Jika slider gagal menulis,
+  periksa izin perangkat dan log collector; adapter tidak memakai sudo.
 - Setelah edit Yuck/SCSS/settings: gunakan `barctl reload`, terutama setelah
-  mengganti schema atau token tray. Eww juga dapat reload otomatis saat file
+  mengganti schema atau token UI. Eww juga dapat reload otomatis saat file
   berubah; lock collector mencegah duplikasi.
 - Log utama: `$XDG_RUNTIME_DIR/eww-islands-<hash>/daemon.log`. Karena daemon
   dimulai tanpa terminal, Eww 0.6.0 tidak mengalihkan stderr sendiri ke
@@ -269,7 +312,7 @@ pages dapat terhitung lebih dari sekali). Hasil sesi implementasi ada di
 - [API dispatcher Hyprland](https://wiki.hypr.land/Configuring/Basics/Dispatchers/)
 - [Protokol IPC Niri](https://github.com/YaLTeR/niri/blob/main/niri-ipc/src/lib.rs)
 - [Pemetaan ikon Nerd Fonts](https://github.com/ryanoasis/nerd-fonts/blob/master/css/nerd-fonts-generated.css) — NixOS, volume, dan tingkat baterai
-- [`../monasm-config.example/`](../monasm-config.example/) — pola tray/workspace lokal
+- [`../monasm-config.example.bak/`](../monasm-config.example.bak/) — pola tray/workspace lokal (di-ignore git, jadi hanya ada di mesin ini)
 - [Arin oleh adi1090x](https://github.com/adi1090x/widgets/tree/main/eww/arin) — referensi kelompok visual
 
 Implementasi ini memakai satu window dan adapter event sendiri; referensi

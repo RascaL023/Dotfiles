@@ -221,6 +221,29 @@ def volume_state(output):
             "tooltip": f"Volume {percent}%{' · mute' if muted else ''}\nKlik: mute · gulir: ±5%"}
 
 
+def brightness_state(device="auto", root=Path("/sys/class/backlight")):
+    candidates = []
+    for path in root.glob("*"):
+        if device != "auto" and path.name != device:
+            continue
+        try:
+            maximum = int((path / "max_brightness").read_text())
+            if maximum <= 0:
+                continue
+            current = max(0, min(maximum, int((path / "brightness").read_text())))
+            kind = (path / "type").read_text().strip()
+            candidates.append(({"raw": 0, "platform": 1, "firmware": 2}.get(kind, 3),
+                               path.name, round(current * 100 / maximum)))
+        except (OSError, ValueError):
+            continue
+    if not candidates:
+        return None
+    _, name, percent = min(candidates)
+    return {"available": True, "device": name, "percent": percent, "text": f"{percent}%",
+            "icon": "󰃞" if percent <= 33 else ("󰃟" if percent <= 66 else "󰃠"),
+            "tooltip": f"Kecerahan layar {percent}%\n{name}\nGulir: ±5%"}
+
+
 def nm_fields(line):
     fields, value, escaped = [], "", False
     for char in line:
@@ -246,7 +269,7 @@ def network_state(output):
     connected.sort(key=lambda r: (r[1] not in ("ethernet", "wifi"), r[0]))
     if not connected:
         return {"available": True, "icon": "󰤭", "tooltip": "Tidak terhubung\nKlik: nmtui"}
-    icon = "󰤨" if connected[0][1] == "wifi" else "󰈀"
+    icon = "" if connected[0][1] == "wifi" else "󰈀"
     return {"available": True, "icon": icon,
             "tooltip": "\n".join(f"{r[0]} · {r[3]}" for r in connected) + "\nKlik: nmtui"}
 

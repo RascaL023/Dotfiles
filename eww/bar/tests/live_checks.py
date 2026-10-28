@@ -129,9 +129,6 @@ def controls():
         ctl("action", "dnd")
         eventually(lambda s: s["notifications"]["dnd"] != original["notifications"]["dnd"])
         ctl("action", "dnd")
-        ctl("action", "tray")
-        eventually(lambda s: s["tray_open"] != original["tray_open"])
-        ctl("action", "tray")
         ctl("action", "music-toggle")
         eventually(lambda s: "Playing" in s["music"]["tooltip"])
         ctl("action", "music-toggle")
@@ -157,7 +154,7 @@ def controls():
             await dispatch(collector, "music-toggle")
             print("MPRIS control:", chosen["key"], flush=True)
         asyncio.run(bridge())
-        print("Workspace, volume limit/mute, DND, tray, MPD and MPRIS controls: PASS", flush=True)
+        print("Workspace, volume limit/mute, DND, MPD and MPRIS controls: PASS", flush=True)
     finally:
         asyncio.run(compositor(settings()).focus(Commands().run, active))
         command("swaync-client", "-dn" if dnd == "true" else "-df")

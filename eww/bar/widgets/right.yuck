@@ -1,0 +1,73 @@
+(defwidget volume-control []
+  (eventbox :visible {bar.modules.volume} :class "slider-control"
+    :onhover "eww --config . --force-wayland --no-daemonize update volume-open=true brightness-open=false"
+    :onhoverlost "eww --config . --force-wayland --no-daemonize update volume-open=false"
+    :onscroll "printf 'volume-scroll %s\\n' '{}' > \"$EWW_BAR_EVENTS\"" :timeout "5s"
+    (box :space-evenly false
+      (revealer :reveal {volume-open && bar.volume.available} :transition "slideright"
+        :duration {bar.ui.reveal_duration}
+        (box :class "inline-slider" :space-evenly false
+          (label :class "slider-percent" :text {bar.volume.text})
+          (scale :class "control-slider" :orientation "h" :valign "center"
+            :min 0 :max 100 :round-digits 0 :draw-value false
+            :value {bar.volume.percent > 100 ? 100 : bar.volume.percent}
+            :active {volume-open && bar.volume.available}
+            :onchange "printf 'volume-set %s\\n' '{}' > \"$EWW_BAR_EVENTS\"" :timeout "5s")))
+      (button :class "right-button ${bar.volume.muted ? 'muted' : ''}"
+        :active {bar.volume.available} :tooltip {bar.volume.tooltip}
+        :onclick "printf 'volume-mute\\n' > \"$EWW_BAR_EVENTS\"" :timeout "5s"
+        (label :class "icon level-icon" :text {bar.volume.icon}
+          :width {bar.ui.icon_box} :height {bar.ui.icon_box})))))
+
+(defwidget brightness-control []
+  (eventbox :visible {bar.modules.brightness && bar.brightness.available} :class "slider-control"
+    :onhover "eww --config . --force-wayland --no-daemonize update brightness-open=true volume-open=false"
+    :onhoverlost "eww --config . --force-wayland --no-daemonize update brightness-open=false"
+    :onscroll "printf 'brightness-scroll %s\\n' '{}' > \"$EWW_BAR_EVENTS\"" :timeout "5s"
+    (box :space-evenly false
+      (revealer :reveal {brightness-open && bar.brightness.available} :transition "slideright"
+        :duration {bar.ui.reveal_duration}
+        (box :class "inline-slider" :space-evenly false
+          (label :class "slider-percent" :text {bar.brightness.text})
+          (scale :class "control-slider" :orientation "h" :valign "center"
+            :min 0 :max 100 :round-digits 0 :draw-value false :value {bar.brightness.percent}
+            :active {brightness-open && bar.brightness.available}
+            :onchange "printf 'brightness-set %s\\n' '{}' > \"$EWW_BAR_EVENTS\"" :timeout "5s")))
+      (box :class "right-button" :tooltip {bar.brightness.tooltip}
+        (label :class "icon level-icon" :text {bar.brightness.icon}
+          :width {bar.ui.icon_box} :height {bar.ui.icon_box})))))
+
+(defwidget controls-island []
+  (box :visible {bar.modules.volume || (bar.modules.brightness && bar.brightness.available)}
+    :class "island" :space-evenly false
+    (volume-control)
+    (brightness-control)))
+
+(defwidget status-island []
+  (box :visible {bar.modules.network || (bar.modules.battery && bar.battery.available)}
+    :class "island" :space-evenly false
+    (button :visible {bar.modules.network} :class "right-button"
+      :tooltip {bar.network.tooltip} :onclick "./barctl action network" :timeout "5s"
+      (label :class "icon" :text {bar.network.icon}
+        :width {bar.ui.icon_box} :height {bar.ui.icon_box}))
+    (box :visible {bar.modules.battery && bar.battery.available}
+      :class "right-button ${bar.battery.warning ? 'warning' : ''}" :tooltip {bar.battery.tooltip}
+      (label :class "icon" :text {bar.battery.icon}
+        :width {bar.ui.icon_box} :height {bar.ui.icon_box}))))
+
+(defwidget actions-island []
+  (box :visible {bar.modules.notifications || bar.modules.power} :class "island" :space-evenly false
+    (button :visible {bar.modules.notifications} :class "right-button"
+      :active {bar.notifications.available} :tooltip {bar.notifications.tooltip}
+      :onclick "printf 'notifications\\n' > \"$EWW_BAR_EVENTS\"" :onrightclick "printf 'dnd\\n' > \"$EWW_BAR_EVENTS\"" :timeout "5s"
+      (label :class "icon" :text {bar.notifications.icon}
+        :width {bar.ui.icon_box} :height {bar.ui.icon_box}))
+    (button :visible {bar.modules.power} :class "right-button muted"
+      :tooltip "Daya" :onclick "./barctl action power" :timeout "5s"
+      (label :class "icon" :text "⏻" :width {bar.ui.icon_box} :height {bar.ui.icon_box}))))
+
+(defwidget right-island []
+  (box :halign "end" :valign "center" :spacing {bar.ui.island_gap} :space-evenly false
+    (controls-island)
+    (status-island)
+    (actions-island)))
