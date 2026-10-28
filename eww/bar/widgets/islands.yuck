@@ -1,7 +1,7 @@
 (defwidget left-island []
   (box :halign "start" :valign "center" :class "island" :space-evenly false
     (button :visible {bar.modules.launcher} :class "control icon accent distro-icon"
-      :tooltip "Aplikasi" :onclick "./barctl action launcher" :timeout "5s" " ")
+      :tooltip "Applications" :onclick "./barctl action launcher" :timeout "5s" " ")
     (scroll :visible {bar.modules.workspaces} :class "workspace-scroll" :width {bar.workspaces.width}
       :hscroll true :vscroll false
       (box :space-evenly false

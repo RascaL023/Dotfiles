@@ -218,7 +218,7 @@ def volume_state(output):
         icon = "󰕾"
     return {"available": True, "muted": muted, "percent": percent,
             "text": f"{percent}%", "icon": icon,
-            "tooltip": f"Volume {percent}%{' · mute' if muted else ''}\nKlik: mute · gulir: ±5%"}
+            "tooltip": f"Volume {percent}%{' · Muted' if muted else ''}"}
 
 
 def brightness_state(device="auto", root=Path("/sys/class/backlight")):
@@ -241,7 +241,7 @@ def brightness_state(device="auto", root=Path("/sys/class/backlight")):
     _, name, percent = min(candidates)
     return {"available": True, "device": name, "percent": percent, "text": f"{percent}%",
             "icon": "󰃞" if percent <= 33 else ("󰃟" if percent <= 66 else "󰃠"),
-            "tooltip": f"Kecerahan layar {percent}%\n{name}\nGulir: ±5%"}
+            "tooltip": f"Brightness {percent}%\n{name}"}
 
 
 def nm_fields(line):
@@ -268,10 +268,10 @@ def network_state(output):
     connected = [r for r in rows if len(r) == 4 and r[2] == "connected" and r[1] != "loopback"]
     connected.sort(key=lambda r: (r[1] not in ("ethernet", "wifi"), r[0]))
     if not connected:
-        return {"available": True, "icon": "󰤭", "tooltip": "Tidak terhubung\nKlik: nmtui"}
+        return {"available": True, "icon": "󰤭", "tooltip": "Disconnected"}
     icon = "" if connected[0][1] == "wifi" else "󰈀"
     return {"available": True, "icon": icon,
-            "tooltip": "\n".join(f"{r[0]} · {r[3]}" for r in connected) + "\nKlik: nmtui"}
+            "tooltip": "\n".join(f"{r[0]} · {r[3]}" for r in connected)}
 
 
 def battery_state(root=Path("/sys/class/power_supply")):
@@ -306,7 +306,7 @@ def notification_state(output):
     dnd = value.get("dnd", False) in (True, "true")
     return {"available": True, "count": count, "dnd": dnd,
             "icon": "󰂛" if dnd else ("󰂚" if count else "󰂜"),
-            "tooltip": f"{count} notifikasi · DND {'aktif' if dnd else 'nonaktif'}\nKlik: panel · klik kanan: DND"}
+            "tooltip": f"Notifications: {count}\nDo Not Disturb: {'On' if dnd else 'Off'}"}
 
 
 def clock_state():

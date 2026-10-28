@@ -63,7 +63,7 @@
       (label :class "icon" :text {bar.notifications.icon}
         :width {bar.ui.icon_box} :height {bar.ui.icon_box}))
     (button :visible {bar.modules.power} :class "right-button muted"
-      :tooltip "Daya" :onclick "./barctl action power" :timeout "5s"
+      :tooltip "Power" :onclick "./barctl action power" :timeout "5s"
       (label :class "icon" :text "⏻" :width {bar.ui.icon_box} :height {bar.ui.icon_box}))))
 
 (defwidget right-island []

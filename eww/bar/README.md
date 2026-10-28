@@ -106,6 +106,10 @@ waktu. Status hover memakai `defvar` dan `eww update`; animasi `revealer`
 200 ms dikerjakan Eww. Meninggalkan kontrol memulai animasi menutup, tanpa
 timer penutupan tambahan. Area hover mencakup ikon beserta slidernya.
 
+Seluruh tooltip bawaan menggunakan bahasa Inggris. Tooltip bagian kanan hanya
+menampilkan nilai atau status, tanpa petunjuk klik maupun gulir. Nama workspace,
+koneksi, serta metadata musik tetap mengikuti data aslinya.
+
 | Area | Aksi |
 |---|---|
 | Launcher | Klik membuka Rofi drun |
