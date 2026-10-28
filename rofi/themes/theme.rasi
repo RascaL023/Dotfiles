@@ -16,7 +16,7 @@ window {
     padding: 5px;
     border-color: @border-col;
     background-color: @bg-col;
-    border-radius: 10px;
+    border-radius: @rofi-radius;
 }
 
 mainbox {

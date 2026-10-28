@@ -178,6 +178,49 @@ Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu), `f
 
 > Di `template/nvim.lua`, key yang namanya bentrok dengan kata kunci Lua harus ditulis berkurung: `["function"]` dan `["return"]`. Di JSON tidak perlu apa-apa — JSON tidak punya kata kunci.
 
+### 3.11 `feel.*` — rasa compositor (bukan warna)
+
+Objek ini **tidak berisi warna**; isinya angka dan boolean yang menentukan look & feel
+Hyprland. Template `template/hypr.lua` menyalinnya apa adanya ke `hypr/theme.lua`,
+lalu `hypr/config/core/theme.lua` menggabungkannya dengan default dan menjepit
+nilainya. Jadi dua blueprint dengan palet sama tetap bisa terasa berbeda.
+
+| Key | Nilai sekarang | Rentang aman | Efek |
+|---|---|---|---|
+| `shape.radius` | `4` | 0–24 | sudut jendela; 0 = kotak, 12 = lembut |
+| `shape.rounding_power` | `2.0` | 1–8 | kelengkungan pada radius yang sama |
+| `shape.border` | `2` | 0–6 | tebal border |
+| `shape.gaps_in` / `shape.gaps_out` | `4` / `7` | 0–30 / 0–60 | jarak antar/pinggir jendela |
+| `shape.border_angle` | `45` | −360–360 | arah gradien border |
+| `shape.border_part_of_window` | `false` | — | `true` = border masuk ke geometri |
+| `surface.active_opacity` / `inactive_opacity` | `1.0` / `1.0` | 0.5–1.0 | transparansi jendela |
+| `surface.fullscreen_opacity` | `1.0` | 0.5–1.0 | transparansi saat fullscreen |
+| `surface.dim_inactive` / `dim_strength` | `false` / `0.0` | — / 0–1 | redupkan jendela non-fokus |
+| `surface.dim_around` | `0.0` | 0–1 | redup di sekitar layer |
+| `surface.terminal_opacity` | `0.9` | 0.5–1.0 | opacity foot |
+| `material.blur.*` | `size 4`, `passes 4` | 1–16 / 1–6 | kekuatan blur |
+| `material.blur.noise` / `vibrancy` | `0.0` / `0.0` | 0–0.2 / 0–1 | grain & saturasi blur |
+| `material.blur.xray` / `popups` | `false` / `false` | — | blur menembus jendela / menu |
+| `material.shadow.*` | `range 20`, `power 10` | 0–60 / 1–10 | bayangan |
+| `material.shadow.sharp` | `false` | — | bayangan tegas (tanpa gradasi) |
+| `motion.speed` | `1.0` | 0.4–2.5 | pengali kecepatan semua animasi |
+| `motion.curve.{x1,y1,x2,y2}` | `0.05, 0.9, 0.1, 1.05` | — | kurva bezier bersama |
+| `motion.style_in` / `style_out` | `gnomed` / `slide` | — | gaya animasi jendela |
+| `motion.style_ws_in` / `style_ws_out` | `slidefade` / `slidevert` | — | gaya animasi workspace |
+| `motion.layers_speed` | `1.0` | 0.4–2.5 | kecepatan layer (bar/launcher) |
+| `chrome.layer_blur` | `true` | — | blur untuk waybar/rofi/swaync |
+| `chrome.rofi_radius` | `10` | 0–24 | radius window rofi (`@rofi-radius`) |
+| `chrome.font_family` | `""` | — | `misc.font_family`; kosong = default |
+| `chrome.groupbar.enabled` / `gradient` | `false` / `true` | — | tab group |
+| `chrome.groupbar.height` / `radius` | `14` / `4` | 0–40 / 0–24 | ukuran groupbar |
+
+`motion.curve` sengaja **objek** (`x1…y2`), bukan array: resolver template matugen
+4.2.0 tidak mendukung indeks array (`curve.0`/`curve[0]` sama-sama ditolak).
+
+`meta.name` + `meta.variant` **tidak** ikut ditulis ke `hypr/theme.lua`: identitas
+tema dicatat switcher di `~/.myenv/theme/current-status.json`, jadi berkas tema
+Hyprland hanya berisi warna dan `feel`.
+
 ---
 
 ## 4. Tabel "pekerjaan UI → key mana"
@@ -195,6 +238,7 @@ Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu), `f
 | Kode: kata kunci / string / fungsi | `syntax.keyword`, `syntax.string`, `syntax.function` |
 | Palet terminal mentah | `color0` … `color15` |
 | Bayangan & backdrop dialog | `effect.shadow`, `effect.scrim` |
+| Sudut, gap, border, animasi | `feel.shape`, `feel.motion` |
 
 Tabel ini tidak lengkap untuk semua tool (ada tool yang memakai kombinasi sendiri), tapi mewakili pola umum yang konsisten di blueprint ini.
 

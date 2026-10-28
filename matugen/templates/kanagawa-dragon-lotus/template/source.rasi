@@ -26,4 +26,5 @@
   // ── Ukuran (statis, bukan warna) ──
   app-width             : 45%;
   wallpaper-width       : 100%;
+  rofi-radius           : {{ feel.chrome.rofi_radius }}px;
 }

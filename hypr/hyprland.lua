@@ -38,43 +38,15 @@ hl.env("XDG_SESSION_DESKTOP", "hyprland")
 hl.env("MYENV", (os.getenv("HOME") or "") .. "/.myenv")
 
 -------------------------------------------------------------- LOOK & FEEL --
--- (lihat theme.lua), menggantikan variabel $gapsIn/$rounding/$colActiveBorder1
+-- Nilai look & feel (general.col, decoration, group, misc) dipetakan di
+-- config/core/theme.lua; di sini hanya diterapkan.
+hl.config(theme.hypr)
+
+-- Sisa config yang bukan milik tema. `general.layout` aman dipisah dari
+-- nilai tema di atas karena kuncinya tidak bertabrakan.
 hl.config({
     general = {
-        layout      = "dwindle",
-        gaps_in     = theme.gaps_in,
-        gaps_out    = theme.gaps_out,
-        border_size = theme.border_size,
-
-        col = {
-            active_border   = {
-                colors = {
-                    theme.border_active,
-                    theme.border_active2,
-                },
-                angle = theme.border_angle
-            },
-            inactive_border = theme.border_inactive,
-        },
-    },
-
-    decoration = {
-        rounding         = theme.rounding,
-        active_opacity   = 1.0,
-        inactive_opacity = 1.0,
-
-        blur = {
-            enabled = theme.blur,
-            size    = theme.blur_size,
-            passes  = theme.blur_passes,
-        },
-
-        shadow = {
-            enabled      = theme.shadow,
-            range        = theme.shadow_range,
-            render_power = theme.shadow_power,
-            color        = theme.shadow_color,
-        },
+        layout = "dwindle",
     },
 
     input = {
@@ -124,22 +96,13 @@ hl.config({
 
 ------------------------------------------------------------ ANIMATIONS ----
 -- Dulu: blok `animations { bezier = ... animation = ... }` di ui.conf.
-hl.animation({ leaf = "global", enabled = true, speed = 10, bezier = "default" })
+-- Kurva, pengali kecepatan, dan gaya tiap leaf dibangun di theme.lua
+-- (theme.curves + theme.animations); di sini hanya diterapkan.
+hl.curve("theme", theme.curves.theme)
 
-hl.curve("myBezier", { type = "bezier", points = { { 0.05, 0.9 }, { 0.1, 1.05 } } })
-
-hl.animation({ leaf = "windows",     enabled = true, speed = 7,  bezier = "myBezier" })
-hl.animation({ leaf = "windowsMove", enabled = true, speed = 3,  bezier = "myBezier" })
-hl.animation({ leaf = "windowsOut",  enabled = true, speed = 7,  bezier = "myBezier", style = "slide" })
-hl.animation({ leaf = "windowsIn",   enabled = true, speed = 5,  bezier = "myBezier", style = "gnomed" })
-
-hl.animation({ leaf = "border",      enabled = true, speed = 10, bezier = "default" })
-hl.animation({ leaf = "borderangle", enabled = true, speed = 50, bezier = "default" })
-
-hl.animation({ leaf = "layers",      enabled = true, speed = 4,  bezier = "myBezier" })
-
-hl.animation({ leaf = "workspacesIn",  enabled = true, speed = 6, bezier = "myBezier",  style = "slidefade" })
-hl.animation({ leaf = "workspacesOut", enabled = true, speed = 3, bezier = "default", style = "slidevert" })
+for _, animation in ipairs(theme.animations) do
+    hl.animation(animation)
+end
 
 ------------------------------------------------------------ AUTOSTART ----
 -- `hl.exec_cmd()` sudah asinkron, jadi tidak perlu `& disown`.
@@ -157,11 +120,11 @@ hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
 hl.gesture({ fingers = 3, direction = "vertical", action = "scroll_move" })
 
 ---------------------------------------------------- WINDOW / LAYER RULES --
--- foot opacity dari tema ($footOpacity).
+-- Opacity terminal dari tema (surface.terminal_opacity).
 hl.window_rule({
     name    = "foot-opacity",
     match   = { class = "^foot$" },
-    opacity = tostring(theme.foot_opacity),
+    opacity = tostring(theme.surface.terminal_opacity),
 })
 
 hl.window_rule({
@@ -186,29 +149,36 @@ hl.window_rule({
     center = true,
 })
 
+-- `theme.layer_blur` memutuskan apakah layer ikut diburamkan: tema "flat"
+-- mematikan ini supaya bar/launcher tampil solid.
+local layer_blur = theme.layer_blur
+
 hl.layer_rule({
     name      = "logout_dialog",
     match     = { namespace = "logout_dialog" },
     animation = "fade",
-    blur      = true,
+    blur      = layer_blur,
 })
 
 hl.layer_rule({
     name      = "swaync-control-center",
     match     = { namespace = "swaync-control-center" },
     animation = "slide left",
+    blur      = layer_blur,
 })
 
 hl.layer_rule({
     name      = "rofi",
     match     = { namespace = "rofi" },
     animation = "slide bottom",
+    blur      = layer_blur,
 })
 
 hl.layer_rule({
     name      = "waybar",
     match     = { namespace = "waybar" },
     animation = "slide up",
+    blur      = layer_blur,
 })
 
 ---------------------------------------------------------- CONFIG IMPORT -----

@@ -182,7 +182,7 @@ color ──┤                              ├─► template ─► ~/.myenv/
                                               ~/.myenv/theme/current  ◄─ symlink
                                                               │
                                           kitty, foot, alacritty, waybar, wlogout,
-                                          swaync, rofi, eww, nvim, yazi, …
+                                          swaync, rofi, eww, nvim, yazi, hypr, …
 ```
 
 `~/.myenv` is the theme store **outside** this repo; the repo only renders into
@@ -224,6 +224,31 @@ matugen json matugen/templates/kanagawa-dragon-lotus/blueprint/kanagawa-dark.jso
 > under `matugen image` (no `accent.*`), and Flow A's `colors.*` does not exist
 > under `matugen json`.
 
+### Rasa per tema (look & feel)
+
+Warna saja tidak membuat dua tema terasa berbeda. Selain warna, `hypr/theme.lua`
+juga membawa `shape` (radius, border, gap, sudut gradien), `surface` (opacity,
+dim),`material` (blur, bayangan), `motion` (kecepatan + kurva + gaya animasi), dan
+`chrome` (blur layer, border nogroup, groupbar, font). `chrome.rofi_radius` di
+blueprint tetap dipakai rofi, tapi dibaca langsung oleh `source.rasi`, bukan
+lewat modul Hyprland:
+
+- **Flow B** — tulis di objek `feel` pada blueprint; template menyalinnya apa
+  adanya. Referensi key ada di
+  [`blueprint/README.md`](matugen/templates/kanagawa-dragon-lotus/blueprint/README.md).
+- **Flow A** — template hanya menghasilkan **warna**; rasa tidak ditulis, jadi
+  yang berlaku adalah default di `hypr/config/core/theme.lua`. Sama seperti
+  `nvim`: berkas hasil matugen berisi data yang dipunya saja, sisanya diurus
+  modul config.
+
+`hypr/config/core/theme.lua` memuat `theme.lua` hasil matugen di atas
+default-nya (merge rekursif, jadi berkas tema boleh hanya berisi sebagian key),
+menjepit nilai di luar rentang aman, lalu memetakan semuanya ke payload
+`hl.config` / `hl.curve` / `hl.animation`. `hypr/hyprland.lua` hanya memanggilnya,
+sehingga tetap terbaca sebagai config dan bukan peta field. Nama + varian tema
+tidak ikut ke berkas tema Hyprland — itu urusan switcher
+(`~/.myenv/theme/current-status.json`).
+
 ### Who reads the generated files
 
 | Consumer | Reads |
@@ -237,6 +262,7 @@ matugen json matugen/templates/kanagawa-dragon-lotus/blueprint/kanagawa-dark.jso
 | `foot/foot.ini` | `~/.myenv/theme/current/foot/theme.ini` |
 | `yazi/flavors/matugen.yazi/flavor.toml` | `~/.myenv/theme/current/yazi/flavor.toml` (symlink) |
 | `yazi/flavors/matugen.yazi/tmtheme.xml` | `~/.myenv/theme/current/yazi/tmtheme.xml` (symlink) |
+| `hypr/config/core/theme.lua` | `~/.myenv/theme/current/hypr/theme.lua` (`load`, modul data) |
 
 `swaync/style.css` is GTK 4 but reaches the palette exactly like waybar and
 wlogout do, because GTK 4 does support `@import` (verified with GTK 4.22 +

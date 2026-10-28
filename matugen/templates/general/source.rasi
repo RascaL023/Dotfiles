@@ -17,5 +17,6 @@
   surface-1             : {{ colors.surface_container_lowest.default.hex }};
   border-col            : {{ colors.primary.default.hex }};
   app-width             : 45%;
-  wallpaper-width       : 100%; 
+  wallpaper-width       : 100%;
+  rofi-radius           : 10px;
 }

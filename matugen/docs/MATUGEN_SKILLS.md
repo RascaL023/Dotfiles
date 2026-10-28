@@ -348,8 +348,9 @@ For each app: output file, how it is loaded, color format, template, reload. Ada
 
 > These are **generic recipes for target apps**, applied only when the user asks
 > to theme that app. This repo does not ship every template listed here — its own
-> coverage is in [`PROGRESS.md`](PROGRESS.md). In particular, the Hyprland (§6.2)
-> and niri (§6.3) recipes are examples, not a statement about the user's setup.
+> coverage is in [`PROGRESS.md`](PROGRESS.md). In particular, the niri (§6.3)
+> recipe is an example, not a statement about the user's setup. Hyprland is themed
+> in this repo now, but in its own shape — see the note at the top of §6.2.
 > The repo itself is compositor-agnostic.
 
 ### 6.1 kitty
@@ -402,6 +403,26 @@ color15 {{ colors.on_surface.default.hex }}
 
 ### 6.2 Hyprland
 
+- **In this repo:** Hyprland 0.55+ uses Lua config, so there is no `source = …`
+  to point at a generated file. `matugen/templates/general/hypr.lua` (Flow A)
+  and `matugen/templates/kanagawa-dragon-lotus/template/hypr.lua` (Flow B)
+  render a **Lua data module** (`return { … }`) to `hypr/theme.lua` in the active
+  theme folder; `hypr/config/core/theme.lua` loads it with
+  `load(source, "@path", "t", {})` (empty env — data only) and merges it over its
+  defaults at every `hyprctl reload`. Field names are the merge keys, so keep
+  them stable. Colors are `rgba(<hex_stripped>ee)` strings; `format: rgba` is
+  **not** usable here because it prints CSS decimals. Check a render without
+  reloading: `luac -p ~/.myenv/theme/current/hypr/theme.lua`.
+
+  Look & feel (radius, gaps, opacity, blur, shadow, motion, layer blur,
+  groupbar) lives in the theme too, in `shape`/`surface`/`material`/`motion`/
+  `chrome`. Flow B takes it from the blueprint's `feel` object; Flow A writes
+  colours only, so the defaults in `hypr/config/core/theme.lua` apply — one
+  template, one output file, exactly like `nvim`. The loader merges nested
+  tables, so a template may emit just the keys it owns. It also clamps
+  out-of-range numbers and rejects unknown animation styles, so a hand-made
+  theme cannot wreck the session. **The template resolver has no array
+  indexing** — `feel.motion.curve` is an object (`x1…y2`), not a list.
 - **VERIFY first** which config format the user runs (`hyprctl version`, look at `~/.config/hypr/`). The recipe below is for the classic hyprlang `.conf`. If the user is on a newer config format, adapt accordingly.
 - Output: `~/.config/hypr/matugen-colors.conf`
 - Load: add `source = ~/.config/hypr/matugen-colors.conf` **at the end** of `hyprland.conf` (later assignments override earlier ones).

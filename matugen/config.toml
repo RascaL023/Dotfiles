@@ -56,3 +56,8 @@ output_path     = "~/.myenv/theme/generated/live.bak/yazi/tmtheme.xml"
 [templates.foot]
 input_path      = "~/.config/matugen/templates/general/foot.ini"
 output_path     = "~/.myenv/theme/generated/live.bak/foot/theme.ini"
+
+[templates.hypr]
+input_path      = "~/.config/matugen/templates/general/hypr.lua"
+output_path     = "~/.myenv/theme/generated/live.bak/hypr/theme.lua"
+post_hook       = "luac -p ~/.myenv/theme/generated/live.bak/hypr/theme.lua && hyprctl reload 2>/dev/null || true"

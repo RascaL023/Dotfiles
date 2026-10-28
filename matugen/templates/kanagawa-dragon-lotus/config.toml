@@ -51,3 +51,8 @@ output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/yazi/tmtheme.xml"
 [templates.foot]
 input_path  = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/foot.ini"
 output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/foot/theme.ini"
+
+[templates.hypr]
+input_path  = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/hypr.lua"
+output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/hypr/theme.lua"
+post_hook   = "luac -p ~/.myenv/theme/generated/kanagawa-dragon-lotus/hypr/theme.lua && hyprctl reload 2>/dev/null || true"

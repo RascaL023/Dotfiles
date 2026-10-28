@@ -147,5 +147,72 @@
     "decorator": "#cc6d00",
     "tag": "#c84053",
     "attribute": "#77713f"
+  },
+  "feel": {
+    "shape": {
+      "radius": 4,
+      "rounding_power": 2.0,
+      "border": 2,
+      "gaps_in": 4,
+      "gaps_out": 7,
+      "border_angle": 45,
+      "border_part_of_window": false
+    },
+    "surface": {
+      "active_opacity": 1.0,
+      "inactive_opacity": 1.0,
+      "fullscreen_opacity": 1.0,
+      "dim_inactive": false,
+      "dim_strength": 0.0,
+      "dim_around": 0.0,
+      "terminal_opacity": 0.9
+    },
+    "material": {
+      "blur": {
+        "enabled": true,
+        "size": 4,
+        "passes": 4,
+        "noise": 0.0,
+        "contrast": 1.0,
+        "brightness": 1.0,
+        "vibrancy": 0.0,
+        "vibrancy_darkness": 0.0,
+        "xray": false,
+        "popups": false,
+        "ignore_opacity": true,
+        "new_optimizations": true
+      },
+      "shadow": {
+        "enabled": true,
+        "range": 20,
+        "power": 10,
+        "sharp": false
+      }
+    },
+    "motion": {
+      "speed": 1.0,
+      "curve": {
+        "x1": 0.05,
+        "y1": 0.9,
+        "x2": 0.1,
+        "y2": 1.05
+      },
+      "style_in": "gnomed",
+      "style_out": "slide",
+      "style_ws_in": "slidefade",
+      "style_ws_out": "slidevert",
+      "layers_speed": 1.0
+    },
+    "chrome": {
+      "layer_blur": true,
+      "rofi_radius": 10,
+      "font_family": "",
+      "groupbar": {
+        "enabled": false,
+        "gradient": true,
+        "height": 14,
+        "radius": 4
+      }
+    }
   }
 }

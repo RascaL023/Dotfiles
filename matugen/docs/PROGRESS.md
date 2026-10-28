@@ -27,6 +27,7 @@ Config: `matugen/config.toml` · output root:
 | [x] Rofi | `source.rasi` | `rasi/theme.rasi` | `rofi/themes/*.rasi` |
 | [x] Yazi | `yazi-flavor.toml`, `yazi-tmtheme.xml` | `yazi/flavor.toml`, `yazi/tmtheme.xml` | `yazi/theme.toml` (`[flavor] dark = "matugen"`) ³ |
 | [x] Foot | `foot.ini` | `foot/theme.ini` | `foot/foot.ini` (`include` via `current`) ⁴ |
+| [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (+ `hyprctl reload` post_hook) | `hypr/config/core/theme.lua` (`require`, `load` modul data) ⁵ |
 | [ ] Cava | — | — | not themed |
 
 ¹ Flow A is the only flow whose Neovim output is written straight to
@@ -48,6 +49,23 @@ leaves it empty), so a broken flavor file is easy to miss.
 `~/.myenv/theme/current/foot/theme.ini`, so whichever theme `current` points at
 wins. Flow A adds no reload hook for foot — foot has no config-reload signal.
 
+⁵ Hyprland 0.55+ memakai config Lua, jadi tidak ada `source = …` yang bisa
+menunjuk berkas tema. Template mengeluarkan **modul data Lua** (`return { … }`)
+ke `~/.myenv/theme/current/hypr/theme.lua`, dan `hypr/config/core/theme.lua`
+memuatnya dengan `load(…, "t", {})` (env kosong: berkas hanya boleh
+mengembalikan tabel) lalu menimpa nilai default, dengan clamp untuk nilai di
+luar rentang aman. Nama field tidak boleh diubah; kalau berkas hilang atau gagal
+dimuat, nilai default dipakai dan alasannya ditulis ke stderr. Validasi tanpa
+reload: `luac -p ~/.myenv/theme/current/hypr/theme.lua` (dijalankan juga sebagai
+`post_hook`).
+
+Bagian "rasa" (radius, opacity, blur, motion) berasal dari objek `feel` di
+blueprint (Flow B). Pada Flow A template hanya menulis warna, sehingga default
+di `hypr/config/core/theme.lua` yang berlaku — satu template, satu berkas tema,
+sama seperti `nvim`. `hypr/config/core/theme.lua` juga yang memetakan nilai ke
+payload `hl.config`/`hl.curve`/`hl.animation`; `hypr/hyprland.lua` hanya
+menerapkannya.
+
 ---
 
 ## Flow B — fixed palette (`templates/kanagawa-dragon-lotus/template/*`)
@@ -68,12 +86,14 @@ Config: `templates/kanagawa-dragon-lotus/config.toml` · blueprints:
 | [x] SCSS | `source.scss` | `scss/_theme.scss` |
 | [x] Yazi | `yazi-flavor.toml`, `yazi-tmtheme.xml` | `yazi/flavor.toml`, `yazi/tmtheme.xml` (colors only; see ³) |
 | [x] Foot | `foot.ini` | `foot/theme.ini` |
+| [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (+ `hyprctl reload` post_hook; lihat ⁵) |
 
 Konsumen yang membaca lewat `~/.myenv/theme/current/…`: `kitty/kitty.conf`
 (`include`), `foot/foot.ini` (`include`),
 `rofi/themes/{theme,apps,wallpaper}.rasi` (`@import`), `swaync/style.css`
-(`@import`, GTK 4 — fiturnya ada, bukan cuma di GTK 3), dan flavor Yazi
-`yazi/flavors/matugen.yazi/{flavor.toml,tmtheme.xml}` (symlink). Sebelum template
+(`@import`, GTK 4 — fiturnya ada, bukan cuma di GTK 3), flavor Yazi
+`yazi/flavors/matugen.yazi/{flavor.toml,tmtheme.xml}` (symlink), dan
+`hypr/config/core/theme.lua` (`require`, lihat ⁵). Sebelum template
 kedua alur ada, berkas-berkas itu diisi mesin lama `~/.myenv`; sekarang kedua alur
 yang memilikinya, jadi `current` boleh menunjuk ke folder kanagawa tanpa
 kehilangan warna.
@@ -93,8 +113,9 @@ Key reference for the JSON these templates read:
 engine produces nothing today. The only legacy artifact still sitting inside a
 theme folder is `generated/kanagawa-dragon-lotus/yazi/theme.toml` (the old 43 KB
 Yazi theme): nothing reads it, because `yazi/theme.toml` in this repo selects the
-`matugen` flavor. `foot/theme.ini` and `kitty/theme.conf` in that folder are
-produced by the flows above now, not by the legacy engine. Do not add a template
+`matugen` flavor. `foot/theme.ini`, `kitty/theme.conf` and `hypr/theme.lua` in
+that folder are produced by the flows above now, not by the legacy engine.
+Do not add a template
 to `matugen/config.toml` here to "fix" a mismatch; check which side owns the path
 first.
 
