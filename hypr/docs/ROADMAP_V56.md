@@ -54,7 +54,7 @@ build 2026-08-05). Terakhir diverifikasi: **2026-10-16**.
 cd ~/.dotfile
 export HYPRLAND_INSTANCE_SIGNATURE=$(ls -t /run/user/1000/hypr | head -1)
 
-luac -p hypr/hyprland.lua hypr/keybinding.lua    # 1. syntax Lua
+luac -p hypr/hyprland.lua hypr/config/core/keybinding.lua    # 1. syntax Lua
 hyprctl reload                                    # 2. terapkan
 hyprctl configerrors                              # 3. harus kosong
 hyprctl binds -j | python3 -c 'import sys,json;print(len(json.load(sys.stdin)))'   # 4. jumlah bind

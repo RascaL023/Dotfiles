@@ -19,6 +19,9 @@ Kanagawa). **Semua nilai di tabel bergantung pada warna sumber itu** — ganti
 sumbernya, semua angka berubah. Jadi tabel ini bukan konstanta repo, hanya
 contoh untuk melihat *bentuk* kosakatanya.
 
+Tabel di bawah dirender ulang dengan **matugen 4.2.0** (`--show-colors`),
+jadi angkanya cocok dengan mesin ini — bukan salinan versi lama.
+
 Kolom `LIGHT` dan `DARK` = dua keluaran dalam satu perintah; template memilih
 salah satunya lewat `{{ colors.<role>.light.hex }}` / `.<role>.dark.hex` (atau
 `default` untuk mode aktif — lihat `CHEATSHEETS.md` §2).
@@ -35,56 +38,54 @@ salah satunya lewat `{{ colors.<role>.light.hex }}` / `.<role>.dark.hex` (atau
 ---
 
 ```text
-╭────────────────────────────┬─────────┬──┬─────────┬──╮
 │            NAME            │  LIGHT  │  │   DARK  │  │
-╞════════════════════════════╪═════════╪══╪═════════╪══╡
-│ primary                    │ #665288 │  │ #D4BCF9 │  │
-│ on_primary                 │ #FFFFFF │  │ #392659 │  │
-│ primary_container          │ #806BA2 │  │ #9D86C0 │  │
-│ on_primary_container       │ #FFFFFF │  │ #000000 │  │
-│ inverse_primary            │ #D4BCF9 │  │ #69548A │  │
+│ primary                    │ #69548D │  │ #D5BBFC │  │
+│ on_primary                 │ #FFFFFF │  │ #3A255B │  │
+│ primary_container          │ #ECDCFF │  │ #513C73 │  │
+│ on_primary_container       │ #240E45 │  │ #ECDCFF │  │
+│ inverse_primary            │ #D5BBFC │  │ #69548D │  │
 │ primary_fixed              │ #ECDCFF │  │ #ECDCFF │  │
-│ primary_fixed_dim          │ #D4BCF9 │  │ #D4BCF9 │  │
-│ on_primary_fixed           │ #241042 │  │ #241042 │  │
-│ on_primary_fixed_variant   │ #503D71 │  │ #503D71 │  │
-│ secondary                  │ #645A71 │  │ #CEC1DC │  │
-│ on_secondary               │ #FFFFFF │  │ #352D42 │  │
-│ secondary_container        │ #EBDDF9 │  │ #4E455B │  │
-│ on_secondary_container     │ #4D445A │  │ #ECDFFB │  │
-│ secondary_fixed            │ #EBDDF9 │  │ #EBDDF9 │  │
-│ secondary_fixed_dim        │ #CEC1DC │  │ #CEC1DC │  │
-│ on_secondary_fixed         │ #1F182C │  │ #1F182C │  │
-│ on_secondary_fixed_variant │ #4C4359 │  │ #4C4359 │  │
-│ tertiary                   │ #854965 │  │ #FCB1D1 │  │
-│ on_tertiary                │ #FFFFFF │  │ #511E39 │  │
-│ tertiary_container         │ #A1617E │  │ #C07C9B │  │
-│ on_tertiary_container      │ #FFFFFF │  │ #000000 │  │
-│ tertiary_fixed             │ #FFD8E6 │  │ #FFD8E6 │  │
-│ tertiary_fixed_dim         │ #FCB1D1 │  │ #FCB1D1 │  │
-│ on_tertiary_fixed          │ #380823 │  │ #380823 │  │
-│ on_tertiary_fixed_variant  │ #6C344F │  │ #6C344F │  │
+│ primary_fixed_dim          │ #D5BBFC │  │ #D5BBFC │  │
+│ on_primary_fixed           │ #240E45 │  │ #240E45 │  │
+│ on_primary_fixed_variant   │ #513C73 │  │ #513C73 │  │
+│ secondary                  │ #645B70 │  │ #CEC2DB │  │
+│ on_secondary               │ #FFFFFF │  │ #352D40 │  │
+│ secondary_container        │ #EADEF7 │  │ #4B4357 │  │
+│ on_secondary_container     │ #1F182A │  │ #EADEF7 │  │
+│ secondary_fixed            │ #EADEF7 │  │ #EADEF7 │  │
+│ secondary_fixed_dim        │ #CEC2DB │  │ #CEC2DB │  │
+│ on_secondary_fixed         │ #1F182A │  │ #1F182A │  │
+│ on_secondary_fixed_variant │ #4B4357 │  │ #4B4357 │  │
+│ tertiary                   │ #7F525C │  │ #F1B7C3 │  │
+│ on_tertiary                │ #FFFFFF │  │ #4B252F │  │
+│ tertiary_container         │ #FFD9E0 │  │ #643B45 │  │
+│ on_tertiary_container      │ #32101A │  │ #FFD9E0 │  │
+│ tertiary_fixed             │ #FFD9E0 │  │ #FFD9E0 │  │
+│ tertiary_fixed_dim         │ #F1B7C3 │  │ #F1B7C3 │  │
+│ on_tertiary_fixed          │ #32101A │  │ #32101A │  │
+│ on_tertiary_fixed_variant  │ #643B45 │  │ #643B45 │  │
 │ error                      │ #BA1A1A │  │ #FFB4AB │  │
 │ on_error                   │ #FFFFFF │  │ #690005 │  │
 │ error_container            │ #FFDAD6 │  │ #93000A │  │
 │ on_error_container         │ #410002 │  │ #FFDAD6 │  │
-│ surface_dim                │ #DED8DD │  │ #141316 │  │
-│ surface                    │ #FEF7FD │  │ #141316 │  │
-│ surface_tint               │ #69548A │  │ #D4BCF9 │  │
-│ surface_bright             │ #FEF7FD │  │ #3B383C │  │
-│ surface_container_lowest   │ #FFFFFF │  │ #0F0D11 │  │
-│ surface_container_low      │ #F8F2F7 │  │ #1D1B1F │  │
-│ surface_container          │ #F2ECF1 │  │ #211F23 │  │
-│ surface_container_high     │ #ECE6EC │  │ #2B292D │  │
-│ surface_container_highest  │ #E7E1E6 │  │ #363438 │  │
-│ on_surface                 │ #1D1B1F │  │ #E7E1E6 │  │
+│ surface_dim                │ #DED8E0 │  │ #151218 │  │
+│ surface                    │ #FEF7FF │  │ #151218 │  │
+│ surface_tint               │ #69548D │  │ #D5BBFC │  │
+│ surface_bright             │ #FEF7FF │  │ #3B383E │  │
+│ surface_container_lowest   │ #FFFFFF │  │ #0F0D12 │  │
+│ surface_container_low      │ #F8F1F9 │  │ #1D1A20 │  │
+│ surface_container          │ #F3ECF4 │  │ #211E24 │  │
+│ surface_container_high     │ #EDE6EE │  │ #2C292F │  │
+│ surface_container_highest  │ #E7E0E8 │  │ #37333A │  │
+│ on_surface                 │ #1D1A20 │  │ #E7E0E8 │  │
 │ on_surface_variant         │ #49454E │  │ #CBC4CF │  │
 │ outline                    │ #7B757F │  │ #958E99 │  │
 │ outline_variant            │ #CBC4CF │  │ #49454E │  │
-│ inverse_surface            │ #322F34 │  │ #E7E1E6 │  │
-│ inverse_on_surface         │ #F5EFF4 │  │ #322F34 │  │
-│ surface_variant            │ #E8E0EC │  │ #49454E │  │
-│ background                 │ #FEF7FD │  │ #141316 │  │
-│ on_background              │ #1D1B1F │  │ #E7E1E6 │  │
+│ inverse_surface            │ #322F35 │  │ #E7E0E8 │  │
+│ inverse_on_surface         │ #F6EEF7 │  │ #322F35 │  │
+│ surface_variant            │ #E8E0EB │  │ #49454E │  │
+│ background                 │ #FEF7FF │  │ #151218 │  │
+│ on_background              │ #1D1A20 │  │ #E7E0E8 │  │
 │ shadow                     │ #000000 │  │ #000000 │  │
 │ scrim                      │ #000000 │  │ #000000 │  │
 │ source_color               │ #957FB8 │  │ #957FB8 │  │
@@ -104,7 +105,6 @@ salah satunya lewat `{{ colors.<role>.light.hex }}` / `.<role>.dark.hex` (atau
 │ base0d                     │ #B98EFF │  │ #B98EFF │  │
 │ base0e                     │ #FF779D │  │ #FF779D │  │
 │ base0f                     │ #767278 │  │ #767278 │  │
-╰────────────────────────────┴─────────┴──┴─────────┴──╯
 ```
 
 ## Cara memakainya di template

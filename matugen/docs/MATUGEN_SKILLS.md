@@ -506,6 +506,7 @@ Notes:
   Use an absolute path (there is no `~` expansion and relative paths are unreliable).
 - **A missing named color is silent in GTK 4.** Unlike a syntax error, `@undeclared` produces no warning; it just falls back to the widget default. Do not "verify" an import by grepping the log — render a probe rule (e.g. `.control-center { background: @accent; }`) and read the pixel, or check the app's own reload output.
 - `swaync` details: stylesheet is `~/.config/swaync/style.css`, palette comes from the shared `css/theme.css`; reload with `swaync-client -rs` — `-R` only reloads `config.json` and leaves the stylesheet untouched.
+- **In this repo:** `waybar`, `wlogout` and `swaync` keep **no** local `colors.css`. All three `@import` the generated `~/.myenv/theme/current/css/theme.css` (78 `@define-color`s, same names in both flows). Add a template entry for a new app rather than a second palette file, and if you must add keys, add them to `source.css` **and** `gtk3.css` so both flows stay in sync.
 - `post_hook` is executed through the user's `$SHELL` (fish on this machine), not bash: keep hooks shell-agnostic. `swaync-client -rs 2>/dev/null || true` works; `$?` is a fish syntax error and fails the whole hook.
 
 Template `waybar-colors.css`:

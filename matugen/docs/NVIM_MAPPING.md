@@ -372,7 +372,8 @@ Bukan bug — sebagian kunci sengaja disamakan bentuknya dengan template tool la
 - Hasil render alur B mendarat di
   `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua`, jadi ia baru
   terbaca nvim kalau `~/.myenv/theme/current` menunjuk ke folder tema itu
-  (dilakukan `theme-switcher.sh` di luar repo ini). Perbedaan ini sudah
+  (dilakukan `theme-switcher.sh` di luar repo ini — di checkout ini berkasnya
+  ada di `~/.myenv/script/theme.bak/`). Perbedaan ini sudah
   diverifikasi: daftar kunci kedua template identik, general hanya punya
   tambahan `source`.
 - Ringkasnya: ubah **nilai warna** → template di `matugen/templates/`; ubah

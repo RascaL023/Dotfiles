@@ -118,8 +118,9 @@ Rules:
   own template per flow. Never assume a value exists; grep the template.
 - `~/.myenv` is the theme store **outside** this repo: this repo only renders
   into it. `~/.myenv/theme/current` is a symlink to the active theme directory
-  and is flipped by `~/.myenv/script/theme/theme-switcher.sh` (legacy engine,
-  its own `assets/templates/**` — not managed from here).
+  and is flipped outside this repo by `theme-switcher.sh` (in
+  `~/.myenv/script/`, parked under `theme.bak/` in this checkout); the legacy
+  engine's own `assets/templates/**` is not managed from here.
 
 ---
 
@@ -179,7 +180,7 @@ Rules:
   value reached the rendered pixel). `swaync/style.css` therefore carries **no**
   palette literals: it imports
   `/home/rascal/.myenv/theme/current/css/theme.css`, the same file
-  `waybar/style.css` and `wlogout/source.css` read. Add colors to the theme,
+  `waybar/style.css` and `wlogout/style.css` read. Add colors to the theme,
   never to that stylesheet.
 - **`swaync-client -rs` reloads CSS; `-R` only reloads `config.json`.** Both
   flows' `[templates.css]` post_hook already ends with `-rs`.
@@ -204,6 +205,8 @@ Rules:
 | `matugen/docs/PROGRESS.md` | template coverage per tool, per flow |
 | `matugen/docs/NVIM_MAPPING.md` | which palette key colors which Neovim highlight group |
 | `matugen/templates/kanagawa-dragon-lotus/blueprint/README.md` | every key of the Flow B blueprint JSON |
+| `hypr/docs/ROADMAP_V56.md` | unimplemented Hyprland 0.56 features: recipes, verification steps, backlog |
+| `eww/bar/README.md` | the Eww bar: `barctl`, settings, adapter, troubleshooting |
 
 When behavior changes, update the document that states it — these files are
 verified against the repo, so a stale line is a bug.

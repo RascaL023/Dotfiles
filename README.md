@@ -49,6 +49,7 @@ each entry is.
 | `alacritty` | GPU terminal emulator | both flows (`alacritty/theme.toml`) |
 | `cava` | Audio visualizer | — |
 | `hypr` | Hyprland compositor | — |
+| `niri` | Scrollable-tiling Wayland compositor | — |
 | `waybar` | Status bar | wallpaper flow, GTK CSS (`css/theme.css`) |
 | `eww` | Widget system | wallpaper flow, SCSS (`scss/theme`) |
 | `wlogout` | Logout menu | wallpaper flow, GTK CSS (`css/theme.css`) |
@@ -164,8 +165,8 @@ hypr
 lazygit:~/.config/lazygit
 ```
 
-Two entries already use the explicit form (`lazygit`, `herdr`); the rest are
-auto-located by name.
+Every current entry uses the explicit form; the `name`-only form above still
+works and is resolved under `$XDG_CONFIG_HOME`.
 
 ---
 
@@ -185,8 +186,11 @@ color ──┤                              ├─► template ─► ~/.myenv/
 ```
 
 `~/.myenv` is the theme store **outside** this repo; the repo only renders into
-it. `current` is a symlink to one theme directory and is flipped by
-`~/.myenv/script/theme/theme-switcher.sh` (not part of this repo).
+it. `current` is a symlink to one theme directory (`generated/live.bak` for the
+wallpaper flow, `generated/kanagawa-dragon-lotus` for the fixed palette) and is
+flipped outside this repo: the switcher that runs `ln -sfn` is
+`theme-switcher.sh` in `~/.myenv/script/` — parked in `theme.bak/` in this
+checkout.
 
 ### Flow A — wallpaper-derived (Material You)
 
@@ -226,7 +230,7 @@ matugen json matugen/templates/kanagawa-dragon-lotus/blueprint/kanagawa-dark.jso
 |---|---|
 | `kitty/kitty.conf` | `~/.myenv/theme/current/kitty/theme.conf` |
 | `alacritty/alacritty.toml` | `~/.myenv/theme/current/alacritty/theme.toml` |
-| `waybar/style.css`, `wlogout/source.css`, `swaync/style.css` | `~/.myenv/theme/current/css/theme.css` |
+| `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` | `~/.myenv/theme/current/css/theme.css` |
 | `rofi/themes/*.rasi` | `~/.myenv/theme/current/rasi/theme.rasi` |
 | `eww/eww.scss` | `~/.myenv/theme/current/scss/theme` |
 | `nvim/lua/core/theme.lua` | `~/.myenv/theme/current/nvim/theme.lua` |

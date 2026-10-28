@@ -22,7 +22,7 @@ Config: `matugen/config.toml` · output root:
 | [x] Neovim | `nvim.lua` | `nvim/theme.lua` ¹ | `nvim/lua/core/theme.lua` (`require`) |
 | [x] Lazygit | `lazygit.yml` | `lazygit/config.yml` | —² |
 | [x] Herdr | `herdr.toml` | `herdr/config.toml` | —² |
-| [x] GTK / CSS | `source.css` | `css/theme.css` (+ `dconf` + `swaync-client -rs` post_hooks) | `waybar/style.css`, `wlogout/source.css`, `swaync/style.css` |
+| [x] GTK / CSS | `source.css` | `css/theme.css` (+ `dconf` + `swaync-client -rs` post_hooks) | `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` |
 | [x] SCSS | `source.scss` | `scss/_theme.scss` | `eww/eww.scss` |
 | [x] Rofi | `source.rasi` | `rasi/theme.rasi` | `rofi/themes/*.rasi` |
 | [x] Yazi | `yazi-flavor.toml`, `yazi-tmtheme.xml` | `yazi/flavor.toml`, `yazi/tmtheme.xml` | `yazi/theme.toml` (`[flavor] dark = "matugen"`) ³ |
@@ -86,9 +86,9 @@ Key reference for the JSON these templates read:
 ## Outside this repo
 
 `~/.myenv` is a separate theme store/engine with its own legacy templates
-(`~/.myenv/assets/templates/**`) and a switcher
-(`~/.myenv/script/theme/theme-switcher.sh`, which repoints
-`~/.myenv/theme/current`). Its `path.txt` still lists generate targets under
+(`~/.myenv/assets/templates/**`) and a switcher (`theme-switcher.sh` under
+`~/.myenv/script/`, parked in `theme.bak/` in this checkout; it only repoints
+`~/.myenv/theme/current` with `ln -sfn`). Its `path.txt` still lists generate targets under
 `generated/kanagawa-dragon/`, a tree that no longer exists, so that legacy
 engine produces nothing today. The only legacy artifact still sitting inside a
 theme folder is `generated/kanagawa-dragon-lotus/yazi/theme.toml` (the old 43 KB
