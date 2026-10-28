@@ -13,7 +13,7 @@ binds {
 
     // script calls
     Mod+C           { spawn "~/.config/hypr/sources/scripts/wifi-menu.sh"; }
-    Mod+O           { spawn "~/.config/hypr/sources/scripts/waybar-toggle.sh"; }
+    Mod+O           { spawn-sh "~/.dotfile/eww/bar/barctl toggle"; }
     Mod+Escape      { spawn "~/.config/hypr/sources/scripts/wlogout-toggle.sh"; }
     Mod+Space       { spawn "~/.config/hypr/sources/scripts/rofi-toggle.sh"; }
     Mod+I           { spawn "~/.config/hypr/sources/scripts/idle-toggle.sh"; }

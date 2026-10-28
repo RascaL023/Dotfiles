@@ -5,7 +5,7 @@
 layout {
     background-color "00000020"
     // background-color "transparent"
-    gaps 12
+    gaps 7
 
     center-focused-column "never"
 
