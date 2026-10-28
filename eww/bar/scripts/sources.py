@@ -312,7 +312,7 @@ def notification_state(output):
 def clock_state():
     now = datetime.datetime.now().astimezone()
     return {"time": now.strftime("%H:%M"), "date": now.strftime("%a, %d %b"),
-            "tooltip": now.strftime("%A, %d %B %Y · %Z")}
+            "tooltip": now.strftime("%A, %d %B %Y")}
 
 
 def choose_player(players, current, cfg):

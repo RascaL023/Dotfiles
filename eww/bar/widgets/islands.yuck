@@ -19,9 +19,9 @@
           (label :class "module-text" :text {bar.music.title} :limit-width {bar.music.limit}))))))
 
 (defwidget clock-island []
-  (box :halign "center" :valign "center" :visible {bar.modules.clock}
-    :class "island clock" :space-evenly false :tooltip {bar.clock.tooltip}
-    (label :text {bar.clock.time})
-    (label :class "clock-date" :text {bar.clock.date})))
+  (button :halign "center" :valign "center" :visible {bar.modules.clock}
+    :class "island clock" :tooltip {bar.clock.tooltip}
+    :onclick "printf 'calendar-toggle\\n' > \"$EWW_BAR_EVENTS\"" :timeout "5s"
+    (label :text {bar.clock.time})))
 
 (include "widgets/right.yuck")

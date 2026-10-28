@@ -14,17 +14,21 @@ $icon-font: "JetBrainsMono Nerd Font";
 $font-size: 11px;
 $icon-size: 13px;
 $font-weight: 500;
+
 $clock-weight: 600;
 $island-height: 30px;
 $outer-top: 4px;
 $outer-bottom: 0px;
 $outer-x: 4px;
+
 $radius: 10px;
-$button-radius: 8px;
 $border-width: 1px;
 $island-padding: 4px;
+
+$button-radius: 8px;
 $button-padding: 6px;
 $button-height: 24px;
+
 $workspace-dot-width: 6px;
 $workspace-active-width: 20px;
 $workspace-dot-height: 6px;
@@ -32,12 +36,29 @@ $workspace-hit-padding: 5px;
 $workspace-area: 144px;
 $workspace-gap: 3px;
 $workspace-transition: 160ms;
+
 $module-gap: 7px;
 $clock-padding: 15px;
+
+$calendar-transition: 300ms;
+$calendar-gap-top: 8px;
+$calendar-padding: 18px;
+$calendar-radius: 16px;
+$calendar-column-gap: 18px;
+$calendar-date-width: 132px;
+$calendar-date-gap: 6px;
+$calendar-day-size: 64px;
+$calendar-heading-size: 13px;
+$calendar-caption-size: 10px;
+$calendar-cell-size: 30px;
+$calendar-cell-gap: 4px;
+$calendar-section-gap: 8px;
+
 $right-island-gap: 8px;
 $right-icon-box: 16px;
 $right-hit-width: 28px;
-$control-transition: 200ms;
+
+$control-transition: 400ms;
 $slider-width: 84px;
 $slider-height: 4px;
 $slider-thumb: 10px;

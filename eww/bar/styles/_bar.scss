@@ -1,6 +1,6 @@
 * { all: unset; }
 
-.islands-window {
+.islands-window, .calendar-window {
   background: $clear;
   color: $text;
   font-family: $font;
@@ -43,7 +43,7 @@
 .music { margin-left: $module-gap; }
 .module-text { margin-left: $module-gap; }
 .clock { padding: $zero $clock-padding; font-weight: $clock-weight; }
-.clock-date { margin-left: 2 * $module-gap; color: $muted; font-weight: $font-weight; }
+.clock:hover { background: $hover; }
 .right-button {
   min-width: $right-hit-width;
   min-height: $button-height;

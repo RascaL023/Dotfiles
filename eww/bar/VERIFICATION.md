@@ -160,3 +160,30 @@ python3 bar/tests/live_checks.py music-measure --seconds 60
 minimal dua workspace, dua lagu dalam playlist, dan bridge MPRIS aktif.
 Perintah ini mengubah keadaan desktop sementara dan memulihkannya. Jalankan
 ketika tidak sedang mengubah playback/volume/workspace secara bersamaan.
+
+## Middle — kalender, 28 Oktober 2026
+
+- **30 tes unit lulus**, termasuk lima tes kalender: grid Senin, Februari
+  kabisat, bulan enam minggu, batas tahun, navigasi, pergantian tanggal/bulan,
+  pemulihan pembukaan gagal, dan pembatalan penutupan saat toggle cepat.
+  Tes socket dijalankan dengan izin socket Unix lokal.
+- Desktop **Hyprland**, LVDS-1 **1366×768**: bar tetap 1366×34 px. Panel
+  kalender 441×298 px, posisi **(463, 42)**, terpusat dengan jarak 8 px dari
+  bawah bar. Screenshot diperiksa: jam saja di tengah, tanggal besar di kiri,
+  kalender mulai Senin di kanan, penanda hari ini, dan panah navigasi.
+- Navigasi sebelumnya/berikutnya, melintasi pergantian tahun, dan Today
+  diperiksa melalui aksi collector. Tanggal kiri tetap menunjukkan hari ini
+  ketika bulan kanan berubah. Membuka ulang kembali ke bulan saat ini.
+- **10 siklus buka/tutup normal dan 10 siklus buka ulang cepat lulus**.
+  Tidak ada popup tersisa setelah menutup; jendela terakhir hanya `islands`.
+  PID daemon dan collector tetap sama sepanjang pengujian. Fokus serta posisi/
+  ukuran aplikasi aktif tidak berubah ketika popup dibuka.
+- Log setelah reload final dan pengujian tidak menunjukkan kesalahan Yuck,
+  SCSS, atau ekspresi kalender. Popup menggunakan instance Eww yang sama,
+  `exclusive false`, `focusable false`, dan animasi revealer 240 ms.
+- Menutup memakai klik jam lagi. Tidak ada listener keyboard, penangkap klik
+  selayar penuh, proses latar tambahan, atau polling kalender. Penutupan memakai
+  satu delay yang dapat dibatalkan agar animasi selesai sebelum window ditutup.
+- Pengujian desktop Middle pada **Niri belum diulang** dalam sesi ini;
+  implementasi popup memakai Eww Wayland dan tidak menggunakan dispatcher
+  compositor. Tes adapter Niri yang ada tetap lulus.

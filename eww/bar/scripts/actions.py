@@ -47,6 +47,9 @@ def local_action(name, cfg):
 
 async def dispatch(collector, name, argument=None):
     cfg, run = collector.cfg, collector.commands.run
+    if name in ("calendar-toggle", "calendar-previous", "calendar-next", "calendar-today"):
+        await collector.calendar_action(name)
+        return
     if name in ("volume-set", "brightness-set"):
         try:
             value = float(argument)

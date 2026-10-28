@@ -1,0 +1,39 @@
+(defwidget calendar-panel []
+  (box :class "calendar-window" :orientation "v" :space-evenly false
+    (revealer :reveal {bar.calendar.open} :transition "slidedown"
+      :duration {bar.ui.calendar_duration}
+      (box :class "calendar-panel" :space-evenly false
+        (box :class "calendar-date" :orientation "v" :valign "center" :space-evenly false
+          (button :class "calendar-today" :halign "center" :tooltip "Current month"
+            :onclick "printf 'calendar-today\\n' > \"$EWW_BAR_EVENTS\"" :timeout "5s" "Today")
+          (label :class "calendar-date-number" :text {bar.calendar.day})
+          (label :class "calendar-date-weekday" :text {bar.calendar.weekday})
+          (label :class "calendar-date-month" :text {bar.calendar.month_year}))
+        (box :class "calendar-divider")
+        (box :class "calendar-month" :orientation "v" :space-evenly false
+          (box :class "calendar-header" :space-evenly false
+            (button :class "calendar-nav icon" :active {bar.calendar.previous}
+              :tooltip "Previous month"
+              :onclick "printf 'calendar-previous\\n' > \"$EWW_BAR_EVENTS\"" :timeout "5s" "")
+            (label :class "calendar-heading" :hexpand true :text {bar.calendar.heading})
+            (button :class "calendar-nav icon" :active {bar.calendar.next}
+              :tooltip "Next month"
+              :onclick "printf 'calendar-next\\n' > \"$EWW_BAR_EVENTS\"" :timeout "5s" ""))
+          (box :class "calendar-week" :space-evenly false
+            (for name in {bar.calendar.weekdays}
+              (label :class "calendar-weekday" :text {name})))
+          (box :class "calendar-weeks" :orientation "v" :space-evenly false
+            (for week in {bar.calendar.weeks}
+              (box :class "calendar-week" :space-evenly false
+                (for day in {week}
+                  (label :class "calendar-cell ${day.today ? 'today' : ''}" :text {day.label}))))))))))
+
+(defwindow calendar-popup [panel-y]
+  :monitor 0
+  :geometry (geometry :x "0px" :y panel-y
+    :width "1px" :height "1px" :anchor "top center")
+  :exclusive false
+  :focusable false
+  :stacking "overlay"
+  :namespace "eww-islands-calendar"
+  (calendar-panel))

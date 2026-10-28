@@ -4,6 +4,7 @@ import json
 import os
 import re
 from pathlib import Path
+from calendar_data import calendar_state
 
 ROOT = Path(__file__).resolve().parents[1]
 SETTINGS = ROOT / "settings.json"
@@ -102,11 +103,15 @@ def initial_state(cfg):
         "modules": cfg["modules"].copy(),
         "ui": {"icon_box": token("right-icon-box", "px"),
                "island_gap": token("right-island-gap", "px"),
-               "reveal_duration": str(token("control-transition", "ms")) + "ms"},
+               "reveal_duration": str(token("control-transition", "ms")) + "ms",
+               "calendar_duration": str(token("calendar-transition", "ms")) + "ms",
+               # Non-exclusive layer surfaces are already placed below the reserved bar.
+               "calendar_offset": str(token("calendar-gap-top", "px")) + "px"},
         "workspaces": workspace_layout({"available": False, "items": [
             {"id": n, "name": str(n), "label": str(n), "active": False, "occupied": False}
             for n in sorted(set(cfg["workspaces"]))]}),
         "clock": {"time": "--:--", "date": "", "tooltip": ""},
+        "calendar": calendar_state(),
         "music": {"available": False, "source": "", "title": "", "tooltip": "",
                   "icon": "󰎈", "limit": cfg["music"]["title_limit"]},
         "volume": {"available": False, "muted": False, "percent": 0,

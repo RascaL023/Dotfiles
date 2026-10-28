@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""One JSON-line collector for Eww; timers only for clock and sysfs batteries."""
+"""One JSON-line collector; periodic timers only for clock and sysfs batteries."""
 import argparse
 import asyncio
 import contextlib
+import datetime
 import fcntl
 import json
 import os
@@ -11,7 +12,8 @@ import sys
 import time
 
 from actions import dispatch, local_action, power_menu, request
-from common import initial_state, runtime_dir, settings, workspace_layout
+from common import ROOT, initial_state, runtime_dir, settings, workspace_layout
+from calendar_data import calendar_state, shift_month
 from sources import (Commands, PipeWireEvents, battery_state, brightness_state, choose_player, clock_state, compositor,
                      music_players, music_state, network_state, notification_state, volume_state)
 
@@ -43,6 +45,70 @@ class Collector:
         self.event_buffer = b""
         self.event_pipe = None
         self.event_fd = None
+        self.calendar_window = False
+        self.calendar_close_task = None
+
+    async def calendar_eww(self, *args):
+        return await self.commands.run("eww", "--config", str(ROOT), "--force-wayland",
+                                       "--no-daemonize", *args)
+
+    async def close_calendar(self):
+        # A single cancellable delay lets GTK finish the native revealer animation.
+        duration = int(self.state["ui"]["calendar_duration"].removesuffix("ms")) / 1000
+        await asyncio.sleep(duration + .05)
+        async with self.action_lock:
+            await self.calendar_eww("close", "calendar-popup")
+            self.calendar_window = False
+
+    async def calendar_action(self, name):
+        if not self.cfg["modules"]["clock"]:
+            raise ValueError("clock is disabled")
+        state = self.state["calendar"]
+        if name == "calendar-toggle":
+            if self.calendar_close_task and not self.calendar_close_task.done():
+                self.calendar_close_task.cancel()
+                await asyncio.gather(self.calendar_close_task, return_exceptions=True)
+            if state["open"]:
+                state["open"] = False
+                self.emit()
+                self.calendar_close_task = self.task(self.close_calendar())
+                return
+            self.state["calendar"] = calendar_state()
+            self.emit()
+            if not self.calendar_window:
+                result = await self.calendar_eww("open", "calendar-popup", "--screen", str(self.cfg["monitor"]),
+                                                 "--arg", "panel-y=" + self.state["ui"]["calendar_offset"])
+                if result is None:
+                    # Like barctl, tolerate Eww's short IPC timeout only if the window exists.
+                    windows = await self.calendar_eww("active-windows")
+                    if "calendar-popup: calendar-popup" not in (windows or ""):
+                        raise RuntimeError("calendar failed to open; inspect daemon.log")
+                self.calendar_window = True
+                await asyncio.sleep(.04)  # Map collapsed before starting the GTK animation.
+            self.state["calendar"]["open"] = True
+        elif name in ("calendar-previous", "calendar-next", "calendar-today"):
+            if not state["open"]:
+                return
+            if name == "calendar-today":
+                self.state["calendar"] = calendar_state(opened=True)
+            else:
+                year, month = shift_month(state["year"], state["month"],
+                                          -1 if name == "calendar-previous" else 1)
+                self.state["calendar"] = calendar_state(year, month, opened=True)
+        else:
+            raise ValueError("unknown calendar action")
+        self.emit()
+
+    def refresh_calendar_date(self):
+        state = self.state["calendar"]
+        today = datetime.date.today()
+        if state["date"] != today.isoformat():
+            year, month = state["year"], state["month"]
+            # Follow the current month across midnight unless the user was browsing.
+            old = datetime.date.fromisoformat(state["date"])
+            if (year, month) == (old.year, old.month):
+                year, month = today.year, today.month
+            self.state["calendar"] = calendar_state(year, month, today=today, opened=state["open"])
 
     def mark(self, module):
         self.dirty.add(module)
@@ -160,6 +226,7 @@ class Collector:
                 value = battery_state()
             elif module == "clock":
                 value = clock_state()
+                self.refresh_calendar_date()
         except (ValueError, TypeError, KeyError, OSError) as exc:
             print(f"bar: {module}: {exc}", file=sys.stderr)
             if module == "music":
