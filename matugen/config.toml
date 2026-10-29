@@ -1,10 +1,5 @@
 [config]
 
-[templates.test]
-input_path      = "~/.config/matugen/templates/test.conf"
-output_path     = "~/.config/matugen/generated.bak/test.conf"
-post_hook       = "echo Test Success"
-
 [templates.alacritty]
 input_path      = "~/.config/matugen/templates/general/alacritty.toml"
 output_path     = "~/.myenv/theme/generated/live.bak/alacritty/theme.toml"
@@ -31,6 +26,7 @@ post_hook       = """
 [templates.scss]
 input_path      = "~/.config/matugen/templates/general/source.scss"
 output_path     = "~/.myenv/theme/generated/live.bak/scss/_theme.scss"
+post_hook       = "eww reload 2>/dev/null || true; ~/.dotfile/eww/scripts/depthctl refresh 2>/dev/null || true"
 
 [templates.rasi]
 input_path      = "~/.config/matugen/templates/general/source.rasi"
