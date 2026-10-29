@@ -130,9 +130,21 @@ Rules:
   loads the generated palette via
   `package.path += "~/.myenv/theme/current/nvim/?.lua"` → `require("theme")`,
   maps it onto TokyoNight's keys, and owns all plugin highlight groups.
-- If that `require` fails it sets `M.fallback = true`, notifies a warning, and
-  returns plain TokyoNight (`style = "night"`, transparent). Never assume the
-  palette loaded.
+- If that `require` fails — or the palette loads but is incomplete — the module
+  enters fallback mode: `M.fallback = true` and `M.colors` holds `FALLBACK_COLORS`
+  (`fg`, `bg`, `bg_dark`, `bg_highlight`, `magenta`, identical to TokyoNight
+  `style = "night"`). `M.colors` and `M.syntax` are **always** tables, so
+  consumers such as `zen.lua` and `smear_cursor.lua` never index nil; the
+  internal overrides (`on_highlights`, `apply_plugin_highlights`,
+  `apply_syntax_highlights`) return early while `M.fallback` is set. Never assume
+  the real palette loaded — check `M.fallback`. Fallback only covers keys read at
+  startup (outside `on_highlights`/`build_colors`); add new ones to
+  `FALLBACK_COLORS`.
+- `M.reload()` always exists and validates with `pcall(build_colors, fresh)`
+  before attaching, so a broken, empty or half-written `theme.lua` never changes
+  what is on screen — and a palette that appears later moves Neovim out of
+  fallback without a restart. `nvim/init.lua` starts `core.theme_watch` **before**
+  `core.lazy` so the watcher survives a failing plugin spec.
 - Templates that produce it:
   - Flow A: `matugen/templates/general/nvim.lua` → `~/.myenv/theme/generated/live.bak/nvim/theme.lua`
   - Flow B: `matugen/templates/kanagawa-dragon-lotus/template/nvim.lua` → `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua`

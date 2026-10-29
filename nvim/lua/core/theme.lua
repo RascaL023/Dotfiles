@@ -81,39 +81,28 @@ local matugen_path = vim.fn.expand(
 
 package.path = matugen_path .. ";" .. package.path
 
-local ok, palette = pcall(require, "theme")
+-- Warna darurat. Hanya kunci yang dibaca konsumen di luar `on_highlights` dan
+-- `build_colors`: zen.lua (fg, bg_dark), smear_cursor.lua (magenta,
+-- bg_highlight), dan `bg` untuk global Markview. Nilainya sama dengan
+-- TokyoNight `style = "night"` supaya mode fallback tidak terlihat setengah
+-- tema. Kunci baru yang dibaca konsumen saat startup harus ditambahkan di sini.
+local FALLBACK_COLORS = {
+  fg = "#c0caf5",
+  bg = "#1a1b26",
+  bg_dark = "#16161e",
+  bg_highlight = "#292e42",
+  magenta = "#bb9af7",
+}
 
-if not ok then
-  M.fallback = true
+local loaded, palette = pcall(require, "theme")
 
-  vim.notify(
-    "[theme] Generated theme unavailable; using TokyoNight fallback.",
-    vim.log.levels.WARN
-  )
-
-  -- Jangan jalankan kode palette-dependent setelah ini.
-  function M.tokyonight_opts()
-    return {
-      style = "night",
-      transparent = true,
-    }
-  end
-
-  return M
-end
-
--- ============================================================================
--- GENERATED THEME BERHASIL
--- ============================================================================
-
-M.fallback = false
-M.palettes = palette
-
---- Indeks 0-based seperti urutan warna ANSI
---- ansi(0) = black, ansi(15) = bright white.
-local function ansi(i)
-  return palette.colors[i + 1]
-end
+-- Selalu berupa tabel sejak awal, sehingga konsumen (`colors.fg`,
+-- `colors.magenta`, ...) tidak pernah mengindeks nil — termasuk ketika palet
+-- belum ada, rusak, atau tidak lengkap. `attach()` di akhir berkas menimpanya.
+M.fallback = true
+M.palettes = nil
+M.syntax = {}
+M.colors = FALLBACK_COLORS
 
 -- ============================================================================
 -- MAPPING KE KUNCI TOKYONIGHT
@@ -190,6 +179,12 @@ local function build_colors(d)
   local ui = d.extra.ui
 
   local base = layer.base
+
+  --- Indeks 0-based seperti urutan warna ANSI
+  --- (0 = black, 15 = bright white).
+  local function ansi(i)
+    return d.colors[i + 1]
+  end
 
   local blue = syntax["function"]
   local blue0 = blend(blue, base, BLUE0_ALPHA)
@@ -352,10 +347,7 @@ local function build_colors(d)
   }
 end
 
-M.colors = build_colors(palette)
-
---- Token semantik -> hex.
-M.syntax = palette.extra.syntax
+-- `M.colors` dan `M.syntax` dipasang oleh `attach()` di akhir berkas.
 
 -- ============================================================================
 -- OVERRIDE TOKYONIGHT
@@ -376,7 +368,12 @@ local function set_fg(hl, group, color)
 end
 
 local function apply_syntax_highlights(hl)
-  local s = palette.extra.syntax
+  -- Fallback: tidak ada palet, biarkan TokyoNight memakai highlight bawaannya.
+  if M.fallback then
+    return
+  end
+
+  local s = M.syntax
 
   local map = {
     { s.constant, "Constant", "@constant", "@constant.builtin" },
@@ -474,8 +471,9 @@ function M.tokyonight_opts()
       Util.bg = c.bg
       Util.fg = c.fg
 
-      -- Guard terhadap warna TokyoNight yang masih bocor.
-      if not warned_missing_keys then
+      -- Guard terhadap warna TokyoNight yang masih bocor. Dilewati saat
+      -- fallback: `M.colors` memang hanya berisi warna darurat.
+      if not M.fallback and not warned_missing_keys then
         local missing = {}
 
         for key in pairs(require("tokyonight.colors.storm")) do
@@ -499,15 +497,21 @@ function M.tokyonight_opts()
     end,
 
     on_highlights = function(hl, c)
+      -- Fallback: `M.palettes` belum ada dan `M.colors` hanya berisi warna
+      -- darurat. Biarkan TokyoNight memakai highlight bawaannya.
+      if M.fallback then
+        return
+      end
+
       -- ================================================================
       -- Selection / search memakai role container (Material)
       -- ================================================================
 
-      local acc = palette.extra.accent
-      local box = container_roles(palette)
+      local acc = M.palettes.extra.accent
+      local box = container_roles(M.palettes)
       -- Palet yang belum punya accent.tertiary memakai secondary + background.
       local tertiary = acc.tertiary or acc.secondary
-      local on_tertiary = acc.on_tertiary or palette.background
+      local on_tertiary = acc.on_tertiary or M.palettes.background
 
       hl.Visual = { bg = box.primary, fg = box.on_primary }
       hl.VisualNOS = { bg = box.primary, fg = box.on_primary }
@@ -670,6 +674,11 @@ vim.g.markview_dark_bg = M.colors.bg
 vim.g.markview_light_bg = M.colors.bg
 
 function M.apply_plugin_highlights()
+  -- Fallback: grup plugin dibiarkan memakai warna TokyoNight.
+  if M.fallback then
+    return
+  end
+
   local c = M.colors
   local set = vim.api.nvim_set_hl
 
@@ -850,8 +859,7 @@ function M.apply_plugin_highlights()
 end
 
 -- :colorscheme menghapus highlight group, jadi pasang ulang.
--- Autocmd didaftarkan saat theme.lua pertama di-require.
-M.apply_plugin_highlights()
+-- Pemanggilan pertama dilakukan di akhir berkas, setelah palet terpasang.
 
 local theme_augroup = vim.api.nvim_create_augroup(
   "Theme",
@@ -895,15 +903,41 @@ local function sync_in_place(dst, src)
   end
 end
 
+--- Pasang palet hasil render. Dipakai saat startup dan saat transisi keluar
+--- dari fallback.
+--- @param d table palet yang sudah lolos `pcall(build_colors, d)`
+local function attach(d)
+  local colors = build_colors(d)
+
+  M.palettes = d
+  M.syntax = d.extra.syntax
+
+  -- Identitas `M.colors` dipertahankan bila sudah berisi palet asli, karena
+  -- modul lain (mis. zen.lua) memegang referensi tabelnya.
+  if M.fallback or M.colors == FALLBACK_COLORS then
+    M.colors = colors
+  else
+    sync_in_place(M.colors, colors)
+  end
+
+  M.fallback = false
+  package.loaded["theme"] = d
+  vim.g.markview_dark_bg = M.colors.bg
+  vim.g.markview_light_bg = M.colors.bg
+end
+
 --- Baca ulang theme.lua hasil matugen lalu terapkan ke nvim yang sedang
---- berjalan. Aman dipanggil kapan saja: bila file rusak/setengah tertulis,
---- palet lama dipertahankan dan fungsi mengembalikan false.
+--- berjalan. Aman dipanggil kapan saja: bila file rusak/setengah tertulis atau
+--- paletnya tidak lengkap, tampilan yang sekarang dipertahankan dan fungsi
+--- mengembalikan false.
 function M.reload()
   package.loaded["theme"] = nil
   local ok_load, fresh = pcall(require, "theme")
 
   if not ok_load or type(fresh) ~= "table" or not fresh.extra then
-    package.loaded["theme"] = palette
+    if M.palettes then
+      package.loaded["theme"] = M.palettes
+    end
     vim.notify(
       "[theme] reload dibatalkan, palet lama dipakai: " .. tostring(fresh),
       vim.log.levels.WARN
@@ -911,17 +945,49 @@ function M.reload()
     return false
   end
 
-  sync_in_place(palette, fresh)
-  package.loaded["theme"] = palette
+  -- `build_colors` menyentuh hampir semua kunci palet, jadi hasil pcall-nya
+  -- sekaligus menjadi uji kelengkapan: palet cacat tidak pernah dipasang.
+  local ok_colors, colors = pcall(build_colors, fresh)
 
-  sync_in_place(M.colors, build_colors(palette))
-  vim.g.markview_dark_bg = M.colors.bg
-  vim.g.markview_light_bg = M.colors.bg
+  if not ok_colors then
+    if M.palettes then
+      package.loaded["theme"] = M.palettes
+    end
+    vim.notify(
+      "[theme] reload ditolak, palet tidak lengkap: " .. tostring(colors),
+      vim.log.levels.WARN
+    )
+    return false
+  end
 
-  require("tokyonight").setup(M.tokyonight_opts())
-  -- Memicu autocmd ColorScheme: apply_plugin_highlights() dan
-  -- re-setup lualine berjalan otomatis.
-  vim.cmd.colorscheme("tokyonight")
+  if M.fallback then
+    -- Transisi fallback -> palet asli: pasang dari nol, bukan sync.
+    attach(fresh)
+  else
+    sync_in_place(M.palettes, fresh)
+    package.loaded["theme"] = M.palettes
+    M.syntax = M.palettes.extra.syntax
+
+    sync_in_place(M.colors, colors)
+    vim.g.markview_dark_bg = M.colors.bg
+    vim.g.markview_light_bg = M.colors.bg
+  end
+
+  -- Repaint. Dibungkus pcall: bila `lazy.setup` sempat gagal, tokyonight bisa
+  -- belum termuat dan kegagalan repaint tidak boleh menjatuhkan nvim.
+  local ok_paint = pcall(function()
+    require("tokyonight").setup(M.tokyonight_opts())
+    -- Memicu autocmd ColorScheme: apply_plugin_highlights() dan
+    -- re-setup lualine berjalan otomatis.
+    vim.cmd.colorscheme("tokyonight")
+  end)
+
+  if not ok_paint then
+    vim.notify(
+      "[theme] palet diperbarui, tetapi repaint gagal.",
+      vim.log.levels.WARN
+    )
+  end
 
   -- smear-cursor menerima warna sebagai string hex saat setup(), bukan
   -- highlight group, jadi harus di-set ulang. Hanya bila sudah termuat
@@ -934,5 +1000,32 @@ function M.reload()
 
   return true
 end
+
+-- ============================================================================
+-- PASANG PALET SAAT MODUL DIMUAT
+-- ============================================================================
+
+if loaded then
+  local ok_attach, err = pcall(attach, palette)
+
+  if not ok_attach then
+    M.fallback = true
+    M.palettes = nil
+    M.syntax = {}
+    M.colors = FALLBACK_COLORS
+
+    vim.notify(
+      "[theme] palet tidak lengkap, warna darurat dipakai: " .. tostring(err),
+      vim.log.levels.WARN
+    )
+  end
+else
+  vim.notify(
+    "[theme] palet belum tersedia, warna darurat dipakai: " .. tostring(palette),
+    vim.log.levels.WARN
+  )
+end
+
+M.apply_plugin_highlights()
 
 return M

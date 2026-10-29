@@ -43,7 +43,9 @@ return {
     opts = {
       dimming = {
         alpha = 0.2,
-        color = { "Normal", colors.fg },
+        -- Tanpa hex: twilight mengambil fg dari grup `Normal` saat dipakai,
+        -- jadi tidak ada warna basi setelah tema di-reload.
+        color = { "Normal" },
         term_bg = colors.bg_dark,
       },
       context = 20,
