@@ -14,6 +14,7 @@ import time
 from actions import dispatch, local_action, power_menu, request
 from common import ROOT, initial_state, runtime_dir, settings, workspace_layout
 from calendar_data import calendar_state, shift_month
+from music_panel import MusicPanel
 from sources import (Commands, PipeWireEvents, battery_state, brightness_state, choose_player, clock_state, compositor,
                      music_players, music_state, network_state, notification_state, volume_state)
 
@@ -47,6 +48,7 @@ class Collector:
         self.event_fd = None
         self.calendar_window = False
         self.calendar_close_task = None
+        self.music_panel = MusicPanel(self)
 
     async def calendar_eww(self, *args):
         return await self.commands.run("eww", "--config", str(ROOT), "--force-wayland",

@@ -187,3 +187,37 @@ ketika tidak sedang mengubah playback/volume/workspace secara bersamaan.
 - Pengujian desktop Middle pada **Niri belum diulang** dalam sesi ini;
   implementasi popup memakai Eww Wayland dan tidak menggunakan dispatcher
   compositor. Tes adapter Niri yang ada tetap lulus.
+
+## Left — widget musik, 29 Oktober 2026
+
+- **35 tes unit lulus**. Lima tes musik baru memeriksa metadata lengkap dan
+  escaping label Eww, rute kontrol MPD/MPRIS, pembukaan kosong, hilang/pulihnya
+  pemutar saat panel terbuka, kegagalan/timeout IPC, dan pembatalan penutupan
+  saat segera dibuka ulang. Tes adapter compositor dan kalender tetap lulus.
+- Desktop **Hyprland**, 1366×768: screenshot keadaan kosong serta metadata
+  Playing/Paused diperiksa. Panel berada di kiri, 8 px di bawah area bar,
+  mengikuti palet/font bar. Tooltip mempertahankan metadata lengkap ketika
+  judul panjang dipotong; penanda kutip dan backslash tampil sebagai teks.
+  Data Unicode dan newline melewati parser/JSON tanpa kesalahan. Ketersediaan
+  glyph non-Latin tetap mengikuti font yang terpasang.
+- MPD dan mpd-mpris pengguna awalnya **inactive**. Pengujian memakai MPD privat
+  pada socket Unix sementara, output **null**, tiga FLAC senyap bertag judul/
+  artis khusus, dan bridge MPRIS privat. Tidak mengubah playlist, posisi lagu,
+  volume, konfigurasi, maupun status layanan musik pengguna.
+- Previous/play-pause/next ke MPD asli dan lewat MPRIS diuji pada server privat.
+  Main collector memilih MPD ketika bridge juga tersedia, sehingga bridge
+  tidak membuat indikator ganda. Metadata baru mengikuti pergantian lagu.
+- **10 siklus buka/tutup normal dan 10 siklus buka ulang cepat lulus**.
+  Setelah menutup, tidak ada jendela `music-popup` tersisa. PID daemon dan
+  collector tetap sama sepanjang siklus. Fokus, posisi, serta ukuran aplikasi
+  aktif tidak berubah saat popup dibuka.
+- Kedua pemutar privat dihentikan saat panel terbuka: state menjadi kosong,
+  kontrol nonaktif, dan panel tetap bisa ditutup. Semua proses privat di-reap,
+  lalu bar di-reload dengan lingkungan MPD awal. Log daemon setelah pemulihan
+  tidak menunjukkan kesalahan Yuck, SCSS, atau ekspresi.
+- Widget menggunakan stream musik yang sudah ada dan FIFO collector yang sama;
+  tidak menambah polling, proses latar, cover art, atau pembacaan progres lagu.
+  Animasi slidedown ditangani Eww 300 ms. Penutupan memakai satu delay yang
+  dapat dibatalkan dan jendela dibuang sesudah animasi selesai.
+- Pengujian desktop Left pada **Niri belum diulang** dalam sesi ini. Widget
+  memakai Eww Wayland tanpa perintah compositor; tes adapter Niri tetap lulus.

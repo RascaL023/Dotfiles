@@ -77,6 +77,11 @@ def one_line(value):
     return " ".join(str(value or "").split())
 
 
+def label_text(value):
+    # Eww 0.6.0 unescapes label text once more after evaluating the JSON value.
+    return one_line(value).replace("\\", "\\\\")
+
+
 def workspace_layout(value):
     tokens = (ROOT / "styles/_tokens.scss").read_text()
     def px(name):
@@ -106,14 +111,23 @@ def initial_state(cfg):
                "reveal_duration": str(token("control-transition", "ms")) + "ms",
                "calendar_duration": str(token("calendar-transition", "ms")) + "ms",
                # Non-exclusive layer surfaces are already placed below the reserved bar.
-               "calendar_offset": str(token("calendar-gap-top", "px")) + "px"},
+               "calendar_offset": str(token("calendar-gap-top", "px")) + "px",
+               "music_duration": str(token("music-transition", "ms")) + "ms",
+               "music_offset_x": str(token("outer-x", "px")) + "px",
+               "music_offset_y": str(token("music-gap-top", "px")) + "px",
+               "music_text_width": token("music-text-width", "px")},
         "workspaces": workspace_layout({"available": False, "items": [
             {"id": n, "name": str(n), "label": str(n), "active": False, "occupied": False}
             for n in sorted(set(cfg["workspaces"]))]}),
         "clock": {"time": "--:--", "date": "", "tooltip": ""},
         "calendar": calendar_state(),
-        "music": {"available": False, "source": "", "title": "", "tooltip": "",
-                  "icon": "󰎈", "limit": cfg["music"]["title_limit"]},
+        "music_panel": {"open": False},
+        "music": {"available": False, "source": "", "title": "", "tooltip": "No active player",
+                  "icon": "󰎈", "limit": cfg["music"]["title_limit"],
+                  "full_title": "", "artist": "", "player": "", "status": "Unavailable",
+                  "playing": False, "play_icon": "󰐊", "label_title": "",
+                  "label_full_title": "No active player", "label_artist": "Start a music player to listen",
+                  "label_player": "Music"},
         "volume": {"available": False, "muted": False, "percent": 0,
                    "text": "--", "icon": "󰝟", "tooltip": "Audio unavailable"},
         "brightness": {"available": False, "device": "", "percent": 0,

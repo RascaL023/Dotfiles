@@ -1,0 +1,51 @@
+(defwidget music-indicator []
+  (eventbox :visible {bar.modules.music}
+    :onscroll {bar.music.available ? "printf 'music-scroll %s\\n' '{}' > \"$EWW_BAR_EVENTS\"" : ""} :timeout "5s"
+    (button :class "control music ${bar.music.available ? '' : 'muted'}"
+      :tooltip {bar.music.tooltip}
+      :onclick "printf 'music-panel-toggle\\n' > \"$EWW_BAR_EVENTS\""
+      :onmiddleclick {bar.music.available ? "printf 'music-toggle\\n' > \"$EWW_BAR_EVENTS\"" : ""}
+      :timeout "5s"
+      (box :space-evenly false
+        (label :class "icon ${bar.music.available ? 'accent' : ''}" :text {bar.music.icon})
+        (label :visible {bar.music.available} :class "module-text"
+          :text {bar.music.label_title} :limit-width {bar.music.limit})))))
+
+(defwidget music-panel []
+  (box :class "music-window" :orientation "v" :space-evenly false
+    (revealer :reveal {bar.music_panel.open} :transition "slidedown" :duration {bar.ui.music_duration}
+      (box :class "music-panel" :orientation "v" :space-evenly false
+        (box :class "music-panel-header" :space-evenly false
+          (label :class "music-source" :xalign 0 :hexpand true
+            :text {bar.music.label_player} :limit-width 28)
+          (label :class "music-status" :text {bar.music.status})
+          (button :class "music-close icon" :tooltip "Close"
+            :onclick "printf 'music-panel-close\\n' > \"$EWW_BAR_EVENTS\"" :timeout "5s" "󰅖"))
+        (box :class "music-emblem" :halign "center"
+          (label :class "icon" :text {bar.music.icon}))
+        (box :class "music-metadata" :orientation "v" :space-evenly false
+          :tooltip {bar.music.tooltip}
+          (label :class "music-title" :text {bar.music.label_full_title}
+            :width {bar.ui.music_text_width} :limit-width 38 :wrap true :justify "center")
+          (label :class "music-artist" :text {bar.music.label_artist}
+            :width {bar.ui.music_text_width} :limit-width 44 :wrap true :justify "center"))
+        (box :class "music-transport" :halign "center" :space-evenly false
+          (button :class "music-transport-button icon" :tooltip "Previous track"
+            :active {bar.music.available}
+            :onclick "printf 'music-previous\\n' > \"$EWW_BAR_EVENTS\"" :timeout "5s" "󰒮")
+          (button :class "music-transport-button music-play icon"
+            :tooltip {bar.music.playing ? "Pause" : "Play"} :active {bar.music.available}
+            :onclick "printf 'music-toggle\\n' > \"$EWW_BAR_EVENTS\"" :timeout "5s"
+            (label :text {bar.music.play_icon}))
+          (button :class "music-transport-button icon" :tooltip "Next track"
+            :active {bar.music.available}
+            :onclick "printf 'music-next\\n' > \"$EWW_BAR_EVENTS\"" :timeout "5s" "󰒭"))))))
+
+(defwindow music-popup [panel-x panel-y]
+  :monitor 0
+  :geometry (geometry :x panel-x :y panel-y :width "1px" :height "1px" :anchor "top left")
+  :exclusive false
+  :focusable false
+  :stacking "overlay"
+  :namespace "eww-islands-music"
+  (music-panel))

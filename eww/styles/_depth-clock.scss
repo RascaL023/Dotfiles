@@ -1,0 +1,29 @@
+/* ========================== Depth clock =========================== */
+/* Wallpaper depth clock (windows/depth-clock.yuck).
+   Colours come from the active Matugen palette imported by eww.scss:
+   $primary-accent for the clock, $layer-lowest for the offset shadow.
+   Geometry knobs below are intentional: keep them in sync with
+   depth-clock/settings.conf (DEPTH_BAND_HEIGHT); see depth-clock/README.md. */
+
+$depth-clock-font: "Noto Serif Display";
+$depth-clock-weight: 400;
+$depth-clock-size: 380px;
+$depth-clock-spacing: 0;
+$depth-clock-padding-top: 49px;
+$depth-clock-shadow: 10px 12px 10px rgba($layer-lowest, 0.55);
+
+.depth-clock {
+  color: $primary-accent;
+  background-color: transparent;
+  font-family: $depth-clock-font;
+  font-weight: $depth-clock-weight;
+  font-size: $depth-clock-size;
+  letter-spacing: $depth-clock-spacing;
+  padding-top: $depth-clock-padding-top;
+  text-shadow: $depth-clock-shadow;
+}
+
+/* The foreground is a transparent PNG; nothing may paint behind it. */
+.depth-clock-fg {
+  background-color: transparent;
+}

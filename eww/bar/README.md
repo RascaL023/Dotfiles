@@ -5,7 +5,8 @@ target awal 1366×768. Satu jendela transparan menampung kelompok kiri, jam,
 dan tiga pulau kanan, masing-masing setinggi 30 px. Padding atas 4 px dan bawah
 0 px membuat area eksklusif **34 px**. Margin horizontal 4 px, radius 10 px,
 border 1 px; teks Monocraft 11 px dan ikon 13 px. Launcher memakai ikon
-NixOS. Jam `HH:MM` tetap di tengah layar; klik membuka kalender. Workspace berupa
+NixOS. Jam `HH:MM` tetap di tengah layar; klik membuka kalender. Bagian kiri
+memiliki indikator musik yang membuka panel kontrol tersendiri. Workspace berupa
 pil tanpa angka: 6 px ketika tidak aktif, memanjang menjadi 20 px ketika aktif,
 dengan transisi 160 ms. Tooltip tetap menampilkan identitas workspace.
 Padding bawah bar sudah nol; jarak tambahan dari pengaturan gap compositor
@@ -26,7 +27,7 @@ tetap mengikuti konfigurasi Niri/Hyprland Anda.
 `--monitor` menerima nama konektor atau indeks Eww dan berlaku untuk
 `start`/`toggle`. Dukungan awal satu monitor pilihan. `reload` melakukan
 stop/start yang bersih, mempertahankan monitor terakhir, serta menutup slider
-dan kalender.
+dan seluruh popup.
 Setelah mengganti monitor default di pengaturan, gunakan
 `stop` lalu `start`. Reload ketika bar berhenti tidak membuka bar.
 
@@ -86,11 +87,12 @@ Dependensi modul:
 | Musik | `playerctl` + `dbus-monitor` untuk MPRIS; `mpc` untuk MPD |
 | Baterai | `/sys/class/power_supply/*` |
 | Notifikasi | `swaync-client`, SwayNC |
-| Launcher / daya | `rofi`, `hyprlock`, `systemctl`, perintah logout compositor aktif |
+| Launcher / daya | `rofi`, `~/.config/rofi/launch.sh`, `hyprlock`, `systemctl`, perintah logout compositor aktif |
 
 `barctl doctor` memeriksa pengaturan, executable, lingkungan sesi, resolusi font,
 dan ketersediaan modul pada instance berjalan. Modul yang kehilangan layanan
-tetap memiliki state lengkap: musik/baterai tersembunyi, workspace tidak aktif,
+tetap memiliki state lengkap: musik menampilkan ikon dan keadaan kosong,
+baterai tersembunyi, workspace tidak aktif,
 volume/notifikasi tidak dapat diklik; jaringan tetap dapat membuka `nmtui`.
 
 ## Interaksi
@@ -104,7 +106,7 @@ membuka `[slider volume · ikon volume]`; hover brightness membuka
 `[slider brightness · ikon brightness]`, sehingga pointer tidak perlu melewati
 volume untuk meraih slider brightness. Hanya satu slider terbuka pada satu
 waktu. Status hover memakai `defvar` dan `eww update`; animasi `revealer`
-200 ms dikerjakan Eww. Meninggalkan kontrol memulai animasi menutup, tanpa
+dengan durasi `$control-transition` dikerjakan Eww. Meninggalkan kontrol memulai animasi menutup, tanpa
 timer penutupan tambahan. Area hover mencakup ikon beserta slidernya.
 
 Klik jam membuka panel `[tanggal hari ini | kalender bulanan]` tepat di tengah,
@@ -113,7 +115,8 @@ kanan mulai Senin, menandai hari ini, dan menyediakan panah bulan sebelumnya/
 berikutnya. Tombol **Today** kembali ke bulan saat ini; membuka ulang panel
 juga kembali ke bulan saat ini. Tooltip jam hanya berisi tanggal hari ini.
 Panel mengikuti monitor pilihan bar, tidak mengambil fokus atau menambah
-ruang eksklusif. Animasi buka/tutup memakai `revealer` Eww selama 240 ms.
+ruang eksklusif. Animasi buka/tutup memakai `revealer` Eww dengan durasi
+`$calendar-transition`.
 Klik jam lagi untuk menutup; keluar dari panel tidak menutupnya.
 
 Penutupan memakai **toggle saja**; klik di luar dan Esc tidak menutup panel.
@@ -124,6 +127,25 @@ membuka ulang membatalkan penutupan tertunda. Tidak ada proses latar atau
 polling tambahan: kalender diperbarui saat navigasi dan pergantian tanggal
 melalui timer jam yang sudah ada; bulan yang sedang dijelajahi tetap dipertahankan.
 
+Klik indikator musik di kiri membuka panel berisi sumber/status pemutar,
+judul dan artis, serta tombol previous, play/pause, dan next. Panel berada
+di sisi kiri, 8 px di bawah area bar, pada monitor pilihan yang sama. Klik
+indikator lagi atau tombol **Close** untuk menutup. Klik tengah pada indikator
+tetap dapat play/pause langsung; gulir atas/bawah berpindah lagu sebelumnya/
+berikutnya. Saat tidak ada pemutar Playing/Paused, indikator hanya berupa ikon
+dan panel menunjukkan **No active player** dengan kontrol nonaktif. Panel
+tetap bisa ditutup bila pemutar hilang, lalu pulih saat pemutar tersedia lagi.
+
+Panel musik memakai warna/font bar dan animasi `revealer` 300 ms, mengikuti
+token `$music-transition`. Judul bar tetap maksimal `music.title_limit`
+karakter; panel mendapat judul/artis lengkap dari snapshot yang sama, dengan
+teks panjang dipotong sesuai ruang dan tooltip metadata lengkap. Tidak ada
+cover art, polling posisi lagu, unduhan, atau listener baru. Callback musik
+menggunakan FIFO yang sama dengan kontrol kanan agar scroll tidak menunggu
+startup Python. Semua tombol mengontrol sumber MPD/MPRIS yang ditampilkan.
+Popup tidak mengambil fokus atau menambah ruang eksklusif; penutupan menunggu
+animasi selesai dan dapat dibatalkan ketika panel segera dibuka ulang.
+
 Seluruh tooltip bawaan menggunakan bahasa Inggris. Tooltip bagian kanan hanya
 menampilkan nilai atau status, tanpa petunjuk klik maupun gulir. Nama workspace,
 koneksi, serta metadata musik tetap mengikuti data aslinya.
@@ -132,7 +154,7 @@ koneksi, serta metadata musik tetap mengikuti data aslinya.
 |---|---|
 | Launcher | Klik membuka Rofi drun |
 | Workspace | Pil aktif memanjang; klik berpindah, tooltip menunjukkan nomor/nama, gulir horizontal/touchpad untuk workspace tambahan |
-| Musik | Klik play/pause; gulir atas sebelumnya, bawah berikutnya; tooltip artis/judul/sumber lengkap |
+| Musik | Klik toggle panel; klik tengah play/pause; gulir atas sebelumnya, bawah berikutnya; panel menyediakan tombol kontrol dan metadata lengkap |
 | Jam | Hanya waktu 24 jam; tooltip tanggal hari ini; klik toggle kalender |
 | Volume | Hover: slider 0–100% dan persentase; klik ikon: mute; gulir ±5%, maksimum 100%; ikon mengikuti level dan mute |
 | Brightness | Hover: slider 0–100% dan persentase; gulir ±5%; ikon mengikuti level, tanpa aksi klik |
@@ -156,6 +178,8 @@ Ukuran memakai px dan durasi memakai ms. Token `$right-*`, `$slider-*`
 dan `$control-transition` mengatur kelompok kanan.
 Token `$calendar-*` mengatur ukuran, jarak, dan durasi panel kalender;
 komponennya berada di `_calendar.scss` dan `widgets/calendar.yuck`.
+Token `$music-*` mengatur panel musik; komponen berada di `_music.scss` dan
+`widgets/music.yuck`. Posisi horizontal popup mengikuti `$outer-x`.
 Tinggi geometri Yuck 1 px hanya batas minimum;
 tinggi sebenarnya berasal dari token SCSS, sehingga tidak ada salinan 34 px
 yang perlu disinkronkan di Yuck.
@@ -200,25 +224,29 @@ python3 scripts/adapter.py snapshot    # baca state instance berjalan
 ./barctl action volume-set 50
 ./barctl action brightness-set 50
 ./barctl action music-scroll down
+./barctl action music-panel-toggle
+./barctl action music-previous
+./barctl action music-next
 ./barctl action calendar-toggle
 ```
 
 `scripts/common.py` mendefinisikan pengaturan dan schema state.
 `sources.py` memisahkan parser, snapshot dan adapter compositor `Hyprland`/`Niri`.
 `adapter.py` mengatur event loop, penggabungan peristiwa, timer, reconnect,
-popup kalender, dan socket aksi. `calendar_data.py` menyusun grid enam minggu
+popup kalender, dan socket aksi. `music_panel.py` mengelola lifecycle popup
+musik dalam collector yang sama. `calendar_data.py` menyusun grid enam minggu
 dengan Python standard library, termasuk tahun kabisat dan batas tahun 1–9999.
 Grid memakai `for`/`label` biasa agar awal minggu dan nama hari Inggris tetap
 konsisten tanpa mengubah locale sesi. `actions.py` membatasi nama aksi serta menjalankan argv tanpa
 shell. `widgets/right.yuck` memisahkan kelompok kontrol, status, dan aksi;
-semuanya tetap berada dalam satu jendela bar. Kalender memakai jendela popup
-tambahan hanya ketika dibuka, pada daemon yang sama. Yuck menggunakan `for` biasa dan `label :text`; tidak ada `literal`,
+semuanya tetap berada dalam satu jendela bar. Kalender dan musik memakai
+jendela popup tambahan hanya ketika dibuka, pada daemon yang sama. Yuck menggunakan `for` biasa dan `label :text`; tidak ada `literal`,
 Pango markup dari metadata, atau penyisipan nama jaringan/judul ke command.
 Nilai dinamis dalam command Yuck berupa ID workspace, arah scroll, pilihan
 dan persentase slider. Adapter memvalidasi allowlist,
 rentang 0–100 dan angka finite; metadata tidak masuk ke command.
 
-Callback perubahan nilai, scroll, mute, notifikasi, dan kalender menulis pesan pendek melalui builtin shell `printf` ke
+Callback perubahan nilai, scroll, mute, notifikasi, kalender, dan musik menulis pesan pendek melalui builtin shell `printf` ke
 `$EWW_BAR_EVENTS`, FIFO privat yang disiapkan `barctl` dan dibaca collector.
 Ini menghindari startup interpreter pada setiap pergeseran slider. Callback
 hover langsung menjalankan `eww --config . --no-daemonize update` pada instance
@@ -267,7 +295,11 @@ bernama `mpd`/`mpd-mpris` (termasuk suffix `.instance...`) disisihkan ketika
 MPD asli tersedia. Tambahkan nama bridge lain ke `mpd_bridges`. Jika memakai
 bridge ke **server MPD berbeda**, hapus namanya dari daftar tersebut.
 Kontrol menggunakan pemutar yang dikirim pada state terakhir, tanpa memilih
-ulang saat klik. Pemutar stopped tidak memenuhi syarat untuk ditampilkan.
+ulang saat klik. Pemutar stopped tidak memenuhi syarat untuk ditampilkan;
+jika tidak ada Playing/Paused, ikon musik tetap membuka keadaan kosong.
+Nilai `label_*` pada state musik menggandakan backslash untuk tahap unescape
+label Eww 0.6.0. Field metadata asli dan tooltip tetap berupa teks aslinya;
+metadata tidak dipakai sebagai markup atau perintah.
 
 Stream yang berhenti mencoba lagi setelah 1, 2, 4, 8, 16, lalu maksimal 30 detik;
 koneksi stabil selama 30 detik mengembalikan backoff ke awal. Penggabungan event
@@ -295,6 +327,9 @@ penggabungan event, reconnect stream/socket, dan reaping child.
 Tes kalender mencakup tahun kabisat, awal minggu Senin, pergantian tahun/
 tanggal, navigasi, pembukaan gagal yang dapat dicoba ulang, dan pembatalan
 penutupan saat toggle cepat.
+Tes musik memeriksa metadata lengkap dan backslash label, kontrol ke sumber
+MPD/MPRIS yang ditampilkan, hilang/pulihnya pemutar ketika panel terbuka,
+timeout IPC Eww, dan pembatalan penutupan saat toggle cepat.
 Tes socket membutuhkan izin socket Unix lokal.
 
 Pemeriksaan desktop yang **secara eksplisit mengubah keadaan sementara**:
@@ -321,7 +356,7 @@ pages dapat terhitung lebih dari sekali). Hasil sesi implementasi ada di
 - Bar tidak muncul: jalankan dari lingkungan sesi Wayland, cek monitor dengan
   `hyprctl -j monitors` atau `niri msg -j outputs`, lalu `barctl doctor` dan log Eww.
 - Ikon kotak: cek `fc-match 'JetBrainsMono Nerd Font'`.
-- Musik kosong: cek `playerctl -l` dan `mpc status`; periksa lingkungan MPD
+- Musik **No active player**: cek `playerctl -l` dan `mpc status`; periksa lingkungan MPD
   pada proses yang menjalankan bar.
 - Jaringan/notifikasi kosong: cek service pengguna dan D-Bus sesi. Modul lain
   tetap berjalan; setelah service kembali, stream reconnect otomatis.
@@ -347,5 +382,5 @@ pages dapat terhitung lebih dari sekali). Hasil sesi implementasi ada di
 - [`../monasm-config.example.bak/`](../monasm-config.example.bak/) — pola tray/workspace lokal (di-ignore git, jadi hanya ada di mesin ini)
 - [Arin oleh adi1090x](https://github.com/adi1090x/widgets/tree/main/eww/arin) — referensi kelompok visual
 
-Implementasi ini memakai satu window bar, popup kalender opsional, dan adapter event sendiri; referensi
+Implementasi ini memakai satu window bar, popup kalender/musik opsional, dan adapter event sendiri; referensi
 dipakai sebagai acuan desain, tanpa menyalin pola polling satu detiknya.

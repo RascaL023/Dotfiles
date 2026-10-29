@@ -207,6 +207,8 @@ Rules:
 | `matugen/templates/kanagawa-dragon-lotus/blueprint/README.md` | every key of the Flow B blueprint JSON |
 | `hypr/docs/ROADMAP_V56.md` | unimplemented Hyprland 0.56 features: recipes, verification steps, backlog |
 | `eww/bar/README.md` | the Eww bar: `barctl`, settings, adapter, troubleshooting |
+| `eww/depth-clock/README.md` | the wallpaper depth clock: `depthctl`, layout knobs, foreground mask |
+| `eww/depth-clock/GUIDE.md` | step-by-step build recipe for a new wallpaper |
 
 When behavior changes, update the document that states it — these files are
 verified against the repo, so a stale line is a bug.

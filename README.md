@@ -289,6 +289,8 @@ back to plain TokyoNight and warns. See
 | [`matugen/docs/VOCABULARY.md`](matugen/docs/VOCABULARY.md) | Sample `matugen --show-colors` output and how to read it |
 | [`matugen/docs/PROGRESS.md`](matugen/docs/PROGRESS.md) | Template coverage per tool |
 | [`matugen/docs/NVIM_MAPPING.md`](matugen/docs/NVIM_MAPPING.md) | Which palette key colors which part of Neovim |
+| [`eww/depth-clock/README.md`](eww/depth-clock/README.md) | Jam wallpaper berlapis: kendali, layout, dan masker foreground |
+| [`eww/depth-clock/GUIDE.md`](eww/depth-clock/GUIDE.md) | Langkah konkret membuat depth clock untuk wallpaper baru |
 | [`…/blueprint/README.md`](matugen/templates/kanagawa-dragon-lotus/blueprint/README.md) | Every key of the fixed-palette JSON |
 
 ---

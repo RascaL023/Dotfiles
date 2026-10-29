@@ -36,7 +36,8 @@
 ;;##### Windows #####
 ;;###################
 
+;; (include "windows/try.yuck")
 (include "windows/power-user.yuck")
 (include "windows/distro.yuck")
-(include "windows/try.yuck")
+(include "windows/depth-clock.yuck")
 

@@ -10,13 +10,7 @@
             :active {bar.workspaces.available} :tooltip {ws.name}
             :onclick "./barctl action workspace ${ws.id}" :timeout "5s"
             (box :class "workspace-dot" :valign "center")))))
-    (eventbox :visible {bar.modules.music && bar.music.available}
-      :onscroll "./barctl action music-scroll {}" :timeout "5s"
-      (button :class "control music" :tooltip {bar.music.tooltip}
-        :onclick "./barctl action music-toggle" :timeout "5s"
-        (box :space-evenly false
-          (label :class "icon accent" :text {bar.music.icon})
-          (label :class "module-text" :text {bar.music.title} :limit-width {bar.music.limit}))))))
+    (music-indicator)))
 
 (defwidget clock-island []
   (button :halign "center" :valign "center" :visible {bar.modules.clock}

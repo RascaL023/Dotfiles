@@ -1,0 +1,40 @@
+;; ============================ Depth clock ============================
+;; Wallpaper depth clock: a live HH:MM label with a static transparent
+;; foreground cutout drawn over it, so the wallpaper subject hides part of the
+;; clock. Open it with scripts/depthctl (it sizes the window for the output
+;; and generates the foreground); the geometry below is only the fallback used
+;; by a bare `eww open depth-clock`.
+;;
+;; Layers: awww wallpaper < bottom-layer window < normal windows.
+
+;; Prints once per minute boundary instead of polling.
+(deflisten depth-clock-time
+  :initial "00:00"
+  `bash -c 'while :; do date +%H:%M; sleep $((60 - 10#$(date +%S))); done'`)
+
+(defwidget depth-clock-layer []
+  (overlay
+    ;; middle: the live clock, painted first
+    (label :class "depth-clock"
+      :text depth-clock-time
+      :halign "center"
+      :valign "start")
+    ;; foreground: static subject cutout, painted over the clock
+    (image :class "depth-clock-fg"
+      :path "/home/rascal/.cache/eww-depth-clock/foreground.png"
+      :halign "center"
+      :valign "start"
+      :preserve-aspect-ratio false)))
+
+(defwindow depth-clock
+  :monitor 0
+  :stacking "bg"
+  :focusable "none"
+  :exclusive false
+  :geometry (geometry
+    :x "0"
+    :y "0"
+    :width "100%"
+    :height "580px"
+    :anchor "top left")
+  (depth-clock-layer))

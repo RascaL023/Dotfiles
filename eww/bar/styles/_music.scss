@@ -1,0 +1,39 @@
+.music-panel {
+  background: $surface;
+  border: $border-width solid $border;
+  border-radius: $music-radius;
+  padding: $music-padding;
+}
+.music-panel-header { margin-bottom: $music-section-gap; }
+.music-source { color: $accent; font-size: $music-caption-size; font-weight: $clock-weight; }
+.music-status { color: $muted; font-size: $music-caption-size; margin-right: $music-control-gap; }
+.music-close {
+  min-width: $button-height;
+  min-height: $button-height;
+  color: $muted;
+  border-radius: $button-radius;
+}
+.music-close:hover { color: $text; background: $hover; }
+.music-emblem {
+  min-width: $music-emblem-box;
+  min-height: $music-emblem-box;
+  border-radius: $music-radius;
+  background: $hover;
+  color: $accent;
+  margin-bottom: $music-section-gap;
+}
+.music-emblem .icon { font-size: $music-emblem-size; }
+.music-metadata { min-width: $music-text-width; margin-bottom: $music-section-gap; }
+.music-title { font-size: $music-title-size; font-weight: $clock-weight; }
+.music-artist { color: $muted; margin-top: $module-gap; }
+.music-transport-button {
+  min-width: $music-control-size;
+  min-height: $music-control-size;
+  border-radius: $button-radius;
+  margin: $zero $music-control-gap;
+  background: $hover;
+}
+.music-transport-button:hover { color: $accent; background: $border; }
+.music-play { color: $on-accent; background: $accent; }
+.music-play:hover { color: $on-accent; background: $text; }
+.music-transport-button:disabled { color: $muted; background: $hover; }

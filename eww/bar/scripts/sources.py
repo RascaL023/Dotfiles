@@ -7,7 +7,7 @@ import os
 import re
 from pathlib import Path
 
-from common import one_line, compositor_name
+from common import one_line, label_text, compositor_name
 
 
 class Commands:
@@ -364,8 +364,16 @@ def music_state(player, cfg):
     if not player:
         return None
     title = one_line(player["title"])
+    artist = one_line(player["artist"])
+    name = "MPD" if player["kind"] == "mpd" else player["name"]
+    playing = player["status"] == "Playing"
     limit = cfg["title_limit"]
+    short_title = title if len(title) <= limit else title[:limit - 1] + "…"
     return {"available": True, "source": player["key"],
-            "title": title if len(title) <= limit else title[:limit - 1] + "…",
-            "limit": limit, "icon": "󰎈" if player["status"] == "Playing" else "󰏤",
+            "title": short_title, "full_title": title, "artist": artist,
+            "player": name, "status": player["status"], "playing": playing,
+            "play_icon": "󰏤" if playing else "󰐊",
+            "label_title": label_text(short_title), "label_full_title": label_text(title),
+            "label_artist": label_text(artist or "Unknown artist"), "label_player": label_text(name),
+            "limit": limit, "icon": "󰎈" if playing else "󰏤",
             "tooltip": f"{player['artist']}\n{player['title']}\n{player['name']} · {player['status']}".strip()}

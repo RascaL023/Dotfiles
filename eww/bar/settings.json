@@ -31,11 +31,11 @@
     "title_limit": 24
   },
   "commands": {
-    "launcher": ["rofi", "-show", "drun"],
+    "launcher": ["~/.config/rofi/launch.sh", "apps"],
     "network": ["kitty", "--class", "bar-network", "nmtui"],
     "notifications": ["swaync-client", "-t"],
     "dnd": ["swaync-client", "-d"],
-    "menu": ["rofi", "-dmenu", "-i", "-no-custom"],
+    "menu": ["~/.config/rofi/launch.sh", "menu", "-no-custom"],
     "lock": ["hyprlock"],
     "suspend": ["systemctl", "suspend"],
     "logout": null,

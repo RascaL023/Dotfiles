@@ -1,0 +1,385 @@
+#!/usr/bin/env bash
+# depthctl — wallpaper depth clock for the main Eww configuration.
+#
+#   awww wallpaper          (background, untouched)
+#   Eww clock (HH:MM)       (middle, live)
+#   foreground.png          (foreground, transparent subject cutout)
+#
+# The foreground is an offline artefact: it is generated from the wallpaper
+# once per wallpaper/screen combination and then reused, so changing the time
+# never touches the image pipeline. See eww/depth-clock/README.md.
+#
+# Usage:
+#   depthctl start              open the clock for the current wallpaper
+#   depthctl stop               close the clock (the Eww daemon keeps running)
+#   depthctl toggle             toggle the clock
+#   depthctl reload             rebuild assets and reopen
+#   depthctl status             report state, assets and layout
+#   depthctl generate [img]     rebuild the foreground PNG only
+#   depthctl refresh            reposition an already open clock
+#   depthctl wallpaper <img>    show for a masked wallpaper, hide otherwise
+
+set -euo pipefail
+
+EWW_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+SETTINGS_FILE="$EWW_DIR/depth-clock/settings.conf"
+WINDOW="depth-clock"
+EWW=(eww --force-wayland -c "$EWW_DIR")
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/eww-depth-clock"
+ASSET="$CACHE_DIR/foreground.png"
+META="$CACHE_DIR/meta"
+FW_STEP="1"       # px of erosion before feathering the mask
+FW_BLUR="0x0.8"   # feather radius
+
+TMP_DIR=""
+cleanup() {
+  if [[ -n $TMP_DIR && -d $TMP_DIR ]]; then rm -rf -- "$TMP_DIR"; fi
+  return 0
+}
+trap cleanup EXIT
+
+die() { printf '[ERR] %s\n' "$*" >&2; exit 1; }
+info() { printf '%s\n' "$*"; }
+note() { printf '%s\n' "$*" >&2; }
+
+# ---------------------------------------------------------------- settings --
+
+DEPTH_BAND_HEIGHT=580
+DEPTH_MASKS=()
+
+load_settings() {
+  [[ -r $SETTINGS_FILE ]] || die "missing settings: $SETTINGS_FILE"
+  # shellcheck disable=SC1090
+  . "$SETTINGS_FILE"
+  [[ $DEPTH_BAND_HEIGHT =~ ^[0-9]+$ ]] || die "DEPTH_BAND_HEIGHT is not a number"
+}
+
+# mask_spec <file name> -> "<bg>|<tolerance>|<speck area>", non-zero if unknown
+mask_spec() {
+  local entry
+  for entry in "${DEPTH_MASKS[@]}"; do
+    [[ ${entry%%|*} == "$1" ]] || continue
+    printf '%s\n' "${entry#*|}"
+    return 0
+  done
+  return 1
+}
+
+# --------------------------------------------------------------- compositor --
+
+detect_compositor() {
+  case "${XDG_CURRENT_DESKTOP:-}" in
+    *Hyprland*) info hyprland; return 0 ;;
+    *[Nn]iri*)  info niri;     return 0 ;;
+  esac
+  [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] && { info hyprland; return 0; }
+  [[ -n ${NIRI_SOCKET:-} ]] && { info niri; return 0; }
+  info none
+}
+
+# output_geometry -> "<connector> <width> <height> <top reserved>"
+# The last field is the space the compositor reserves at the top (another bar).
+# Layer surfaces are placed inside the usable area, so the depth clock has to
+# shift up by exactly that much to line up with the wallpaper again.
+output_geometry() {
+  local compositor line
+  compositor=$(detect_compositor)
+  case $compositor in
+    hyprland)
+      line=$(hyprctl -j monitors | jq -r \
+        '(map(select(.focused))[0] // .[0])
+         | "\(.name) \(.width) \(.height) \((.reserved // [0,0,0,0])[1] // 0)"')
+      ;;
+    niri)
+      # niri does not reserve space for layer surfaces
+      line=$(niri msg -j outputs | jq -r \
+        'to_entries | (map(select(.value.focused))[0] // .[0])
+         | "\(.key) \(.value.logical.width) \(.value.logical.height) 0"')
+      ;;
+    *)
+      die "unsupported session: set XDG_CURRENT_DESKTOP to Hyprland or niri"
+      ;;
+  esac
+  [[ $line =~ ^[^[:space:]]+\ [0-9]+\ [0-9]+\ [0-9]+$ ]] \
+    || die "could not read the focused output ($compositor)"
+  printf '%s\n' "$line"
+}
+
+# current_wallpaper -> path awww is displaying
+current_wallpaper() {
+  command -v awww >/dev/null || die "awww is not installed"
+  local out
+  out=$(awww query 2>/dev/null || true)
+  sed -n 's/.*currently displaying: image: \(.*\)$/\1/p' <<<"$out" | head -n1
+}
+
+# ------------------------------------------------------------------- assets --
+
+# signature of everything the foreground PNG depends on
+asset_signature() {
+  local wallpaper=$1 bg=$2 fuzz=$3 area=$4 width=$5 height=$6
+  local stat
+  stat=$(stat -c '%Y:%s' -- "$wallpaper" 2>/dev/null) || die "cannot stat $wallpaper"
+  printf '%s|%s|%sx%s|%s|%s|%s|%s' \
+    "$wallpaper" "$stat" "$width" "$height" "$DEPTH_BAND_HEIGHT" "$bg" "$fuzz" "$area"
+}
+
+# build_foreground <wallpaper> <bg> <fuzz> <area> <width> <height>
+build_foreground() {
+  local wallpaper=$1 bg=$2 fuzz=$3 area=$4 width=$5 height=$6
+  local band=$DEPTH_BAND_HEIGHT
+  command -v magick >/dev/null || die "ImageMagick (magick) is required"
+
+  mkdir -p -- "$CACHE_DIR"
+  TMP_DIR=$(mktemp -d "$CACHE_DIR/.build.XXXXXX")
+  local t=$TMP_DIR
+
+  # same geometry awww uses: crop to fill the output, centred
+  magick "$wallpaper" -resize "${width}x${height}^" \
+    -gravity center -extent "${width}x${height}" +repage "$t/scaled.png"
+  magick "$t/scaled.png" -crop "${width}x${band}+0+0" +repage "$t/band.png"
+
+  # pixels far enough from the background colour form the first silhouette
+  magick "$t/band.png" \( +clone -fill "$bg" -colorize 100 \) \
+    -compose difference -composite -colorspace gray \
+    -threshold "${fuzz}%" "$t/raw.png"
+
+  # close background pockets that are fully enclosed by the subject
+  magick "$t/raw.png" -negate "$t/bg.png"
+  if [[ $(magick "$t/bg.png" -format '%[fx:u.p{0,0}]' info:) == 1* ]]; then
+    magick "$t/bg.png" -fill black -draw 'color 0,0 floodfill' "$t/pockets.png"
+    magick "$t/raw.png" "$t/pockets.png" -compose lighten -composite "$t/solid.png"
+  else
+    note "[WARN] subject touches the top-left corner; keeping holes as-is"
+    cp -- "$t/raw.png" "$t/solid.png"
+  fi
+
+  # drop paper dust (small connected components); the manifest value is in
+  # wallpaper pixels, so scale it to the output the band was rendered at
+  local orig_width area_eff
+  orig_width=$(magick "$wallpaper" -format '%w' info:)
+  area_eff=$(awk -v a="$area" -v s="$width" -v o="$orig_width" \
+    'BEGIN { printf "%d", a * (s / o) * (s / o) }')
+  if (( area_eff > 0 )); then
+    magick "$t/solid.png" -define connected-components:area-threshold="$area_eff" \
+      -define connected-components:mean-color=true -connected-components 8 \
+      "$t/large.png"
+  else
+    cp -- "$t/solid.png" "$t/large.png"
+  fi
+
+  # erode 1px so the cutout carries no background fringe, then feather
+  magick "$t/large.png" -morphology Erode "Disk:$FW_STEP" \
+    -blur "$FW_BLUR" "$t/mask.png"
+
+  # a mask that is empty or covers everything means the keying failed
+  local coverage
+  coverage=$(magick "$t/mask.png" -format '%[fx:mean]' info:)
+  awk -v c="$coverage" 'BEGIN { exit !(c >= 0.02 && c <= 0.60) }' \
+    || die "mask coverage ${coverage} outside 2%-60%; check the background colour and tolerance"
+
+  # horizontal crop centred on the screen centre, so the image can be
+  # positioned with halign "center" and stay aligned with awww's crop
+  local bbox bw bx cx left right half
+  bbox=$(magick "$t/mask.png" -format '%@' info:)
+  bw=${bbox%%x*}; bbox=${bbox#*x}; bbox=${bbox#*+}
+  bx=${bbox%%+*}
+  cx=$(( width / 2 ))
+  left=$(( cx - bx ))
+  right=$(( bx + bw - cx ))
+  half=$(( left > right ? left : right ))
+  (( half > 0 )) || die "mask has no horizontal extent"
+
+  magick "$t/band.png" "$t/mask.png" -alpha off -compose CopyOpacity -composite \
+    -crop "$(( 2 * half ))x${band}+$(( cx - half ))+0" +repage -strip \
+    "$t/foreground.png"
+
+  [[ $(magick "$t/foreground.png" -format '%[channels]' info:) == *a* ]] \
+    || die "foreground lost its alpha channel"
+  [[ $(magick "$t/foreground.png" -format '%[pixel:p{0,0}]' info:) == *',0)'* ]] \
+    || note "[WARN] foreground corner is not transparent"
+
+  mv -f -- "$t/foreground.png" "$ASSET"
+  note "foreground: $ASSET ($(magick "$ASSET" -format '%wx%h' info:), $(du -h "$ASSET" | cut -f1))"
+}
+
+# ensure_asset <wallpaper> -> prints "<width> <height> <band>"
+ensure_asset() {
+  local wallpaper=$1 name spec bg fuzz area out width height signature
+  name=${wallpaper##*/}
+  spec=$(mask_spec "$name") \
+    || die "no foreground mask for \"$name\" (add it to $SETTINGS_FILE)"
+  IFS='|' read -r bg fuzz area <<<"$spec"
+  out=$(output_geometry)
+  read -r _ width height _ <<<"$out"
+
+  signature=$(asset_signature "$wallpaper" "$bg" "$fuzz" "$area" "$width" "$height")
+  if [[ -f $ASSET && -f $META && $(<"$META") == "$signature" ]]; then
+    note "foreground: cached"
+  else
+    mkdir -p -- "$CACHE_DIR"
+    build_foreground "$wallpaper" "$bg" "$fuzz" "$area" "$width" "$height"
+    printf '%s' "$signature" >"$META"
+  fi
+  printf '%s %s %s\n' "$width" "$height" "$DEPTH_BAND_HEIGHT"
+}
+
+# ------------------------------------------------------------------ window --
+
+window_open() {
+  "${EWW[@]}" active-windows 2>/dev/null | grep -qx "$WINDOW: $WINDOW"
+}
+
+open_window() {
+  local wallpaper=$1 geometry width height band out
+  local connector top pos="0x0"
+  geometry=$(ensure_asset "$wallpaper")
+  read -r width height band <<<"$geometry"
+  out=$(output_geometry)
+  read -r connector _ _ top <<<"$out"
+  if (( top > 0 )); then pos="0x-${top}"; fi
+
+  "${EWW[@]}" close "$WINDOW" >/dev/null 2>&1 || true
+  # eww 0.6.0 can time out on the client side while still opening the window,
+  # so verify the result instead of trusting the exit status alone.
+  timeout 10 "${EWW[@]}" open "$WINDOW" --screen "$connector" \
+    --size "${width}x${band}" --pos "$pos" --anchor 'top left' \
+    >/dev/null 2>&1 || true
+  window_open || die "failed to open $WINDOW on $connector (${width}x${band})"
+  info "depth clock: open on $connector (${width}x${band}, top offset ${top}px)"
+}
+
+# --------------------------------------------------------------- commands --
+
+cmd_start() {
+  local wallpaper=${1:-}
+  [[ -n $wallpaper ]] || wallpaper=$(current_wallpaper)
+  [[ -n $wallpaper ]] || die "cannot detect the wallpaper; pass its path"
+  [[ -r $wallpaper ]] || die "wallpaper not found: $wallpaper"
+  load_settings
+  open_window "$wallpaper"
+}
+
+cmd_stop() {
+  "${EWW[@]}" close "$WINDOW" >/dev/null 2>&1 || true
+  if window_open; then
+    die "could not close $WINDOW"
+  fi
+  info "depth clock: closed"
+}
+
+cmd_toggle() {
+  load_settings
+  if window_open; then cmd_stop; else cmd_start "${1:-}"; fi
+}
+
+cmd_reload() {
+  load_settings
+  "${EWW[@]}" close "$WINDOW" >/dev/null 2>&1 || true
+  local wallpaper=${1:-}
+  [[ -n $wallpaper ]] || wallpaper=$(current_wallpaper)
+  [[ -n $wallpaper ]] || die "cannot detect the wallpaper; pass its path"
+  open_window "$wallpaper"
+}
+
+cmd_refresh() {
+  load_settings
+  if ! window_open; then
+    info "depth clock: not open"
+    return 0
+  fi
+  local wallpaper
+  wallpaper=$(current_wallpaper)
+  if [[ -z $wallpaper ]] || ! mask_spec "${wallpaper##*/}" >/dev/null; then
+    cmd_stop
+    return 0
+  fi
+  open_window "$wallpaper"
+}
+
+cmd_generate() {
+  load_settings
+  local wallpaper=${1:-}
+  [[ -n $wallpaper ]] || wallpaper=$(current_wallpaper)
+  [[ -n $wallpaper ]] || die "cannot detect the wallpaper; pass its path"
+  rm -f -- "$META"
+  ensure_asset "$wallpaper" >/dev/null
+  info "foreground ready for ${wallpaper##*/}"
+}
+
+cmd_wallpaper() {
+  local wallpaper=${1:-} name
+  [[ -n $wallpaper ]] || die "usage: depthctl wallpaper <image path>"
+  name=${wallpaper##*/}
+  load_settings
+  if ! mask_spec "$name" >/dev/null; then
+    cmd_stop >/dev/null
+    info "depth clock: hidden (no mask for \"$name\")"
+    return 0
+  fi
+  open_window "$wallpaper"
+}
+
+cmd_status() {
+  load_settings
+  local wallpaper geometry out connector width height top
+  wallpaper=$(current_wallpaper)
+  info "wallpaper: ${wallpaper:-unknown}"
+  if [[ -n $wallpaper ]] && mask_spec "${wallpaper##*/}" >/dev/null; then
+    info "mask:      configured"
+  else
+    info "mask:      missing (clock stays hidden for this wallpaper)"
+  fi
+  if [[ -f $ASSET ]]; then
+    info "foreground: $(du -h "$ASSET" | cut -f1) $(stat -c '%y' "$ASSET")"
+  else
+    info "foreground: not generated"
+  fi
+  out=$(output_geometry)
+  read -r connector width height top <<<"$out"
+  info "output:    $connector ${width}x${height} (band ${DEPTH_BAND_HEIGHT}px, top reserved ${top}px)"
+  if command -v eww >/dev/null && "${EWW[@]}" ping >/dev/null 2>&1; then
+    if window_open; then
+      info "window:    open"
+    else
+      info "window:    closed"
+    fi
+  else
+    info "window:    Eww daemon not running"
+  fi
+  return 0
+}
+
+usage() {
+  cat <<'EOF'
+usage: depthctl <command> [wallpaper]
+
+  start              open the clock for the current wallpaper
+  stop               close the clock (the Eww daemon keeps running)
+  toggle             toggle the clock
+  reload             rebuild assets and reopen
+  status             report state, assets and layout
+  generate [img]     rebuild the foreground PNG only
+  refresh            reposition/resize an open clock (also after `eww reload`)
+  wallpaper <img>    show for a masked wallpaper, hide otherwise
+EOF
+}
+
+main() {
+  local cmd=${1:-status}
+  if [[ $# -gt 0 ]]; then shift; fi
+  case $cmd in
+    start)     cmd_start "$@" ;;
+    stop)      load_settings; cmd_stop ;;
+    toggle)    cmd_toggle "$@" ;;
+    reload)    cmd_reload "$@" ;;
+    status)    cmd_status ;;
+    generate)  cmd_generate "$@" ;;
+    refresh)   cmd_refresh ;;
+    wallpaper) cmd_wallpaper "$@" ;;
+    -h|--help|help) usage ;;
+    *) die "unknown command: $cmd (try --help)" ;;
+  esac
+}
+
+main "$@"

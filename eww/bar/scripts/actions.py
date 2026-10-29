@@ -50,6 +50,9 @@ async def dispatch(collector, name, argument=None):
     if name in ("calendar-toggle", "calendar-previous", "calendar-next", "calendar-today"):
         await collector.calendar_action(name)
         return
+    if name in ("music-panel-toggle", "music-panel-close"):
+        await collector.music_panel.action(name)
+        return
     if name in ("volume-set", "brightness-set"):
         try:
             value = float(argument)
@@ -91,13 +94,14 @@ async def dispatch(collector, name, argument=None):
                            "--device=" + state["device"], "--min-value=0", "set",
                            "5%+" if argument == "up" else "5%-")
         collector.mark("brightness")
-    elif name in ("music-toggle", "music-scroll"):
+    elif name in ("music-toggle", "music-scroll", "music-previous", "music-next"):
         player = collector.selected
         if not player:
             raise ValueError("no displayed player")
         if name == "music-scroll" and argument not in ("up", "down"):
             raise ValueError("scroll must be up or down")
-        action = "play-pause" if name == "music-toggle" else ("previous" if argument == "up" else "next")
+        action = ("play-pause" if name == "music-toggle" else "previous"
+                  if name == "music-previous" or (name == "music-scroll" and argument == "up") else "next")
         if player["kind"] == "mpd":
             result = await run("mpc", {"play-pause": "toggle", "previous": "prev", "next": "next"}[action])
         else:
