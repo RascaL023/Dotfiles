@@ -56,8 +56,9 @@ Repo rules (from `AGENTS.md`):
 ### Neovim target (already wired)
 - Templates: `matugen/templates/general/nvim.lua` (flow A) and
   `matugen/templates/kanagawa-dragon-lotus/template/nvim.lua` (flow B, omits `source`).
-- Output: `~/.myenv/theme/generated/<theme>/nvim/theme.lua` — flow A writes
-  straight to `~/.myenv/theme/current/nvim/theme.lua`.
+- Output: `~/.myenv/theme/generated/<theme>/nvim/theme.lua` — flow A writes to
+  `~/.myenv/theme/generated/live.bak/nvim/theme.lua` and never straight into
+  `current`; the palette reaches Neovim once `current` points at that folder.
 - The generated file is a **palette module only** and is consumed by
   `nvim/lua/core/theme.lua`, which adds `~/.myenv/theme/current/nvim/?.lua` to
   `package.path` and calls `require("theme")` (with a TokyoNight fallback when
@@ -769,7 +770,7 @@ theme[cpu_end]="{{ colors.tertiary.default.hex }}"
 
 ### 6.14 Neovim / Lua targets
 
-- Generate a **palette module**, not a full colorscheme. In this repo the generated modules are `~/.myenv/theme/current/nvim/theme.lua` (flow A) and `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua` (flow B), both loaded by `nvim/lua/core/theme.lua` through `require("theme")` (see section 0).
+- Generate a **palette module**, not a full colorscheme. In this repo the generated modules are `~/.myenv/theme/generated/live.bak/nvim/theme.lua` (flow A) and `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua` (flow B); `nvim/lua/core/theme.lua` loads whichever one `~/.myenv/theme/current` points at, through `require("theme")` (see section 0).
 - Beware the Lua `{{` collision: do not write nested table constructors that put two `{` together. Keep one key per line, and quote Lua keyword keys (`["function"]`, `["return"]`).
 
 ```lua

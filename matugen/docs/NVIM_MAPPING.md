@@ -28,7 +28,8 @@ wallpaper  ──►  matugen  ──►  template nvim.lua  ──►  theme.lu
    Daftar lengkapnya ada di `VOCABULARY.md`.
 2. **`matugen/templates/general/nvim.lua`** memilih role itu menjadi nama-nama
    kunci (`background`, `extra.syntax.keyword`, ...). Hasil render-nya ditulis ke
-   `~/.myenv/theme/current/nvim/theme.lua`. File template **hanya menyimpan
+   `~/.myenv/theme/generated/live.bak/nvim/theme.lua`, dan baru terbaca setelah
+   `current` menunjuk folder tema itu. File template **hanya menyimpan
    nilai warna** — belum tahu warna itu akan dipakai untuk apa.
 3. **`nvim/lua/core/theme.lua`** membacanya, lalu memetakan tiap kunci ke
    **highlight group** — nama-nama "cat" yang dipakai nvim untuk mewarnai bagian

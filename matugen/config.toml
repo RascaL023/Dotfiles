@@ -34,7 +34,7 @@ output_path     = "~/.myenv/theme/generated/live.bak/rasi/theme.rasi"
 
 [templates.nvim]
 input_path      = "~/.config/matugen/templates/general/nvim.lua"
-output_path     = "~/.myenv/theme/current/nvim/theme.lua"
+output_path     = "~/.myenv/theme/generated/live.bak/nvim/theme.lua"
 
 [templates.herdr]
 input_path      = "~/.config/matugen/templates/general/herdr.toml"

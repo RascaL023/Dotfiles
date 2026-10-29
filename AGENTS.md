@@ -134,8 +134,12 @@ Rules:
   returns plain TokyoNight (`style = "night"`, transparent). Never assume the
   palette loaded.
 - Templates that produce it:
-  - Flow A: `matugen/templates/general/nvim.lua` → `~/.myenv/theme/current/nvim/theme.lua`
+  - Flow A: `matugen/templates/general/nvim.lua` → `~/.myenv/theme/generated/live.bak/nvim/theme.lua`
   - Flow B: `matugen/templates/kanagawa-dragon-lotus/template/nvim.lua` → `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua`
+- **Both flows write into their own theme folder, never into `current`.** The
+  loader still reads `current/nvim/theme.lua`, so a palette only goes live after
+  `current` points at that folder; activating Flow A is still manual (nothing in
+  this repo flips it yet).
 - **Both templates emit exactly the same key set** (verified: `background`,
   `foreground`, `cursor`, `colors[16]`, `extra.{accent,container,text,layer,
   border,status,fg,bg,syntax,ui}`; Flow B just omits `source`). So one mapping

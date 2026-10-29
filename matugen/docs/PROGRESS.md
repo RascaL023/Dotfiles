@@ -30,9 +30,19 @@ Config: `matugen/config.toml` · output root:
 | [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (+ `hyprctl reload` post_hook) | `hypr/config/core/theme.lua` (`require`, `load` modul data) ⁵ |
 | [ ] Cava | — | — | not themed |
 
-¹ Flow A is the only flow whose Neovim output is written straight to
-`~/.myenv/theme/current/nvim/theme.lua`, i.e. it does not wait for a theme
-switch. ² The generated file exists and a `post_hook` reloads the tool, but no
+> **Activation.** Writing into `generated/live.bak/` does not change the running
+> session: every reader goes through `current/…`. Nothing in this repo runs
+> `matugen image` or flips `current` today (`nextwall.sh` only sets the
+> wallpaper), so activating Flow A is manual:
+> `ln -s ~/.myenv/theme/generated/live.bak ~/.myenv/theme/current.tmp && mv -T ~/.myenv/theme/current.tmp ~/.myenv/theme/current`.
+> `theme-switcher.sh` (outside this repo) can only point `current` at a named
+> theme folder, so it cannot select `live.bak`.
+
+¹ Flow A writes Neovim into the same theme folder as every other tool
+(`nvim/theme.lua` under `generated/live.bak/`), so a wallpaper render never
+touches the active theme; the palette reaches Neovim only once `current` points
+at `live.bak` (see the activation note above). ² The generated file exists and a
+`post_hook` reloads the tool, but no
 include line inside this repo points at it yet. ³ Yazi is split in two: the
 generated file holds **colors only** (a flavor), while `yazi/theme.toml` keeps
 the glyphs and separators, the notify & cmp icons and the `which` columns, and
