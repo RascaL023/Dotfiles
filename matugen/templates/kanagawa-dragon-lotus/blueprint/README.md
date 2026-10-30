@@ -157,7 +157,7 @@ Pola `X` + `on_X` selalu berpasangan: `X` untuk latar, `on_X` untuk teks di atas
 | Key | Contoh | Arti | Dipakai di |
 |---|---|---|---|
 | `effect.shadow` | `#0d0c0c` | Warna bayangan jendela/menu | —ⁱ |
-| `effect.scrim` | `#0d0c0c` | Lapisan gelap di belakang dialog | `source.rasi` (`bg-transparent-col`, alpha 0.45) |
+| `effect.scrim` | `#0d0c0c` | Lapisan gelap di belakang dialog | `source.rasi` (`effect-scrim`, alpha 0.45) |
 
 `effect.shadow` masih disediakan untuk tool yang butuh (mis. compositor/hyprlock bila nanti ditambahkan). `effect.scrim` dipakai oleh picker wallpaper rofi (`wallpaper.rasi`) sebagai lapisan gelap layar penuh.
 
@@ -209,7 +209,7 @@ nilainya. Jadi dua blueprint dengan palet sama tetap bisa terasa berbeda.
 | `motion.style_ws_in` / `style_ws_out` | `slidefade` / `slidevert` | — | gaya animasi workspace |
 | `motion.layers_speed` | `1.0` | 0.4–2.5 | kecepatan layer (bar/launcher) |
 | `chrome.layer_blur` | `true` | — | blur untuk waybar/rofi/swaync |
-| `chrome.rofi_radius` | `10` | 0–24 | radius window rofi (`@rofi-radius`) |
+| `chrome.rofi_radius` | `10` | 0–24 | radius window rofi (`@window-radius`) |
 | `chrome.font_family` | `""` | — | `misc.font_family`; kosong = default |
 | `chrome.groupbar.enabled` / `gradient` | `false` / `true` | — | tab group |
 | `chrome.groupbar.height` / `radius` | `14` / `4` | 0–40 / 0–24 | ukuran groupbar |

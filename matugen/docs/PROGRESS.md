@@ -24,7 +24,7 @@ Config: `matugen/config.toml` · output root:
 | [x] Herdr | `herdr.toml` | `herdr/config.toml` | —² |
 | [x] GTK / CSS | `source.css` | `css/theme.css` (+ `dconf` + `swaync-client -rs` post_hooks) | `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` |
 | [x] SCSS | `source.scss` | `scss/_theme.scss` | `eww/eww.scss` |
-| [x] Rofi | `source.rasi` | `rasi/theme.rasi` | `rofi/themes/*.rasi` |
+| [x] Rofi | `source.rasi` | `rasi/theme.rasi` | `rofi/themes/shared/palette.rasi` (all layouts) |
 | [x] Yazi | `yazi-flavor.toml`, `yazi-tmtheme.xml` | `yazi/flavor.toml`, `yazi/tmtheme.xml` | `yazi/theme.toml` (`[flavor] dark = "matugen"`) ³ |
 | [x] Foot | `foot.ini` | `foot/theme.ini` | `foot/foot.ini` (`include` via `current`) ⁴ |
 | [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (+ `hyprctl reload` post_hook) | `hypr/config/core/theme.lua` (`require`, `load` modul data) ⁵ |
@@ -100,7 +100,7 @@ Config: `templates/kanagawa-dragon-lotus/config.toml` · blueprints:
 
 Konsumen yang membaca lewat `~/.myenv/theme/current/…`: `kitty/kitty.conf`
 (`include`), `foot/foot.ini` (`include`),
-`rofi/themes/{theme,apps,wallpaper}.rasi` (`@import`), `swaync/style.css`
+`rofi/themes/shared/palette.rasi` (`@import`, shared by all layouts), `swaync/style.css`
 (`@import`, GTK 4 — fiturnya ada, bukan cuma di GTK 3), flavor Yazi
 `yazi/flavors/matugen.yazi/{flavor.toml,tmtheme.xml}` (symlink), dan
 `hypr/config/core/theme.lua` (`require`, lihat ⁵). Sebelum template

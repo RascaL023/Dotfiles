@@ -587,6 +587,55 @@ Template `gtk-colors.css` (libadwaita named colors):
 
 ### 6.6 rofi
 
+- **In this repo:** both `templates/general/source.rasi` (Flow A) and
+  `templates/kanagawa-dragon-lotus/template/source.rasi` (Flow B) emit the same
+  23 tokens. Their generated `rasi/theme.rasi` is read through
+  `~/.myenv/theme/current/rasi/theme.rasi` by
+  `rofi/themes/shared/palette.rasi`, imported by every layout.
+  Accent, text, layer and border tokens use the exact names and source color
+  expressions from the semantic palette in `general/source.css` and
+  `kanagawa-dragon-lotus/template/gtk3.css`, respectively. The same groups
+  also exist in `source.scss` (SCSS calls the accents `primary-accent` and
+  `secondary-accent`, with layers named `layer-low`, `layer-medium`, etc.).
+  Keep both templates and all Rofi consumers in sync when changing a name.
+
+  | Token | UI role |
+  |---|---|
+  | `accent-primary` | Primary accent color |
+  | `accent-secondary` | Secondary accent color |
+  | `accent-on` | Text on `accent-primary` |
+  | `accent-prompt` | Prompt background; Flow A darkens the primary accent by 10 |
+  | `text-primary` | Main text |
+  | `text-secondary` | Secondary text |
+  | `text-muted` | Muted text |
+  | `layer-base` | Main background |
+  | `layer-mantle` | Mantle surface, matching the CSS palette |
+  | `layer-crust` | Deep surface, currently used for input and list backgrounds |
+  | `layer-surface` | Standard surface |
+  | `layer-surface-raised` | Raised surface |
+  | `layer-surface-overlay` | Overlay surface |
+  | `border-default` | Default border |
+  | `border-active` | Active border, currently used for the window |
+  | `border-medium` | Medium border |
+  | `selection-bg` | Selected row background |
+  | `selection-fg` | Text on `selection-bg` |
+  | `selection-accent-bg` | Accent selection used by the wallpaper gallery |
+  | `effect-scrim` | Translucent fullscreen backdrop |
+  | `launcher-width` | Launcher window width |
+  | `wallpaper-width` | Wallpaper width token, currently unused by the fullscreen layout |
+  | `window-radius` | Theme-provided window corner radius |
+
+  Selection tokens retain the existing Rofi color assignments. Current prompt
+  backgrounds use `accent-prompt`, and their text uses `layer-base`, preserving
+  the existing appearance. New layouts can use `accent-primary` with `accent-on`.
+  Flow B's `window-radius` still reads `feel.chrome.rofi_radius`; blueprint
+  keys are unchanged. Layouts with a literal radius keep that override.
+  Re-render existing generated Rofi palettes after renaming tokens; the
+  layouts now reference the new names. No app reload hook is needed.
+
+The following is a generic recipe; use the paths and token contract above for
+this repo:
+
 - Output: `~/.config/rofi/colors.rasi`
 - Load: `@import "colors.rasi"` at the top of the user's theme, then reference `@surface`, `@primary`, etc.
 - Format: `hex`. Use hyphenated names for safety.
