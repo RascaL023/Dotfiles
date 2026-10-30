@@ -1,0 +1,327 @@
+/* Orbit — an application and command launcher.
+ * Palette: Matugen Flow A / Flow B, via the active theme.
+ * Launch: ~/.config/rofi/launch.sh apps orbit
+ */
+@import "shared/palette.rasi"
+
+configuration {
+    modi: "drun,run";
+    sidebar-mode: true;
+    show-icons: true;
+    icon-theme: "Papirus";
+    drun-display-format: "{name}";
+    display-drun: "  Aplikasi";
+    display-run: "  Perintah";
+}
+
+* {
+    font: "Inter 11";
+    background-color: @layer-base;
+    text-color: @text-primary;
+    border-color: @border-default;
+}
+
+window {
+    location: center;
+    anchor: center;
+    fullscreen: false;
+    width: 920px;
+    height: 548px;
+    padding: 12px;
+    border: 1px;
+    border-color: @border-medium;
+    border-radius: 26px;
+    background-color: @layer-base;
+}
+
+mainbox {
+    orientation: horizontal;
+    children: [ orbit-sidebar, content ];
+    expand: true;
+    spacing: 8px;
+}
+
+orbit-sidebar {
+    orientation: vertical;
+    children: [ textbox-eyebrow, textbox-orbit, textbox-brand,
+                textbox-description, sidebar-spacer, mode-switcher,
+                textbox-mode-hint ];
+    width: 208px;
+    expand: false;
+    padding: 26px 22px;
+    spacing: 12px;
+    border-radius: 18px;
+    background-color: @layer-crust;
+}
+
+textbox-eyebrow {
+    expand: false;
+    content: "R U A N G   K E R J A";
+    font: "Inter Semi-Bold 8";
+    text-color: @text-muted;
+    background-color: inherit;
+}
+
+textbox-orbit {
+    expand: false;
+    content: "◎";
+    font: "Inter Light 78";
+    text-color: @accent-primary;
+    background-color: inherit;
+    margin: 14px 0px 0px;
+}
+
+textbox-brand {
+    expand: false;
+    content: "orbit.";
+    font: "Inter Bold 32";
+    text-color: @text-primary;
+    background-color: inherit;
+}
+
+textbox-description {
+    expand: false;
+    content: "Satu tempat.\nBanyak kemungkinan.";
+    font: "Inter 10";
+    text-color: @text-secondary;
+    background-color: inherit;
+}
+
+sidebar-spacer {
+    expand: true;
+    background-color: inherit;
+}
+
+mode-switcher {
+    expand: false;
+    orientation: vertical;
+    spacing: 7px;
+    background-color: inherit;
+}
+
+button {
+    expand: false;
+    padding: 12px 8px;
+    border-radius: 10px;
+    font: "Inter Medium 10";
+    horizontal-align: 0.0;
+    background-color: @layer-crust;
+    text-color: @text-secondary;
+}
+
+button selected {
+    background-color: @accent-primary;
+    text-color: @accent-on;
+}
+
+textbox-mode-hint {
+    expand: false;
+    content: "ctrl + tab   ganti mode";
+    font: "Inter 8";
+    margin: 6px 0px 0px;
+    text-color: @text-muted;
+    background-color: inherit;
+}
+
+content {
+    expand: true;
+    orientation: vertical;
+    children: [ heading, inputbar, listview, message, footer ];
+    padding: 20px 22px;
+    spacing: 18px;
+}
+
+heading {
+    expand: false;
+    orientation: horizontal;
+    children: [ textbox-title, heading-spacer, num-filtered-rows ];
+    spacing: 12px;
+}
+
+textbox-title {
+    expand: false;
+    content: "Mulai dari sini";
+    font: "Inter Semi-Bold 18";
+    text-color: @text-primary;
+}
+
+heading-spacer {
+    expand: true;
+}
+
+num-filtered-rows {
+    expand: false;
+    vertical-align: 0.5;
+    font: "Inter Medium 10";
+    text-color: @text-muted;
+}
+
+inputbar {
+    expand: false;
+    children: [ textbox-search, entry, case-indicator ];
+    spacing: 12px;
+    padding: 15px 16px;
+    border: 1px;
+    border-color: @border-default;
+    border-radius: 13px;
+    background-color: @layer-crust;
+}
+
+textbox-search {
+    expand: false;
+    content: "⌕";
+    font: "Inter 18";
+    vertical-align: 0.5;
+    text-color: @accent-primary;
+    background-color: inherit;
+}
+
+entry {
+    placeholder: "Cari aplikasi atau perintah…";
+    placeholder-color: @text-muted;
+    text-color: @text-primary;
+    cursor-color: @accent-primary;
+    vertical-align: 0.5;
+    background-color: inherit;
+}
+
+case-indicator {
+    font: "Inter Medium 9";
+    text-color: @text-muted;
+    vertical-align: 0.5;
+    background-color: inherit;
+}
+
+listview {
+    expand: true;
+    columns: 2;
+    lines: 4;
+    fixed-columns: true;
+    fixed-height: true;
+    dynamic: false;
+    cycle: true;
+    scrollbar: false;
+    spacing: 10px;
+}
+
+element {
+    orientation: horizontal;
+    children: [ element-icon, element-text ];
+    spacing: 12px;
+    padding: 16px 12px;
+    border: 1px;
+    border-radius: 12px;
+    border-color: @layer-surface;
+    background-color: @layer-surface;
+    text-color: @text-primary;
+}
+
+element normal.normal, element alternate.normal {
+    background-color: @layer-surface;
+    text-color: @text-primary;
+}
+
+element selected.normal, element selected.active, element selected.urgent {
+    border-color: @accent-primary;
+    background-color: @accent-primary;
+    text-color: @accent-on;
+}
+
+element-icon {
+    size: 28px;
+    vertical-align: 0.5;
+    background-color: inherit;
+    text-color: inherit;
+}
+
+element-text {
+    vertical-align: 0.5;
+    font: "Inter Medium 10";
+    background-color: inherit;
+    text-color: inherit;
+    highlight: none;
+}
+
+message {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background-color: @layer-surface;
+}
+
+textbox {
+    text-color: @text-secondary;
+    background-color: inherit;
+}
+
+footer {
+    expand: false;
+    orientation: horizontal;
+    children: [ textbox-open, footer-spacer, textbox-close ];
+    spacing: 12px;
+    padding: 4px 2px 0px;
+}
+
+textbox-open {
+    expand: false;
+    content: "↵   Buka pilihan";
+    font: "Inter Medium 9";
+    text-color: @text-secondary;
+}
+
+footer-spacer {
+    expand: true;
+}
+
+textbox-close {
+    expand: false;
+    content: "esc   Tutup";
+    font: "Inter 9";
+    text-color: @text-muted;
+}
+
+/* Keep the search and results usable on compact displays. */
+@media (max-width: 1000) {
+    window {
+        width: 92%;
+    }
+    orbit-sidebar {
+        width: 176px;
+        padding: 22px 18px;
+    }
+    content {
+        padding: 20px 16px;
+    }
+}
+
+@media (max-width: 720) {
+    orbit-sidebar {
+        enabled: false;
+    }
+    content {
+        padding: 16px;
+    }
+    listview {
+        columns: 1;
+    }
+}
+
+@media (max-height: 680) {
+    window {
+        height: 88%;
+    }
+    listview {
+        lines: 3;
+    }
+    textbox-orbit {
+        font: "Inter Light 50";
+        margin: 0px;
+    }
+    content {
+        spacing: 12px;
+        padding: 14px 18px;
+    }
+    orbit-sidebar {
+        padding: 18px;
+        spacing: 8px;
+    }
+}

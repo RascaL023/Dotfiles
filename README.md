@@ -54,7 +54,7 @@ each entry is.
 | `eww` | Widget system | wallpaper flow, SCSS (`scss/theme`) |
 | `wlogout` | Logout menu | wallpaper flow, GTK CSS (`css/theme.css`) |
 | `swaync` | Notification daemon + control center | both flows, GTK 4 CSS (`css/theme.css`) |
-| `rofi` | App launcher | both flows (`rasi/theme.rasi`) |
+| [`rofi`](rofi/README.md) | App launcher | both flows (`rasi/theme.rasi`) |
 | `nvim` | Neovim editor | both flows (`nvim/theme.lua`) |
 | `yazi` | Terminal file manager | both flows, colors only (`yazi/flavor.toml`)² |
 | `lazygit` | Terminal Git UI | both flows (`lazygit/config.yml`) |
@@ -256,7 +256,7 @@ tidak ikut ke berkas tema Hyprland — itu urusan switcher
 | `kitty/kitty.conf` | `~/.myenv/theme/current/kitty/theme.conf` |
 | `alacritty/alacritty.toml` | `~/.myenv/theme/current/alacritty/theme.toml` |
 | `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` | `~/.myenv/theme/current/css/theme.css` |
-| `rofi/themes/*.rasi` | `~/.myenv/theme/current/rasi/theme.rasi` |
+| `rofi/themes/shared/palette.rasi` (shared by all Rofi layouts) | `~/.myenv/theme/current/rasi/theme.rasi` |
 | `eww/eww.scss` | `~/.myenv/theme/current/scss/theme` |
 | `nvim/lua/core/theme.lua` | `~/.myenv/theme/current/nvim/theme.lua` |
 | `foot/foot.ini` | `~/.myenv/theme/current/foot/theme.ini` |

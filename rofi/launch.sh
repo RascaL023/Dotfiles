@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+# Rofi owns presentation here; callers own the actions behind their menu rows.
+set -u
+
+usage() {
+    cat <<'EOF'
+Usage: launch.sh [command] [style] [rofi options...]
+
+  apps [apps|orbit]   Application launcher (default: apps)
+  run [apps|orbit]    Command launcher
+  window             Window switcher, using Rofi's window mode
+  toggle [apps|orbit] Open/close only the chosen launcher
+  shell              Choose Noctalia or Native; print the selected name
+  menu               Text menu from stdin; custom input is allowed
+  wallpaper          Wallpaper rows from stdin, including icon metadata
+  password           Password prompt; print the entered text
+
+Examples:
+  launch.sh apps orbit
+  launch.sh run orbit
+  launch.sh shell
+  printf '%s\n' Batal Restart | launch.sh menu -no-custom -p Daya
+  launch.sh password -p 'Password Wi-Fi'
+
+Menu commands preserve Rofi's stdout and exit status (including cancellation).
+No shell, wallpaper, network or power actions are performed by this script.
+EOF
+}
+
+fail() {
+    printf 'rofi/launch.sh: %s\n' "$*" >&2
+    exit 2
+}
+
+# Builtins only: resolve paths relative to this script, including symlinked use.
+rofi_dir=$(CDPATH= cd -- "${BASH_SOURCE[0]%/*}" && pwd -P) || exit 1
+command_name=${1:-apps}
+if (( $# > 0 )); then
+    shift
+fi
+
+case "$command_name" in
+    -h|--help|help)
+        usage
+        exit 0
+        ;;
+esac
+
+toggle=false
+if [[ $command_name == toggle ]]; then
+    toggle=true
+    command_name=apps
+fi
+
+options=()
+case "$command_name" in
+    apps|run)
+        style=apps
+        if (( $# > 0 )) && [[ $1 != -* ]]; then
+            style=$1
+            shift
+        fi
+        case "$style" in
+            apps|orbit) ;;
+            *) fail "unknown launcher style: $style (use apps or orbit)" ;;
+        esac
+        theme=$style
+        profile=launcher-$style
+        mode=drun
+        [[ $command_name == run ]] && mode=run
+        options=(-show "$mode")
+        ;;
+    window)
+        theme=apps
+        profile=window
+        options=(-show window)
+        ;;
+    shell|shell-select)
+        theme=shell-select
+        profile=shell
+        options=(-dmenu -no-custom)
+        ;;
+    menu)
+        theme=list
+        profile=menu
+        options=(-dmenu -i)
+        ;;
+    wallpaper)
+        theme=wallpaper
+        profile=wallpaper
+        options=(-dmenu -i -no-custom -p ' Wallpaper ')
+        ;;
+    password)
+        theme=prompt
+        profile=password
+        options=(-dmenu -password)
+        ;;
+    *)
+        fail "unknown command: $command_name (use --help)"
+        ;;
+esac
+
+command -v rofi >/dev/null 2>&1 || {
+    printf 'rofi/launch.sh: rofi is not available on PATH\n' >&2
+    exit 127
+}
+
+pid_file=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/dotfile-rofi-$UID-$profile.pid
+
+stop_launcher() {
+    local pid='' index
+    local -a process_args=()
+
+    [[ -r $pid_file ]] || return 1
+    IFS= read -r pid < "$pid_file" || :
+    [[ $pid =~ ^[0-9]+$ && $pid -gt 1 ]] || return 1
+    [[ -O /proc/$pid ]] || return 1
+    mapfile -d '' -t process_args 2>/dev/null < "/proc/$pid/cmdline" || return 1
+
+    # A stale PID must never close an unrelated process or another Rofi menu.
+    for (( index=0; index+1<${#process_args[@]}; index++ )); do
+        if [[ ${process_args[index]} == -pid &&
+              ${process_args[index+1]} == "$pid_file" ]]; then
+            kill -TERM -- "$pid" 2>/dev/null
+            return
+        fi
+    done
+    return 1
+}
+
+if [[ $toggle == true ]] && stop_launcher; then
+    exit 0
+fi
+
+rofi_args=(-config "$rofi_dir/config.rasi"
+           -theme "$rofi_dir/themes/$theme.rasi"
+           -pid "$pid_file" "${options[@]}" "$@")
+
+case "$command_name" in
+    shell|shell-select)
+        exec rofi "${rofi_args[@]}" <<< $'Noctalia\nNative'
+        ;;
+    password)
+        exec rofi "${rofi_args[@]}" < /dev/null
+        ;;
+    menu|wallpaper)
+        [[ ! -t 0 ]] || fail "$command_name requires menu rows on stdin"
+        exec rofi "${rofi_args[@]}"
+        ;;
+    *)
+        exec rofi "${rofi_args[@]}"
+        ;;
+esac

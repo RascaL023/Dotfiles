@@ -69,7 +69,7 @@
    Nama `cc-bg`, `noti-bg`, `noti-bg-hover`, ... sengaja dipertahankan karena
    itu variabel bawaan gaya bawaan swaync; potongan CSS pihak ketiga yang
    memakainya tetap jalan. */
-@define-color cc-bg              alpha(@bg-main, 0.92);
+@define-color cc-bg              alpha(@bg-main, 0.80);
 @define-color cc-card            alpha(@bg-surface, 0.45);
 @define-color cc-card-hover      alpha(@bg-surface, 0.75);
 @define-color cc-inset           alpha(@bg-deep, 0.55);

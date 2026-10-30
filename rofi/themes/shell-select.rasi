@@ -1,0 +1,219 @@
+/* Shell Select — a two-choice desktop shell picker.
+ * Input rows: Noctalia, Native. Outputs the selected row; runs no commands.
+ * Palette: the active Matugen Flow A / Flow B theme.
+ */
+@import "shared/palette.rasi"
+
+configuration {
+    show-icons: false;
+    sidebar-mode: false;
+    kb-row-left: "Left";
+    kb-row-right: "Right";
+    kb-move-char-back: "";
+    kb-move-char-forward: "";
+}
+
+* {
+    font: "Inter 11";
+    background-color: @layer-base;
+    text-color: @text-primary;
+    border-color: @border-default;
+}
+
+window {
+    location: center;
+    anchor: center;
+    fullscreen: false;
+    width: 720px;
+    height: 520px;
+    padding: 30px;
+    border: 1px;
+    border-color: @border-medium;
+    border-radius: 28px;
+    background-color: @layer-base;
+}
+
+mainbox {
+    expand: true;
+    orientation: vertical;
+    children: [ inputbar, shell-heading, textbox-shell-title, textbox-shell-subtitle,
+                listview, message, shell-footer ];
+    spacing: 14px;
+    padding: 0px;
+}
+
+/* Keep Rofi's input/filter state initialized without showing a search field. */
+inputbar {
+    enabled: false;
+    children: [ entry ];
+}
+
+entry {
+    enabled: false;
+}
+
+shell-heading {
+    expand: false;
+    orientation: horizontal;
+    children: [ textbox-shell-eyebrow, shell-heading-spacer,
+                textbox-shell-emblem ];
+    spacing: 12px;
+    margin: 0px 0px 4px;
+}
+
+textbox-shell-eyebrow {
+    expand: false;
+    content: "D E S K T O P   /   S H E L L";
+    font: "Inter Semi-Bold 8";
+    vertical-align: 0.5;
+    text-color: @text-muted;
+}
+
+shell-heading-spacer {
+    expand: true;
+}
+
+textbox-shell-emblem {
+    expand: false;
+    content: "◈";
+    font: "Inter 22";
+    text-color: @accent-primary;
+}
+
+textbox-shell-title {
+    expand: false;
+    content: "Ruang kerja, caramu.";
+    font: "Inter Semi-Bold 25";
+    text-color: @text-primary;
+}
+
+textbox-shell-subtitle {
+    expand: false;
+    content: "Pilih desktop shell yang ingin kamu gunakan.";
+    font: "Inter 11";
+    text-color: @text-secondary;
+    margin: 0px 0px 12px;
+}
+
+listview {
+    expand: true;
+    layout: vertical;
+    flow: horizontal;
+    columns: 2;
+    lines: 1;
+    fixed-columns: true;
+    fixed-height: true;
+    dynamic: false;
+    cycle: true;
+    scrollbar: false;
+    spacing: 16px;
+    padding: 0px;
+}
+
+element {
+    orientation: vertical;
+    children: [ element-index, element-text, textbox-shell-card-type,
+                textbox-shell-card-action ];
+    spacing: 10px;
+    padding: 24px;
+    border: 1px;
+    border-radius: 20px;
+    border-color: @border-default;
+    background-color: @layer-surface;
+    text-color: @text-primary;
+    cursor: pointer;
+}
+
+element normal.normal, element alternate.normal,
+element normal.active, element alternate.active,
+element normal.urgent, element alternate.urgent {
+    border-color: @border-default;
+    background-color: @layer-surface;
+    text-color: @text-primary;
+}
+
+element selected.normal, element selected.active, element selected.urgent {
+    border-color: @accent-primary;
+    background-color: @accent-primary;
+    text-color: @accent-on;
+}
+
+element-index {
+    expand: true;
+    font: "Inter Light 40";
+    horizontal-align: 0.0;
+    background-color: inherit;
+    text-color: inherit;
+}
+
+element-text {
+    expand: false;
+    font: "Inter Semi-Bold 21";
+    horizontal-align: 0.0;
+    background-color: inherit;
+    text-color: inherit;
+    highlight: none;
+}
+
+textbox-shell-card-type {
+    expand: false;
+    content: "D E S K T O P   S H E L L";
+    font: "Inter Medium 8";
+    background-color: inherit;
+    text-color: inherit;
+}
+
+textbox-shell-card-action {
+    expand: false;
+    content: "Gunakan shell    ↗";
+    font: "Inter Medium 10";
+    margin: 22px 0px 0px;
+    background-color: inherit;
+    text-color: inherit;
+}
+
+message {
+    expand: false;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background-color: @layer-crust;
+}
+
+textbox {
+    background-color: inherit;
+    text-color: @text-secondary;
+}
+
+shell-footer {
+    expand: false;
+    orientation: horizontal;
+    children: [ textbox-shell-navigate, shell-footer-spacer,
+                textbox-shell-accept, textbox-shell-cancel ];
+    spacing: 20px;
+    padding: 18px 2px 0px;
+}
+
+textbox-shell-navigate {
+    expand: false;
+    content: "← →   Pilih";
+    font: "Inter 9";
+    text-color: @text-muted;
+}
+
+shell-footer-spacer {
+    expand: true;
+}
+
+textbox-shell-accept {
+    expand: false;
+    content: "↵   Konfirmasi";
+    font: "Inter Medium 9";
+    text-color: @text-secondary;
+}
+
+textbox-shell-cancel {
+    expand: false;
+    content: "esc   Batal";
+    font: "Inter 9";
+    text-color: @text-muted;
+}

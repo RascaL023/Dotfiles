@@ -1,0 +1,14 @@
+/* Single-column layout for text menus. */
+configuration {
+    location: 3;
+}
+
+@import "shared/list.rasi"
+
+window {
+    border-radius: @window-radius;
+}
+
+listview {
+    columns: 1;
+}

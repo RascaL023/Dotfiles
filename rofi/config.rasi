@@ -1,15 +1,14 @@
+/* Shared behavior. Layouts and the Matugen palette live under themes/. */
 configuration {
     modi: "drun,run,window";
-    show-icons: true;
+    location: 5;
+    show-icons: false;
     icon-theme: "Papirus";
     font: "JetBrainsMono Nerd Font 12";
-    display-drun: " Apps ";
     drun-display-format: "{name}";
+    display-drun: " Apps ";
     display-run: " Run ";
     display-window: " Window ";
-    location: 5;
-    // scroll-method: 1;
-    // drun-display-format: "{name} [<span weight='light' size='small'><i>({generic})</i></span>]";
 }
 
-// //@theme "/nix/store/za31vpq7l1ypzhyp7zpnl1i9mxr7csgs-rofi-1.7.9+wayland1/share/rofi/themes/fullscreen-preview.rasi"
+@theme "themes/default.rasi"

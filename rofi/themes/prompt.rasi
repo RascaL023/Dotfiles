@@ -1,0 +1,14 @@
+/* Password input, without a list of choices. */
+@import "list.rasi"
+
+window {
+    height: 160px;
+}
+
+mainbox {
+    children: [ inputbar, message ];
+}
+
+entry {
+    placeholder: "Masukkan kata sandi…";
+}

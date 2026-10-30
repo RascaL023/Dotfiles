@@ -1,0 +1,74 @@
+/* Shared classic list styling. */
+@import "palette.rasi"
+
+element-text, element-icon, mode-switcher {
+    background-color: inherit;
+    text-color: inherit;
+}
+
+window {
+    height: 360px;
+    width: @launcher-width;
+    border: 3px;
+    padding: 5px;
+    border-color: @border-active;
+    background-color: @layer-base;
+    border-radius: 10px;
+}
+
+mainbox {
+    background-color: @layer-base;
+    padding: 8px;
+    spacing: 10px;
+    children: [ inputbar, listview ];
+}
+
+inputbar {
+    children: [ prompt, entry ];
+    spacing: 10px;
+    background-color: @layer-base;
+    border-radius: 5px;
+    padding: 5px 7px;
+}
+
+prompt {
+    background-color: @accent-prompt;
+    padding: 6px;
+    text-color: @layer-base;
+    border-radius: 3px;
+}
+
+entry {
+    padding: 7px 10px;
+    placeholder: "Search...";
+    text-color: @text-primary;
+    background-color: @layer-crust;
+    border-radius: 8px;
+}
+
+listview {
+    lines: 5;
+    dynamic: true;
+    padding: 11px 10px;
+    columns: 2;
+    spacing: 5px 10px;
+    background-color: @layer-crust;
+    border-radius: 10px;
+}
+
+element {
+    padding: 10px;
+    border-radius: 8px;
+    background-color: @layer-base;
+    text-color: @text-primary;
+    spacing: 10px;
+}
+
+element-icon {
+    size: 22px;
+}
+
+element selected {
+    background-color: @selection-bg;
+    text-color: @selection-fg;
+}
