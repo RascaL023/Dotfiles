@@ -16,6 +16,7 @@ post_hook       = """
 [templates.scss]
 input_path = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/source.scss"
 output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/scss/_theme.scss"
+post_hook       = "eww reload 2>/dev/null || true; ~/.dotfile/eww/scripts/depthctl refresh 2>/dev/null || true"
 
 [templates.lazygit]
 input_path      = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/lazygit.yml"

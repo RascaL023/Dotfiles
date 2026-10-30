@@ -10,3 +10,7 @@ lazygit/**
 !lazygit/.gitkeep
 
 LOCAL_TODO.md
+
+
+# Temporary ignore
+noctalia/palettes
