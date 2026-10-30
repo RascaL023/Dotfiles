@@ -3,6 +3,15 @@
 # Folder wallpaper
 DIR="$HOME/Pictures/Wallpaper"
 WALLPAPER_ENGINE=awww
+DEPTHCTL="$HOME/.dotfile/eww/scripts/depthctl"
+ROFI_LAUNCHER="$HOME/.config/rofi/launch.sh"
+
+# Depth clock: show the matching foreground, hide it when the new wallpaper has
+# no mask. Never blocks the wallpaper transition and never fails the script.
+depth_sync() {
+    [[ -x $DEPTHCTL ]] || return 0
+    "$DEPTHCTL" wallpaper "$1" >/dev/null 2>&1 || true
+}
 
 # Ambil semua file gambar (pakai array bash, lebih aman dari ls)
 shopt -s nullglob  # Kalau gak ada file, array kosong (gak error)
@@ -20,6 +29,7 @@ if [[ $1 == "first" ]]; then
         --transition-type center \
         --transition-fps 60 \
         --transition-step 200
+    depth_sync "${FILES[0]}"
     exit 0
 fi
 
@@ -34,7 +44,7 @@ done
 LIST="${LIST%\\n}"  # <-- Ini yang penting! Hapus \n di akhir
 
 # Panggil rofi
-SELECTED=$(echo -e "$LIST" | rofi -theme "$HOME/.config/rofi/themes/wallpaper.rasi" -dmenu -i -p " Wallpaper ")
+SELECTED=$(echo -e "$LIST" | "$ROFI_LAUNCHER" wallpaper)
 
 # Kalau gak ada yang dipilih, exit
 [[ -z "$SELECTED" ]] && exit 0
@@ -50,6 +60,8 @@ $WALLPAPER_ENGINE img "$CHOSEN" \
     --transition-type center \
     --transition-fps 60 \
     --transition-step 200
+
+depth_sync "$CHOSEN"
 
 # Optional: Simpan pilihan terakhir
 # echo "$CHOSEN" > "$HOME/.cache/current_wallpaper"

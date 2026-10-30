@@ -165,6 +165,9 @@ hl.layer_rule({
     match     = { namespace = "swaync-control-center" },
     animation = "slide left",
     blur      = layer_blur,
+    -- `ignore_alpha` membuat blur melewati piksel yang transparan, jadi yang
+    -- diburamkan hanya area panel (358 px, `cc-bg` = 0.92 alpha).
+    ignore_alpha = 0,
 })
 
 hl.layer_rule({
