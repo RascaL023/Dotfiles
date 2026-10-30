@@ -143,8 +143,13 @@ Rules:
 - `M.reload()` always exists and validates with `pcall(build_colors, fresh)`
   before attaching, so a broken, empty or half-written `theme.lua` never changes
   what is on screen — and a palette that appears later moves Neovim out of
-  fallback without a restart. `nvim/init.lua` starts `core.theme_watch` **before**
-  `core.lazy` so the watcher survives a failing plugin spec.
+  fallback without a restart. `build_colors` starts with `check_palette`: every
+  `extra.syntax` key it or `apply_syntax_highlights` reads must be a string and
+  `colors` must hold 16 ANSI entries, so a palette with a silently missing key
+  is rejected whole instead of installing empty highlight groups. `attach()`
+  accepts the candidate colors already computed by that check and reuses them.
+  `nvim/init.lua` starts `core.theme_watch` **before** `core.lazy` so the
+  watcher survives a failing plugin spec.
 - Templates that produce it:
   - Flow A: `matugen/templates/general/nvim.lua` → `~/.myenv/theme/generated/live.bak/nvim/theme.lua`
   - Flow B: `matugen/templates/kanagawa-dragon-lotus/template/nvim.lua` → `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua`

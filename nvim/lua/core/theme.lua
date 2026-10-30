@@ -167,7 +167,74 @@ local function container_roles(d)
   }
 end
 
+--- Kunci `extra.syntax` yang dibaca `build_colors` dan
+--- `apply_syntax_highlights`. Tanpa salah satunya, grup highlight terkait jadi
+--- kosong tanpa error dan tanpa peringatan — jadi palet yang kehilangan kunci
+--- ini ditolak utuh, bukan dipasang setengah.
+local REQUIRED_SYNTAX = {
+  "comment",
+  "punctuation",
+  "property",
+  "parameter",
+  "keyword",
+  "statement",
+  "return",
+  "import",
+  "decorator",
+  "function",
+  "method",
+  "type",
+  "class",
+  "builtin",
+  "string",
+  "number",
+  "boolean",
+  "constant",
+  "variable",
+  "identifier",
+  "operator",
+  "regex",
+  "builtin_variable",
+  "special",
+  "exception",
+  "tag",
+  "attribute",
+}
+
+--- Uji kelengkapan isi palet, bukan hanya sintaks Lua-nya. Dipanggil di awal
+--- `build_colors` supaya satu `pcall(build_colors, d)` sekaligus memvalidasi
+--- struktur (dereference di bawah), kunci syntax, dan 16 warna ANSI.
+--- @param d table palet tergenerate
+local function check_palette(d)
+  local syntax = d.extra.syntax
+  local missing = {}
+
+  for _, key in ipairs(REQUIRED_SYNTAX) do
+    if type(syntax[key]) ~= "string" then
+      missing[#missing + 1] = "extra.syntax." .. key
+    end
+  end
+
+  local ansi = d.colors
+
+  if type(ansi) ~= "table" then
+    missing[#missing + 1] = "colors"
+  else
+    for i = 1, 16 do
+      if type(ansi[i]) ~= "string" then
+        missing[#missing + 1] = ("colors[%d]"):format(i - 1)
+      end
+    end
+  end
+
+  if #missing > 0 then
+    error("palet tidak lengkap: " .. table.concat(missing, ", "), 0)
+  end
+end
+
 local function build_colors(d)
+  check_palette(d)
+
   local layer = d.extra.layer
   local text = d.extra.text
   local border = d.extra.border
@@ -906,8 +973,10 @@ end
 --- Pasang palet hasil render. Dipakai saat startup dan saat transisi keluar
 --- dari fallback.
 --- @param d table palet yang sudah lolos `pcall(build_colors, d)`
-local function attach(d)
-  local colors = build_colors(d)
+--- @param colors table? warna kandidat yang sudah dihitung; dibangun di sini
+--- bila tidak diberikan.
+local function attach(d, colors)
+  colors = colors or build_colors(d)
 
   M.palettes = d
   M.syntax = d.extra.syntax
@@ -961,8 +1030,9 @@ function M.reload()
   end
 
   if M.fallback then
-    -- Transisi fallback -> palet asli: pasang dari nol, bukan sync.
-    attach(fresh)
+    -- Transisi fallback -> palet asli: pasang dari nol, bukan sync. Kandidat
+    -- yang sudah lolos pcall dipakai apa adanya, tidak dihitung ulang.
+    attach(fresh, colors)
   else
     sync_in_place(M.palettes, fresh)
     package.loaded["theme"] = M.palettes
