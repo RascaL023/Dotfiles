@@ -67,7 +67,7 @@ fixed-palette pipeline; see [Theming](#theming).
 ¹ `foot/foot.ini` loads its palette with
 `include=/home/rascal/.myenv/theme/current/foot/theme.ini`, so it follows the
 active theme the same way `kitty/kitty.conf` does. Flow A writes
-`generated/live.bak/foot/theme.ini`, Flow B
+`generated/wallpaper-based/foot/theme.ini`, Flow B
 `generated/kanagawa-dragon-lotus/foot/theme.ini`; foot sees whichever one the
 active theme exposes. Foot has no reload signal, so a re-render only shows up in
 the next foot window.
@@ -186,7 +186,7 @@ color ──┤                              ├─► template ─► ~/.myenv/
 ```
 
 `~/.myenv` is the theme store **outside** this repo; the repo only renders into
-it. `current` is a symlink to one theme directory (`generated/live.bak` for the
+it. `current` is a symlink to one theme directory (`generated/wallpaper-based` for the
 wallpaper flow, `generated/kanagawa-dragon-lotus` for the fixed palette) and is
 flipped outside this repo: the switcher that runs `ln -sfn` is
 `theme-switcher.sh` in `~/.myenv/script/` — parked in `theme.bak/` in this
@@ -199,27 +199,32 @@ matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/config.tom
 ```
 
 - Config: `matugen/config.toml`
-- Templates: `matugen/templates/general/*`
+- Templates: `matugen/templates/palette/wallpaper-based/*`
 - Vocabulary: `{{ colors.<role>.<scheme>.<format> }}` (MD3 roles: `primary`,
   `surface`, `on_surface`, …)
-- Output: `~/.myenv/theme/generated/live.bak/<tool>/…`
+- Output: `~/.myenv/theme/generated/wallpaper-based/<tool>/…`
 
 ### Flow B — fixed palette (a named theme)
 
 ```bash
-matugen json matugen/templates/kanagawa-dragon-lotus/blueprint/kanagawa-dark.json \
-  -c matugen/templates/kanagawa-dragon-lotus/config.toml
+matugen json matugen/templates/palette/kanagawa-dragon-lotus/blueprint/kanagawa-dark.json \
+  -c matugen/templates/palette/kanagawa-dragon-lotus/config.toml
 ```
 
-- Palette: `matugen/templates/kanagawa-dragon-lotus/blueprint/*.json` —
+- Palette: `matugen/templates/palette/kanagawa-dragon-lotus/blueprint/*.json` —
   hand-authored, **one file per variant** (`kanagawa-dark.json`,
   `kanagawa-light.json`)
-- Templates: `matugen/templates/kanagawa-dragon-lotus/template/*`
+- Templates: `matugen/templates/palette/kanagawa-dragon-lotus/template/*`
 - Vocabulary: the JSON is exposed at the template root, so templates read
   `{{ accent.primary }}`, `{{ syntax.keyword }}`, … — never `colors.*`
 - Output: `~/.myenv/theme/generated/kanagawa-dragon-lotus/<tool>/…`
-- Full key-by-key reference: [`blueprint/README.md`](matugen/templates/kanagawa-dragon-lotus/blueprint/README.md)
+- Full key-by-key reference: [`blueprint/README.md`](matugen/templates/palette/kanagawa-dragon-lotus/blueprint/README.md)
 
+> Color templates live in `matugen/templates/palette/` — one directory per
+> palette source (`wallpaper-based/`, `kanagawa-dragon-lotus/`). Templates for
+> **feel** will live in `matugen/templates/feel/`; that directory does not exist
+> yet (see [`matugen/docs/FEEL.md`](matugen/docs/FEEL.md)).
+>
 > Keep the two flows in **separate config files**. Templates from Flow B fail
 > under `matugen image` (no `accent.*`), and Flow A's `colors.*` does not exist
 > under `matugen json`.
@@ -235,7 +240,7 @@ lewat modul Hyprland:
 
 - **Flow B** — tulis di objek `feel` pada blueprint; template menyalinnya apa
   adanya. Referensi key ada di
-  [`blueprint/README.md`](matugen/templates/kanagawa-dragon-lotus/blueprint/README.md).
+  [`blueprint/README.md`](matugen/templates/palette/kanagawa-dragon-lotus/blueprint/README.md).
 - **Flow A** — template hanya menghasilkan **warna**; rasa tidak ditulis, jadi
   yang berlaku adalah default di `hypr/config/core/theme.lua`. Sama seperti
   `nvim`: berkas hasil matugen berisi data yang dipunya saja, sisanya diurus
@@ -291,7 +296,7 @@ back to plain TokyoNight and warns. See
 | [`matugen/docs/NVIM_MAPPING.md`](matugen/docs/NVIM_MAPPING.md) | Which palette key colors which part of Neovim |
 | [`eww/depth-clock/README.md`](eww/depth-clock/README.md) | Jam wallpaper berlapis: kendali, layout, dan masker foreground |
 | [`eww/depth-clock/GUIDE.md`](eww/depth-clock/GUIDE.md) | Langkah konkret membuat depth clock untuk wallpaper baru |
-| [`…/blueprint/README.md`](matugen/templates/kanagawa-dragon-lotus/blueprint/README.md) | Every key of the fixed-palette JSON |
+| [`…/blueprint/README.md`](matugen/templates/palette/kanagawa-dragon-lotus/blueprint/README.md) | Every key of the fixed-palette JSON |
 
 ---
 
@@ -309,8 +314,8 @@ Then make the theme available, since generated files are not committed:
 matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/config.toml
 
 # or the fixed palette
-matugen json ~/.dotfile/matugen/templates/kanagawa-dragon-lotus/blueprint/kanagawa-dark.json \
-  -c ~/.dotfile/matugen/templates/kanagawa-dragon-lotus/config.toml
+matugen json ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/blueprint/kanagawa-dark.json \
+  -c ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/config.toml
 ```
 
 Requires `matugen` (4.x) on `PATH` and a `~/.myenv/theme` store with a `current`

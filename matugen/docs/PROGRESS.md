@@ -8,12 +8,15 @@
 
 Last verified against the repo: 2026-10-28.
 
+> Template layout: every color template lives under `templates/palette/<source>/`;
+> `templates/feel/` does not exist yet.
+
 ---
 
-## Flow A — wallpaper (`templates/general/*`)
+## Flow A — wallpaper (`templates/palette/wallpaper-based/*`)
 
 Config: `matugen/config.toml` · output root:
-`~/.myenv/theme/generated/live.bak/<tool>/…`
+`~/.myenv/theme/generated/wallpaper-based/<tool>/…`
 
 | Tool | Template | Output | Consumer reads it |
 |---|---|---|---|
@@ -30,18 +33,18 @@ Config: `matugen/config.toml` · output root:
 | [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (+ `hyprctl reload` post_hook) | `hypr/config/core/theme.lua` (`require`, `load` modul data) ⁵ |
 | [ ] Cava | — | — | not themed |
 
-> **Activation.** Writing into `generated/live.bak/` does not change the running
+> **Activation.** Writing into `generated/wallpaper-based/` does not change the running
 > session: every reader goes through `current/…`. Nothing in this repo runs
 > `matugen image` or flips `current` today (`nextwall.sh` only sets the
 > wallpaper), so activating Flow A is manual:
-> `ln -s ~/.myenv/theme/generated/live.bak ~/.myenv/theme/current.tmp && mv -T ~/.myenv/theme/current.tmp ~/.myenv/theme/current`.
+> `ln -s ~/.myenv/theme/generated/wallpaper-based ~/.myenv/theme/current.tmp && mv -T ~/.myenv/theme/current.tmp ~/.myenv/theme/current`.
 > `theme-switcher.sh` (outside this repo) can only point `current` at a named
-> theme folder, so it cannot select `live.bak`.
+> theme folder, so it cannot select `wallpaper-based`.
 
 ¹ Flow A writes Neovim into the same theme folder as every other tool
-(`nvim/theme.lua` under `generated/live.bak/`), so a wallpaper render never
+(`nvim/theme.lua` under `generated/wallpaper-based/`), so a wallpaper render never
 touches the active theme; the palette reaches Neovim only once `current` points
-at `live.bak` (see the activation note above). ² The generated file exists and a
+at `wallpaper-based` (see the activation note above). ² The generated file exists and a
 `post_hook` reloads the tool, but no
 include line inside this repo points at it yet. ³ Yazi is split in two: the
 generated file holds **colors only** (a flavor), while `yazi/theme.toml` keeps
@@ -70,7 +73,8 @@ reload: `luac -p ~/.myenv/theme/current/hypr/theme.lua` (dijalankan juga sebagai
 `post_hook`).
 
 Bagian "rasa" (radius, opacity, blur, motion) berasal dari objek `feel` di
-blueprint (Flow B). Pada Flow A template hanya menulis warna, sehingga default
+blueprint (Flow B). Rancangan untuk memisahkannya menjadi sumbu rasa sendiri
+(warna tetap milik `theme/current`) ada di [`FEEL.md`](FEEL.md); belum diterapkan. Pada Flow A template hanya menulis warna, sehingga default
 di `hypr/config/core/theme.lua` yang berlaku — satu template, satu berkas tema,
 sama seperti `nvim`. `hypr/config/core/theme.lua` juga yang memetakan nilai ke
 payload `hl.config`/`hl.curve`/`hl.animation`; `hypr/hyprland.lua` hanya
@@ -78,9 +82,9 @@ menerapkannya.
 
 ---
 
-## Flow B — fixed palette (`templates/kanagawa-dragon-lotus/template/*`)
+## Flow B — fixed palette (`templates/palette/kanagawa-dragon-lotus/template/*`)
 
-Config: `templates/kanagawa-dragon-lotus/config.toml` · blueprints:
+Config: `templates/palette/kanagawa-dragon-lotus/config.toml` · blueprints:
 `blueprint/kanagawa-{dark,light}.json` · output root:
 `~/.myenv/theme/generated/kanagawa-dragon-lotus/<tool>/…`
 
@@ -109,7 +113,7 @@ yang memilikinya, jadi `current` boleh menunjuk ke folder kanagawa tanpa
 kehilangan warna.
 
 Key reference for the JSON these templates read:
-[`blueprint/README.md`](../templates/kanagawa-dragon-lotus/blueprint/README.md).
+[`blueprint/README.md`](../templates/palette/kanagawa-dragon-lotus/blueprint/README.md).
 
 ---
 

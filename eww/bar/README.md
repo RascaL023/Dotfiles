@@ -189,8 +189,8 @@ hanya setinggi 6 px. Transisi hanya berjalan ketika status workspace berubah.
 
 Palet lokal gelap hangat langsung bekerja tanpa theme store. Integrasi Matugen
 bersifat opsional: kedua template yang sudah ada,
-`../../matugen/templates/general/source.scss` dan
-`../../matugen/templates/kanagawa-dragon-lotus/template/source.scss`, menyediakan
+`../../matugen/templates/palette/wallpaper-based/source.scss` dan
+`../../matugen/templates/palette/kanagawa-dragon-lotus/template/source.scss`, menyediakan
 variabel berikut. Setelah memastikan `~/.myenv/theme/current/scss/_theme.scss`
 (partial Sass — karena itu `@import` di bawah menulis `theme` tanpa underscore)
 tersedia, tambahkan import **sebelum** definisi token warna dan ganti nilainya:

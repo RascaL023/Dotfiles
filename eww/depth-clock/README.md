@@ -195,7 +195,7 @@ atau `depthctl stop` sendiri.
   keduanya — tidak ada palet kedua, tidak ada template matugen baru.
 - Ganti tema berarti symlink `~/.myenv/theme/current` berubah; stylesheet Eww
   baru terbaca setelah reload. Kedua `[templates.scss]` di
-  `matugen/config.toml` dan `matugen/templates/kanagawa-dragon-lotus/config.toml`
+  `matugen/config.toml` dan `matugen/templates/palette/kanagawa-dragon-lotus/config.toml`
   sekarang berakhir dengan `eww reload`, jadi render ulang tema langsung
   mewarnai ulang jam (dan jendela Eww lain).
 - Mengganti wallpaper **tidak** memicu render ulang palet; wallpaper pilihan

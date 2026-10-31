@@ -28,19 +28,19 @@ Repo rules (from `AGENTS.md`):
 
 ### Two different theming flows — pick the right one
 
-**A. Wallpaper-derived ("general") theme** — sections 1–11 below
+**A. Wallpaper-derived ("wallpaper-based") theme** — sections 1–11 below
 - Command: `matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/config.toml`
 - Config: `matugen/config.toml` (`alacritty`, `kitty`, `lazygit`, `scss`, `rasi`, …)
-- Templates: `matugen/templates/general/*`, using Material roles `{{ colors.<role>.default.hex }}`.
-- Outputs: `~/.myenv/theme/generated/live.bak/<tool>/…`
+- Templates: `matugen/templates/palette/wallpaper-based/*`, using Material roles `{{ colors.<role>.default.hex }}`.
+- Outputs: `~/.myenv/theme/generated/wallpaper-based/<tool>/…`
 - Only run `matugen image` when the user asks for wallpaper theming. Always pass `--source-color-index 0`.
 
 **B. Fixed palette (named theme: `kanagawa-dragon-lotus`)** — the usual task in this repo
-- Source of truth: `matugen/templates/<theme>/blueprint/<variant>.json` — **one file per variant** (`kanagawa-dark.json`, `kanagawa-light.json`). Hand-authored, **not** matugen-generated. Keys: `meta`, `background`, `foreground`, `cursor`, `colors` (16-entry array, ANSI order, index 0 = black), `color0`…`color15`, and the groups `accent`, `text`, `surface`, `border`, `status`, `effect`, `syntax`. Full reference: `templates/kanagawa-dragon-lotus/blueprint/README.md`.
+- Source of truth: `matugen/templates/palette/<theme>/blueprint/<variant>.json` — **one file per variant** (`kanagawa-dark.json`, `kanagawa-light.json`). Hand-authored, **not** matugen-generated. Keys: `meta`, `background`, `foreground`, `cursor`, `colors` (16-entry array, ANSI order, index 0 = black), `color0`…`color15`, and the groups `accent`, `text`, `surface`, `border`, `status`, `effect`, `syntax`. Full reference: `templates/palette/kanagawa-dragon-lotus/blueprint/README.md`.
   - `syntax` uses **universal semantic names** (`comment`, `keyword`, `function`, `string`, `type`, …) so every tool template maps from the same vocabulary.
-- Templates: `matugen/templates/<theme>/template/*`.
+- Templates: `matugen/templates/palette/<theme>/template/*`.
 - Command: `matugen json <blueprint.json> -c <theme-config.toml>`. The JSON is exposed **at the template root**, so templates read root-level keys (`{{ accent.primary }}`, `{{ syntax.keyword }}`) — never `colors.*`, and there is no `dark.*`/`light.*` wrapper: the variant you pass is the variant you get.
-- Config: use a **separate config per theme** (`templates/kanagawa-dragon-lotus/config.toml`). Do NOT add fixed-theme templates to `matugen/config.toml`, otherwise every `matugen image` run fails because `accent.*` / `syntax.*` only exist in `json` mode.
+- Config: use a **separate config per theme** (`templates/palette/kanagawa-dragon-lotus/config.toml`). Do NOT add fixed-theme templates to `matugen/config.toml`, otherwise every `matugen image` run fails because `accent.*` / `syntax.*` only exist in `json` mode.
 - Outputs: `~/.myenv/theme/generated/<theme>/<tool>/…` (here: `generated/kanagawa-dragon-lotus/nvim/`).
 
 ### Engine facts verified on this machine (matugen 4.1.0)
@@ -54,10 +54,10 @@ Repo rules (from `AGENTS.md`):
 - Escape `\{{` only when the target language itself contains a literal `{{`. For Lua tables keep one key per line (never `= {{`), and quote Lua keyword keys: `["function"]`, `["return"]`.
 
 ### Neovim target (already wired)
-- Templates: `matugen/templates/general/nvim.lua` (flow A) and
-  `matugen/templates/kanagawa-dragon-lotus/template/nvim.lua` (flow B, omits `source`).
+- Templates: `matugen/templates/palette/wallpaper-based/nvim.lua` (flow A) and
+  `matugen/templates/palette/kanagawa-dragon-lotus/template/nvim.lua` (flow B, omits `source`).
 - Output: `~/.myenv/theme/generated/<theme>/nvim/theme.lua` — flow A writes to
-  `~/.myenv/theme/generated/live.bak/nvim/theme.lua` and never straight into
+  `~/.myenv/theme/generated/wallpaper-based/nvim/theme.lua` and never straight into
   `current`; the palette reaches Neovim once `current` points at that folder.
 - The generated file is a **palette module only** and is consumed by
   `nvim/lua/core/theme.lua`, which adds `~/.myenv/theme/current/nvim/?.lua` to
@@ -66,7 +66,7 @@ Repo rules (from `AGENTS.md`):
   stay in `theme.lua` (the template engine cannot do colour arithmetic).
 - Both templates emit **the same key set**, so one mapping serves both flows;
   the mapping table lives in `NVIM_MAPPING.md`.
-- When adding a new tool/theme, mirror the comment header used in `matugen/templates/general/*`.
+- When adding a new tool/theme, mirror the comment header used in `matugen/templates/palette/wallpaper-based/*`.
 
 ### Testing a fixed-palette template (verified recipe)
 ```sh
@@ -75,10 +75,10 @@ cat > /tmp/mtest/config.toml <<'EOF'
 [config]
 
 [templates.t]
-input_path  = "<abs>/matugen/templates/kanagawa-dragon-lotus/template/nvim.lua"
+input_path  = "<abs>/matugen/templates/palette/kanagawa-dragon-lotus/template/nvim.lua"
 output_path = "/tmp/mtest/out/out.lua"
 EOF
-matugen json "<abs>/matugen/templates/kanagawa-dragon-lotus/blueprint/kanagawa-dark.json" -c /tmp/mtest/config.toml
+matugen json "<abs>/matugen/templates/palette/kanagawa-dragon-lotus/blueprint/kanagawa-dark.json" -c /tmp/mtest/config.toml
 grep -nE '\{\{|\}\}|<\*|\*>' /tmp/mtest/out/out.lua   # must print nothing
 luac -p /tmp/mtest/out/out.lua                            # Lua targets must parse
 ```
@@ -405,8 +405,8 @@ color15 {{ colors.on_surface.default.hex }}
 ### 6.2 Hyprland
 
 - **In this repo:** Hyprland 0.55+ uses Lua config, so there is no `source = …`
-  to point at a generated file. `matugen/templates/general/hypr.lua` (Flow A)
-  and `matugen/templates/kanagawa-dragon-lotus/template/hypr.lua` (Flow B)
+  to point at a generated file. `matugen/templates/palette/wallpaper-based/hypr.lua` (Flow A)
+  and `matugen/templates/palette/kanagawa-dragon-lotus/template/hypr.lua` (Flow B)
   render a **Lua data module** (`return { … }`) to `hypr/theme.lua` in the active
   theme folder; `hypr/config/core/theme.lua` loads it with
   `load(source, "@path", "t", {})` (empty env — data only) and merges it over its
@@ -587,14 +587,14 @@ Template `gtk-colors.css` (libadwaita named colors):
 
 ### 6.6 rofi
 
-- **In this repo:** both `templates/general/source.rasi` (Flow A) and
-  `templates/kanagawa-dragon-lotus/template/source.rasi` (Flow B) emit the same
+- **In this repo:** both `templates/palette/wallpaper-based/source.rasi` (Flow A) and
+  `templates/palette/kanagawa-dragon-lotus/template/source.rasi` (Flow B) emit the same
   23 tokens. Their generated `rasi/theme.rasi` is read through
   `~/.myenv/theme/current/rasi/theme.rasi` by
   `rofi/themes/shared/palette.rasi`, imported by every layout.
   Accent, text, layer and border tokens use the exact names and source color
-  expressions from the semantic palette in `general/source.css` and
-  `kanagawa-dragon-lotus/template/gtk3.css`, respectively. The same groups
+  expressions from the semantic palette in `palette/wallpaper-based/source.css` and
+  `palette/kanagawa-dragon-lotus/template/gtk3.css`, respectively. The same groups
   also exist in `source.scss` (SCSS calls the accents `primary-accent` and
   `secondary-accent`, with layers named `layer-low`, `layer-medium`, etc.).
   Keep both templates and all Rofi consumers in sync when changing a name.
@@ -819,7 +819,7 @@ theme[cpu_end]="{{ colors.tertiary.default.hex }}"
 
 ### 6.14 Neovim / Lua targets
 
-- Generate a **palette module**, not a full colorscheme. In this repo the generated modules are `~/.myenv/theme/generated/live.bak/nvim/theme.lua` (flow A) and `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua` (flow B); `nvim/lua/core/theme.lua` loads whichever one `~/.myenv/theme/current` points at, through `require("theme")` (see section 0).
+- Generate a **palette module**, not a full colorscheme. In this repo the generated modules are `~/.myenv/theme/generated/wallpaper-based/nvim/theme.lua` (flow A) and `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua` (flow B); `nvim/lua/core/theme.lua` loads whichever one `~/.myenv/theme/current` points at, through `require("theme")` (see section 0).
 - Beware the Lua `{{` collision: do not write nested table constructors that put two `{` together. Keep one key per line, and quote Lua keyword keys (`["function"]`, `["return"]`).
 
 ```lua
@@ -858,7 +858,7 @@ Use this procedure for any app not listed:
 
 Read the existing `~/.config/matugen/config.toml` first, then **add** entries. Do not remove existing ones.
 
-> **In this repo:** `matugen/config.toml` is only for the wallpaper-derived (`general`) theme. The fixed palette (`kanagawa-dragon-lotus`) has its **own config** at `matugen/templates/kanagawa-dragon-lotus/config.toml` and is rendered with `matugen json <blueprint.json>` — never add those templates here (section 0B).
+> **In this repo:** `matugen/config.toml` is only for the wallpaper-derived (`wallpaper-based`) theme. The fixed palette (`kanagawa-dragon-lotus`) has its **own config** at `matugen/templates/palette/kanagawa-dragon-lotus/config.toml` and is rendered with `matugen json <blueprint.json>` — never add those templates here (section 0B).
 
 ```toml
 [config]

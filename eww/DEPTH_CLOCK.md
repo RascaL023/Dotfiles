@@ -28,8 +28,8 @@ Before making changes, inspect:
 - `eww/eww.scss`
 - `eww/bar/README.md`
 - `matugen/config.toml`
-- `matugen/templates/general/source.scss`
-- `matugen/templates/kanagawa-dragon-lotus/template/source.scss`
+- `matugen/templates/palette/wallpaper-based/source.scss`
+- `matugen/templates/palette/kanagawa-dragon-lotus/template/source.scss`
 - `matugen/docs/MATUGEN_SKILLS.md`
 - `hypr/sources/scripts/nextwall.sh`
 - Current Niri and Hyprland configurations

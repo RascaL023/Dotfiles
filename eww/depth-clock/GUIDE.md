@@ -282,7 +282,7 @@ depth_sync "$CHOSEN"
 Perilakunya: wallpaper punya masker → jam tampil; tidak punya → jam ditutup,
 jadi foreground lama tidak pernah tertinggal di atas wallpaper lain.
 
-Tema (`matugen/config.toml` dan `matugen/templates/kanagawa-dragon-lotus/config.toml`,
+Tema (`matugen/config.toml` dan `matugen/templates/palette/kanagawa-dragon-lotus/config.toml`,
 keduanya pada `[templates.scss]`):
 
 ```toml

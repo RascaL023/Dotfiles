@@ -1,13 +1,13 @@
 # Pemetaan Warna Nvim
 
-Dokumen ini menjawab satu pertanyaan: **kunci di `matugen/templates/general/nvim.lua`
+Dokumen ini menjawab satu pertanyaan: **kunci di `matugen/templates/palette/wallpaper-based/nvim.lua`
 itu dipakai untuk mewarnai bagian apa saja di nvim?**
 
 Ditulis agar bisa dibaca orang yang tidak tahu nvim. Tidak ada perubahan kode di
 dokumen ini — murni penjelasan.
 
 > Indeks dokumen: [`README.md`](README.md) · referensi key palet tetap:
-> [`../templates/kanagawa-dragon-lotus/blueprint/README.md`](../templates/kanagawa-dragon-lotus/blueprint/README.md).
+> [`../templates/palette/kanagawa-dragon-lotus/blueprint/README.md`](../templates/palette/kanagawa-dragon-lotus/blueprint/README.md).
 
 ---
 
@@ -26,9 +26,9 @@ wallpaper  ──►  matugen  ──►  template nvim.lua  ──►  theme.lu
 1. **matugen** mengambil warna dari wallpaper dan menghasilkan satu set *role*
    (Material Design 3): `primary`, `tertiary`, `surface`, `on_surface`, dst.
    Daftar lengkapnya ada di `VOCABULARY.md`.
-2. **`matugen/templates/general/nvim.lua`** memilih role itu menjadi nama-nama
+2. **`matugen/templates/palette/wallpaper-based/nvim.lua`** memilih role itu menjadi nama-nama
    kunci (`background`, `extra.syntax.keyword`, ...). Hasil render-nya ditulis ke
-   `~/.myenv/theme/generated/live.bak/nvim/theme.lua`, dan baru terbaca setelah
+   `~/.myenv/theme/generated/wallpaper-based/nvim/theme.lua`, dan baru terbaca setelah
    `current` menunjuk folder tema itu. File template **hanya menyimpan
    nilai warna** — belum tahu warna itu akan dipakai untuk apa.
 3. **`nvim/lua/core/theme.lua`** membacanya, lalu memetakan tiap kunci ke
@@ -187,7 +187,7 @@ Perhatikan: `success`, `warning`, `critical` masih **hardcode hex** di template
 | `dim_muted` | `outline` | `dark5` | Nilai di panel `which-key`, tab non-aktif (`MiniTablineHidden`), ekor animasi kursor (`smooth_tail`), `Conceal`, `BufferOffset` |
 | `disabled` | `outline` | — | Belum dipakai |
 
-> Nilai di kolom "Isi" mengikuti `templates/general/nvim.lua`. Di alur palet tetap
+> Nilai di kolom "Isi" mengikuti `templates/palette/wallpaper-based/nvim.lua`. Di alur palet tetap
 > (`kanagawa-*.json`) ketiga kunci itu diisi role yang **setara tapi bukan sama**
 > (lihat tabel di `blueprint/README.md`): `dim` = `text.subtle`, `dim_muted` =
 > `text.faint`, `disabled` = `text.disabled` — pola yang sama dipakai
@@ -366,8 +366,8 @@ Bukan bug — sebagian kunci sengaja disamakan bentuknya dengan template tool la
 
 ## 12. Catatan cakupan
 
-- Dokumen ini fokus ke **`templates/general/nvim.lua`**. Template
-  `templates/kanagawa-dragon-lotus/template/nvim.lua` punya **nama kunci yang
+- Dokumen ini fokus ke **`templates/palette/wallpaper-based/nvim.lua`**. Template
+  `templates/palette/kanagawa-dragon-lotus/template/nvim.lua` punya **nama kunci yang
   sama persis** (hanya sumber nilainya beda + tanpa `source`), jadi tabel
   "dipakai di mana" di atas berlaku untuk keduanya.
 - Hasil render alur B mendarat di

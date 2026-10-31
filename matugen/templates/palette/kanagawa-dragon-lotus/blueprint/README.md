@@ -1,6 +1,6 @@
 # Blueprint JSON — `kanagawa-dragon-lotus`
 
-> Indeks dokumen: [`matugen/docs/README.md`](../../../docs/README.md) · terkait: [`NVIM_MAPPING.md`](../../../docs/NVIM_MAPPING.md), [`MATUGEN_SKILLS.md`](../../../docs/MATUGEN_SKILLS.md)
+> Indeks dokumen: [`matugen/docs/README.md`](../../../../docs/README.md) · terkait: [`NVIM_MAPPING.md`](../../../../docs/NVIM_MAPPING.md), [`MATUGEN_SKILLS.md`](../../../../docs/MATUGEN_SKILLS.md)
 
 Dokumen ini menjelaskan **isi `kanagawa-dark.json` dan `kanagawa-light.json`**: apa arti setiap key, nilainya dipakai untuk apa, dan di file mana nilainya mendarat. Ditulis supaya bisa dibaca tanpa hafal matugen.
 
@@ -10,13 +10,13 @@ Dokumen ini menjelaskan **isi `kanagawa-dark.json` dan `kanagawa-light.json`**: 
 
 Blueprint = **palet warna yang ditulis tangan**, bukan hasil matugen. Ini kebalikannya dari alur wallpaper:
 
-| | Alur wallpaper (`general`) | Blueprint (`kanagawa-dragon-lotus`) |
+| | Alur wallpaper (`wallpaper-based`) | Blueprint (`kanagawa-dragon-lotus`) |
 |---|---|---|
 | Sumber warna | gambar wallpaper | JSON yang ditulis manusia |
 | Yang menentukan warna | matugen (Material You) | kamu, di editor |
 | Perintah | `matugen image <gambar> -c matugen/config.toml` | `matugen json <blueprint.json> -c .../config.toml` |
 | Kosakata template | `{{ colors.<role>.default.hex }}` | `{{ accent.primary }}`, `{{ syntax.keyword }}`, dst. |
-| Output | `~/.myenv/theme/generated/live.bak/<tool>/…` | `~/.myenv/theme/generated/kanagawa-dragon-lotus/<tool>/…` |
+| Output | `~/.myenv/theme/generated/wallpaper-based/<tool>/…` | `~/.myenv/theme/generated/kanagawa-dragon-lotus/<tool>/…` |
 
 Karena warnanya sudah ditetapkan di sini, alur `matugen json …` cukup **mengirim** nilainya ke template, bukan menemukan warnanya.
 
@@ -32,7 +32,7 @@ Karena warnanya sudah ditetapkan di sini, alur `matugen json …` cukup **mengir
 Catatan teknis penting:
 - Template **tidak boleh** mengandalkan key yang tidak ada di blueprint. Jika sebuah key hilang, placeholder-nya tetap tertulis apa adanya atau render gagal — bukan warna default.
 - Blueprint ini **tidak menyimpan** turunan `rgba()` atau alpha sendiri. Kalau template butuh alpha, hitungnya dilakukan di template (mis. `{{ effect.scrim | to_color | set_alpha: 0.45 | format: rgba }}`).
-- Tool yang jalan dengan alur wallpaper (`general`) dan blueprint (`kanagawa-dragon-lotus`) **berbagi kosakata template yang sama**, tapi membaca dari blueprint yang berbeda.
+- Tool yang jalan dengan alur wallpaper (`wallpaper-based`) dan blueprint (`kanagawa-dragon-lotus`) **berbagi kosakata template yang sama**, tapi membaca dari blueprint yang berbeda.
 
 ---
 
@@ -182,7 +182,7 @@ Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu), `f
 
 Objek ini **tidak berisi warna**; isinya angka dan boolean yang menentukan look & feel
 Hyprland. Rancangan untuk memindahkannya keluar dari blueprint (menjadi profil rasa
-sendiri di `~/.myenv/feel/current`) ada di [`FEEL.md`](../../../docs/FEEL.md) —
+sendiri di `~/.myenv/feel/current`) ada di [`FEEL.md`](../../../../docs/FEEL.md) —
 dokumen itu masih rancangan, jadi selama belum dieksekusi `feel` tetap dibaca dari sini. Template `template/hypr.lua` menyalinnya apa adanya ke `hypr/theme.lua`,
 lalu `hypr/config/core/theme.lua` menggabungkannya dengan default dan menjepit
 nilainya. Jadi dua blueprint dengan palet sama tetap bisa terasa berbeda.
@@ -252,14 +252,14 @@ Tabel ini tidak lengkap untuk semua tool (ada tool yang memakai kombinasi sendir
 2. **Jangan mengubah nama key** tanpa mengubah template; key yang hilang membuat placeholder tidak terisi (atau render gagal), bukan sekadar warna default.
 3. **Sinkronkan `colors[]` dengan `color0`…`color15`.** Kalau salah satu berubah, ubah yang lain juga. Cara termudah: ubah `colors[]`, lalu salin ulang ke `color0`…`color15` berurutan.
 4. **Alpha / `rgba()` tidak boleh jadi sisa di blueprint.** Canvas render matugen pada template, bukan pada JSON ini.
-5. **Portabilitas key masih terbatas.** `colors.surface.default.hex` adalah bentuk yang dipakai alur wallpaper (`general`). Blueprint ini **tidak punya** bentuk grouping itu — gunakan `surface.base`, `text.primary`, dst. secara langsung.
+5. **Portabilitas key masih terbatas.** `colors.surface.default.hex` adalah bentuk yang dipakai alur wallpaper (`wallpaper-based`). Blueprint ini **tidak punya** bentuk grouping itu — gunakan `surface.base`, `text.primary`, dst. secara langsung.
 6. **Key yang belum dipakai bukan sampah.** `effect.shadow`, `surface.inverse`, `text.on_inverse`, `status.error_container`, dan `meta.*` adalah slot siap pakai untuk template berikutnya.
 7. **Menambah tool baru:** buat `template/<tool>.<ext>` lalu daftarkan di `config.toml` folder ini:
    ```toml
    [config]
 
    [templates.tool]
-   input_path  = "~/.dotfile/matugen/templates/kanagawa-dragon-lotus/template/tool.conf"
+   input_path  = "~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/template/tool.conf"
    output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/tool/theme.conf"
    ```
    Config matugen **wajib** diawali `[config]`. Selalu uji ke `/tmp` dulu (bagian 2), baru render ke jalur sebenarnya.
@@ -289,7 +289,7 @@ Jalurnya:
 - → dibaca lewat tema aktif: `~/.myenv/theme/current/foot/theme.ini`
 - → pemuat repo: `foot/foot.ini` (`include=.../current/foot/theme.ini`)
 
-Alur wallpaper punya pasangan yang sama: `general/foot.ini` → `generated/live.bak/foot/theme.ini`. Karena pemuatnya menunjuk ke `current`, foot ikut tema yang sedang aktif, bukan terpaku pada folder kanagawa.
+Alur wallpaper punya pasangan yang sama: `palette/wallpaper-based/foot.ini` → `generated/wallpaper-based/foot/theme.ini`. Karena pemuatnya menunjuk ke `current`, foot ikut tema yang sedang aktif, bukan terpaku pada folder kanagawa.
 
 Pola render Foot sederhana:
 - `foreground`, `background` → `[colors]` utama.
