@@ -272,9 +272,10 @@ tidak ikut ke berkas tema Hyprland — itu urusan switcher
 `swaync/style.css` is GTK 4 but reaches the palette exactly like waybar and
 wlogout do, because GTK 4 does support `@import` (verified with GTK 4.22 +
 swaync 0.12.6): the file holds one import line and then only derived colors and
-metrics, no palette literals. Both flows' `[templates.css]` post_hook ends with
-`swaync-client -rs`, so a re-render repaints the notification center as well
-(`-R` alone reloads `config.json` only and leaves the stylesheet alone).
+metrics, no palette literals. Neither flow has a `post_hook` any more: after a
+render, `matugen/reload.sh` runs `swaync-client -rs` (only when swaync is
+running) so the notification center repaints too (`-R` alone reloads
+`config.json` only and leaves the stylesheet alone).
 
 `nvim/lua/core/theme.lua` maps the generated palette onto TokyoNight keys and
 owns every plugin highlight group; when the generated file is missing it falls

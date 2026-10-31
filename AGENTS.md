@@ -206,9 +206,11 @@ Rules:
   `/home/rascal/.myenv/theme/current/css/theme.css`, the same file
   `waybar/style.css` and `wlogout/style.css` read. Add colors to the theme,
   never to that stylesheet.
-- **`swaync-client -rs` reloads CSS; `-R` only reloads `config.json`.** Both
-  flows' `[templates.css]` post_hook already ends with `-rs`.
-- **`post_hook` runs through `$SHELL` (fish here), not bash.** Keep hooks
+- **`swaync-client -rs` reloads CSS; `-R` only reloads `config.json`.** Neither
+  config has a `post_hook` now; `matugen/reload.sh` calls `-rs` after a render,
+  and only when swaync is actually running.
+- **`post_hook` runs through `$SHELL` (fish here), not bash** — no hook is left in
+  this repo; reload lives in the bash script `matugen/reload.sh`. Keep hooks
   shell-agnostic: `swaync-client -rs 2>/dev/null || true` is fine, `$?` is a
   fish syntax error and fails the whole hook.
 - A missing named color in GTK 4 is **silent** — it falls back to the widget

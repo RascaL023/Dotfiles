@@ -9,7 +9,8 @@
 Last verified against the repo: 2026-10-28.
 
 > Template layout: every color template lives under `templates/palette/<source>/`;
-> `templates/feel/` does not exist yet.
+> `templates/feel/` does not exist yet. Neither config has a `post_hook`: after
+> a render, `matugen/reload.sh` makes the running desktop pick the files up.
 
 ---
 
@@ -25,12 +26,12 @@ Config: `matugen/config.toml` · output root:
 | [x] Neovim | `nvim.lua` | `nvim/theme.lua` ¹ | `nvim/lua/core/theme.lua` (`require`) |
 | [x] Lazygit | `lazygit.yml` | `lazygit/config.yml` | —² |
 | [x] Herdr | `herdr.toml` | `herdr/config.toml` | —² |
-| [x] GTK / CSS | `source.css` | `css/theme.css` (+ `dconf` + `swaync-client -rs` post_hooks) | `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` |
+| [x] GTK / CSS | `source.css` | `css/theme.css` (reload: `matugen/reload.sh`) | `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` |
 | [x] SCSS | `source.scss` | `scss/_theme.scss` | `eww/eww.scss` |
 | [x] Rofi | `source.rasi` | `rasi/theme.rasi` | `rofi/themes/shared/palette.rasi` (all layouts) |
 | [x] Yazi | `yazi-flavor.toml`, `yazi-tmtheme.xml` | `yazi/flavor.toml`, `yazi/tmtheme.xml` | `yazi/theme.toml` (`[flavor] dark = "matugen"`) ³ |
 | [x] Foot | `foot.ini` | `foot/theme.ini` | `foot/foot.ini` (`include` via `current`) ⁴ |
-| [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (+ `hyprctl reload` post_hook) | `hypr/config/core/theme.lua` (`require`, `load` modul data) ⁵ |
+| [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (reload lewat `matugen/reload.sh`) | `hypr/config/core/theme.lua` (`require`, `load` modul data) ⁵ |
 | [ ] Cava | — | — | not themed |
 
 > **Activation.** Writing into `generated/wallpaper-based/` does not change the running
@@ -44,9 +45,8 @@ Config: `matugen/config.toml` · output root:
 ¹ Flow A writes Neovim into the same theme folder as every other tool
 (`nvim/theme.lua` under `generated/wallpaper-based/`), so a wallpaper render never
 touches the active theme; the palette reaches Neovim only once `current` points
-at `wallpaper-based` (see the activation note above). ² The generated file exists and a
-`post_hook` reloads the tool, but no
-include line inside this repo points at it yet. ³ Yazi is split in two: the
+at `wallpaper-based` (see the activation note above). ² The generated file exists,
+but no include line inside this repo points at it yet (reload: `matugen/reload.sh`). ³ Yazi is split in two: the
 generated file holds **colors only** (a flavor), while `yazi/theme.toml` keeps
 the glyphs and separators, the notify & cmp icons and the `which` columns, and
 never gets rewritten. The consumer is
@@ -69,8 +69,8 @@ memuatnya dengan `load(…, "t", {})` (env kosong: berkas hanya boleh
 mengembalikan tabel) lalu menimpa nilai default, dengan clamp untuk nilai di
 luar rentang aman. Nama field tidak boleh diubah; kalau berkas hilang atau gagal
 dimuat, nilai default dipakai dan alasannya ditulis ke stderr. Validasi tanpa
-reload: `luac -p ~/.myenv/theme/current/hypr/theme.lua` (dijalankan juga sebagai
-`post_hook`).
+reload: `luac -p ~/.myenv/theme/current/hypr/theme.lua` (`matugen/reload.sh`
+menjalankan pemeriksaan ini sebelum reload).
 
 Bagian "rasa" (radius, opacity, blur, motion) berasal dari objek `feel` di
 blueprint (Flow B). Rancangan untuk memisahkannya menjadi sumbu rasa sendiri
@@ -91,16 +91,16 @@ Config: `templates/palette/kanagawa-dragon-lotus/config.toml` · blueprints:
 | Tool | Template | Output |
 |---|---|---|
 | [x] Neovim | `nvim.lua` | `nvim/theme.lua` |
-| [x] Kitty | `kitty.conf` | `kitty/theme.conf` (+ `pkill -SIGUSR1` post_hook) |
+| [x] Kitty | `kitty.conf` | `kitty/theme.conf` |
 | [x] Alacritty | `alacritty.toml` | `alacritty/theme.toml` |
 | [x] Rofi | `source.rasi` | `rasi/theme.rasi` |
 | [x] Lazygit | `lazygit.yml` | `lazygit/config.yml` |
 | [x] Herdr | `herdr.toml` | `herdr/config.toml` |
-| [x] GTK-3 | `gtk3.css` | `css/theme.css` (+ `dconf` + `swaync-client -rs` post_hooks) |
+| [x] GTK-3 | `gtk3.css` | `css/theme.css` (reload: `matugen/reload.sh`) |
 | [x] SCSS | `source.scss` | `scss/_theme.scss` |
 | [x] Yazi | `yazi-flavor.toml`, `yazi-tmtheme.xml` | `yazi/flavor.toml`, `yazi/tmtheme.xml` (colors only; see ³) |
 | [x] Foot | `foot.ini` | `foot/theme.ini` |
-| [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (+ `hyprctl reload` post_hook; lihat ⁵) |
+| [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (reload: `matugen/reload.sh`; lihat ⁵) |
 
 Konsumen yang membaca lewat `~/.myenv/theme/current/…`: `kitty/kitty.conf`
 (`include`), `foot/foot.ini` (`include`),

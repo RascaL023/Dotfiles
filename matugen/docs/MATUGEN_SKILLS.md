@@ -413,7 +413,10 @@ color15 {{ colors.on_surface.default.hex }}
   defaults at every `hyprctl reload`. Field names are the merge keys, so keep
   them stable. Colors are `rgba(<hex_stripped>ee)` strings; `format: rgba` is
   **not** usable here because it prints CSS decimals. Check a render without
-  reloading: `luac -p ~/.myenv/theme/current/hypr/theme.lua`.
+  reloading: `luac -p ~/.myenv/theme/current/hypr/theme.lua`. Reload is **not**
+  a post_hook any more: `matugen/reload.sh` reloads Hyprland only when
+  `HYPRLAND_INSTANCE_SIGNATURE` points at a running instance (a render under
+  niri must never touch Hyprland), and it validates that file first.
 
   Look & feel (radius, gaps, opacity, blur, shadow, motion, layer blur,
   groupbar) lives in the theme too, in `shape`/`surface`/`material`/`motion`/
@@ -529,7 +532,7 @@ Notes:
 - **A missing named color is silent in GTK 4.** Unlike a syntax error, `@undeclared` produces no warning; it just falls back to the widget default. Do not "verify" an import by grepping the log — render a probe rule (e.g. `.control-center { background: @accent; }`) and read the pixel, or check the app's own reload output.
 - `swaync` details: stylesheet is `~/.config/swaync/style.css`, palette comes from the shared `css/theme.css`; reload with `swaync-client -rs` — `-R` only reloads `config.json` and leaves the stylesheet untouched.
 - **In this repo:** `waybar`, `wlogout` and `swaync` keep **no** local `colors.css`. All three `@import` the generated `~/.myenv/theme/current/css/theme.css` (78 `@define-color`s, same names in both flows). Add a template entry for a new app rather than a second palette file, and if you must add keys, add them to `source.css` **and** `gtk3.css` so both flows stay in sync.
-- `post_hook` is executed through the user's `$SHELL` (fish on this machine), not bash: keep hooks shell-agnostic. `swaync-client -rs 2>/dev/null || true` works; `$?` is a fish syntax error and fails the whole hook.
+- `post_hook` is executed through the user's `$SHELL` (fish on this machine), not bash: keep hooks shell-agnostic. `swaync-client -rs 2>/dev/null || true` works; `$?` is a fish syntax error and fails the whole hook. **This repo stopped using hooks entirely** — both configs have none, and `matugen/reload.sh` (bash) owns the reload step, driven by process presence instead of a blind call.
 
 Template `waybar-colors.css`:
 
