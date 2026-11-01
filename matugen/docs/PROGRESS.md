@@ -85,7 +85,7 @@ menerapkannya.
 ## Flow B — fixed palette (`templates/palette/kanagawa-dragon-lotus/template/*`)
 
 Config: `templates/palette/kanagawa-dragon-lotus/config.toml` · blueprints:
-`blueprint/kanagawa-{dark,light}.json` · output root:
+`blueprint/<variant>.json` (`dark.json`, `light.json`) · output root:
 `~/.myenv/theme/generated/kanagawa-dragon-lotus/<tool>/…`
 
 | Tool | Template | Output |

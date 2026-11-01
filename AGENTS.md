@@ -88,7 +88,7 @@ bash ~/.dotfile/.synchronizer/.sync.sh
 matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/config.toml
 
 # Flow B: fixed palette (pick the variant with the file you pass)
-matugen json ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/blueprint/kanagawa-dark.json \
+matugen json ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/blueprint/dark.json \
   -c ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/config.toml
 ```
 
@@ -115,8 +115,12 @@ Rules:
 
 - **Separate config per flow.** Adding a Flow B template to `matugen/config.toml`
   breaks every `matugen image` run (no `accent.*` in a Material You palette).
-- **One blueprint file = one variant.** `kanagawa-dark.json` and
-  `kanagawa-light.json` are independent; nothing syncs them automatically.
+- **One blueprint file = one variant, and the file name is the variant:**
+  `blueprint/dark.json`, `blueprint/light.json`. The path is therefore always
+  `<theme>/blueprint/<variant>.json`, which is what a theme switcher composes;
+  the theme identity lives in the directory name and `meta.name` inside the
+  JSON, never in the file name. The two files are independent — nothing syncs
+  them automatically.
 - **Placeholder names are not shared** between flows — the same tool needs its
   own template per flow. Never assume a value exists; grep the template.
 - `~/.myenv` is the theme store **outside** this repo: this repo only renders

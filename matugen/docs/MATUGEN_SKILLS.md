@@ -1,6 +1,6 @@
 ---
 name: matugen-templates
-description: Build, register, test and reload Matugen 4.x templates for Linux ricing targets such as kitty, Waybar, rofi, GTK, mako, alacritty, ghostty, btop, neovim, and (on request) compositors like Hyprland or niri. Covers both wallpaper-derived Material You theming and this repo's fixed palettes (hand-authored blueprint/kanagawa-*.json rendered with `matugen json`, theme `kanagawa-dragon-lotus`). Use this whenever the user wants an app themed with matugen.
+description: Build, register, test and reload Matugen 4.x templates for Linux ricing targets such as kitty, Waybar, rofi, GTK, mako, alacritty, ghostty, btop, neovim, and (on request) compositors like Hyprland or niri. Covers both wallpaper-derived Material You theming and this repo's fixed palettes (hand-authored `blueprint/<variant>.json` rendered with `matugen json`, theme `kanagawa-dragon-lotus`). Use this whenever the user wants an app themed with matugen.
 ---
 
 # Matugen Template Skill (matugen 4.1.0)
@@ -36,7 +36,7 @@ Repo rules (from `AGENTS.md`):
 - Only run `matugen image` when the user asks for wallpaper theming. Always pass `--source-color-index 0`.
 
 **B. Fixed palette (named theme: `kanagawa-dragon-lotus`)** — the usual task in this repo
-- Source of truth: `matugen/templates/palette/<theme>/blueprint/<variant>.json` — **one file per variant** (`kanagawa-dark.json`, `kanagawa-light.json`). Hand-authored, **not** matugen-generated. Keys: `meta`, `background`, `foreground`, `cursor`, `colors` (16-entry array, ANSI order, index 0 = black), `color0`…`color15`, and the groups `accent`, `text`, `surface`, `border`, `status`, `effect`, `syntax`. Full reference: `templates/palette/kanagawa-dragon-lotus/blueprint/README.md`.
+- Source of truth: `matugen/templates/palette/<theme>/blueprint/<variant>.json` — **one file per variant**, and the file name carries only the variant (`dark.json`, `light.json`). The theme name lives in the directory name and `meta.name`; never encode it in the blueprint file name, so `<theme>/blueprint/<variant>.json` stays derivable. Hand-authored, **not** matugen-generated. Keys: `meta`, `background`, `foreground`, `cursor`, `colors` (16-entry array, ANSI order, index 0 = black), `color0`…`color15`, and the groups `accent`, `text`, `surface`, `border`, `status`, `effect`, `syntax`. Full reference: `templates/palette/kanagawa-dragon-lotus/blueprint/README.md`.
   - `syntax` uses **universal semantic names** (`comment`, `keyword`, `function`, `string`, `type`, …) so every tool template maps from the same vocabulary.
 - Templates: `matugen/templates/palette/<theme>/template/*`.
 - Command: `matugen json <blueprint.json> -c <theme-config.toml>`. The JSON is exposed **at the template root**, so templates read root-level keys (`{{ accent.primary }}`, `{{ syntax.keyword }}`) — never `colors.*`, and there is no `dark.*`/`light.*` wrapper: the variant you pass is the variant you get.
@@ -78,12 +78,12 @@ cat > /tmp/mtest/config.toml <<'EOF'
 input_path  = "<abs>/matugen/templates/palette/kanagawa-dragon-lotus/template/nvim.lua"
 output_path = "/tmp/mtest/out/out.lua"
 EOF
-matugen json "<abs>/matugen/templates/palette/kanagawa-dragon-lotus/blueprint/kanagawa-dark.json" -c /tmp/mtest/config.toml
+matugen json "<abs>/matugen/templates/palette/kanagawa-dragon-lotus/blueprint/dark.json" -c /tmp/mtest/config.toml
 grep -nE '\{\{|\}\}|<\*|\*>' /tmp/mtest/out/out.lua   # must print nothing
 luac -p /tmp/mtest/out/out.lua                            # Lua targets must parse
 ```
 Then diff the generated values against the blueprint you rendered — every key
-must match 1:1. Repeat with `kanagawa-light.json`.
+must match 1:1. Repeat with `light.json`.
 
 ---
 

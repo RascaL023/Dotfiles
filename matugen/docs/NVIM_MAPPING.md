@@ -20,7 +20,7 @@ wallpaper  ──►  matugen  ──►  template nvim.lua  ──►  theme.lu
 
 > Ada dua "hulu" yang bisa mengisi kotak kedua, sisanya identik:
 > **alur wallpaper** (`matugen image` → `general/nvim.lua`) dan **alur palet
-> tetap** (`matugen json …/kanagawa-dark.json` → `…/kanagawa-dragon-lotus/template/nvim.lua`).
+> tetap** (`matugen json …/blueprint/dark.json` → `…/kanagawa-dragon-lotus/template/nvim.lua`).
 > Keduanya menghasilkan bentuk file yang sama — lihat §12.
 
 1. **matugen** mengambil warna dari wallpaper dan menghasilkan satu set *role*

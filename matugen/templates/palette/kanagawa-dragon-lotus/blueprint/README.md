@@ -2,7 +2,9 @@
 
 > Indeks dokumen: [`matugen/docs/README.md`](../../../../docs/README.md) · terkait: [`NVIM_MAPPING.md`](../../../../docs/NVIM_MAPPING.md), [`MATUGEN_SKILLS.md`](../../../../docs/MATUGEN_SKILLS.md)
 
-Dokumen ini menjelaskan **isi `kanagawa-dark.json` dan `kanagawa-light.json`**: apa arti setiap key, nilainya dipakai untuk apa, dan di file mana nilainya mendarat. Ditulis supaya bisa dibaca tanpa hafal matugen.
+Dokumen ini menjelaskan **isi `dark.json` dan `light.json`**: apa arti setiap key, nilainya dipakai untuk apa, dan di file mana nilainya mendarat. Ditulis supaya bisa dibaca tanpa hafal matugen.
+
+Nama berkas hanya membawa **varian** — `blueprint/<variant>.json` dengan `<variant>` = `dark` atau `light`. Identitas tema tidak ada di nama berkas: ia berasal dari nama folder tema dan field `meta.name` di dalam JSON. Jadi untuk tema apa pun, jalur blueprint selalu bisa disusun sebagai `<theme>/blueprint/<variant>.json`, tanpa perlu tahu nama temanya lebih dulu.
 
 ---
 
@@ -24,7 +26,7 @@ Karena warnanya sudah ditetapkan di sini, alur `matugen json …` cukup **mengir
 
 ## 2. Alur render
 
-1. **Blueprint → matugen context:** `matugen json kanagawa-dark.json` memuat isi JSON ini ke dalam konteks render.
+1. **Blueprint → matugen context:** `matugen json dark.json` memuat isi JSON ini ke dalam konteks render.
 2. **Template → file keluaran:** setiap `[templates.<tool>]` di `config.toml` ini mengambil file template dan mengisi placeholder-nya.
 3. **Post-hook:** bila ada, dijalankan setelah file tertulis (mis. `pkill -SIGUSR1 kitty`, `herdr server reload-config`). Foot tidak punya post-hook reload: foot tidak menyediakan sinyal reload, jadi warna barunya muncul di jendela foot berikutnya.
 4. **Konsumen:** file yang dihasilkan lalu di-*include* oleh alat bersangkutan (atau disalin/disinlink oleh alur tema di pihak lain).
@@ -283,7 +285,7 @@ Tabel ini tidak lengkap untuk semua tool (ada tool yang memakai kombinasi sendir
 Foot memuat hasil blueprint lewat `include`, pola yang sama dengan `kitty/kitty.conf` (`include ~/.myenv/theme/current/kitty/theme.conf`).
 Jalurnya:
 
-- Blueprint `kanagawa-dark.json`
+- Blueprint `dark.json`
 - → template `template/foot.ini`
 - → output `generated/kanagawa-dragon-lotus/foot/theme.ini`
 - → dibaca lewat tema aktif: `~/.myenv/theme/current/foot/theme.ini`

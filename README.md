@@ -207,13 +207,14 @@ matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/config.tom
 ### Flow B — fixed palette (a named theme)
 
 ```bash
-matugen json matugen/templates/palette/kanagawa-dragon-lotus/blueprint/kanagawa-dark.json \
+matugen json matugen/templates/palette/kanagawa-dragon-lotus/blueprint/dark.json \
   -c matugen/templates/palette/kanagawa-dragon-lotus/config.toml
 ```
 
-- Palette: `matugen/templates/palette/kanagawa-dragon-lotus/blueprint/*.json` —
-  hand-authored, **one file per variant** (`kanagawa-dark.json`,
-  `kanagawa-light.json`)
+- Palette: `matugen/templates/palette/kanagawa-dragon-lotus/blueprint/<variant>.json`
+  — hand-authored, **one file per variant**, named after the variant only
+  (`dark.json`, `light.json`). The theme name comes from the directory and
+  `meta.name`, so a theme always resolves to `<theme>/blueprint/<variant>.json`.
 - Templates: `matugen/templates/palette/kanagawa-dragon-lotus/template/*`
 - Vocabulary: the JSON is exposed at the template root, so templates read
   `{{ accent.primary }}`, `{{ syntax.keyword }}`, … — never `colors.*`
@@ -315,7 +316,7 @@ Then make the theme available, since generated files are not committed:
 matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/config.toml
 
 # or the fixed palette
-matugen json ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/blueprint/kanagawa-dark.json \
+matugen json ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/blueprint/dark.json \
   -c ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/config.toml
 ```
 

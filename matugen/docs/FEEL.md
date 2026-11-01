@@ -122,7 +122,7 @@ Efek yang diharapkan:
 - Flow A (wallpaper) akhirnya punya rasa; sekarang selalu jatuh ke default.
 - Ganti warna tanpa mengubah rasa, dan sebaliknya.
 - `feel` keluar dari blueprint. Nilai yang sekarang ada di
-  `kanagawa-dark.json` / `kanagawa-light.json` cukup menjadi isi awal salah
+  `blueprint/dark.json` / `blueprint/light.json` cukup menjadi isi awal salah
   satu profil, lalu dihapus dari blueprint dan dari template warnanya.
 - `hypr/theme.lua` (warna) dan `hypr/feel.lua` (rasa) menjadi dua file. Ini juga
   menghilangkan risiko dua flow saling menimpa.
