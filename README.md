@@ -223,8 +223,8 @@ matugen json matugen/templates/palette/kanagawa-dragon-lotus/blueprint/dark.json
 
 > Color templates live in `matugen/templates/palette/` — one directory per
 > palette source (`wallpaper-based/`, `kanagawa-dragon-lotus/`). Templates for
-> **feel** will live in `matugen/templates/feel/`; that directory does not exist
-> yet (see [`matugen/docs/FEEL.md`](matugen/docs/FEEL.md)).
+> **feel** live in `matugen/templates/feel/`, driven by the profiles in
+> `matugen/feel/<profile>.json` (see [`matugen/docs/FEEL.md`](matugen/docs/FEEL.md)).
 >
 > Keep the two flows in **separate config files**. Templates from Flow B fail
 > under `matugen image` (no `accent.*`), and Flow A's `colors.*` does not exist

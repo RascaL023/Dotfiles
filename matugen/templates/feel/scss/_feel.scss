@@ -1,0 +1,19 @@
+// ############################
+// ## Generated with Matugen ##
+// ############################
+// ## Manual edit is not recommended.
+// ## Sumber: matugen/feel/<profil>.json — ubah profilnya, lalu jalankan
+// ## matugen/feel.sh <profil>. Berkas ini milik flow rasa, bukan flow warna.
+
+// ── Font UI ──
+$font-ui-text:   "{{ font.ui.text }}";
+$font-ui-system: "{{ font.ui.system }}";
+$font-ui-icon:   "{{ font.ui.icon }}";
+
+// ── Font lain ──
+$font-terminal:  "{{ font.terminal }}";
+$font-display:   "{{ font.display }}";
+
+// ── Bobot ──
+$font-weight:        {{ font.weight.normal }};
+$font-weight-strong: {{ font.weight.strong }};

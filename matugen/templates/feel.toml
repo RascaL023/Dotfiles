@@ -1,0 +1,37 @@
+# Render satu profil rasa menjadi berkas per konsumen.
+#
+#   matugen/feel.sh <profil>          (lihat skripnya: render + flip symlink)
+#
+# `output_path` SELALU diawali "/" dan tidak berisi root: root-nya diberikan
+# saat render lewat `matugen json … -p ~/.myenv/feel/generated/<profil>`.
+# Tanpa `-p`, matugen akan mencoba menulis ke "/scss/…" dan gagal.
+#
+# Satu config untuk semua profil: yang berbeda antar profil hanya isi
+# `matugen/feel/<profil>.json`. Menambah konsumen baru = tambah satu blok di
+# sini (berlaku untuk semua profil sekaligus).
+[config]
+
+# Variabel font untuk eww (popup/profile/OSD). Partial Sass, di-import oleh
+# eww/eww.scss setelah partial tema.
+[templates.scss]
+input_path  = "~/.config/matugen/templates/feel/scss/_feel.scss"
+output_path = "/scss/_feel.scss"
+
+# Font terminal: kitty dan foot membaca berkas ini lewat `include`.
+[templates.kitty]
+input_path  = "~/.config/matugen/templates/feel/kitty.conf"
+output_path = "/kitty/font.conf"
+
+[templates.foot]
+input_path  = "~/.config/matugen/templates/feel/foot.ini"
+output_path = "/foot/font.ini"
+
+# Shell: waybar (GTK 3, aturan siap pakai) dan swaync (GTK 4, custom property).
+# Dua berkas karena sintaksnya beda; keduanya hanya membawa font keluarga.
+[templates.waybar]
+input_path  = "~/.config/matugen/templates/feel/css/waybar.css"
+output_path = "/css/waybar-font.css"
+
+[templates.swaync]
+input_path  = "~/.config/matugen/templates/feel/css/swaync.css"
+output_path = "/css/swaync-font.css"

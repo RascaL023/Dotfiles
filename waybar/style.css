@@ -1,4 +1,6 @@
 @import url("/home/rascal/.myenv/theme/current/css/theme.css");
+/* Font milik flow rasa, bukan palet (matugen/feel.sh). */
+@import url("/home/rascal/.myenv/feel/current/css/waybar-font.css");
 /* @import url("~/.myenv/theme/current/general/css/source.css"); */
 /* @import url("source.css"); */
 
@@ -23,9 +25,7 @@
 @define-color battery @layer-surface;
 
 * {
-	/* font-family: "0xProto Nerd Font"; */
-	/* font-family: "Maple Mono NF ExtraBold"; */
-	font-family: "Monocraft Nerd Font";
+	/* font-family datang dari feel/current/css/waybar-font.css */
 	font-weight: bold;
 	font-size: 9.2px;
 	color: @main-fg;

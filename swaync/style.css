@@ -63,6 +63,8 @@
    dimuat dan semua @warna di bawah jatuh ke warna bawaan GTK: panel tetap
    jalan, hanya tidak bertema. */
 @import url("/home/rascal/.myenv/theme/current/css/theme.css");
+/* Font milik flow rasa, bukan palet (matugen/feel.sh). */
+@import url("/home/rascal/.myenv/feel/current/css/swaync-font.css");
 
 /* ── 2. Turunan + nama lama swaync ──────────────────────────────────────── */
 /* Ditulis tangan (bukan hasil matugen), semuanya turunan dari blok di atas.
@@ -119,7 +121,7 @@
 
 /* ── 4. Dasar ───────────────────────────────────────────────────────────── */
 * {
-  font-family: "Maple Mono NF", "JetBrainsMono Nerd Font", monospace;
+  font-family: var(--font-family-ui);
   font-size: 12px;
   color: @fg-main;
   text-shadow: none;

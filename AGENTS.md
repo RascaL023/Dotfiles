@@ -40,7 +40,10 @@ script and the theming pipeline work with any compositor.
 ├── tools.list                    # tools the synchronizer manages
 ├── matugen/
 │   ├── config.toml               # Flow A (wallpaper → Material You)
+│   ├── feel.sh                   # Flow C: render a feel profile, flip feel/current
+│   ├── feel/<profile>.json       # Flow C values (one file per profile)
 │   ├── templates/
+│   │   ├── feel.toml                     # Flow C render config (shared by all profiles)
 │   │   ├── palette/                      # color templates, one dir per source
 │   │   │   ├── wallpaper-based/*         # Flow A templates
 │   │   │   └── kanagawa-dragon-lotus/
@@ -48,7 +51,7 @@ script and the theming pipeline work with any compositor.
 │   │   │       ├── template/*            # Flow B templates
 │   │   │       ├── config.toml           # Flow B render config
 │   │   │       └── blueprint/README.md   # key-by-key reference
-│   │   └── feel/                         # feel templates — does not exist yet
+│   │   └── feel/                         # Flow C templates (per consumer)
 │   └── docs/                     # start at docs/README.md
 ├── nvim/ kitty/ foot/ …          # one directory per tool, symlinked to ~/.config
 └── README.md                     # user-facing overview
@@ -90,6 +93,9 @@ matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/config.tom
 # Flow B: fixed palette (pick the variant with the file you pass)
 matugen json ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/blueprint/dark.json \
   -c ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/config.toml
+
+# Flow C: feel (one JSON per profile, same toml and templates)
+~/.dotfile/matugen/feel.sh default
 ```
 
 Always pass `--source-color-index 0` (or `--prefer …`) on `matugen image`, or
@@ -115,6 +121,17 @@ Rules:
 
 - **Separate config per flow.** Adding a Flow B template to `matugen/config.toml`
   breaks every `matugen image` run (no `accent.*` in a Material You palette).
+- **Feel is its own flow, not part of a palette.** Colors write
+  `~/.myenv/theme/current`, feel writes `~/.myenv/feel/current`; no file is
+  written by both. Profiles are data only: `matugen/feel/<profile>.json`, with
+  one shared `matugen/templates/feel.toml` and shared `templates/feel/` —
+  adding a profile never touches the toml or the templates.
+- **Render feel only through `matugen/feel.sh <profile>`.** It renders into
+  `~/.myenv/feel/generated/<profile>` and only then flips `feel/current`, so a
+  failed render never leaves the desktop on a half-written profile. Matugen
+  cannot resolve a missing/empty key (no `default` filter, no conditionals), so
+  a profile must carry every key the templates read, and empty-value semantics
+  belong to the consumer or to `feel.sh` — never to the template.
 - **One blueprint file = one variant, and the file name is the variant:**
   `blueprint/dark.json`, `blueprint/light.json`. The path is therefore always
   `<theme>/blueprint/<variant>.json`, which is what a theme switcher composes;

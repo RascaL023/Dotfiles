@@ -79,6 +79,43 @@ Kalau nanti dieksekusi, perbarui dokumen ini di commit yang sama — bagian
 | `gtk3.css` | file utuh hasil matugen | tidak (nilai dibakar) |
 | Neovim | `require("theme")` | ya (Lua) |
 
+### 2.4 Font (sudah jalan sebagian)
+
+Sumbu pertama yang pindah keluar palet **bukan** geometry, tapi font — karena
+font hari ini ikut ditulis template warna. Yang sudah berjalan:
+
+| Bagian | Berkas |
+|---|---|
+| Profil (nilai) | `matugen/feel/<profil>.json` — sekarang baru `default.json` |
+| Mapping (template → output) | `matugen/templates/feel.toml`, satu untuk semua profil |
+| Template | `matugen/templates/feel/{scss/_feel.scss, kitty.conf, foot.ini}` |
+| Renderer | `matugen/feel.sh <profil>` → `~/.myenv/feel/generated/<profil>`, lalu flip `feel/current` |
+
+Konsumen yang sudah membaca hasilnya:
+
+- `eww` (popup/profile/OSD): `eww/eww.scss` meng-`@import`
+  `~/.myenv/feel/current/scss/feel` **setelah** partial tema, lalu memakai
+  `$font-ui-text`, `$font-ui-system`, `$font-ui-icon`, `$font-terminal`,
+  `$font-display`, `$font-weight`, `$font-weight-strong`.
+- `kitty`: `include ~/.myenv/feel/current/kitty/font.conf`.
+- `foot`: `include=…/feel/current/foot/font.ini`.
+- `waybar`: `@import` `~/myenv/feel/current/css/waybar-font.css` di baris atas
+  `waybar/style.css`. GTK 3 tidak punya `var()`, jadi berkas itu berisi aturan
+  `* { font-family: … }` siap pakai; `font-family` literal dihapus dari
+  `style.css`. Ukuran (9.2px), bobot `bold`, dan warna tetap milik waybar.
+- `swaync`: `@import` `…/css/swaync-font.css` sesudah import tema, lalu
+  `style.css` memakai `font-family: var(--font-family-ui)`. Berkas feel hanya
+  mendefinisikan variabel; `--font-size-*` tetap milik swaync.
+
+Konsekuensinya: `matugen/templates/palette/*/source.scss` **tidak lagi** menulis
+`$font-system`/`$font-widget`/`$font-terminal`. Mengganti font sekarang berarti
+mengubah satu profil rasa, tidak menyentuh palet sama sekali.
+
+Yang **belum** ikut (masih hardcoded, jangan diklaim sudah): `wlogout`,
+`hyprlock`, `rofi`, bar `eww` (`eww/bar/styles/_tokens.scss` masih menyimpan font
+lokal karena bar sengaja bisa jalan tanpa theme store), dan font display depth
+clock.
+
 ---
 
 ## 3. niri vs Hyprland: apa yang bisa dan tidak bisa disamakan
@@ -135,7 +172,20 @@ Satu profil = satu JSON kecil. Contoh (angka hanya ilustrasi):
 
 ```jsonc
 {
-  "meta": { "name": "default" },
+  "meta": { "name": "default", "version": 1 },
+
+  // Sumbu font — sudah diterapkan (lihat §2.4). Nama key mengikuti peran, bukan
+  // nama alat: satu font bisa dipakai beberapa konsumen.
+  "font": {
+    "ui": {
+      "text": "Monocraft Nerd Font",     // teks widget (eww, bar)
+      "system": "Maple Mono NF",          // teks GTK/notifikasi/lock
+      "icon": "JetBrainsMono Nerd Font"   // glyph/ikon
+    },
+    "terminal": "MapleMono NF",
+    "display": "Noto Serif Display",      // dekoratif (depth clock)
+    "weight": { "normal": 500, "strong": 600 }
+  },
 
   "geometry": {
     "radius": 8,
@@ -186,9 +236,14 @@ Satu profil = satu JSON kecil. Contoh (angka hanya ilustrasi):
 Aturan:
 
 1. **Lengkap by default.** Semua key wajib ada; render divalidasi sebelum
-   dipakai. Matugen menulis placeholder kosong (atau gagal) untuk key hilang,
-   jadi validasi bukan kemewahan. Pola rujukannya `check_palette` di
-   `nvim/lua/core/theme.lua`.
+   dipakai. Perilaku matugen 4.2 (terverifikasi): key hilang → render **gagal**
+   (`ResolveError`), `null` → tercetak `Null`, string kosong → tercetak kosong,
+   dan tidak ada filter `default` maupun `{% if %}` (blok `if` malah lolos
+   sebagai teks). Jadi "kosong berarti pakai nilai lain" tidak mungkin di dalam
+   template: itu tugas konsumen (contoh `hypr/config/core/theme.lua:340`) atau
+   `matugen/feel.sh`, yang menolak render bila ada placeholder tersisa.
+   Ukuran font **tidak** masuk profil: tiap konsumen punya tuning sendiri.
+   Pola validasi palet: `check_palette` di `nvim/lua/core/theme.lua`.
 2. **Angka dijepit** ke rentang aman, alasan penolakan ditulis ke stderr.
 3. **`motion.character`** adalah satu-satunya cara menyebut “rasa gerak”:
    - `snappy` → bezier pendek/cepat; niri: spring stiffness tinggi.
@@ -275,16 +330,22 @@ matugen/templates/feel.toml         ← config render rasa
 ```
 
 - Dijalankan sekali saat profil dipilih, bukan saat login → tanpa biaya runtime.
-- `feel/current` adalah symlink ke folder profil aktif; render menulis lewat
-  symlink, pola sama dengan `theme/current`.
+- **Render tidak menulis lewat symlink.** Output selalu ke folder konkret
+  `~/.myenv/feel/generated/<profil>/`; `feel/current` baru dibalik setelah
+  render dan validasi lolos. Pola ini sama dengan `theme/current` dan mencegah
+  konsumen membaca profil setengah jadi.
 - Warna dan rasa tidak pernah menulis file yang sama, kecuali
   `hypr/theme.lua` yang dipecah.
+- Entry point-nya `matugen/feel.sh <profil>` (bukan perintah matugen manual):
+  render → cek berkas kosong/placeholder sisa → `sassc` untuk partial SCSS →
+  baru flip `feel/current`.
 
 Pemisahan folder template mengikuti keputusan struktur repo: template **warna**
-sudah pindah ke `matugen/templates/palette/<sumber>/`, sedangkan template
-**rasa** menjadi `matugen/templates/feel/` (belum dibuat — berkas di atas masih
-rencana). Jadi satu render warna dan satu render rasa tidak pernah berbagi
-folder template maupun berkas hasil.
+tinggal di `matugen/templates/palette/<sumber>/`, template **rasa** di
+`matugen/templates/feel/<konsumen>`, dan satu config render
+`matugen/templates/feel.toml` dipakai bersama semua profil. Jadi satu render
+warna dan satu render rasa tidak pernah berbagi folder template maupun berkas
+hasil.
 
 Kenapa bukan assembler bash/jq sendiri: itu bahasa template kedua yang harus
 dirawat, sementara matugen sudah punya filter yang dibutuhkan
@@ -454,6 +515,9 @@ Kunci: **profil rasa adalah kontrak**, bukan milik salah satu shell.
 ---
 
 ## 11. Fase implementasi
+
+> Fase 0 sudah dimulai dari sumbu **font** (bukan geometry): lihat §2.4. Sisa
+> Fase 0 (geometry/material/motion keluar dari blueprint) belum dikerjakan.
 
 | Fase | Isi | Kriteria selesai |
 |---|---|---|

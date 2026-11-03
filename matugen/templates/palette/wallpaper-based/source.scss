@@ -66,7 +66,5 @@ $fg-disabled:              {{ colors.outline_variant.default.hex }};
 $bg-conflict:              {{ colors.secondary_container.default.hex }};
 $bg-disk-usage:            {{ colors.surface_container_high.default.hex }};
 
-
-$font-system:             "JetBrainsMono Nerd Font";
-$font-widget:             "Monocraft Nerd Font";
-$font-terminal:           "MapleMono NF";
+/* Font bukan milik palet: variabel $font-* datang dari flow rasa
+   (~/.myenv/feel/current/scss/_feel.scss), bukan dari render warna ini. */

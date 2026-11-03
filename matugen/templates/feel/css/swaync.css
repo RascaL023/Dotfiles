@@ -1,0 +1,11 @@
+/* ############################
+   ## Generated with Matugen ##
+   ############################
+   ## Manual edit is not recommended.
+   ## Sumber: matugen/feel/<profil>.json (flow rasa).
+   ## GTK 4 punya custom property, jadi cukup satu variabel; ukuran font
+   ## tetap milik swaync/style.css (:root --font-size-*). */
+
+:root {
+  --font-family-ui: "{{ font.ui.system }}", "{{ font.ui.icon }}", monospace;
+}
