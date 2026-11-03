@@ -1,0 +1,12 @@
+{
+	/* Sesi niri. `include` MENGGANTI array (bukan menyambung), jadi
+	   `modules-left` di sini menimpa nilai di config.jsonc. */
+	"include": ["config.jsonc"],
+
+	"modules-left": [
+		"group/theme_switcher",
+		"custom/left_div#1",
+		"niri/workspaces",
+		"custom/right_div#1"
+	]
+}

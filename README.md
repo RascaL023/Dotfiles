@@ -50,7 +50,7 @@ each entry is.
 | `cava` | Audio visualizer | — |
 | `hypr` | Hyprland compositor | — |
 | `niri` | Scrollable-tiling Wayland compositor | — |
-| `waybar` | Status bar | wallpaper flow, GTK CSS (`css/theme.css`) |
+| `waybar` | Status bar | wallpaper flow, GTK CSS (`css/theme.css`), config per sesi (`config.niri.jsonc` / `config.hyprland.jsonc` via `launch.sh`) |
 | `eww` | Widget system | wallpaper flow, SCSS (`scss/theme`) |
 | `wlogout` | Logout menu | wallpaper flow, GTK CSS (`css/theme.css`) |
 | `swaync` | Notification daemon + control center | both flows, GTK 4 CSS (`css/theme.css`) |

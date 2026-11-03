@@ -180,8 +180,9 @@ reload = { hypr = "true", niri = "true" }  # Noctalia hot-reload ~150 ms
 ```
 
 Catatan: `waybar` SIGUSR2 perlu diverifikasi saat implementasi; fallback-nya
-restart (`pkill waybar; waybar &`) seperti `hypr/sources/scripts/waybar-toggle.sh`
-sekarang.
+restart. Jangan panggil `waybar` telanjang: pakai `~/.config/waybar/launch.sh`,
+karena modul workspace yang salah compositor membuat waybar segfault
+(lihat `waybar/launch.sh`).
 
 ---
 

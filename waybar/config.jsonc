@@ -3,12 +3,10 @@
 		layout
 	------------*/
 
-	"modules-left": [
-		"group/theme_switcher",
-		"custom/left_div#1",
-		"hyprland/workspaces",
-		"custom/right_div#1"
-	],
+	/* `modules-left` sengaja TIDAK di sini: daftar itu berbeda per sesi
+	   (niri vs hyprland), dan modul workspace milik compositor yang tidak
+	   sedang jalan membuat waybar segfault. Lihat config.niri.jsonc /
+	   config.hyprland.jsonc, dijalankan lewat launch.sh. */
 	"modules-center": [
 		"custom/left_div#2",
 		"temperature",
@@ -110,6 +108,15 @@
 		"min-length": 8,
 		"max-length": 8,
 		"tooltip-format": "Temp in Fahrenheit: {temperatureF}°F"
+	},
+	/* Modul workspace: definisi di sini tidak pernah dibuat selama tidak
+	   dicantumkan di `modules-left`, jadi aman menyimpan keduanya. */
+	"niri/workspaces": {
+		"format": "{icon}",
+		"format-icons": {
+			"active": "",
+			"default": ""
+		}
 	},
 	"hyprland/workspaces": {
 		// "active-only":
