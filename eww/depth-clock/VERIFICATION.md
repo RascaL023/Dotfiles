@@ -23,7 +23,7 @@ Eww aktif dengan area eksklusif 34 px. Tema aktif: `kanagawa-dragon-lotus`
 | 12 | Flow A (wallpaper) dan Flow B (palet tetap) | Flow B aktif di daemon utama; config uji terpisah yang mengimpor `live.bak/scss/theme` + `styles/_depth-clock` terbuka tanpa error → token kedua flow cocok |
 | 13 | Perilaku pointer (rekaman `WAYLAND_DEBUG=1`) | `get_layer_surface(layer=0)`, `set_keyboard_interactivity(0)`, `set_exclusive_zone(0)`, `set_input_region(nil)` |
 | 14 | Overhead | daemon Eww: 60.412 KiB (tertutup) → 63.508 KiB (terbuka), +3 MiB; 2 tick CPU / 30 detik ≈ 0,07%; satu child proses (`bash` + `sleep` pencetak jam) |
-| 15 | Niri | **tidak diuji** — sesi Niri tidak tersedia di mesin ini; jalur deteksi memakai `niri msg -j outputs` dan offset bar 0 |
+| 15 | Niri | **tidak dijalankan** — tidak ada sesi Niri di mesin ini; jalur kode diperiksa statis dan parser-nya diuji dengan `niri` tiruan (lihat bagian *Tinjauan jalur Niri* di bawah) |
 
 ## Pemeriksaan visual (screenshot langsung)
 
@@ -83,3 +83,54 @@ secara horizontal atau pilih wallpaper dengan subjek di tepi. Parameter ada di
 - **Font.** Acuan memakai serif display kontras tinggi; implementasi memakai
   Noto Serif Display (regular) yang tersedia di sistem. Roboto Thin sempat
   dipakai lebih dulu, tetapi bentuknya jauh dari acuan.
+
+## Tinjauan jalur Niri — 5 November 2026
+
+Sesi Niri tidak tersedia (niri 26.04 terpasang, tetapi tidak ada display), jadi
+tidak ada satu pun jendela yang dibuka di Niri. Yang diperiksa: kode `depthctl`,
+konfigurasi sesi, dan bentuk data IPC — dibandingkan dengan sumber niri-ipc
+v26.04, kode layer-shell niri, dan smithay `LayerMap::arrange()`.
+
+| # | Pemeriksaan | Hasil |
+|---|---|---|
+| 23 | `Output` di niri-ipc v26.04 | **tidak punya field `focused`**; `niri msg -j outputs` mengembalikan `HashMap<String, Output>` (urutan tak tentu) |
+| 24 | Ekspresi lama pada JSON realistis (HDMI-A-1 mati + LVDS-1 hidup) | menghasilkan `HDMI-A-1 null null 0` → regex gagal → `[ERR] could not read the focused output (niri)`, padahal LVDS-1 hidup |
+| 25 | Jalur baru `niri msg -j focused-output` (shim `niri`) | `output: LVDS-1 1366x768 (band 580px, top reserved 0px)` |
+| 26 | `DEPTH_TOP_RESERVED=40` (settings salinan) | `top reserved 40px` — offset ikut terpakai |
+| 27 | Output fokus null / `logical: null` / `niri msg` gagal | `[ERR] niri reports no focused output with a logical size (is the monitor on?)`, exit 1 |
+| 28 | `DEPTH_TOP_RESERVED` bukan angka | `[ERR] DEPTH_TOP_RESERVED is not a number` |
+| 29 | Eww 0.6.0 `display_backend.rs` | `auto_exclusive_zone_enable` hanya dipanggil bila `:exclusive` true → `:exclusive false` mengirim `set_exclusive_zone(0)`, konsisten dengan rekaman #13 |
+| 30 | smithay `arrange()` | surface dengan zona 0 (`Neutral`) diatur di dalam area yang sudah dipotong exclusive zone; hanya zona `-1` (`DontCare`) memakai persegi penuh |
+| 31 | `niri msg -j layers` (`LayerSurface`) | hanya `namespace`, `output`, `layer`, `keyboard_interactivity` — tidak ada bounds/exclusive zone, jadi inset bar tidak bisa dibaca lewat IPC |
+
+Kesimpulan tinjauan:
+
+- **Penyebab utama di Niri bukan render.** `niri/config.kdl` hanya menjalankan
+  `noctalia` (baris `eww daemon`, `awww-daemon`, `barctl start` dikomentari), dan
+  satu-satunya pemicu `depthctl wallpaper` adalah `nextwall.sh` milik Hyprland.
+  Jadi jam tidak pernah dibuka.
+- **Sumber wallpaper** kini jatuh ke Noctalia (lihat #32–#35); sebelumnya
+  `current_wallpaper` kosong sehingga `start` gagal dan `refresh` menutup jam.
+- **Tiga cacat jalur niri diperbaiki:** pemilihan output (#23–#25), offset bar
+  yang tadinya di-hardcode 0 (#29–#31 → `DEPTH_TOP_RESERVED`), dan gate reload
+  `matugen/reload.sh` yang masih mewajibkan awww (#36).
+
+## Sumber wallpaper Noctalia — 5 November 2026
+
+Noctalia v5.2.1 menyediakan `noctalia msg wallpaper-get [connector]`. Diuji
+dengan `noctalia`, `awww`, `niri` dan `hyprctl` tiruan (tidak ada sesi nyata):
+
+| # | Pemeriksaan | Hasil |
+|---|---|---|
+| 32 | niri, awww idle, Noctalia hidup | `wallpaper: /home/rascal/Pictures/Wallpaper/Nyx Bright.png  [noctalia]`, `mask: configured`; argumen yang dipanggil `msg wallpaper-get LVDS-1` |
+| 33 | Noctalia mengembalikan `color:#1a1a2e` | `wallpaper: unknown` → jam tertutup, bukan error |
+| 34 | Noctalia tidak jalan (`error: noctalia is not running`) | `wallpaper: unknown`, exit 0 |
+| 35 | Hyprland, awww hidup + Noctalia hidup | `wallpaper: ... [awww]`, `noctalia` tidak dipanggil sama sekali |
+| 36 | `depthctl start` di niri tanpa argumen | wallpaper + geometri ter-resolve (`foreground: cached`), berhenti hanya di `[ERR] failed to open depth-clock` karena shell uji tidak punya display |
+| 37 | `matugen/reload.sh --dry-run scss` tanpa daemon Eww | `[skip] depth clock: eww tidak siap` — gate awww hilang |
+| 38 | `bash -n eww/scripts/depthctl`, `bash -n matugen/reload.sh` | lolos |
+
+Belum bisa diverifikasi tanpa sesi: urutan tumpuk jam terhadap wallpaper
+Noctalia (sesama layer background), tinggi bar Noctalia yang sebenarnya,
+kecocokan crop Noctalia dengan crop-tengah `depthctl`, dan perilaku klik di
+Niri.

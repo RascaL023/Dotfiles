@@ -5,6 +5,9 @@
 #   Eww clock (HH:MM)       (middle, live)
 #   foreground.png          (foreground, transparent subject cutout)
 #
+# Where the wallpaper belongs to Noctalia instead of awww (niri), the current
+# image is read from `noctalia msg wallpaper-get`; see current_wallpaper().
+#
 # The foreground is an offline artefact: it is generated from the wallpaper
 # once per wallpaper/screen combination and then reused, so changing the time
 # never touches the image pipeline. See eww/depth-clock/README.md.
@@ -45,6 +48,7 @@ note() { printf '%s\n' "$*" >&2; }
 # ---------------------------------------------------------------- settings --
 
 DEPTH_BAND_HEIGHT=580
+DEPTH_TOP_RESERVED=0
 DEPTH_MASKS=()
 
 load_settings() {
@@ -52,6 +56,7 @@ load_settings() {
   # shellcheck disable=SC1090
   . "$SETTINGS_FILE"
   [[ $DEPTH_BAND_HEIGHT =~ ^[0-9]+$ ]] || die "DEPTH_BAND_HEIGHT is not a number"
+  [[ $DEPTH_TOP_RESERVED =~ ^[0-9]+$ ]] || die "DEPTH_TOP_RESERVED is not a number"
 }
 
 # mask_spec <file name> -> "<bg>|<tolerance>|<speck area>", non-zero if unknown
@@ -91,10 +96,17 @@ output_geometry() {
          | "\(.name) \(.width) \(.height) \((.reserved // [0,0,0,0])[1] // 0)"')
       ;;
     niri)
-      # niri does not reserve space for layer surfaces
-      line=$(niri msg -j outputs | jq -r \
-        'to_entries | (map(select(.value.focused))[0] // .[0])
-         | "\(.key) \(.value.logical.width) \(.value.logical.height) 0"')
+      # `niri msg -j outputs` is a HashMap with no focus flag, so it cannot pick
+      # the output the clock belongs on: use the focused-output request instead.
+      # niri does not expose the reserved top inset over IPC (`niri msg layers`
+      # carries no bounds), hence DEPTH_TOP_RESERVED.
+      line=$(niri msg -j focused-output 2>/dev/null | jq -r \
+        --arg top "$DEPTH_TOP_RESERVED" \
+        'if . == null or .logical == null then empty
+         else "\(.name) \(.logical.width) \(.logical.height) \($top)" end' \
+        2>/dev/null || true)
+      [[ -n $line ]] \
+        || die "niri reports no focused output with a logical size (is the monitor on?)"
       ;;
     *)
       die "unsupported session: set XDG_CURRENT_DESKTOP to Hyprland or niri"
@@ -105,12 +117,43 @@ output_geometry() {
   printf '%s\n' "$line"
 }
 
-# current_wallpaper -> path awww is displaying
-current_wallpaper() {
-  command -v awww >/dev/null || die "awww is not installed"
+# awww_wallpaper -> path awww is displaying, empty when awww is absent or idle
+awww_wallpaper() {
+  command -v awww >/dev/null 2>&1 || return 0
   local out
   out=$(awww query 2>/dev/null || true)
   sed -n 's/.*currently displaying: image: \(.*\)$/\1/p' <<<"$out" | head -n1
+}
+
+# noctalia_wallpaper -> path Noctalia is displaying, empty when it cannot say.
+# On niri the wallpaper belongs to Noctalia (no awww daemon), and it is the
+# only place that knows which image is on screen. The per-monitor question is
+# asked first so a monitor with its own wallpaper wins over the default.
+noctalia_wallpaper() {
+  command -v noctalia >/dev/null 2>&1 || return 0
+  local connector path
+  connector=$(output_geometry 2>/dev/null | cut -d' ' -f1 || true)
+  if [[ -n $connector ]]; then
+    path=$(noctalia msg wallpaper-get "$connector" 2>/dev/null || true)
+  fi
+  [[ -n ${path:-} ]] || path=$(noctalia msg wallpaper-get 2>/dev/null || true)
+  path=$(head -n1 <<<"$path" | sed -e 's/[[:space:]]*$//')
+  # a solid colour is not an image: no foreground, so the clock stays hidden
+  if [[ -z $path || $path == color:* ]]; then return 0; fi
+  path=${path#file://}
+  if [[ $path == \~/* ]]; then path=$HOME/${path#\~/}; fi
+  [[ -r $path ]] || return 0
+  printf '%s\n' "$path"
+}
+
+# current_wallpaper -> path the desktop is displaying, empty when unknown.
+# awww wins where it runs (Hyprland): it is the surface the cutout has to line
+# up with. Elsewhere (niri + Noctalia) Noctalia is asked instead.
+current_wallpaper() {
+  local path
+  path=$(awww_wallpaper)
+  [[ -n $path ]] || path=$(noctalia_wallpaper)
+  printf '%s\n' "$path"
 }
 
 # ------------------------------------------------------------------- assets --
@@ -324,7 +367,11 @@ cmd_status() {
   load_settings
   local wallpaper geometry out connector width height top
   wallpaper=$(current_wallpaper)
-  info "wallpaper: ${wallpaper:-unknown}"
+  local source=""
+  if [[ -n $wallpaper ]]; then
+    if [[ $(awww_wallpaper) == "$wallpaper" ]]; then source=awww; else source=noctalia; fi
+  fi
+  info "wallpaper: ${wallpaper:-unknown}${source:+  [$source]}"
   if [[ -n $wallpaper ]] && mask_spec "${wallpaper##*/}" >/dev/null; then
     info "mask:      configured"
   else

@@ -57,10 +57,11 @@ mesin lain. `depthctl` sendiri selalu memakai `$XDG_CACHE_HOME` atau
 ~/.dotfile/eww/scripts/depthctl wallpaper "<path gambar>"
 ```
 
-`start` membaca wallpaper yang sedang ditampilkan `awww query`, mengukur output
-yang fokus (`hyprctl -j monitors` atau `niri msg -j outputs`), membangun
-foreground bila cache-nya basi, lalu membuka jendela dengan ukuran yang tepat
-untuk output itu. `stop` hanya menutup jendela; daemon, widget profil, dan bar
+`start` membaca wallpaper yang sedang ditampilkan (`awww query`, atau
+`noctalia msg wallpaper-get` bila awww tidak memegang wallpaper), mengukur
+output yang fokus (`hyprctl -j monitors` atau `niri msg -j focused-output`),
+membangun foreground bila cache-nya basi, lalu membuka jendela dengan ukuran
+yang tepat untuk output itu. `stop` hanya menutup jendela; daemon, widget profil, dan bar
 tetap hidup.
 
 Jangan memakai `eww open depth-clock` langsung untuk pemakaian normal: geometri
@@ -187,6 +188,69 @@ dengan latar rata seperti Nyx.
 
 Kalau wallpaper diganti dengan cara lain, panggil `depthctl wallpaper "<path>"`
 atau `depthctl stop` sendiri.
+
+## Niri
+
+Di Niri wallpaper digambar Noctalia, bukan awww, jadi `depthctl` tidak lagi
+mengandalkan `awww query`:
+
+```text
+current_wallpaper()
+  ├─ awww query                      → Hyprland (surface yang harus ditiru)
+  └─ noctalia msg wallpaper-get <connector>
+       → niri / Noctalia, fallback tanpa connector
+```
+
+Monitor ditanya lebih dulu (`wallpaper-get <connector>`) supaya wallpaper
+per-monitor menang atas default; kalau Noctalia tidak menjawab, dipakai
+`wallpaper-get` tanpa argumen. Path `color:#RRGGBB` (wallpaper warna solid) dan
+path yang tidak bisa dibaca dianggap "tidak ada gambar" — jam tertutup, bukan
+gagal. `file://` dan `~` ikut dinormalkan. `depthctl status` menampilkan
+sumbernya: `wallpaper: /path [noctalia]` atau `[awww]`.
+
+Ikutannya: `matugen/reload.sh` tidak lagi mensyaratkan awww, hanya daemon Eww
+(`refresh` sendiri yang memutuskan menutup atau reposisi), jadi render tema di
+Niri tidak mematikan jam.
+
+Hal lain yang sudah dibereskan untuk Niri:
+
+- **Deteksi output** memakai `niri msg -j focused-output`. `niri msg -j outputs`
+  mengembalikan `HashMap` tanpa field `focused`, jadi dulu output dipilih
+  sembarang dan gagal total bila entri pertama output yang dimatikan
+  (`logical: null`).
+- **Bar Noctalia memesan ruang atas.** Eww mengirim `set_exclusive_zone(0)`
+  untuk `:exclusive false` (lihat `VERIFICATION.md` #13), dan niri menempatkan
+  surface seperti itu di dalam area sisa — jam mendarat di bawah bar, bukan di
+  `y=0`. niri tidak menyediakan query inset ini (`niri msg layers` tanpa
+  bounds), karena itu ada `DEPTH_TOP_RESERVED` di `settings.conf`: isi tinggi
+  bar + margin atasnya. Di Hyprland nilai itu tidak dipakai (otomatis dari
+  `reserved`).
+
+### Mengaktifkan di Niri
+
+Belum ada autostart: `niri/config.kdl` hanya menjalankan `noctalia`, dan baris
+`eww daemon`, `awww-daemon`, `barctl start` dikomentari. Sekali per sesi:
+
+```sh
+eww daemon --force-wayland &          # jendela jam butuh daemon ini
+~/.dotfile/eww/scripts/depthctl start # wallpaper dibaca dari Noctalia
+```
+
+Bar Noctalia tidak perlu dimatikan dan tidak perlu awww sama sekali — yang
+dibutuhkan hanya daemon Eww, bukan bar Eww. Setelah mengganti wallpaper lewat
+panel Noctalia, panggil `depthctl refresh` (belum ada hook; `nextwall.sh` hanya
+untuk Hyprland).
+
+Dua hal yang masih perlu diukur di sesi nyata: tinggi bar untuk
+`DEPTH_TOP_RESERVED`, dan kecocokan crop Noctalia (`fillMode "crop"`) dengan
+asumsi crop-tengah `depthctl` saat membangun foreground.
+
+Catatan perilaku: `:stacking "bg"` menaruh jam di layer background, dan
+`niri/config.kdl` punya `layer-rule { place-within-backdrop true }` global tanpa
+`match` — surface background yang mengabaikan ruang eksklusif ikut masuk backdrop
+Overview (di-zoom bersama workspace, kena blur/tint). Kosmetik, bukan penghalang.
+Urutan tumpuk terhadap wallpaper Noctalia (sesama layer background) belum
+diverifikasi di sesi nyata.
 
 ## Tema
 

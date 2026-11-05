@@ -151,10 +151,13 @@ reload_scss() {
     else
         skip "eww: tidak jalan"
     fi
-    if [[ -x $depthctl ]] && running eww && have awww; then
+    # depthctl resolves the wallpaper itself (awww on Hyprland, Noctalia on
+    # niri), and hides the clock when the image has no mask, so the only thing
+    # to check here is that the window can be repositioned at all.
+    if [[ -x $depthctl ]] && running eww; then
         run "depth clock" "$depthctl" refresh
     else
-        skip "depth clock: eww/awww tidak siap"
+        skip "depth clock: eww tidak siap"
     fi
 }
 
