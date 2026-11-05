@@ -76,7 +76,8 @@ Seperti di [`FEEL.md`](FEEL.md) §5: token semantik (`font`, `geometry`,
 `elevation`, `surface`, `material`, `motion`, `chrome`). **Tidak berisi warna**,
 dan tidak berisi knob WM.
 
-`font` sudah berjalan (§2.4 FEEL.md): satu profil JSON → `templates/feel.toml` →
+`font` sudah berjalan (§2.4 FEEL.md): satu profil JSON di
+`templates/feel/blueprint/<profil>.json` → `templates/feel/feel.toml` →
 `~/.myenv/feel/current/{scss/_feel.scss, kitty/font.conf, foot/font.ini}`.
 Sisanya (`geometry` dan seterusnya) masih menjadi payload `feel` di blueprint
 Flow B sampai Fase 0 selesai.
@@ -405,7 +406,7 @@ batas, atau nilai GUI dihapus saat apply (keputusan terpisah, jangan otomatis).
 Profil rasa tetap kecil dan semantik, tetapi renderer-nya boleh kaya:
 
 ```text
-matugen/feel/<profil>.json                 (satu berkas per profil)
+matugen/templates/feel/blueprint/<profil>.json   (satu berkas per profil)
    ├── matugen (Tera) ──► scss/_feel.scss (variabel font, sudah jalan)
    │                   ├── kitty/font.conf (sudah jalan)
    │                   ├── foot/font.ini   (sudah jalan)

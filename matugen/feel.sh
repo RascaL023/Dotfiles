@@ -2,7 +2,7 @@
 # Render satu profil rasa (feel) dan balik ~/.myenv/feel/current ke hasilnya.
 #
 #   matugen/feel.sh default      # render profil default
-#   matugen/feel.sh paper        # profil lain (matugen/feel/paper.json)
+#   matugen/feel.sh paper        # profil lain (templates/feel/blueprint/paper.json)
 #
 # Kenapa skrip dan bukan sekadar perintah matugen: symlink harus dibalik
 # setelah render sukses, supaya tidak ada jendela waktu di mana konsumen
@@ -12,20 +12,21 @@ set -euo pipefail
 
 REPO="${HOME}/.dotfile"
 STORE="${HOME}/.myenv/feel"
-CONFIG="${REPO}/matugen/templates/feel.toml"
+CONFIG="${REPO}/matugen/templates/feel/feel.toml"
+PROFILES="${REPO}/matugen/templates/feel/blueprint"
 
 profile="${1:-}"
 if [[ -z $profile ]]; then
   echo "usage: feel.sh <profil>       # contoh: feel.sh default" >&2
   echo "profil tersedia:" >&2
-  for f in "${REPO}"/matugen/feel/*.json; do
+  for f in "${PROFILES}"/*.json; do
     [[ -e $f ]] || continue
     echo "  $(basename "$f" .json)" >&2
   done
   exit 2
 fi
 
-src="${REPO}/matugen/feel/${profile}.json"
+src="${PROFILES}/${profile}.json"
 if [[ ! -f $src ]]; then
   echo "[ERR] profil tidak ada: ${src}" >&2
   exit 1

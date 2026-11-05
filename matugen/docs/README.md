@@ -35,9 +35,10 @@ memang untuk alur itu:
 
 Semua template **warna** tinggal di `matugen/templates/palette/<sumber>/` — satu
 folder per sumber palet (`wallpaper-based/`, `kanagawa-dragon-lotus/`). Template
-**rasa** tinggal di `matugen/templates/feel/`, dengan profil di
-`matugen/feel/<profil>.json` dan satu `matugen/templates/feel.toml` bersama;
-render lewat `matugen/feel.sh <profil>` (lihat [`FEEL.md`](FEEL.md) §7).
+**rasa** tinggal di `matugen/templates/feel/`: profil di
+`blueprint/<profil>.json`, template per konsumen di `template/`, dan satu config
+render `feel.toml` yang dipakai semua profil; render lewat
+`matugen/feel.sh <profil>` (lihat [`FEEL.md`](FEEL.md) §7).
 
 Aturan singkat: **jangan pernah mencampur keduanya dalam satu config matugen.**
 Template alur B akan gagal di `matugen image` (tidak ada `accent.*`), dan

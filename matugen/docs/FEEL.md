@@ -86,17 +86,38 @@ font hari ini ikut ditulis template warna. Yang sudah berjalan:
 
 | Bagian | Berkas |
 |---|---|
-| Profil (nilai) | `matugen/feel/<profil>.json` — sekarang baru `default.json` |
-| Mapping (template → output) | `matugen/templates/feel.toml`, satu untuk semua profil |
-| Template | `matugen/templates/feel/{scss/_feel.scss, kitty.conf, foot.ini}` |
+| Profil (nilai) | `matugen/templates/feel/blueprint/<profil>.json` — sekarang baru `default.json` |
+| Template per konsumen | `matugen/templates/feel/template/{source.scss, kitty.conf, foot.ini, gtk3.css, gtk4.css}` |
+| Mapping (template → output) | `matugen/templates/feel/feel.toml`, satu untuk semua profil |
 | Renderer | `matugen/feel.sh <profil>` → `~/.myenv/feel/generated/<profil>`, lalu flip `feel/current` |
+
+Bentuk foldernya:
+
+```text
+matugen/templates/feel/
+├── blueprint/   # isi profil rasa: satu JSON per rasa
+├── template/    # template per konsumen, dipakai semua profil
+└── feel.toml    # config render, satu untuk semua profil
+```
+
+Menambah rasa = menambah satu berkas di `blueprint/`; `feel.toml` dan
+`template/` tidak disentuh. Nama berkas profil = nama rasa yang dipakai
+`feel.sh` (`feel.sh default` membaca `blueprint/default.json`).
+
+> Catatan jujur: `blueprint/default.json` dan `template/*` **belum sinkron**.
+> Profil memakai `font.{ui.text, ui.tooltip, ui.title, icon, system, terminal, weight}`,
+> sedangkan template masih membaca key lama (`font.ui.system`, `font.display`,
+> …). Skema font masih dibahas, jadi template sengaja tidak diubah; render akan
+> gagal (`ResolveError`) sampai keduanya disamakan.
 
 Konsumen yang sudah membaca hasilnya:
 
 - `eww` (popup/profile/OSD): `eww/eww.scss` meng-`@import`
-  `~/.myenv/feel/current/scss/feel` **setelah** partial tema, lalu memakai
-  `$font-ui-text`, `$font-ui-system`, `$font-ui-icon`, `$font-terminal`,
-  `$font-display`, `$font-weight`, `$font-weight-strong`.
+  `~/.myenv/feel/current/scss/feel` **setelah** partial tema. Template
+  `source.scss` merender tujuh variabel (`$font-ui-text`, `$font-ui-system`,
+  `$font-ui-icon`, `$font-terminal`, `$font-display`, `$font-weight`,
+  `$font-weight-strong`); `eww.scss` baru memakai `$font-ui-text` dan
+  `$font-weight`.
 - `kitty`: `include ~/.myenv/feel/current/kitty/font.conf`.
 - `foot`: `include=…/feel/current/foot/font.ini`.
 - `waybar`: `@import` `~/myenv/feel/current/css/waybar-font.css` di baris atas
@@ -174,16 +195,19 @@ Satu profil = satu JSON kecil. Contoh (angka hanya ilustrasi):
 {
   "meta": { "name": "default", "version": 1 },
 
-  // Sumbu font — sudah diterapkan (lihat §2.4). Nama key mengikuti peran, bukan
-  // nama alat: satu font bisa dipakai beberapa konsumen.
+  // Sumbu font — sudah jalan (lihat §2.4). Isi key masih dibahas; yang sudah
+  // tetap: profil = data, `template/` = konsumen, `feel.toml` = pemetaan.
+  // Nama key mengikuti peran, bukan nama alat: satu font bisa dipakai beberapa
+  // konsumen.
   "font": {
     "ui": {
-      "text": "Monocraft Nerd Font",     // teks widget (eww, bar)
-      "system": "Maple Mono NF",          // teks GTK/notifikasi/lock
-      "icon": "JetBrainsMono Nerd Font"   // glyph/ikon
+      "text": "MapleMono NF",               // teks widget (eww, bar)
+      "tooltip": "FiraCodeNerdFontMono",    // tooltip bar
+      "title": "Monocraft Nerd Font"        // judul/elemen menonjol
     },
+    "icon": "JetBrainsMono Nerd Font",      // glyph/ikon
+    "system": "Cantarell Regular",          // app GTK/notifikasi
     "terminal": "MapleMono NF",
-    "display": "Noto Serif Display",      // dekoratif (depth clock)
     "weight": { "normal": 500, "strong": 600 }
   },
 
@@ -318,15 +342,17 @@ seluruh stylesheet GTK setiap kali rasa berganti.
 template dari JSON sembarang. Jadi flow rasa:
 
 ```bash
-matugen json ~/.dotfile/matugen/feel/default.json -c ~/.dotfile/matugen/templates/feel.toml
+matugen json ~/.dotfile/matugen/templates/feel/blueprint/default.json \
+  -c ~/.dotfile/matugen/templates/feel/feel.toml
 ```
 
 ```text
-matugen/feel/<profil>.json          ← satu-satunya sumber rasa
-matugen/templates/feel/<konsumen>   ← template per konsumen
-matugen/templates/feel.toml         ← config render rasa
-→ ~/.myenv/feel/current/{hypr.lua, niri.kdl, waybar.css, swaync.css,
-                         eww.scss, rasi.rasi, kitty.conf}
+matugen/templates/feel/
+├── blueprint/<profil>.json  ← satu-satunya sumber rasa
+├── template/<konsumen>      ← template per konsumen
+└── feel.toml                ← config render rasa
+→ ~/.myenv/feel/current/{scss/_feel.scss, kitty/font.conf, foot/font.ini,
+                         css/waybar-font.css, css/swaync-font.css}
 ```
 
 - Dijalankan sekali saat profil dipilih, bukan saat login → tanpa biaya runtime.
@@ -342,8 +368,9 @@ matugen/templates/feel.toml         ← config render rasa
 
 Pemisahan folder template mengikuti keputusan struktur repo: template **warna**
 tinggal di `matugen/templates/palette/<sumber>/`, template **rasa** di
-`matugen/templates/feel/<konsumen>`, dan satu config render
-`matugen/templates/feel.toml` dipakai bersama semua profil. Jadi satu render
+`matugen/templates/feel/template/<konsumen>`, profil rasa di
+`matugen/templates/feel/blueprint/<profil>.json`, dan satu config render
+`matugen/templates/feel/feel.toml` dipakai bersama semua profil. Jadi satu render
 warna dan satu render rasa tidak pernah berbagi folder template maupun berkas
 hasil.
 
@@ -521,7 +548,7 @@ Kunci: **profil rasa adalah kontrak**, bukan milik salah satu shell.
 
 | Fase | Isi | Kriteria selesai |
 |---|---|---|
-| 0 | Angkat `feel` dari blueprint ke `matugen/feel/default.json` + `matugen/feel.toml`; pecah `current/hypr/` jadi `theme.lua` + `feel.lua`; `hypr/config/core/theme.lua` memuat keduanya | Tampilan Hyprland identik dengan sebelum perubahan; `luac -p` lolos; Flow A tetap jalan |
+| 0 | Angkat `feel` dari blueprint ke `matugen/templates/feel/blueprint/<profil>.json` + `matugen/templates/feel/feel.toml`; pecah `current/hypr/` jadi `theme.lua` + `feel.lua`; `hypr/config/core/theme.lua` memuat keduanya | Tampilan Hyprland identik dengan sebelum perubahan; `luac -p` lolos; Flow A tetap jalan |
 | 1 | `colors.kdl` + `niri.kdl`; pindahkan warna/animasi/opacity dari config tangan; `include optional=true` | `niri validate -c niri/config.kdl` exit 0; tampilan niri sama + warna dari palet |
 | 2 | swaync `:root`, eww `_feel.scss`, rofi `feel.rasi`, waybar `base.css` + `feel.css` | Ganti profil → radius/translucency bar, menu, notifikasi ikut berubah tanpa edit file |
 | 3 | Profil kedua yang kontras (flat: radius 0, blur off, shadow off, speed 1.4) | Dua profil bisa ditukar bolak-balik; warna tidak berubah |

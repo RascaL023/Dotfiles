@@ -17,6 +17,9 @@ script and the theming pipeline work with any compositor.
 - **Do not run `.synchronizer/.sync.sh`** unless the user asks. `link`/`restore`
   **move** real configs on disk.
 - **Do not commit or push** unless the user asks.
+- **Branch for structural changes.** Routine edits land on `dev`; a change that
+  moves files or touches several consumers goes on `feature/<area>/<name>`
+  (e.g. `feature/matugen/feel-structure`), is committed there, then merged back.
 - **Never hand-edit generated artifacts.** Change the template or palette, then
   re-render:
 
@@ -41,9 +44,11 @@ script and the theming pipeline work with any compositor.
 ├── matugen/
 │   ├── config.toml               # Flow A (wallpaper → Material You)
 │   ├── feel.sh                   # Flow C: render a feel profile, flip feel/current
-│   ├── feel/<profile>.json       # Flow C values (one file per profile)
 │   ├── templates/
-│   │   ├── feel.toml                     # Flow C render config (shared by all profiles)
+│   │   ├── feel/                         # Flow C
+│   │   │   ├── blueprint/<profile>.json  #   values (one file per profile)
+│   │   │   ├── template/*                #   per-consumer templates
+│   │   │   └── feel.toml                 #   render config, shared by all profiles
 │   │   ├── palette/                      # color templates, one dir per source
 │   │   │   ├── wallpaper-based/*         # Flow A templates
 │   │   │   └── kanagawa-dragon-lotus/
@@ -51,7 +56,6 @@ script and the theming pipeline work with any compositor.
 │   │   │       ├── template/*            # Flow B templates
 │   │   │       ├── config.toml           # Flow B render config
 │   │   │       └── blueprint/README.md   # key-by-key reference
-│   │   └── feel/                         # Flow C templates (per consumer)
 │   └── docs/                     # start at docs/README.md
 ├── nvim/ kitty/ foot/ …          # one directory per tool, symlinked to ~/.config
 └── README.md                     # user-facing overview
@@ -123,9 +127,11 @@ Rules:
   breaks every `matugen image` run (no `accent.*` in a Material You palette).
 - **Feel is its own flow, not part of a palette.** Colors write
   `~/.myenv/theme/current`, feel writes `~/.myenv/feel/current`; no file is
-  written by both. Profiles are data only: `matugen/feel/<profile>.json`, with
-  one shared `matugen/templates/feel.toml` and shared `templates/feel/` —
-  adding a profile never touches the toml or the templates.
+  written by both. Profiles are data only:
+  `matugen/templates/feel/blueprint/<profile>.json`, with one shared
+  `matugen/templates/feel/feel.toml` and shared
+  `matugen/templates/feel/template/` — adding a profile never touches the toml
+  or the templates.
 - **Render feel only through `matugen/feel.sh <profile>`.** It renders into
   `~/.myenv/feel/generated/<profile>` and only then flips `feel/current`, so a
   failed render never leaves the desktop on a half-written profile. Matugen

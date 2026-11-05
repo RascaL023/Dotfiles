@@ -24,6 +24,7 @@ a wallpaper or a hand-written palette.
 │   ├── config.toml         #   wallpaper-derived theme (Material You)
 │   ├── templates/
 │   │   ├── general/        #   templates for the wallpaper flow
+│   │   ├── feel/           #   rasa: blueprint/ (profil), template/, feel.toml
 │   │   └── kanagawa-dragon-lotus/
 │   │       ├── blueprint/  #   hand-written palette JSON (see its README)
 │   │       ├── template/   #   templates for the fixed palette
@@ -222,9 +223,10 @@ matugen json matugen/templates/palette/kanagawa-dragon-lotus/blueprint/dark.json
 - Full key-by-key reference: [`blueprint/README.md`](matugen/templates/palette/kanagawa-dragon-lotus/blueprint/README.md)
 
 > Color templates live in `matugen/templates/palette/` — one directory per
-> palette source (`wallpaper-based/`, `kanagawa-dragon-lotus/`). Templates for
-> **feel** live in `matugen/templates/feel/`, driven by the profiles in
-> `matugen/feel/<profile>.json` (see [`matugen/docs/FEEL.md`](matugen/docs/FEEL.md)).
+> palette source (`wallpaper-based/`, `kanagawa-dragon-lotus/`). The **feel**
+> flow is the directory `matugen/templates/feel/`: profiles in
+> `blueprint/<profile>.json`, per-consumer templates in `template/`, and one
+> shared `feel.toml` (see [`matugen/docs/FEEL.md`](matugen/docs/FEEL.md)).
 >
 > Keep the two flows in **separate config files**. Templates from Flow B fail
 > under `matugen image` (no `accent.*`), and Flow A's `colors.*` does not exist

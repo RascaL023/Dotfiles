@@ -2,17 +2,17 @@
 // ## Generated with Matugen ##
 // ############################
 // ## Manual edit is not recommended.
-// ## Sumber: matugen/feel/<profil>.json — ubah profilnya, lalu jalankan
-// ## matugen/feel.sh <profil>. Berkas ini milik flow rasa, bukan flow warna.
+// ## Except for testing.
+
 
 // ── Font UI ──
 $font-ui-text:   "{{ font.ui.text }}";
-$font-ui-system: "{{ font.ui.system }}";
-$font-ui-icon:   "{{ font.ui.icon }}";
+$font-ui-title: "{{ font.ui.title }}";
+$font-ui-tooltip: "{{ font.ui.tooltip }}";
 
 // ── Font lain ──
 $font-terminal:  "{{ font.terminal }}";
-$font-display:   "{{ font.display }}";
+$font-icon:   "{{ font.icon }}";
 
 // ── Bobot ──
 $font-weight:        {{ font.weight.normal }};

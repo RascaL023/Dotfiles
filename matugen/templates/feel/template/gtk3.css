@@ -1,0 +1,12 @@
+/*
+############################
+## Generated with Matugen ##
+############################
+## Manual edit is not recomended,
+## Except for testing. 
+*/
+
+
+* {
+  font-family: "{{ font.ui.text }}", monospace;
+}

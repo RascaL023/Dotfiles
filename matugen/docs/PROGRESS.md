@@ -9,7 +9,8 @@
 Last verified against the repo: 2026-11-03.
 
 > Template layout: every color template lives under `templates/palette/<source>/`,
-> every feel template under `templates/feel/<consumer>`. Neither color config has
+> every feel template under `templates/feel/template/<consumer>`, with feel
+> profiles in `templates/feel/blueprint/<profile>.json`. Neither color config has
 > a `post_hook`: after a render, `matugen/reload.sh` makes the running desktop
 > pick the files up. Feel has its own entry point, `matugen/feel.sh <profile>`.
 
@@ -120,19 +121,19 @@ Key reference for the JSON these templates read:
 
 ## Flow C — feel (`templates/feel/*`)
 
-Config: `templates/feel.toml` (satu untuk semua profil) · profil:
-`feel/<profil>.json` · entry point: `matugen/feel.sh <profil>` · output root:
+Config: `templates/feel/feel.toml` (satu untuk semua profil) · profil:
+`templates/feel/blueprint/<profil>.json` · entry point: `matugen/feel.sh <profil>` · output root:
 `~/.myenv/feel/generated/<profil>/…` (dibalik ke `feel/current` setelah validasi).
 
 Sumbu yang sudah dipindah keluar palet: **font**.
 
 | Tool | Template | Output | Consumer reads it |
 |---|---|---|---|
-| [x] eww (popup/profile/OSD) | `scss/_feel.scss` | `scss/_feel.scss` | `eww/eww.scss` (`@import`, sesudah partial tema) |
-| [x] Kitty | `kitty.conf` | `kitty/font.conf` | `kitty/kitty.conf` (`include`) |
-| [x] Foot | `foot.ini` | `foot/font.ini` | `foot/foot.ini` (`include`) |
-| [x] Waybar | `css/waybar.css` | `css/waybar-font.css` | `waybar/style.css` (`@import`, aturan `*` siap pakai — GTK 3) |
-| [x] Swaync | `css/swaync.css` | `css/swaync-font.css` | `swaync/style.css` (`@import` + `var(--font-family-ui)`) |
+| [x] eww (popup/profile/OSD) | `template/source.scss` | `scss/_feel.scss` | `eww/eww.scss` (`@import`, sesudah partial tema) |
+| [x] Kitty | `template/kitty.conf` | `kitty/font.conf` | `kitty/kitty.conf` (`include`) |
+| [x] Foot | `template/foot.ini` | `foot/font.ini` | `foot/foot.ini` (`include`) |
+| [x] Waybar | `template/gtk3.css` | `css/waybar-font.css` | `waybar/style.css` (`@import`, aturan `*` siap pakai — GTK 3) |
+| [x] Swaync | `template/gtk4.css` | `css/swaync-font.css` | `swaync/style.css` (`@import` + `var(--font-family-ui)`) |
 | [ ] wlogout / hyprlock / rofi | — | — | masih hardcoded |
 | [ ] eww bar | — | — | `eww/bar/styles/_tokens.scss` masih menyimpan font lokal |
 | [ ] Depth clock | — | — | `eww/styles/_depth-clock.scss` masih lokal |

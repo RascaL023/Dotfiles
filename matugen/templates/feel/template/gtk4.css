@@ -1,0 +1,12 @@
+/*
+############################
+## Generated with Matugen ##
+############################
+## Manual edit is not recomended,
+## Except for testing. 
+*/
+
+
+:root {
+  --font-family-ui: "{{ font.ui.text }}", "{{ font.icon }}", monospace;
+}

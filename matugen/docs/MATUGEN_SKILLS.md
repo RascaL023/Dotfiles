@@ -18,7 +18,9 @@ Read this whole file before writing any template. Follow it as the source of tru
 
 Sections 1–11 are a generic wallpaper-theming skill. **This repo also does something the generic skill does not cover**, so read this first.
 
-Repo: `~/.dotfile` (branch `dev`), with each tool symlinked into `~/.config/<tool>`. `~/.config/matugen` → `~/.dotfile/matugen`.
+Repo: `~/.dotfile` — `dev` is the integration branch; a structural change may be
+tracked on `feature/<area>/<name>` until it is merged back. Each tool is
+symlinked into `~/.config/<tool>`; `~/.config/matugen` → `~/.dotfile/matugen`.
 
 Repo rules (from `AGENTS.md`):
 - Edit files **only inside `~/.dotfile`**; never edit the symlinked `~/.config` copies directly.
