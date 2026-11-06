@@ -241,9 +241,16 @@ dibutuhkan hanya daemon Eww, bukan bar Eww. Setelah mengganti wallpaper lewat
 panel Noctalia, panggil `depthctl refresh` (belum ada hook; `nextwall.sh` hanya
 untuk Hyprland).
 
-Dua hal yang masih perlu diukur di sesi nyata: tinggi bar untuk
-`DEPTH_TOP_RESERVED`, dan kecocokan crop Noctalia (`fillMode "crop"`) dengan
-asumsi crop-tengah `depthctl` saat membangun foreground.
+`DEPTH_TOP_RESERVED` sudah diukur di sesi Niri (LVDS-1, bar Noctalia `framed`
+dengan `marginVertical 4`): **35 px**. Caranya: jendela Eww uji setinggi 8 px
+dengan setelan layer yang sama seperti jam (`:stacking "fg"`, `:exclusive
+false`, anchor `top left`, `pos 0x0`) dibuka sesaat; tangkapan `grim`
+memperlihatkan jendela itu mendarat di `y=35`, jadi 35 px itulah area yang
+dipesan bar. Probe lalu ditutup dan dihapus. Kalau bar Noctalia diubah tingginya
+atau di-set auto-hide, angka ini harus diukur ulang.
+
+Sisa yang belum diverifikasi: kecocokan crop Noctalia (`fillMode "crop"`)
+dengan asumsi crop-tengah `depthctl` saat membangun foreground.
 
 Catatan perilaku: `:stacking "bg"` menaruh jam di layer background, dan
 `niri/config.kdl` punya `layer-rule { place-within-backdrop true }` global tanpa

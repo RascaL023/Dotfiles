@@ -130,7 +130,27 @@ dengan `noctalia`, `awww`, `niri` dan `hyprctl` tiruan (tidak ada sesi nyata):
 | 37 | `matugen/reload.sh --dry-run scss` tanpa daemon Eww | `[skip] depth clock: eww tidak siap` — gate awww hilang |
 | 38 | `bash -n eww/scripts/depthctl`, `bash -n matugen/reload.sh` | lolos |
 
-Belum bisa diverifikasi tanpa sesi: urutan tumpuk jam terhadap wallpaper
-Noctalia (sesama layer background), tinggi bar Noctalia yang sebenarnya,
-kecocokan crop Noctalia dengan crop-tengah `depthctl`, dan perilaku klik di
-Niri.
+## Inset bar Niri diukur — 6 November 2026
+
+Dikerjakan di sesi Niri yang hidup (bukan shim): `XDG_CURRENT_DESKTOP=niri`,
+`NIRI_SOCKET` aktif, Noctalia 5.2.1 melaporkan `Nyx Bright.png`, output
+`LVDS-1` 1366x768 skala 1.
+
+Metode: jendela Eww uji setinggi 8 px dengan setelan layer identik dengan jam
+(`:stacking "fg"`, `:exclusive false`, anchor `top left`, `--pos 0x0`), dibuka
+1,5 detik, lalu `grim` menangkap layar dan `magick` mencari piksel penandanya.
+Jarak dari tepi atas layar ke jendela itu = besar area yang dipesan bar.
+
+| # | Pemeriksaan | Hasil |
+|---|---|---|
+| 39 | Posisi jendela uji, dibaca per baris piksel di `x=100` dan `x=683` | penanda menempati `y=35..42` (8 px) → permukaan `:exclusive false` jatuh tepat di `y=35` |
+| 40 | Bar Noctalia sendiri di tangkapan yang sama | badan bar `#111111` di `y=4..30`, margin bawah 4 px (`y=31..34`), jadi 35 px = bar + `marginVertical` atas-bawah |
+| 41 | Nilai yang dipakai | `DEPTH_TOP_RESERVED=35` di `settings.conf` |
+| 42 | `depthctl status` di sesi Niri | `output:    LVDS-1 1366x768 (band 580px, top reserved 35px)` |
+| 43 | `bash -n eww/scripts/depthctl` | lolos |
+
+Belum bisa diverifikasi tanpa mengubah sesi: apakah posisi 35 px membuat band
+di jendela pas dengan baris atas wallpaper (jam masih di layer Background,
+sehingga jendela normal menutupinya), urutan tumpuk jam terhadap wallpaper
+Noctalia, kecocokan crop Noctalia dengan crop-tengah `depthctl`, dan perilaku
+klik di Niri.
