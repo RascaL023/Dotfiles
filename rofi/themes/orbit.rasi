@@ -1,6 +1,5 @@
 /* Orbit — an application and command launcher.
  * Palette: Matugen Flow A / Flow B, via the active theme.
- * Launch: ~/.config/rofi/launch.sh apps orbit
  */
 @import "shared/palette.rasi"
 

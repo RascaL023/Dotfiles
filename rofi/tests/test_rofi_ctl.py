@@ -34,8 +34,8 @@ class LaunchTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.config = self.root / "config with spaces"
         self.config.mkdir()
-        shutil.copy2(ROFI_ROOT / "launch.sh", self.config / "launch.sh")
-        self.launch = self.config / "launch.sh"
+        shutil.copy2(ROFI_ROOT / "rofi-ctl", self.config / "rofi-ctl")
+        self.launch = self.config / "rofi-ctl"
         self.record = self.root / "record.json"
         self.runtime = self.root / "runtime"
         self.runtime.mkdir()
@@ -93,6 +93,14 @@ class LaunchTests(unittest.TestCase):
         self.assertEqual(self.option("-show"), "drun")
         self.assertEqual(self.option("-config"), str(self.config / "config.rasi"))
         self.assertEqual(self.option("-theme"), str(self.config / "themes/apps.rasi"))
+
+    def test_symlinked_entry_point_finds_its_own_config(self):
+        entry = self.root / "bin" / "rofi-ctl"
+        entry.symlink_to(self.launch)
+        result = subprocess.run([str(entry), "shell"], input=b"",
+                                capture_output=True, env=self.env, timeout=5, cwd="/")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.option("-config"), str(self.config / "config.rasi"))
 
     def test_modes_and_launcher_styles(self):
         for command, style, mode in [
@@ -159,7 +167,7 @@ class LaunchTests(unittest.TestCase):
     def test_help_does_not_launch_rofi(self):
         result = self.call("--help")
         self.assertEqual(result.returncode, 0)
-        self.assertIn(b"Usage:", result.stdout)
+        self.assertIn(b"Usage: rofi-ctl", result.stdout)
         self.assertFalse(self.record.exists())
 
     def test_exec_replaces_the_wrapper_process(self):
