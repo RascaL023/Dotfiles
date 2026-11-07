@@ -46,6 +46,9 @@ case "$command_name" in
         ;;
 esac
 
+# A copied script finds no config; fail here instead of inside rofi.
+[[ -f $rofi_dir/config.rasi ]] || fail "no config.rasi in $rofi_dir (install a symlink, not a copy)"
+
 toggle=false
 if [[ $command_name == toggle ]]; then
     toggle=true

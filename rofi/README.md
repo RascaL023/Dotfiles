@@ -52,7 +52,8 @@ rofi-ctl apps orbit
 ```
 
 Pakai symlink, bukan salinan: skrip mencari `config.rasi` dan `themes/` di
-direktori aslinya, dan itu hanya benar bila dipanggil lewat symlink.
+direktori aslinya, dan itu hanya benar bila dipanggil lewat symlink. Salinan
+ditolak dengan exit status 2 dan pesan di stderr, bukan kegagalan Rofi.
 
 ## Struktur
 

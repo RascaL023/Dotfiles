@@ -34,6 +34,8 @@ class LaunchTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.config = self.root / "config with spaces"
         self.config.mkdir()
+        (self.config / "config.rasi").write_text("")
+        (self.config / "themes").mkdir()
         shutil.copy2(ROFI_ROOT / "rofi-ctl", self.config / "rofi-ctl")
         self.launch = self.config / "rofi-ctl"
         self.record = self.root / "record.json"
@@ -101,6 +103,16 @@ class LaunchTests(unittest.TestCase):
                                 capture_output=True, env=self.env, timeout=5, cwd="/")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.option("-config"), str(self.config / "config.rasi"))
+
+    def test_copy_without_config_fails_loudly(self):
+        lonely = self.root / "copied"
+        lonely.mkdir()
+        shutil.copy2(self.launch, lonely / "rofi-ctl")
+        result = subprocess.run([str(lonely / "rofi-ctl"), "shell"], input=b"",
+                                capture_output=True, env=self.env, timeout=5, cwd="/")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn(b"config.rasi", result.stderr)
+        self.assertFalse(self.record.exists())
 
     def test_modes_and_launcher_styles(self):
         for command, style, mode in [
