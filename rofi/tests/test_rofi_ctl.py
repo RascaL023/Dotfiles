@@ -139,6 +139,44 @@ class LaunchTests(unittest.TestCase):
                 self.assertEqual(bytes.fromhex(self.recorded()["stdin"]), data)
         self.assertIn("-no-custom", self.recorded()["argv"])
 
+    def test_wallpaper_dir_resolves_images_and_returns_the_path(self):
+        gallery = self.root / "my wallpapers"
+        gallery.mkdir()
+        for name in ("b.png", "a.JPG", "notes.txt"):
+            (gallery / name).write_bytes(b"")
+        (gallery / "sub").mkdir()
+
+        result = self.call("wallpaper", "-d", str(gallery), MOCK_STDOUT="a.JPG\n")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, f"{gallery / 'a.JPG'}\n".encode())
+        self.assertNotIn("-d", self.recorded()["argv"])
+        rows = bytes.fromhex(self.recorded()["stdin"])
+        self.assertIn(f"a.JPG\0icon\x1f{gallery / 'a.JPG'}\n".encode(), rows)
+        self.assertIn(f"b.png\0icon\x1f{gallery / 'b.png'}\n".encode(), rows)
+        self.assertNotIn(b"notes.txt", rows)
+        self.assertNotIn(b"sub", rows)
+
+    def test_wallpaper_dir_rejects_missing_or_empty_directories(self):
+        missing = self.call("wallpaper", "-d", str(self.root / "absent"))
+        self.assertEqual(missing.returncode, 2)
+        self.assertIn(b"not found", missing.stderr)
+
+        empty = self.root / "empty"
+        empty.mkdir()
+        result = self.call("wallpaper", "-d", str(empty))
+        self.assertEqual(result.returncode, 2)
+        self.assertIn(str(empty).encode(), result.stderr)
+        self.assertEqual(self.call("wallpaper", "-d").returncode, 2)
+        self.assertFalse(self.record.exists())
+
+    def test_wallpaper_dir_preserves_cancellation(self):
+        gallery = self.root / "gallery"
+        gallery.mkdir()
+        (gallery / "one.png").write_bytes(b"")
+        result = self.call("wallpaper", "-d", str(gallery), MOCK_EXIT="1")
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stdout, b"")
+
     def test_menu_leaves_custom_input_policy_to_caller(self):
         self.call("menu")
         self.assertNotIn("-no-custom", self.recorded()["argv"])

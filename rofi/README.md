@@ -12,6 +12,7 @@ path konfigurasi, tema, dan PID diurus di folder ini.
 ~/.config/rofi/rofi-ctl run orbit
 ~/.config/rofi/rofi-ctl toggle apps
 ~/.config/rofi/rofi-ctl shell
+~/.config/rofi/rofi-ctl wallpaper -d ~/Pictures/Wallpaper
 ```
 
 Tanpa argumen, skrip membuka `apps`. Pilihan `apps` / `orbit` adalah nama style
@@ -25,7 +26,7 @@ untuk launcher aplikasi dan perintah. Opsi Rofi tambahan diletakkan setelahnya.
 | `toggle [apps\|orbit]` | Launcher dengan style yang dipilih | Buka/tutup launcher tersebut |
 | `shell` | Dua kartu: Noctalia / Native | Nama pilihan ke stdout |
 | `menu` | Daftar teks dari stdin, satu kolom | Pilihan atau input bebas ke stdout |
-| `wallpaper` | Nama dan metadata ikon dari stdin, galeri fullscreen | Nama pilihan ke stdout |
+| `wallpaper [-d DIR]` | Galeri fullscreen; baris dari stdin atau gambar di DIR | Nama pilihan, atau path absolut dengan `-d` |
 | `password` | Prompt input, stdin dikosongkan | Teks yang diketik ke stdout |
 
 Skrip meneruskan stdout dan exit status Rofi, termasuk status `1` saat pengguna
@@ -98,9 +99,19 @@ ditutup oleh toggle launcher.
 `rofi-ctl shell` menyediakan pilihan Noctalia / Native, lalu mencetak hasil.
 Tidak ada backend pergantian shell atau indikator shell aktif.
 
-`rofi-ctl wallpaper` hanya menampilkan daftar yang diberikan lewat stdin.
-`hypr/sources/scripts/nextwall.sh` tetap menyediakan data, memasang wallpaper,
-dan menyinkronkan depth clock. Logika koneksi Wi-Fi tetap dimiliki
+`rofi-ctl wallpaper` menampilkan daftar yang diberikan lewat stdin. Dengan
+`-d DIR` (atau `--dir`), ia membaca sendiri gambar satu level di DIR — `*.jpg`,
+`*.jpeg`, `*.png`, `*.webp`, `*.gif`, tanpa rekursi — memakai nama berkas
+sebagai label dan berkasnya sebagai ikon, lalu mencetak **path absolut** gambar
+terpilih, sehingga pemanggil tidak perlu menyusun path lagi. Direktori kosong
+atau tidak ada ditolak dengan exit `2`; batal tetap `1` dengan stdout kosong.
+
+```bash
+rofi-ctl wallpaper -d ~/Pictures/Wallpaper
+```
+
+`hypr/sources/scripts/nextwall.sh` masih menyediakan data sendiri, memasang
+wallpaper, dan menyinkronkan depth clock. Logika koneksi Wi-Fi tetap dimiliki
 `hypr/sources/scripts/wifi-menu.sh`; menu daya tetap dimiliki Eww.
 
 Pemanggil yang sudah memakai wrapper:

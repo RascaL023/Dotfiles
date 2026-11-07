@@ -12,13 +12,14 @@ Usage: rofi-ctl [command] [style] [rofi options...]
   toggle [apps|orbit] Open/close only the chosen launcher
   shell              Choose Noctalia or Native; print the selected name
   menu               Text menu from stdin; custom input is allowed
-  wallpaper          Wallpaper rows from stdin, including icon metadata
+  wallpaper [-d DIR] Wallpaper gallery: rows from stdin, or images in DIR
   password           Password prompt; print the entered text
 
 Examples:
   rofi-ctl apps orbit
   rofi-ctl run orbit
   rofi-ctl shell
+  rofi-ctl wallpaper -d ~/Pictures/Wallpaper
   printf '%s\n' Batal Restart | rofi-ctl menu -no-custom -p Daya
   rofi-ctl password -p 'Password Wi-Fi'
 
@@ -92,6 +93,31 @@ case "$command_name" in
         theme=wallpaper
         profile=wallpaper
         options=(-dmenu -i -no-custom -p ' Wallpaper ')
+        # -d DIR makes this command build its own rows; everything else goes to rofi.
+        wallpaper_dir=''
+        passthrough=()
+        while (( $# )); do
+            case $1 in
+                -d|--dir)
+                    (( $# > 1 )) || fail "$1 needs a directory"
+                    wallpaper_dir=$2
+                    shift 2
+                    ;;
+                -d=*|--dir=*)
+                    wallpaper_dir=${1#*=}
+                    shift
+                    ;;
+                *)
+                    passthrough+=("$1")
+                    shift
+                    ;;
+            esac
+        done
+        if (( ${#passthrough[@]} )); then
+            set -- "${passthrough[@]}"
+        else
+            set --
+        fi
         ;;
     password)
         theme=prompt
@@ -146,9 +172,52 @@ case "$command_name" in
     password)
         exec rofi "${rofi_args[@]}" < /dev/null
         ;;
-    menu|wallpaper)
-        [[ ! -t 0 ]] || fail "$command_name requires menu rows on stdin"
+    menu)
+        [[ ! -t 0 ]] || fail "menu requires menu rows on stdin"
         exec rofi "${rofi_args[@]}"
+        ;;
+    wallpaper)
+        if [[ -z $wallpaper_dir ]]; then
+            [[ ! -t 0 ]] || fail "wallpaper requires menu rows on stdin (or -d DIR)"
+            exec rofi "${rofi_args[@]}"
+        fi
+        case $wallpaper_dir in
+            '~') wallpaper_dir=$HOME ;;
+            '~/'*) wallpaper_dir=$HOME/${wallpaper_dir#'~/'} ;;
+        esac
+        resolved=$(readlink -f -- "$wallpaper_dir" 2>/dev/null) && [[ -d $resolved ]] ||
+            fail "wallpaper directory not found: $wallpaper_dir"
+        wallpaper_dir=$resolved
+
+        names=() paths=()
+        shopt -s nullglob
+        for path in "$wallpaper_dir"/*; do
+            [[ -f $path ]] || continue
+            case ${path##*.} in
+                [Jj][Pp][Gg]|[Jj][Pp][Ee][Gg]|[Pp][Nn][Gg]|[Ww][Ee][Bb][Pp]|[Gg][Ii][Ff]) ;;
+                *) continue ;;
+            esac
+            names+=("${path##*/}")
+            paths+=("$path")
+        done
+        (( ${#paths[@]} )) || fail "no wallpaper images in $wallpaper_dir"
+
+        # Rows carry an icon; the label stays the bare filename, so map it back.
+        selected=$(rofi "${rofi_args[@]}" < <(
+            for (( index=0; index<${#paths[@]}; index++ )); do
+                printf '%s\0icon\x1f%s\n' "${names[index]}" "${paths[index]}"
+            done))
+        status=$?
+        if (( status != 0 )) || [[ -z $selected ]]; then
+            exit "$status"
+        fi
+        for (( index=0; index<${#names[@]}; index++ )); do
+            if [[ ${names[index]} == "$selected" ]]; then
+                printf '%s\n' "${paths[index]}"
+                exit 0
+            fi
+        done
+        fail "selection '$selected' is not a wallpaper in $wallpaper_dir"
         ;;
     *)
         exec rofi "${rofi_args[@]}"
