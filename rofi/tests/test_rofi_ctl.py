@@ -34,8 +34,10 @@ class LaunchTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.config = self.root / "config with spaces"
         self.config.mkdir()
-        shutil.copy2(ROFI_ROOT / "launch.sh", self.config / "launch.sh")
-        self.launch = self.config / "launch.sh"
+        (self.config / "config.rasi").write_text("")
+        (self.config / "themes").mkdir()
+        shutil.copy2(ROFI_ROOT / "rofi-ctl", self.config / "rofi-ctl")
+        self.launch = self.config / "rofi-ctl"
         self.record = self.root / "record.json"
         self.runtime = self.root / "runtime"
         self.runtime.mkdir()
@@ -94,6 +96,24 @@ class LaunchTests(unittest.TestCase):
         self.assertEqual(self.option("-config"), str(self.config / "config.rasi"))
         self.assertEqual(self.option("-theme"), str(self.config / "themes/apps.rasi"))
 
+    def test_symlinked_entry_point_finds_its_own_config(self):
+        entry = self.root / "bin" / "rofi-ctl"
+        entry.symlink_to(self.launch)
+        result = subprocess.run([str(entry), "shell"], input=b"",
+                                capture_output=True, env=self.env, timeout=5, cwd="/")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.option("-config"), str(self.config / "config.rasi"))
+
+    def test_copy_without_config_fails_loudly(self):
+        lonely = self.root / "copied"
+        lonely.mkdir()
+        shutil.copy2(self.launch, lonely / "rofi-ctl")
+        result = subprocess.run([str(lonely / "rofi-ctl"), "shell"], input=b"",
+                                capture_output=True, env=self.env, timeout=5, cwd="/")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn(b"config.rasi", result.stderr)
+        self.assertFalse(self.record.exists())
+
     def test_modes_and_launcher_styles(self):
         for command, style, mode in [
             ("apps", "orbit", "drun"), ("run", "apps", "run"),
@@ -118,6 +138,44 @@ class LaunchTests(unittest.TestCase):
                 self.assertEqual(self.call(command, data=data).returncode, 0)
                 self.assertEqual(bytes.fromhex(self.recorded()["stdin"]), data)
         self.assertIn("-no-custom", self.recorded()["argv"])
+
+    def test_wallpaper_dir_resolves_images_and_returns_the_path(self):
+        gallery = self.root / "my wallpapers"
+        gallery.mkdir()
+        for name in ("b.png", "a.JPG", "notes.txt"):
+            (gallery / name).write_bytes(b"")
+        (gallery / "sub").mkdir()
+
+        result = self.call("wallpaper", "-d", str(gallery), MOCK_STDOUT="a.JPG\n")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, f"{gallery / 'a.JPG'}\n".encode())
+        self.assertNotIn("-d", self.recorded()["argv"])
+        rows = bytes.fromhex(self.recorded()["stdin"])
+        self.assertIn(f"a.JPG\0icon\x1f{gallery / 'a.JPG'}\n".encode(), rows)
+        self.assertIn(f"b.png\0icon\x1f{gallery / 'b.png'}\n".encode(), rows)
+        self.assertNotIn(b"notes.txt", rows)
+        self.assertNotIn(b"sub", rows)
+
+    def test_wallpaper_dir_rejects_missing_or_empty_directories(self):
+        missing = self.call("wallpaper", "-d", str(self.root / "absent"))
+        self.assertEqual(missing.returncode, 2)
+        self.assertIn(b"not found", missing.stderr)
+
+        empty = self.root / "empty"
+        empty.mkdir()
+        result = self.call("wallpaper", "-d", str(empty))
+        self.assertEqual(result.returncode, 2)
+        self.assertIn(str(empty).encode(), result.stderr)
+        self.assertEqual(self.call("wallpaper", "-d").returncode, 2)
+        self.assertFalse(self.record.exists())
+
+    def test_wallpaper_dir_preserves_cancellation(self):
+        gallery = self.root / "gallery"
+        gallery.mkdir()
+        (gallery / "one.png").write_bytes(b"")
+        result = self.call("wallpaper", "-d", str(gallery), MOCK_EXIT="1")
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stdout, b"")
 
     def test_menu_leaves_custom_input_policy_to_caller(self):
         self.call("menu")
@@ -159,7 +217,7 @@ class LaunchTests(unittest.TestCase):
     def test_help_does_not_launch_rofi(self):
         result = self.call("--help")
         self.assertEqual(result.returncode, 0)
-        self.assertIn(b"Usage:", result.stdout)
+        self.assertIn(b"Usage: rofi-ctl", result.stdout)
         self.assertFalse(self.record.exists())
 
     def test_exec_replaces_the_wrapper_process(self):

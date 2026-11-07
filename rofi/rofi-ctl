@@ -1,0 +1,225 @@
+#!/usr/bin/env bash
+# Rofi owns presentation here; callers own the actions behind their menu rows.
+set -u
+
+usage() {
+    cat <<'EOF'
+Usage: rofi-ctl [command] [style] [rofi options...]
+
+  apps [apps|orbit]   Application launcher (default: apps)
+  run [apps|orbit]    Command launcher
+  window             Window switcher, using Rofi's window mode
+  toggle [apps|orbit] Open/close only the chosen launcher
+  shell              Choose Noctalia or Native; print the selected name
+  menu               Text menu from stdin; custom input is allowed
+  wallpaper [-d DIR] Wallpaper gallery: rows from stdin, or images in DIR
+  password           Password prompt; print the entered text
+
+Examples:
+  rofi-ctl apps orbit
+  rofi-ctl run orbit
+  rofi-ctl shell
+  rofi-ctl wallpaper -d ~/Pictures/Wallpaper
+  printf '%s\n' Batal Restart | rofi-ctl menu -no-custom -p Daya
+  rofi-ctl password -p 'Password Wi-Fi'
+
+Menu commands preserve Rofi's stdout and exit status (including cancellation).
+No shell, wallpaper, network or power actions are performed by this script.
+EOF
+}
+
+fail() {
+    printf 'rofi-ctl: %s\n' "$*" >&2
+    exit 2
+}
+
+# Builtins only: resolve the real path, so a symlink in ~/.local/bin still works.
+rofi_dir=$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" && pwd -P) || exit 1
+command_name=${1:-apps}
+if (( $# > 0 )); then
+    shift
+fi
+
+case "$command_name" in
+    -h|--help|help)
+        usage
+        exit 0
+        ;;
+esac
+
+# A copied script finds no config; fail here instead of inside rofi.
+[[ -f $rofi_dir/config.rasi ]] || fail "no config.rasi in $rofi_dir (install a symlink, not a copy)"
+
+toggle=false
+if [[ $command_name == toggle ]]; then
+    toggle=true
+    command_name=apps
+fi
+
+options=()
+case "$command_name" in
+    apps|run)
+        style=apps
+        if (( $# > 0 )) && [[ $1 != -* ]]; then
+            style=$1
+            shift
+        fi
+        case "$style" in
+            apps|orbit) ;;
+            *) fail "unknown launcher style: $style (use apps or orbit)" ;;
+        esac
+        theme=$style
+        profile=launcher-$style
+        mode=drun
+        [[ $command_name == run ]] && mode=run
+        options=(-show "$mode")
+        ;;
+    window)
+        theme=apps
+        profile=window
+        options=(-show window)
+        ;;
+    shell|shell-select)
+        theme=shell-select
+        profile=shell
+        options=(-dmenu -no-custom)
+        ;;
+    menu)
+        theme=list
+        profile=menu
+        options=(-dmenu -i)
+        ;;
+    wallpaper)
+        theme=wallpaper
+        profile=wallpaper
+        options=(-dmenu -i -no-custom -p ' Wallpaper ')
+        # -d DIR makes this command build its own rows; everything else goes to rofi.
+        wallpaper_dir=''
+        passthrough=()
+        while (( $# )); do
+            case $1 in
+                -d|--dir)
+                    (( $# > 1 )) || fail "$1 needs a directory"
+                    wallpaper_dir=$2
+                    shift 2
+                    ;;
+                -d=*|--dir=*)
+                    wallpaper_dir=${1#*=}
+                    shift
+                    ;;
+                *)
+                    passthrough+=("$1")
+                    shift
+                    ;;
+            esac
+        done
+        if (( ${#passthrough[@]} )); then
+            set -- "${passthrough[@]}"
+        else
+            set --
+        fi
+        ;;
+    password)
+        theme=prompt
+        profile=password
+        options=(-dmenu -password)
+        ;;
+    *)
+        fail "unknown command: $command_name (use --help)"
+        ;;
+esac
+
+command -v rofi >/dev/null 2>&1 || {
+    printf 'rofi-ctl: rofi is not available on PATH\n' >&2
+    exit 127
+}
+
+pid_file=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/dotfile-rofi-$UID-$profile.pid
+
+stop_launcher() {
+    local pid='' index
+    local -a process_args=()
+
+    [[ -r $pid_file ]] || return 1
+    IFS= read -r pid < "$pid_file" || :
+    [[ $pid =~ ^[0-9]+$ && $pid -gt 1 ]] || return 1
+    [[ -O /proc/$pid ]] || return 1
+    mapfile -d '' -t process_args 2>/dev/null < "/proc/$pid/cmdline" || return 1
+
+    # A stale PID must never close an unrelated process or another Rofi menu.
+    for (( index=0; index+1<${#process_args[@]}; index++ )); do
+        if [[ ${process_args[index]} == -pid &&
+              ${process_args[index+1]} == "$pid_file" ]]; then
+            kill -TERM -- "$pid" 2>/dev/null
+            return
+        fi
+    done
+    return 1
+}
+
+if [[ $toggle == true ]] && stop_launcher; then
+    exit 0
+fi
+
+rofi_args=(-config "$rofi_dir/config.rasi"
+           -theme "$rofi_dir/themes/$theme.rasi"
+           -pid "$pid_file" "${options[@]}" "$@")
+
+case "$command_name" in
+    shell|shell-select)
+        exec rofi "${rofi_args[@]}" <<< $'Noctalia\nNative'
+        ;;
+    password)
+        exec rofi "${rofi_args[@]}" < /dev/null
+        ;;
+    menu)
+        [[ ! -t 0 ]] || fail "menu requires menu rows on stdin"
+        exec rofi "${rofi_args[@]}"
+        ;;
+    wallpaper)
+        if [[ -z $wallpaper_dir ]]; then
+            [[ ! -t 0 ]] || fail "wallpaper requires menu rows on stdin (or -d DIR)"
+            exec rofi "${rofi_args[@]}"
+        fi
+        case $wallpaper_dir in
+            '~') wallpaper_dir=$HOME ;;
+            '~/'*) wallpaper_dir=$HOME/${wallpaper_dir#'~/'} ;;
+        esac
+        resolved=$(readlink -f -- "$wallpaper_dir" 2>/dev/null) && [[ -d $resolved ]] ||
+            fail "wallpaper directory not found: $wallpaper_dir"
+        wallpaper_dir=$resolved
+
+        names=() paths=()
+        shopt -s nullglob
+        for path in "$wallpaper_dir"/*; do
+            [[ -f $path ]] || continue
+            case ${path##*.} in
+                [Jj][Pp][Gg]|[Jj][Pp][Ee][Gg]|[Pp][Nn][Gg]|[Ww][Ee][Bb][Pp]|[Gg][Ii][Ff]) ;;
+                *) continue ;;
+            esac
+            names+=("${path##*/}")
+            paths+=("$path")
+        done
+        (( ${#paths[@]} )) || fail "no wallpaper images in $wallpaper_dir"
+
+        # Rows carry an icon; the label stays the bare filename, so map it back.
+        selected=$(rofi "${rofi_args[@]}" < <(
+            for (( index=0; index<${#paths[@]}; index++ )); do
+                printf '%s\0icon\x1f%s\n' "${names[index]}" "${paths[index]}"
+            done))
+        status=$?
+        if (( status != 0 )) || [[ -z $selected ]]; then
+            exit "$status"
+        fi
+        for (( index=0; index<${#names[@]}; index++ )); do
+            if [[ ${names[index]} == "$selected" ]]; then
+                printf '%s\n' "${paths[index]}"
+                exit 0
+            fi
+        done
+        fail "selection '$selected' is not a wallpaper in $wallpaper_dir"
+        ;;
+    *)
+        exec rofi "${rofi_args[@]}"
+        ;;
+esac
