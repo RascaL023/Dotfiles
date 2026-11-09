@@ -1,25 +1,6 @@
--- theme.lua -- modul tema Hyprland 0.56 (config Lua).
---
--- Sumber nilai, berurutan (yang belakangan menimpa yang sebelumnya):
---   1. tabel default di bawah
---   2. ~/.myenv/theme/current/hypr/theme.lua -> hasil matugen
---
--- Berkas hasil matugen murni data (`return { ... }`), dimuat dengan env kosong
--- sehingga tidak bisa memanggil fungsi apa pun. Field yang hilang memakai
--- default, jadi tema lama/baru tetap jalan; itulah sebabnya tema wallpaper
--- (Flow A) cukup menghasilkan warna, sedangkan tema blueprint (Flow B) juga
--- menghasilkan bagian "rasa" dari objek `feel` di blueprint-nya.
---
--- Modul ini tidak memanggil hl.* sama sekali. Semua pemetaan field -> opsi
--- Hyprland selesai di sini, hasilnya berupa data siap pakai:
---
---   theme.hypr        -> payload hl.config (general/decorations/group/misc)
---   theme.curves      -> payload hl.curve
---   theme.animations  -> daftar payload hl.animation
---   theme.layer_blur  -> dipakai layer rule di hyprland.lua
---
--- Nilai dijepit ke rentang aman supaya tema buatan tangan tidak membuat
--- desktop tak terpakai; alasan kegagalan ditulis ke stderr.
+-- Hyprland theme. The defaults below are merged with the generated
+-- ~/.myenv/theme/current/hypr/theme.lua (data only: it is loaded without env,
+-- so it can only return a table) and clamped before they become hl.* payloads.
 
 local Theme = {
     shape = {
@@ -93,7 +74,7 @@ local Theme = {
     },
 }
 
--- Batas aman: [min, max]. Hanya berlaku untuk nilai bertipe number.
+-- Safe ranges: [min, max], numbers only.
 local limits = {
     { "shape.radius",                0,   24  },
     { "shape.rounding_power",        1.0, 8.0 },
@@ -122,7 +103,7 @@ local limits = {
     { "chrome.groupbar.radius",      0,   24  },
 }
 
--- Nama gaya animasi yang dikenal Hyprland 0.56; selain ini diabaikan.
+-- Animation styles known to 0.56; anything else is replaced.
 local styles = {
     gnomed = true, popin = true, slide = true, slidefade = true,
     slidevert = true, fade = true, slidefadevert = true,
@@ -172,8 +153,7 @@ local function clamp_field(theme, path, minimum, maximum)
     end
 end
 
--- $MYENV belum tentu sudah di-set saat modul ini di-require, jadi urutannya
--- MYENV dulu (kalau ada), lalu lokasi default berbasis $HOME.
+-- MYENV may not be set yet when this module is required.
 local function base_dir()
     local myenv = os.getenv("MYENV")
     if myenv and myenv ~= "" then
@@ -188,8 +168,7 @@ local function base_dir()
     return nil
 end
 
--- Mengembalikan (data, ada). `ada` membedakan "berkas tidak ada" dari
--- "berkas ada tapi rusak", supaya pesan stderr tidak menyesatkan.
+-- Returns (data, exists) so a missing file can be told apart from a broken one.
 local function load_data(path, label)
     local handle = io.open(path, "r")
     if not handle then
@@ -257,8 +236,7 @@ end
 -- ===========================================================================
 -- Data siap pakai untuk hl.*
 -- ===========================================================================
--- Dari sini ke bawah hanya pemetaan: nama field tema -> nama opsi Hyprland.
--- hyprland.lua tidak perlu tahu bentuk fieldnya.
+-- Theme field -> Hyprland option name. hyprland.lua never sees the shape above.
 
 local shape   = Theme.shape
 local surface = Theme.surface
@@ -320,7 +298,6 @@ Theme.hypr = {
         },
     },
 
-    -- Tab/group: border & groupbar ikut tema (default: groupbar mati).
     group = {
         col = {
             border_active   = shape.border_active,
@@ -348,8 +325,8 @@ Theme.curves = {
     },
 }
 
--- Kecepatan = angka dasar Hyprland x pengali tema (motion.speed /
--- motion.layers_speed), jadi satu angka tema menggeser seluruh rasa animasi.
+-- Speed = Hyprland base number x theme multiplier (motion.speed /
+-- motion.layers_speed), so one value shifts the whole motion feel.
 Theme.animations = {
     { leaf = "global", enabled = true, speed = 10 * motion.speed, bezier = "default" },
 
@@ -367,7 +344,7 @@ Theme.animations = {
     { leaf = "workspacesOut", enabled = true, speed = 3 * motion.speed, bezier = "default", style = motion.style_ws_out },
 }
 
--- Tema "flat" mematikan blur layer supaya bar/launcher tampil solid.
+-- The "flat" theme turns layer blur off so bars and launchers stay solid.
 Theme.layer_blur = chrome.layer_blur
 
 return Theme

@@ -1,26 +1,14 @@
-# Render satu profil rasa menjadi berkas per konsumen.
-#
-#   matugen/feel.sh <profil>          (lihat skripnya: render + flip symlink)
-#
-# `output_path` SELALU diawali "/" dan tidak berisi root: root-nya diberikan
-# saat render lewat `matugen json … -p ~/.myenv/feel/generated/<profil>`.
-# Tanpa `-p`, matugen akan mencoba menulis ke "/scss/…" dan gagal.
-#
-# Satu config untuk semua profil: yang berbeda antar profil hanya isi
-# `matugen/templates/feel/blueprint/<profil>.json`. Menambah konsumen baru =
-# tambah satu blok di sini (berlaku untuk semua profil sekaligus).
-#
-# Template per konsumen ada di `matugen/templates/feel/template/`; nama blok di
-# bawah (`scss`, `kitty`, …) hanya label, bukan nama berkas.
+# One feel profile -> one file per consumer. output_path is relative to the
+# root passed with `-p`; profiles differ only in blueprint/<profile>.json, so a
+# new consumer is one block here. Block names are labels, not file names.
 [config]
 
-# Variabel font untuk eww (popup/profile/OSD). Partial Sass, di-import oleh
-# eww/eww.scss setelah partial tema.
+# Font variables for eww, imported by eww/eww.scss.
 [templates.scss]
 input_path  = "~/.config/matugen/templates/feel/template/source.scss"
 output_path = "/scss/_feel.scss"
 
-# Font terminal: kitty dan foot membaca berkas ini lewat `include`.
+# Terminal fonts, read by kitty and foot through `include`.
 [templates.kitty]
 input_path  = "~/.config/matugen/templates/feel/template/kitty.conf"
 output_path = "/kitty/font.conf"
@@ -29,8 +17,7 @@ output_path = "/kitty/font.conf"
 input_path  = "~/.config/matugen/templates/feel/template/foot.ini"
 output_path = "/foot/font.ini"
 
-# Shell: waybar (GTK 3, aturan siap pakai) dan swaync (GTK 4, custom property).
-# Dua berkas karena sintaksnya beda; keduanya hanya membawa font keluarga.
+# Shell fonts: waybar is GTK 3, swaync is GTK 4, hence two files.
 [templates.waybar]
 input_path  = "~/.config/matugen/templates/feel/template/gtk3.css"
 output_path = "/css/waybar-font.css"

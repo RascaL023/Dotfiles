@@ -81,11 +81,8 @@ local matugen_path = vim.fn.expand(
 
 package.path = matugen_path .. ";" .. package.path
 
--- Warna darurat. Hanya kunci yang dibaca konsumen di luar `on_highlights` dan
--- `build_colors`: zen.lua (fg, bg_dark), smear_cursor.lua (magenta,
--- bg_highlight), dan `bg` untuk global Markview. Nilainya sama dengan
--- TokyoNight `style = "night"` supaya mode fallback tidak terlihat setengah
--- tema. Kunci baru yang dibaca konsumen saat startup harus ditambahkan di sini.
+-- Fallback colors: only the keys read outside on_highlights and build_colors
+-- (zen.lua, smear_cursor.lua, the Markview global).
 local FALLBACK_COLORS = {
   fg = "#c0caf5",
   bg = "#1a1b26",
@@ -96,9 +93,7 @@ local FALLBACK_COLORS = {
 
 local loaded, palette = pcall(require, "theme")
 
--- Selalu berupa tabel sejak awal, sehingga konsumen (`colors.fg`,
--- `colors.magenta`, ...) tidak pernah mengindeks nil — termasuk ketika palet
--- belum ada, rusak, atau tidak lengkap. `attach()` di akhir berkas menimpanya.
+-- Always a table so consumers never index nil before `attach()` runs.
 M.fallback = true
 M.palettes = nil
 M.syntax = {}
@@ -111,8 +106,7 @@ M.colors = FALLBACK_COLORS
 local BLUE0_ALPHA = 0.35
 local BLUE7_ALPHA = 0.22
 
---- Bobot `text.muted` saat membuat warna "redup tapi terbaca" (`fg_faint`).
---- 0.0 = sepekat komentar, 1.0 = seterang teks muted.
+--- Share of text.muted kept by "dim but readable" text (`fg_faint`).
 local FAINT_ALPHA = 0.45
 
 --- Campur `fg` ke `bg` dengan bobot `alpha` untuk `fg`.
@@ -148,11 +142,9 @@ local function blend(fg, bg, alpha)
   )
 end
 
---- Role container (selection/search) dari palet.
---- Palet dari pipeline wallpaper versi lama dan palet legacy belum punya
---- `extra.container`, jadi di situ dipakai perilaku lama: accent untuk
---- seleksi, background untuk teks di atasnya.
---- @param d table palet tergenerate
+--- Container role (selection/search), falling back to the old accent/background
+--- behaviour for palettes without `extra.container`.
+--- @param d table generated palette
 --- @return table
 local function container_roles(d)
   local accent = d.extra.accent
@@ -167,10 +159,8 @@ local function container_roles(d)
   }
 end
 
---- Kunci `extra.syntax` yang dibaca `build_colors` dan
---- `apply_syntax_highlights`. Tanpa salah satunya, grup highlight terkait jadi
---- kosong tanpa error dan tanpa peringatan — jadi palet yang kehilangan kunci
---- ini ditolak utuh, bukan dipasang setengah.
+--- `extra.syntax` keys read by build_colors and apply_syntax_highlights. A
+--- palette missing one is rejected whole: the group would be silently empty.
 local REQUIRED_SYNTAX = {
   "comment",
   "punctuation",
@@ -201,10 +191,9 @@ local REQUIRED_SYNTAX = {
   "attribute",
 }
 
---- Uji kelengkapan isi palet, bukan hanya sintaks Lua-nya. Dipanggil di awal
---- `build_colors` supaya satu `pcall(build_colors, d)` sekaligus memvalidasi
---- struktur (dereference di bawah), kunci syntax, dan 16 warna ANSI.
---- @param d table palet tergenerate
+--- Rejects an incomplete palette early, so one `pcall(build_colors, d)` checks
+--- structure, syntax keys and the 16 ANSI colors at once.
+--- @param d table generated palette
 local function check_palette(d)
   local syntax = d.extra.syntax
   local missing = {}
@@ -266,12 +255,8 @@ local function build_colors(d)
   local red = status.critical
   local dark5 = fg.dim_muted
 
-  -- Warna teks "redup tapi terbaca".
-  -- Dipakai untuk grup yang TokyoNight warnai dengan `terminal_black` sebagai
-  -- *foreground*: `terminal_black` kita adalah LATAR chip kode inline (gelap,
-  -- ~1.1:1 terhadap bg), jadi teks di atasnya menyatu dengan latar. Yang
-  -- kena: `DiagnosticUnnecessary` (kode mati/tak terpakai dari LSP, mis.
-  -- `dead_code` Rust) dan ghost text saran (cmp/Copilot/Blink).
+  -- "Dim but readable" text for groups where TokyoNight puts terminal_black in
+  -- the foreground; ours is the inline-code background (~1.1:1 against bg).
   local fg_faint = blend(text.muted, syntax.comment, FAINT_ALPHA)
 
   return {
@@ -289,13 +274,8 @@ local function build_colors(d)
     dark3 = fg.dim,
     dark5 = dark5,
 
-    -- Latar halus (chip inline code `...`, backdrop).
-    -- Di TokyoNight `terminal_black` adalah permukaan GELAP; memakai `border`
-    -- (abu terang) membuat teks di atas chip nyaris tak terbaca.
-    -- CATATAN: kunci ini hanya boleh dipakai sebagai *latar*. TokyoNight juga
-    -- memakainya sebagai fg (ghost text, `DiagnosticUnnecessary`) — pemakaian
-    -- itu ditimpa di `on_highlights` memakai `fg_faint`, karena nilai ini
-    -- terlalu dekat ke bg untuk dibaca sebagai teks.
+    -- Subtle surface (inline-code chip, backdrop). Background only; where
+    -- TokyoNight uses it as a foreground, `fg_faint` overrides it.
     terminal_black = blend(accent.primary, layer.crust, 0.12),
 
     red = red,

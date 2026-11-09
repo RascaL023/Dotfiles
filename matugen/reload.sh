@@ -1,25 +1,12 @@
 #!/usr/bin/env bash
 
-# matugen/reload.sh — make the running desktop pick up freshly rendered files.
+# matugen/reload.sh — let the running desktop pick up freshly rendered files.
+# Both matugen configs have no post_hook, so this is the only place activation
+# happens: nothing is reloaded for a process that is not running, every call is
+# wrapped in `timeout` (a dead D-Bus service can wait forever), and a palette
+# that fails `luac -p` is reported instead of applied.
 #
-# matugen only writes files now: every `post_hook` is gone from both configs.
-# Those hooks were the reason a render could hang (a hook called
-# `swaync-client`, whose daemon was not running, and never returned) and why a
-# render leaked into a shell mode that was off (Noctalia replaces swaync,
-# waybar and eww). This script is the single place that reloads after a render.
-#
-# Rules:
-#   1. Ask the owner. Nothing is reloaded when the process that reads the file
-#      is not running, or when the file belongs to a shell mode that is off.
-#   2. Never block. Every call runs under `timeout`; a D-Bus client of a dead
-#      service can wait forever.
-#   3. Validate before applying. A generated Lua palette that fails `luac -p`
-#      is reported and not reloaded.
-#
-# Temporary: the theme switcher (external repo) will own activation + reload.
-# When it does, delete this file instead of growing it.
-#
-#   reload.sh                 reload every consumer registered below
+#   reload.sh                 reload every consumer
 #   reload.sh kitty hypr      reload only those
 #   reload.sh --list          print known consumers
 #   reload.sh --dry-run …     print what would run, change nothing
@@ -38,11 +25,8 @@ wanted=()
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
-# clean_name <path-or-comm> — the name a process is known by.
-# Nix wraps binaries (kitty runs as `.kitty-wrapped`), so neither `pgrep -x`
-# (exact comm) nor `pgrep -f` (substring of the whole command line) is reliable:
-# `pgrep -x kitty` finds nothing while `.kitty-wrapped` is running, and
-# `pgrep noctalia` matches because `noctalia-shell` merely starts with it.
+# clean_name <path-or-comm> — Nix wraps binaries (`.kitty-wrapped`), so neither
+# `pgrep -x` nor a plain substring match is reliable here.
 clean_name() {
     local n=${1##*/}
     n=${n#.}
@@ -84,15 +68,10 @@ run() {
 
 # --- consumers -------------------------------------------------------------
 
-# Alacritty live-reloads its config and imports (0.17), but it watches the
-# **directory**, not the file: `fdinfo` shows an inotify watch on the theme's
-# alacritty folder itself. So the trigger is an entry changing inside that
-# folder — which is why the old post_hook ran `mkdir -p` there: without the
-# folder the import resolves to nothing and no watch is installed. Keep the
-# mkdir, then poke the imported file so a watcher that is already installed
-# receives an event (a bare `mkdir -p` on an existing folder emits none).
-# Caveat: flipping `~/.myenv/theme/current` replaces the watched inode, so a
-# flipped theme needs alacritty restarted — this script cannot fix that.
+# Alacritty 0.17 watches the theme's alacritty *directory*, not the file, so the
+# trigger is an entry changing inside it: create the dir, then touch the import.
+# Flipping ~/.myenv/theme/current replaces the watched inode, so a theme flip
+# still needs alacritty restarted.
 reload_alacritty() {
     local dir=$current/alacritty
     run "alacritty dir" mkdir -p "$dir" || return 1
@@ -118,8 +97,7 @@ reload_kitty() {
 
 reload_lazygit() { skip "lazygit: dibaca saat start (tanpa reload)"; }
 
-# GTK theme plus the two shells that load css/theme.css. Noctalia owns all
-# three when it is the active shell, so touching them would fight it.
+# Noctalia owns gtk, swaync and waybar when it is the active shell.
 reload_css() {
     if running noctalia; then
         skip "gtk/swaync/waybar: Noctalia yang mengurus"
@@ -143,17 +121,14 @@ reload_css() {
     fi
 }
 
-# eww reads scss/_theme.scss through `@import`; the depth clock also has to
-# reposition itself for the wallpaper it was opened with.
+# eww reads scss/_theme.scss through @import; the depth clock also repositions.
 reload_scss() {
     if running eww; then
         run eww eww reload
     else
         skip "eww: tidak jalan"
     fi
-    # depthctl resolves the wallpaper itself (awww on Hyprland, Noctalia on
-    # niri), and hides the clock when the image has no mask, so the only thing
-    # to check here is that the window can be repositioned at all.
+    # depthctl resolves the wallpaper itself; refresh only repositions.
     if [[ -x $depthctl ]] && running eww; then
         run "depth clock" "$depthctl" refresh
     else
@@ -179,8 +154,7 @@ reload_herdr() {
 reload_yazi() { skip "yazi: dibaca saat start (flavor menunjuk current)"; }
 reload_foot() { skip "foot: tidak punya sinyal reload"; }
 
-# Reloading Hyprland needs its own instance: `hyprctl` refuses (or guesses)
-# without HYPRLAND_INSTANCE_SIGNATURE, and a niri session must never get here.
+# hyprctl needs HYPRLAND_INSTANCE_SIGNATURE; a niri session must never get here.
 reload_hypr() {
     local sig=${HYPRLAND_INSTANCE_SIGNATURE:-}
     local runtime=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}

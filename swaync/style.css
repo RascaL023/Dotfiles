@@ -1,76 +1,8 @@
-/* ==========================================================================
-   SwayNC — tema untuk swaync 0.12.6 (GTK 4.22)
-   ==========================================================================
-   Ditulis mengikuti pohon CSS asli swaync 0.12.6 (data/style/style.scss dan
-   data/ui/*.blp), bukan tema versi lama. Yang paling sering bikin tampilan
-   rusak, dan sudah dihindari di bawah:
-
-     * `.control-center` adalah ScrolledWindow-nya, bukan kotak dalamnya:
-         window.blank-window > scrolledwindow.control-center > viewport >
-         box.widgets > .widget
-       Karena `hscrollbar-policy: never`, isi yang lebih lebar dari panel tidak
-       bisa digeser — jangan menaruh apa pun yang lebih lebar dari lebarnya.
-       Tidak ada satu pun `min-width` di berkas ini; lebarnya diatur di
-       config.json, dan itu lebar *isi* (lihat butir terakhir di bawah).
-     * Notifikasi: `.notification-row > .notification-background >
-       .notification > .notification-default-action > .notification-content`.
-     * Slider GTK4: `scale > trough > (highlight, slider)` — slider ada DI
-       DALAM trough, dan tidak ada lagi node `progress` seperti di GTK3 tema
-       lama. Yang mengisi jalur adalah `highlight`.
-     * MPris: sampul buram di `.mpris-background`, isi di `.mpris-overlay`;
-       `.widget-mpris-player` hanya pembungkus (punya `overflow: hidden`).
-     * Ukuran ikon tidak lagi lewat config.json (`notification-icon-size`
-       deprecated di 0.12.6) — semuanya variabel di blok `:root`.
-     * `control-center-width` / `notification-window-width` di config.json itu
-       lebar *isi*: padding dan border di CSS menambah lebar luar. Panel versi
-       tema ini 340 + border 2 + padding 16 = 358 px, dengan hitungan yang sama
-       seperti tema bawaan swaync (tanpa padding/border → 340 px).
-
-   ── Kelompok widget (dari config.json) ───────────────────────────────────
-   Nama setelah `#` di daftar `widgets` menjadi kelas CSS tambahan
-   (baseWidget.vala: `add_css_class (suffix)`), jadi tiap bagian bisa punya
-   gayanya sendiri tanpa menyentuh yang lain:
-
-     mpris / title / volume / backlight      → kartu biasa
-     label#SectionQuick  → .widget-label.SectionQuick   (judul bagian)
-     label#SectionSystem → .widget-label.SectionSystem
-     buttons-grid#QuickActions  → .widget-buttons-grid.QuickActions
-     buttons-grid#SystemActions → .widget-buttons-grid.SystemActions
-
-   ── Palet: dari matugen ──────────────────────────────────────────────────
-   Tidak ada satu pun nilai warna di berkas ini. Semua `@define-color` mentah
-   datang dari `~/.myenv/theme/current/css/theme.css` — berkas yang sama yang
-   dibaca waybar dan wlogout, hasil `[templates.css]` di `matugen/config.toml`
-   (varian `general/source.css` maupun `kanagawa-dragon-lotus/template/
-   gtk3.css`). Tema berganti → warna swaync ikut berganti tanpa menyentuh
-   berkas ini. Yang ditulis tangan hanya turunannya (bagian 2) dan ukuran
-   (bagian 3).
-
-   Catatan: GTK 4 *punya* `@import` (diuji di GTK 4.22 + swaync 0.12.6: warna
-   dari berkas yang di-import benar-benar sampai ke widget). Karena itu
-   penyambungannya cukup satu baris import, bukan penimpaan blok.
-   ========================================================================== */
-
 /* ── 1. Palet — satu sumber, dari matugen ───────────────────────────────── */
-/* Satu baris ini menggantikan seluruh blok palet yang tadinya ditulis tangan.
-   Nama yang dipakai aturan di bawah semuanya sudah ada di theme.css: accent,
-   accent-hover, accent-on, selection-bg, bg-main, bg-raised, bg-surface,
-   bg-deep, fg-main, fg-alt, fg-dim, fg-disabled, border, border-medium,
-   border-active, shadow, error. Tidak ada pemetaan/alias yang perlu dirawat:
-   yang di-import memakai kosakata yang sama dengan waybar.
-
-   Kalau `~/.myenv/theme/current` belum pernah di-generate, baris ini gagal
-   dimuat dan semua @warna di bawah jatuh ke warna bawaan GTK: panel tetap
-   jalan, hanya tidak bertema. */
 @import url("/home/rascal/.myenv/theme/current/css/theme.css");
-/* Font milik flow rasa, bukan palet (matugen/feel.sh). */
 @import url("/home/rascal/.myenv/feel/current/css/swaync-font.css");
 
 /* ── 2. Turunan + nama lama swaync ──────────────────────────────────────── */
-/* Ditulis tangan (bukan hasil matugen), semuanya turunan dari blok di atas.
-   Nama `cc-bg`, `noti-bg`, `noti-bg-hover`, ... sengaja dipertahankan karena
-   itu variabel bawaan gaya bawaan swaync; potongan CSS pihak ketiga yang
-   memakainya tetap jalan. */
 @define-color cc-bg              alpha(@bg-main, 0.80);
 @define-color cc-card            alpha(@bg-surface, 0.45);
 @define-color cc-card-hover      alpha(@bg-surface, 0.75);
@@ -90,10 +22,6 @@
 @define-color accent-halo-hover  alpha(@accent, 0.45);
 
 /* ── 3. Ukuran & jarak ─────────────────────────────────────────────────── */
-/* Semua angka yang biasanya perlu diutak-atik ada di sini, bukan tersebar
-   di dalam aturan. `--notification-*`, `--mpris-*` dan `--widget-volume-*`
-   adalah nama variabel yang dipakai gaya bawaan swaync, jadi menimpanya di
-   sini pasti berpengaruh. */
 :root {
   --radius: 10px;
   --radius-sm: 6px;
@@ -127,9 +55,6 @@
   text-shadow: none;
 }
 
-/* Jendela hanya bingkai: latarnya digambar oleh .control-center dan kartu
-   notifikasi. `.blank-window` dipakai jendela CC maupun jendela penutup
-   layar, jadi keduanya wajib tembus pandang. */
 window,
 .blank-window,
 .floating-notifications {
@@ -144,8 +69,6 @@ window,
   padding: var(--cc-pad);
 }
 
-/* Kotak pembungkus semua widget. Kartu tiap widget digambar oleh `.widget`
-   di bawah, jadi wadahnya sendiri tetap polos. */
 .control-center .widgets {
   background: transparent;
 }
@@ -155,19 +78,11 @@ window,
   border-radius: var(--radius);
 }
 
-/* Kartu widget. Semua widget dapat kartu di sini, lalu yang tidak boleh
-   berkartu direset di bawah. Dua aturan itu sengaja ditulis berurutan dan
-   tanpa `:not()`: aturan kartu ini bernilai 3 kelas, sementara penimpaan
-   per-widget nanti bernilai 4 kelas — kalau aturannya digabung pakai
-   `:not()`, spesifisitasnya naik jadi 5 dan justru mengalahkan penimpaan
-   per-widget (`padding` widget-mpris, sudut slider yang dirapatkan, dll). */
 .control-center .widgets > .widget {
   background-color: @cc-card;
   border: 1px solid @border;
   padding: var(--card-pad);
 }
-/* Daftar notifikasi dan tombol tidak berkartu (isinya sudah berkartu sendiri),
-   begitu pula judul bagian yang cuma teks. */
 .control-center .widgets > .widget.widget-notifications,
 .control-center .widgets > .widget.widget-buttons-grid,
 .control-center .widgets > .widget.widget-label,
@@ -188,7 +103,6 @@ window,
   padding: 4px 2px;
 }
 
-/* Scrollbar ramping; jendelanya sendiri yang menggulung, bukan daftarnya. */
 scrollbar {
   background: transparent;
 }
@@ -211,13 +125,9 @@ scrollbar slider:hover {
 .notification-row:focus .notification-background .notification {
   border-color: @border-active;
 }
-/* Jarak antar kartu di dalam daftar. */
 .notification-row .notification-background {
   padding: 4px 0;
 }
-/* 7px = jarak yang sama dengan margin panel, jadi sudut kiri-atas kartu
-   notifikasi melayang persis menempel di sudut kiri-atas panel CC, dan masih
-   menyisakan ruang untuk bayangannya. */
 .floating-notifications .notification-row .notification-background {
   padding: 7px;
 }
@@ -244,7 +154,6 @@ scrollbar slider:hover {
 .notification-default-action:hover {
   background-color: @noti-bg-hover;
 }
-/* Saat ada tombol aksi tambahan, sudut bawah kartu diratakan. */
 .notification-default-action:not(:only-child) {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -255,7 +164,7 @@ scrollbar slider:hover {
   padding: 8px 10px;
 }
 .notification-content .text-box label {
-  filter: none;   /* GTK4 memasang opacity 50% di sini; itu yang bikin teks pudar */
+  filter: none;
 }
 .notification-content .text-box .summary {
   font-size: var(--font-size-summary);
@@ -270,10 +179,9 @@ scrollbar slider:hover {
 .notification-content .text-box .time {
   font-size: var(--font-size-time);
   color: @fg-faint;
-  margin-right: 22px;   /* jangan bertabrakan dengan tombol tutup */
+  margin-right: 22px;
 }
 
-/* Ikon utama + ikon aplikasi kecil di sudutnya. */
 .notification-content .image {
   -gtk-icon-size: var(--notification-icon-size);
   -gtk-icon-filter: none;
@@ -287,14 +195,12 @@ scrollbar slider:hover {
   margin: 2px;
 }
 
-/* Gambar isi notifikasi (opsional, di bawah teks). */
 .notification-content .body-image {
   margin-top: 6px;
   border-radius: var(--radius-sm);
   -gtk-icon-filter: none;
 }
 
-/* Bilah progres opsional di dalam notifikasi. */
 .notification-content progressbar trough {
   min-height: 4px;
   border-radius: 2px;
@@ -306,7 +212,6 @@ scrollbar slider:hover {
   background-color: @accent;
 }
 
-/* Balasan langsung (inline reply). */
 .notification-content .inline-reply {
   margin-top: 6px;
 }
@@ -336,7 +241,6 @@ scrollbar slider:hover {
   color: @fg-disabled;
 }
 
-/* Tombol aksi tambahan di bawah kartu notifikasi. */
 .notification-alt-actions {
   background: none;
   padding: 3px;
@@ -359,7 +263,6 @@ scrollbar slider:hover {
   color: @fg-main;
 }
 
-/* Tombol tutup bulat di sudut kanan atas. */
 .close-button {
   background-color: @noti-close-bg;
   color: @fg-alt;
@@ -428,7 +331,6 @@ scrollbar slider:hover {
 .notification-group .notification-group-close-button .close-button {
   margin: 6px 8px;
 }
-/* Grup yang mengecil saat grup lain dibuka. */
 .notification-group.collapsed.not-expanded {
   opacity: 0.45;
 }
@@ -475,9 +377,6 @@ scrollbar slider:hover {
   color: @fg-alt;
   margin-left: 4px;
 }
-/* Judul bagian didahului kartu/grid di atasnya, jadi jarak atasnya lebih besar
-   daripada jaraknya ke isi yang dijelaskan. Garis tipis di bawahnya memisahkan
-   bagian (label punya hexpand, jadi garisnya selebar panel). */
 .SectionQuick > label,
 .SectionSystem > label {
   color: @accent;
@@ -499,7 +398,6 @@ scrollbar slider:hover {
 }
 
 /* ── 12. Widget: pemutar musik (MPris) ──────────────────────────────────── */
-/* Pembungkusnya tanpa padding supaya sampul buram mengisi sudut kartu. */
 .control-center .widgets > .widget.widget-mpris {
   padding: 0;
 }
@@ -528,7 +426,6 @@ scrollbar slider:hover {
   font-size: var(--font-size-body);
   color: @fg-alt;
 }
-/* Tombol kontrol pemutar (shuffle/prev/play/next/repeat). */
 .widget-mpris .mpris-overlay button,
 .widget-mpris > box > button {
   background: none;
@@ -552,8 +449,6 @@ scrollbar slider:hover {
 }
 
 /* ── 13. Widget: volume & brightness ────────────────────────────────────── */
-/* Keduanya dirapatkan jadi satu kartu dua baris: sudut yang bertemu diratakan
-   dan garis pemisahnya dihilangkan. */
 .control-center .widgets > .widget.widget-volume,
 .control-center .widgets > .widget.widget-backlight {
   padding: 6px 10px;
@@ -570,10 +465,6 @@ scrollbar slider:hover {
   border-top-color: transparent;
 }
 
-/* Label pasangan slider dibuat chip ikon. Volume menaruh label+slider di dalam
-   satu box (`main_volume_slider_container`, karena masih ada tombol per-app),
-   sedangkan brightness dan slider bawaan menempel langsung ke widget-nya.
-   `min-width` yang sama bikin kedua slider mulai di x yang sama. */
 .widget-volume > box > label,
 .widget-backlight > label,
 .widget-slider > label {
@@ -586,22 +477,18 @@ scrollbar slider:hover {
   margin-right: 10px;
 }
 
-/* Jalur slider. Gaya bawaan GTK untuk `trough` dihilangkan seluruhnya. */
 scale trough {
   min-height: 8px;
   border-radius: var(--pill);
   background-color: @cc-inset;
   border: none;
 }
-/* Bagian terisi. Di GTK4 namanya `highlight` (bukan `progress`). */
 scale trough highlight {
   min-height: 8px;
   border-radius: var(--pill);
   background-color: @accent;
   box-shadow: none;
 }
-/* Gagang. Letaknya di dalam `trough`; margin negatif bikin gagangnya keluar
-   dari jalur tanpa ikut menaikkan tinggi jalur. */
 scale trough slider {
   min-width: 14px;
   min-height: 14px;
@@ -618,7 +505,6 @@ scale:hover trough slider {
   box-shadow: 0 0 0 4px @accent-halo-hover;
 }
 
-/* Kontrol volume per aplikasi (aktif kalau widget-config.volume.show-per-app). */
 .per-app-volume {
   background-color: @cc-inset;
   border-radius: var(--radius-sm);
@@ -655,8 +541,6 @@ scale:hover trough slider {
 }
 
 /* ── 14. Widget: grid tombol (QuickActions, SystemActions) ──────────────── */
-/* Kontainer gridnya sengaja transparan (lihat reset di bagian 5) — yang jadi
-   "kartu" adalah tombolnya, jadi grid terbaca sebagai deretan pil. */
 .widget-buttons-grid flowbox {
   background: none;
 }
@@ -679,10 +563,6 @@ scale:hover trough slider {
   border-color: @accent;
   color: @fg-main;
 }
-/* Tombol toggle yang sedang aktif (mis. DND). swaync memakai
-   Gtk.ToggleButton dan tidak menambah kelas apa pun, jadi yang menentukan
-   keadaan aktif adalah pseudo-class `:checked`; `.toggle` cuma jaring
-   pengaman kalau suatu saat GTK menambahkannya. */
 .widget-buttons-grid flowboxchild > button:checked {
   background-color: @accent;
   border-color: @accent;

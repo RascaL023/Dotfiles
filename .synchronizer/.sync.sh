@@ -23,7 +23,7 @@ link() { log "LINK" "$1"; }
 err()  { log "ERR"  "$1" >&2; }
 
 # ---------------------------------------------------------------------------
-# Auth (left as-is, intentionally simple)
+# Auth
 # ---------------------------------------------------------------------------
 auth() {
   for i in {1..3}; do
@@ -37,11 +37,8 @@ auth() {
 }
 
 # ---------------------------------------------------------------------------
-# tools.list reader
-#   supports two syntaxes (blank lines & '#' comments are ignored):
-#     name          -> auto-locate file/dir under $config
-#     name:path      -> explicit source path (e.g. zsh:~/.zshrc)
-#   emits: "name<TAB>path"  (path empty when not specified)
+# tools.list reader: "name" auto-locates under $config, "name:path" is an
+# explicit source. Emits "name<TAB>path".
 # ---------------------------------------------------------------------------
 tools_reader() {
   local line name path
@@ -62,7 +59,6 @@ tools_reader() {
   done < "$tools_file"
 }
 
-# look up a single tool in tools.list -> prints its path, returns 1 if absent
 lookup_tool() {
   local want="$1" name path
   while IFS=$'\t' read -r name path; do
@@ -71,14 +67,12 @@ lookup_tool() {
   return 1
 }
 
-# resolve the real source path of a tool (explicit wins, else auto-find)
 resolve_src() {
   local name="$1" path="$2"
   if [[ -n "$path" ]]; then
     printf '%s\n' "$path"
     return 0
   fi
-  # auto-locate: match file/dir/symlink named $name under $config (first hit)
   find "$config" \( -type d -o -type f -o -type l \) -name "$name" -print -quit 2>/dev/null
 }
 
@@ -114,7 +108,6 @@ state_del() {
 # Per-tool actions
 # ---------------------------------------------------------------------------
 
-# link one tool: move real config into $dotfile and symlink it back
 link_tool() {
   local name="$1" path="$2" src linkpath target bak
   src="$(resolve_src "$name" "$path")"
@@ -139,7 +132,6 @@ link_tool() {
     return 1
   fi
 
-  # backup existing target instead of silently skipping
   if [[ -e "$target" ]]; then
     bak="$target.bak-$(date +%Y%m%d%H%M%S)"
     skip "$name: $target exists -> backup to $(basename "$bak")"
@@ -162,7 +154,6 @@ link_tool() {
   state_set "$name" "$linkpath"
 }
 
-# restore one tool: remove symlink and move real config back to its origin
 restore_tool() {
   local name="$1" path="$2" linkpath realpath
   linkpath="$(state_get "$name")" || linkpath=""
@@ -194,7 +185,6 @@ restore_tool() {
   state_del "$name"
 }
 
-# status of one tool (dry-run)
 status_tool() {
   local name="$1" path="$2" src target state
   src="$(resolve_src "$name" "$path")"
@@ -282,9 +272,7 @@ menus() {
 # ---------------------------------------------------------------------------
 [[ -f "$tools_file" ]] || { err "tools.list not found: $tools_file"; exit 1; }
 
-# Non-interactive CLI mode:
-#   sync.sh <command> [tool ...]
-#   commands: link | restore | status   (no tool = all tools)
+# Non-interactive: sync.sh <link|restore|status> [tool ...]
 if [[ $# -gt 0 ]]; then
   cmd="$1"; shift
   case "$cmd" in

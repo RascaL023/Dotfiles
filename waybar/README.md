@@ -64,7 +64,6 @@ waybar/
 ├── config.hyprland.jsonc       # modules-left untuk Hyprland
 ├── config.niri.jsonc           # modules-left untuk niri
 ├── style.css                   # membaca palet Matugen
-├── source.css                  # daftar @define-color
 └── tests/test_waybar_ctl.py    # kontrak argumen, sesi, PID, dan sinyal
 ```
 
