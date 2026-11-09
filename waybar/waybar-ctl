@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+# One entry point for the session-specific Waybar bar.
+set -u
+
+usage() {
+    cat <<'EOF'
+Usage: waybar-ctl [command] [--session hyprland|niri] [--] [waybar args...]
+
+  start     Start the bar for this session (no-op if already running)
+  stop      Stop it
+  toggle    Start if stopped, stop if running
+  restart   Stop, then start
+  reload    Send SIGUSR2, Waybar's default reload action
+  status    Print "running <pid> <session>" or "not running"
+  config    Print the config path for this session
+  run       Run Waybar in the foreground (for example -l debug)
+
+Session: --session wins, then NIRI_SOCKET, then HYPRLAND_INSTANCE_SIGNATURE.
+Exit: 0 ok, 1 not running, 2 usage/config problem, 127 Waybar is missing.
+EOF
+}
+
+fail() {
+    printf 'waybar-ctl: %s\n' "$*" >&2
+    exit 2
+}
+
+dir=$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" && pwd -P) || exit 1
+
+command_name=${1:-start}
+if (( $# > 0 )); then
+    shift
+fi
+
+case $command_name in
+    -h|--help|help)
+        usage
+        exit 0
+        ;;
+    start|stop|toggle|restart|reload|status|config|run) ;;
+    *)
+        fail "unknown command: $command_name (use --help)"
+        ;;
+esac
+
+session=''
+passthrough=()
+while (( $# )); do
+    case $1 in
+        --session)
+            (( $# > 1 )) || fail '--session needs hyprland or niri'
+            session=$2
+            shift 2
+            ;;
+        --session=*)
+            session=${1#*=}
+            shift
+            ;;
+        --)
+            shift
+            passthrough+=("$@")
+            set --
+            ;;
+        *)
+            passthrough+=("$1")
+            shift
+            ;;
+    esac
+done
+
+if [[ -z $session ]]; then
+    if [[ -n ${NIRI_SOCKET:-} ]]; then
+        session=niri
+    elif [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
+        session=hyprland
+    else
+        fail 'cannot tell the session (use --session hyprland|niri)'
+    fi
+fi
+
+case $session in
+    hyprland|niri) ;;
+    *) fail "unknown session: $session (use hyprland or niri)" ;;
+esac
+
+cfg=$dir/config.$session.jsonc
+[[ -f $cfg ]] || fail "missing config: $cfg"
+
+pid_file=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/dotfile-waybar-$UID.pid
+
+running_pid() {
+    local pid='' index
+    local -a args=()
+
+    [[ -r $pid_file ]] || return 1
+    IFS= read -r pid < "$pid_file" || :
+    [[ $pid =~ ^[0-9]+$ && $pid -gt 1 ]] || return 1
+    [[ -O /proc/$pid ]] || return 1
+    mapfile -d '' -t args 2>/dev/null < "/proc/$pid/cmdline" || return 1
+
+    for (( index=0; index+1<${#args[@]}; index++ )); do
+        if [[ ${args[index]} == -c && ${args[index+1]} == "$cfg" ]]; then
+            printf '%s\n' "$pid"
+            return 0
+        fi
+    done
+    return 1
+}
+
+require_waybar() {
+    command -v waybar >/dev/null 2>&1 || {
+        printf 'waybar-ctl: waybar is not available on PATH\n' >&2
+        exit 127
+    }
+}
+
+start_bar() {
+    local pid
+    pid=$(running_pid) && return 0
+    require_waybar
+    nohup waybar -c "$cfg" "${passthrough[@]}" </dev/null >/dev/null 2>&1 &
+    printf '%s\n' "$!" > "$pid_file"
+}
+
+stop_bar() {
+    local pid index
+    pid=$(running_pid) || return 0
+    kill -TERM -- "$pid" 2>/dev/null || :
+    for (( index=0; index<50; index++ )); do
+        kill -0 -- "$pid" 2>/dev/null || break
+        sleep 0.02
+    done
+    rm -f -- "$pid_file"
+}
+
+case $command_name in
+    status)
+        if pid=$(running_pid); then
+            printf 'running %s %s\n' "$pid" "$session"
+        else
+            printf 'not running\n'
+            exit 1
+        fi
+        ;;
+    config)
+        printf '%s\n' "$cfg"
+        ;;
+    start)
+        start_bar
+        ;;
+    stop)
+        stop_bar
+        ;;
+    toggle)
+        if pid=$(running_pid); then
+            stop_bar
+        else
+            start_bar
+        fi
+        ;;
+    restart)
+        stop_bar
+        start_bar
+        ;;
+    reload)
+        pid=$(running_pid) || {
+            printf 'waybar-ctl: not running\n' >&2
+            exit 1
+        }
+        kill -USR2 -- "$pid"
+        ;;
+    run)
+        require_waybar
+        exec waybar -c "$cfg" "${passthrough[@]}"
+        ;;
+esac

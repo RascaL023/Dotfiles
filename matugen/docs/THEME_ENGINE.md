@@ -135,7 +135,7 @@ name = "waybar"
 wm = "any"
 scope = "any"
 path = "theme/current/css/theme.css"
-reload = { hypr = "pkill -SIGUSR2 waybar || true", niri = "pkill -SIGUSR2 waybar || true" }
+reload = { hypr = "~/.config/waybar/waybar-ctl reload 2>/dev/null || true", niri = "~/.config/waybar/waybar-ctl reload 2>/dev/null || true" }
 
 [[consumer]]
 name = "rofi"
@@ -180,10 +180,9 @@ path = "feel/current/noctalia.toml"
 reload = { hypr = "true", niri = "true" }  # Noctalia hot-reload ~150 ms
 ```
 
-Catatan: `waybar` SIGUSR2 perlu diverifikasi saat implementasi; fallback-nya
-restart. Jangan panggil `waybar` telanjang: pakai `~/.config/waybar/launch.sh`,
-karena modul workspace yang salah compositor membuat waybar segfault
-(lihat `waybar/launch.sh`).
+`waybar` memakai SIGUSR2 sebagai reload (`waybar(5)`). Jangan panggil `waybar`
+telanjang: pakai `~/.config/waybar/waybar-ctl`, karena modul workspace yang salah
+compositor membuat waybar segfault (lihat `waybar/README.md`).
 
 ---
 
@@ -197,7 +196,7 @@ yang tidak aktif hanya membuang waktu dan menyentuh file yang tidak dibaca.
 | `hypr/theme.lua`, `feel/hypr.lua` | `hyprctl reload` | **tidak disentuh** | Lua dibaca saat config reload |
 | `niri/colors.kdl`, `feel/niri.kdl` | **tidak disentuh** | tulis ulang `niri/config.kdl` (touch) | niri live-reload; include di-watch |
 | `swaync` | `swaync-client -rs` | idem (kalau swaync jalan) | `-R` hanya config.json |
-| `waybar` | SIGUSR2 / restart | idem | bar milik mode `rice` |
+| `waybar` | `waybar-ctl reload` (SIGUSR2) | idem | bar milik mode `rice` |
 | `eww` | `eww reload` | idem | — |
 | `rofi` | — | — | dibaca saat dibuka |
 | `kitty` | SIGUSR1 | SIGUSR1 | — |
