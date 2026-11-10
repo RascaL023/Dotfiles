@@ -2,7 +2,7 @@
 # Render satu profil rasa (feel) dan balik ~/.myenv/feel/current ke hasilnya.
 #
 #   matugen/feel.sh default      # render profil default
-#   matugen/feel.sh paper        # profil lain (templates/feel/blueprint/paper.json)
+#   matugen/feel.sh paper        # profil lain (matugen/core/feel/blueprint/paper.json)
 #
 # Kenapa skrip dan bukan sekadar perintah matugen: symlink harus dibalik
 # setelah render sukses, supaya tidak ada jendela waktu di mana konsumen
@@ -12,8 +12,8 @@ set -euo pipefail
 
 REPO="${HOME}/.dotfile"
 STORE="${HOME}/.myenv/feel"
-CONFIG="${REPO}/matugen/templates/feel/feel.toml"
-PROFILES="${REPO}/matugen/templates/feel/blueprint"
+CONFIG="${REPO}/matugen/core/feel/config.toml"
+PROFILES="${REPO}/matugen/core/feel/blueprint"
 
 profile="${1:-}"
 if [[ -z $profile ]]; then

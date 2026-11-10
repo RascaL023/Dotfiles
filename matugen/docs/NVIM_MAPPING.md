@@ -379,5 +379,5 @@ Bukan bug — sebagian kunci sengaja disamakan bentuknya dengan template tool la
   tambahan `source`.
 - Ringkasnya: ubah **nilai warna** → template di `matugen/templates/`; ubah
   **tujuan pemakaian** → `nvim/lua/core/theme.lua`.
-- Perubahan alur A berlaku setelah `matugen image <wallpaper>`; perubahan alur B
+- Perubahan alur A berlaku setelah `matugen/palette.sh <wallpaper>`; perubahan alur B
   setelah `matugen json <blueprint>` (atau reload tema yang sedang jalan).

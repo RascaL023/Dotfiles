@@ -1,24 +1,31 @@
 #!/usr/bin/env bash
-
-# matugen/reload.sh — let the running desktop pick up freshly rendered files.
-# Both matugen configs have no post_hook, so this is the only place activation
-# happens: nothing is reloaded for a process that is not running, every call is
-# wrapped in `timeout` (a dead D-Bus service can wait forever), and a palette
-# that fails `luac -p` is reported instead of applied.
+# matugen/palette.sh — render a palette, activate it, reload its consumers.
 #
-#   reload.sh                 reload every consumer
-#   reload.sh kitty hypr      reload only those
-#   reload.sh --list          print known consumers
-#   reload.sh --dry-run …     print what would run, change nothing
+#   palette.sh <wallpaper>        Flow A: derive colours from an image
+#   palette.sh <blueprint.json>   Flow B: render <theme>/blueprint/<variant>.json
+#   palette.sh [consumer ...]     reload only
+#   palette.sh --list             print known consumers
+#   palette.sh --dry-run ...      print what would run, change nothing
+#
+# Both palette configs write relative output_paths (`/kitty/theme.conf`), so the
+# store folder is decided here: render into `generated/.<palette>.tmp`, validate,
+# move it to `generated/<palette>`, then flip `theme/current`. A failed render
+# therefore never replaces the live theme, and config.toml carries no store path
+# (the same contract as core/feel/config.toml). Reload is process-gated and
+# wrapped in `timeout`; a Hyprland palette that fails `luac -p` is reported
+# instead of applied.
 
 set -u
 
 timeout_s=${RELOAD_TIMEOUT:-5}
+root=${HOME}/.dotfile/matugen
 theme_root=${THEME_ROOT:-$HOME/.myenv/theme}
+generated=$theme_root/generated
 current=$theme_root/current
 depthctl=$HOME/.dotfile/eww/scripts/depthctl
 
 dry_run=0
+source_path=""
 wanted=()
 
 # --- helpers ---------------------------------------------------------------
@@ -66,12 +73,95 @@ run() {
     fi
 }
 
+# --- palette ---------------------------------------------------------------
+
+# render <image|blueprint.json> — one palette, from source to active theme.
+render() {
+    local src=$1 name cfg out tmp
+    local -a cmd files
+    if [[ ! -f $src ]]; then
+        fail "sumber tidak ada: $src"
+        return 1
+    fi
+    case $src in
+        *.json)
+            local dir
+            dir=$(cd "$(dirname "$src")" && pwd) || return 1
+            if [[ ${dir##*/} != blueprint ]]; then
+                fail "blueprint harus <theme>/blueprint/<variant>.json: $src"
+                return 1
+            fi
+            name=${dir%/*}
+            name=${name##*/}
+            cfg=$root/core/palette/$name/config.toml
+            cmd=(matugen json "$src" -c "$cfg")
+            ;;
+        *.png|*.jpg|*.jpeg|*.webp|*.gif|*.bmp)
+            name=wallpaper-based
+            cfg=$root/core/palette/wallpaper-based/config.toml
+            cmd=(matugen image "$src" --source-color-index 0 -c "$cfg")
+            ;;
+        *)
+            fail "sumber harus gambar (png/jpg/webp) atau blueprint .json: $src"
+            return 1
+            ;;
+    esac
+    if [[ ! -f $cfg ]]; then
+        fail "config tidak ada: $cfg"
+        return 1
+    fi
+    if ! have matugen; then
+        fail "matugen tidak ada di PATH"
+        return 1
+    fi
+
+    out=$generated/$name
+    tmp=$generated/.$name.tmp
+    if (( dry_run )); then
+        printf '[dry]  render %s: %s -p %s\n' "$name" "${cmd[*]}" "$tmp"
+        return 0
+    fi
+
+    rm -rf "$tmp"
+    mkdir -p "$tmp"
+    if ! "${cmd[@]}" -p "$tmp"; then
+        fail "matugen gagal; $out tidak diubah"
+        rm -rf "$tmp"
+        return 1
+    fi
+
+    mapfile -t files < <(find "$tmp" -type f | sort)
+    if [[ ${#files[@]} -eq 0 ]]; then
+        fail "tidak ada berkas yang dirender; $out tidak diubah"
+        rm -rf "$tmp"
+        return 1
+    fi
+    local f
+    for f in "${files[@]}"; do
+        if [[ ! -s $f ]]; then
+            fail "berkas kosong: ${f#"$tmp"/}; $out tidak diubah"
+            rm -rf "$tmp"
+            return 1
+        fi
+        if grep -qE '\{\{|\}\}|<\*|\*>' "$f"; then
+            fail "placeholder tersisa di ${f#"$tmp"/}; $out tidak diubah"
+            rm -rf "$tmp"
+            return 1
+        fi
+    done
+
+    rm -rf "$out"
+    mv "$tmp" "$out"
+    ln -sfn "$out" "$current"
+    ok "$name: ${#files[@]} berkas, current -> generated/$name"
+}
+
 # --- consumers -------------------------------------------------------------
 
 # Alacritty 0.17 watches the theme's alacritty *directory*, not the file, so the
 # trigger is an entry changing inside it: create the dir, then touch the import.
-# Flipping ~/.myenv/theme/current replaces the watched inode, so a theme flip
-# still needs alacritty restarted.
+# Flipping `current` replaces the watched inode, so a theme flip still needs
+# alacritty restarted.
 reload_alacritty() {
     local dir=$current/alacritty
     run "alacritty dir" mkdir -p "$dir" || return 1
@@ -194,28 +284,23 @@ declare -A handler=(
 
 usage() {
     cat <<'EOF'
-usage: reload.sh [options] [consumer ...]
+usage: palette.sh [options] [source] [consumer ...]
 
-  (no consumer)     reload every consumer matugen feeds
-  consumer ...      reload only these (see --list)
+  <wallpaper>       Flow A: render colours from an image (palette wallpaper-based)
+  <blueprint.json>  Flow B: render <theme>/blueprint/<variant>.json
+  (no source)       reload only
+  consumer ...      reload only these tools (see --list)
   -n, --dry-run     print the actions, change nothing
   -l, --list        print known consumers
   -h, --help        this text
+
+A render goes to ~/.myenv/theme/generated/<palette> and, once it validates,
+flips ~/.myenv/theme/current. Override the store with THEME_ROOT.
 EOF
 }
 
-main() {
-    local arg tool rc=0
-    for arg in "$@"; do
-        case $arg in
-            -n|--dry-run) dry_run=1 ;;
-            -l|--list) printf '%s\n' "${consumers[@]}"; return 0 ;;
-            -h|--help) usage; return 0 ;;
-            -*) fail "opsi tidak dikenal: $arg"; usage >&2; return 2 ;;
-            *) wanted+=("$arg") ;;
-        esac
-    done
-
+dispatch() {
+    local tool rc=0
     if (( ${#wanted[@]} )); then
         for tool in "${wanted[@]}"; do
             if [[ -z ${handler[$tool]:-} ]]; then
@@ -231,6 +316,30 @@ main() {
         done
     fi
     return "$rc"
+}
+
+main() {
+    local arg
+    for arg in "$@"; do
+        case $arg in
+            -n|--dry-run) dry_run=1 ;;
+            -l|--list) printf '%s\n' "${consumers[@]}"; return 0 ;;
+            -h|--help) usage; return 0 ;;
+            -*) fail "opsi tidak dikenal: $arg"; usage >&2; return 2 ;;
+            *)
+                if [[ -z $source_path ]] && [[ -f $arg || $arg == */* ]]; then
+                    source_path=$arg
+                else
+                    wanted+=("$arg")
+                fi
+                ;;
+        esac
+    done
+
+    if [[ -n $source_path ]]; then
+        render "$source_path" || return 1
+    fi
+    dispatch
 }
 
 main "$@"

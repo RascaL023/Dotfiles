@@ -64,7 +64,7 @@ script and the theming pipeline work with any compositor.
 Entry points:
 
 - Config sync: `.synchronizer/.sync.sh`
-- Theming: `matugen/core/palette/wallpaper-based/config.toml` (Flow A), `matugen/core/palette/<theme>/config.toml` (Flow B)
+- Theming: `matugen/palette.sh` (colors, Flow A/B) and `matugen/feel.sh` (feel); configs in `matugen/core/{palette,feel}/`
 - Agent docs: this file + `matugen/docs/`
 
 ---
@@ -92,18 +92,18 @@ bash ~/.dotfile/.synchronizer/.sync.sh
 
 ```bash
 # Flow A: wallpaper-derived
-matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/core/palette/wallpaper-based/config.toml
+~/.dotfile/matugen/palette.sh <wallpaper>
 
 # Flow B: fixed palette (pick the variant with the file you pass)
-matugen json ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json \
-  -c ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/config.toml
+~/.dotfile/matugen/palette.sh ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json
 
 # Flow C: feel (one JSON per profile, same toml and templates)
 ~/.dotfile/matugen/feel.sh default
 ```
 
-Always pass `--source-color-index 0` (or `--prefer …`) on `matugen image`, or
-matugen may open an interactive color picker and hang.
+`palette.sh` always passes `--source-color-index 0` on `matugen image`. If you
+call matugen directly, pass it yourself (or `--prefer …`), or matugen may open
+an interactive color picker and hang.
 
 Test a template into `/tmp` before rendering over a live path — recipe in
 `matugen/docs/MATUGEN_SKILLS.md`, section 0.
@@ -116,7 +116,7 @@ Test a template into `/tmp` before rendering over a live path — recipe in
 |---|---|---|
 | Config | `matugen/core/palette/wallpaper-based/config.toml` | `matugen/core/palette/<theme>/config.toml` |
 | Palette source | the image | `blueprint/<variant>.json` (hand-written) |
-| Command | `matugen image …` | `matugen json <blueprint>.json …` |
+| Command | `palette.sh <wallpaper>` | `palette.sh <blueprint>.json` |
 | Template vocabulary | `{{ colors.<role>.<scheme>.<format> }}` | root-level keys: `{{ accent.primary }}`, `{{ syntax.keyword }}` |
 | Themes here | `wallpaper-based` | `kanagawa-dragon-lotus` |
 | Output | `~/.myenv/theme/generated/wallpaper-based/<tool>/…` | `~/.myenv/theme/generated/<theme>/<tool>/…` |
@@ -125,6 +125,11 @@ Rules:
 
 - **Separate config per flow.** Adding a Flow B template to `matugen/core/palette/wallpaper-based/config.toml`
   breaks every `matugen image` run (no `accent.*` in a Material You palette).
+- **`output_path` is relative** in both palette configs (`/kitty/theme.conf`),
+  exactly like the feel config: `matugen/palette.sh` supplies
+  `-p ~/.myenv/theme/generated/<palette>`, validates the result, then flips
+  `theme/current`. Rendering one of these configs with bare `matugen` writes to
+  `/kitty/theme.conf` at the filesystem root.
 - **Feel is its own flow, not part of a palette.** Colors write
   `~/.myenv/theme/current`, feel writes `~/.myenv/feel/current`; no file is
   written by both. Profiles are data only:
@@ -147,9 +152,10 @@ Rules:
 - **Placeholder names are not shared** between flows — the same tool needs its
   own template per flow. Never assume a value exists; grep the template.
 - `~/.myenv` is the theme store **outside** this repo: this repo only renders
-  into it. `~/.myenv/theme/current` is a symlink to the active theme directory
-  and is flipped outside this repo by `theme-switcher.sh` (in
-  `~/.myenv/script/`, parked under `theme.bak/` in this checkout); the legacy
+  into it. `~/.myenv/theme/current` is a symlink to the active theme directory:
+  `matugen/palette.sh` flips it after a validated render, and the external
+  `theme-switcher.sh` (in `~/.myenv/script/`, parked under `theme.bak/` in this
+  checkout) may point it at a named theme as well; the legacy
   engine's own `assets/templates/**` is not managed from here.
 
 ---
@@ -234,10 +240,10 @@ Rules:
   `waybar/style.css` and `wlogout/style.css` read. Add colors to the theme,
   never to that stylesheet.
 - **`swaync-client -rs` reloads CSS; `-R` only reloads `config.json`.** Neither
-  config has a `post_hook` now; `matugen/reload.sh` calls `-rs` after a render,
+  config has a `post_hook` now; `matugen/palette.sh` calls `-rs` after a render,
   and only when swaync is actually running.
 - **`post_hook` runs through `$SHELL` (fish here), not bash** — no hook is left in
-  this repo; reload lives in the bash script `matugen/reload.sh`. Keep hooks
+  this repo; reload lives in the bash script `matugen/palette.sh`. Keep hooks
   shell-agnostic: `swaync-client -rs 2>/dev/null || true` is fine, `$?` is a
   fish syntax error and fails the whole hook.
 - A missing named color in GTK 4 is **silent** — it falls back to the widget

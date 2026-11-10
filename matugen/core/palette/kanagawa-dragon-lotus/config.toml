@@ -1,49 +1,49 @@
 [config]
 
 [templates.nvim]
-input_path      = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/nvim.lua"
-output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua"
+input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/nvim.lua"
+output_path = "/nvim/theme.lua"
 
 [templates.css]
-input_path = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/gtk3.css"
-output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/css/theme.css"
+input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/gtk3.css"
+output_path = "/css/theme.css"
 
 [templates.scss]
-input_path = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/source.scss"
-output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/scss/_theme.scss"
+input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/source.scss"
+output_path = "/scss/_theme.scss"
 
 [templates.lazygit]
-input_path      = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/lazygit.yml"
-output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/lazygit/config.yml"
+input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/lazygit.yml"
+output_path = "/lazygit/config.yml"
 
 [templates.herdr]
-input_path      = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/herdr.toml"
-output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/herdr/config.toml"
+input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/herdr.toml"
+output_path = "/herdr/config.toml"
 
 [templates.alacritty]
-input_path      = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/alacritty.toml"
-output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/alacritty/theme.toml"
+input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/alacritty.toml"
+output_path = "/alacritty/theme.toml"
 
 [templates.kitty]
-input_path      = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/kitty.conf"
-output_path     = "~/.myenv/theme/generated/kanagawa-dragon-lotus/kitty/theme.conf"
+input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/kitty.conf"
+output_path = "/kitty/theme.conf"
 
 [templates.rasi]
-input_path = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/source.rasi"
-output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/rasi/theme.rasi"
+input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/source.rasi"
+output_path = "/rasi/theme.rasi"
 
 [templates.yazi]
-input_path = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/yazi-flavor.toml"
-output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/yazi/flavor.toml"
+input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/yazi-flavor.toml"
+output_path = "/yazi/flavor.toml"
 
 [templates.yazi-tmtheme]
-input_path = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/yazi-tmtheme.xml"
-output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/yazi/tmtheme.xml"
+input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/yazi-tmtheme.xml"
+output_path = "/yazi/tmtheme.xml"
 
 [templates.foot]
 input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/foot.ini"
-output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/foot/theme.ini"
+output_path = "/foot/theme.ini"
 
 [templates.hypr]
 input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/hypr.lua"
-output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/hypr/theme.lua"
+output_path = "/hypr/theme.lua"

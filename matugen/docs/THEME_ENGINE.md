@@ -22,9 +22,9 @@ Dokumen ini menjawab tiga hal:
 
 Sekarang:
 
-- Tidak ada yang memilih tema secara otomatis di repo ini. `current` di-flip
-  manual (atau oleh `theme-switcher.sh` di luar repo). Render Flow A/B menulis
-  ke folder tema, bukan ke `current`.
+- `matugen/palette.sh` merender satu palet ke `generated/<palette>`, memvalidasi,
+  lalu membalik `current`. Yang belum ada: pemilihan tema otomatis dan
+  `current-status.json` (masih dipegang `theme-switcher.sh` di luar repo).
 - Post-hook matugen berjalan **tanpa tahu sesi**: `hyprctl reload` dipanggil
   dari template hypr meskipun sesi yang jalan niri, dan sebaliknya nanti.
 - Rasa dan warna berbagi file di Hyprland (`current/hypr/theme.lua`).
@@ -248,7 +248,7 @@ Tambahan yang membuat mulus:
 - **Tidak ada reload lintas sesi.** Guard ganda: manifest + deteksi env +
   flag `--session`. Kalau `--session=hypr` tapi env menunjukkan niri → tolak.
 - **Reload tidak lagi hidup di post_hook matugen.** Kedua config tidak punya
-  `post_hook`; sementara ini `matugen/reload.sh` yang menjadi dispatcher
+  `post_hook`; sementara ini `matugen/palette.sh` yang menjadi dispatcher
   (sadar pemilik proses, sadar sesi, tervalidasi, ber-`timeout`). Saat switcher
   memegang aktivasi, script itu pindah ke sana dan matugen berhenti tahu soal
   reload sama sekali.
@@ -292,7 +292,7 @@ Dua sumber, satu kontrak (`palette.json`), lalu renderer yang sama.
 | Custom color | via config/palet | `[config.custom_colors]` → **role warna** saja |
 | Output | file per template | file per template, `output_path_dynamic`, hook |
 | Skip file tak berubah | tidak dijamin | ya (docs: skips rewriting unchanged files) |
-| Hot reload | lewat `matugen/reload.sh` (sementara) | ya (~150 ms), state GUI menang |
+| Hot reload | lewat `matugen/palette.sh` (sementara) | ya (~150 ms), state GUI menang |
 | Integrasi WM otomatis | tidak (kita tulis template) | ya: `niri/noctalia.kdl`, `hypr/noctalia.lua` |
 
 ### 6.1 Tiga skenario

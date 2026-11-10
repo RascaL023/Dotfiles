@@ -31,7 +31,7 @@ Repo rules (from `AGENTS.md`):
 ### Two different theming flows — pick the right one
 
 **A. Wallpaper-derived ("wallpaper-based") theme** — sections 1–11 below
-- Command: `matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/core/palette/wallpaper-based/config.toml`
+- Command: `~/.dotfile/matugen/palette.sh <wallpaper>` (`matugen image <wallpaper> --source-color-index 0 -c <config> -p <store>` underneath)
 - Config: `matugen/core/palette/wallpaper-based/config.toml` (`alacritty`, `kitty`, `lazygit`, `scss`, `rasi`, …)
 - Templates: `matugen/core/palette/wallpaper-based/template/*`, using Material roles `{{ colors.<role>.default.hex }}`.
 - Outputs: `~/.myenv/theme/generated/wallpaper-based/<tool>/…`
@@ -41,12 +41,13 @@ Repo rules (from `AGENTS.md`):
 - Source of truth: `matugen/core/palette/<theme>/blueprint/<variant>.json` — **one file per variant**, and the file name carries only the variant (`dark.json`, `light.json`). The theme name lives in the directory name and `meta.name`; never encode it in the blueprint file name, so `<theme>/blueprint/<variant>.json` stays derivable. Hand-authored, **not** matugen-generated. Keys: `meta`, `background`, `foreground`, `cursor`, `colors` (16-entry array, ANSI order, index 0 = black), `color0`…`color15`, and the groups `accent`, `text`, `surface`, `border`, `status`, `effect`, `syntax`. Full reference: `core/palette/kanagawa-dragon-lotus/blueprint/README.md`.
   - `syntax` uses **universal semantic names** (`comment`, `keyword`, `function`, `string`, `type`, …) so every tool template maps from the same vocabulary.
 - Templates: `matugen/core/palette/<theme>/template/*`.
-- Command: `matugen json <blueprint.json> -c <theme-config.toml>`. The JSON is exposed **at the template root**, so templates read root-level keys (`{{ accent.primary }}`, `{{ syntax.keyword }}`) — never `colors.*`, and there is no `dark.*`/`light.*` wrapper: the variant you pass is the variant you get.
+- Command: `~/.dotfile/matugen/palette.sh <theme>/blueprint/<variant>.json` (`matugen json <blueprint.json> -c <theme-config.toml> -p <store>` underneath). The JSON is exposed **at the template root**, so templates read root-level keys (`{{ accent.primary }}`, `{{ syntax.keyword }}`) — never `colors.*`, and there is no `dark.*`/`light.*` wrapper: the variant you pass is the variant you get.
 - Config: use a **separate config per theme** (`core/palette/kanagawa-dragon-lotus/config.toml`). Do NOT add fixed-theme templates to `matugen/core/palette/wallpaper-based/config.toml`, otherwise every `matugen image` run fails because `accent.*` / `syntax.*` only exist in `json` mode.
 - Outputs: `~/.myenv/theme/generated/<theme>/<tool>/…` (here: `generated/kanagawa-dragon-lotus/nvim/`).
 
 ### Engine facts verified on this machine (matugen 4.1.0)
 - `matugen json <file> -c <cfg>` needs no source color. `-m dark|light` is irrelevant here: the variant comes from which blueprint file you pass.
+- **`output_path` is relative** in both palette configs (`/kitty/theme.conf`), like the feel config. `matugen -p <dir>` makes it `<dir>/kitty/theme.conf` (verified on 4.2.0); without `-p` the file lands at `/kitty/theme.conf` on the filesystem root. `matugen/palette.sh` supplies `-p ~/.myenv/theme/generated/<palette>`, validates the result, then flips `theme/current`.
 - `--import-json <file>` adds the same JSON as render data for `matugen image` / `matugen color` runs.
 - Dotted access works even for keyword-like keys: `{{ syntax.function }}`, `.return`, `.class`, `.import` are all valid.
 - **Arrays cannot be indexed.** `colors[0]` and `colors.0` are parse errors. Loop instead:
@@ -416,7 +417,7 @@ color15 {{ colors.on_surface.default.hex }}
   them stable. Colors are `rgba(<hex_stripped>ee)` strings; `format: rgba` is
   **not** usable here because it prints CSS decimals. Check a render without
   reloading: `luac -p ~/.myenv/theme/current/hypr/theme.lua`. Reload is **not**
-  a post_hook any more: `matugen/reload.sh` reloads Hyprland only when
+  a post_hook any more: `matugen/palette.sh` reloads Hyprland only when
   `HYPRLAND_INSTANCE_SIGNATURE` points at a running instance (a render under
   niri must never touch Hyprland), and it validates that file first.
 
@@ -534,7 +535,7 @@ Notes:
 - **A missing named color is silent in GTK 4.** Unlike a syntax error, `@undeclared` produces no warning; it just falls back to the widget default. Do not "verify" an import by grepping the log — render a probe rule (e.g. `.control-center { background: @accent; }`) and read the pixel, or check the app's own reload output.
 - `swaync` details: stylesheet is `~/.config/swaync/style.css`, palette comes from the shared `css/theme.css`; reload with `swaync-client -rs` — `-R` only reloads `config.json` and leaves the stylesheet untouched.
 - **In this repo:** `waybar`, `wlogout` and `swaync` keep **no** local `colors.css`. All three `@import` the generated `~/.myenv/theme/current/css/theme.css` (78 `@define-color`s, same names in both flows). Add a template entry for a new app rather than a second palette file, and if you must add keys, add them to `source.css` **and** `gtk3.css` so both flows stay in sync.
-- `post_hook` is executed through the user's `$SHELL` (fish on this machine), not bash: keep hooks shell-agnostic. `swaync-client -rs 2>/dev/null || true` works; `$?` is a fish syntax error and fails the whole hook. **This repo stopped using hooks entirely** — both configs have none, and `matugen/reload.sh` (bash) owns the reload step, driven by process presence instead of a blind call.
+- `post_hook` is executed through the user's `$SHELL` (fish on this machine), not bash: keep hooks shell-agnostic. `swaync-client -rs 2>/dev/null || true` works; `$?` is a fish syntax error and fails the whole hook. **This repo stopped using hooks entirely** — both configs have none, and `matugen/palette.sh` (bash) owns the reload step, driven by process presence instead of a blind call.
 
 Template `waybar-colors.css`:
 

@@ -177,9 +177,9 @@ works and is resolved under `$XDG_CONFIG_HOME`.
 Source of truth: [`matugen/`](matugen) (symlinked as `~/.config/matugen`).
 
 ```text
-        ┌─ wallpaper ─► matugen image ─┐
-color ──┤                              ├─► template ─► ~/.myenv/theme/generated/…
-        └─ blueprint ─► matugen json ──┘                      │
+        ┌─ wallpaper ─┐
+color ──┤              ├─ palette.sh ─► template ─► ~/.myenv/theme/generated/<palette>/
+        └─ blueprint ──┘                                     │
                                                               ▼
                                               ~/.myenv/theme/current  ◄─ symlink
                                                               │
@@ -188,16 +188,16 @@ color ──┤                              ├─► template ─► ~/.myenv/
 ```
 
 `~/.myenv` is the theme store **outside** this repo; the repo only renders into
-it. `current` is a symlink to one theme directory (`generated/wallpaper-based` for the
-wallpaper flow, `generated/kanagawa-dragon-lotus` for the fixed palette) and is
-flipped outside this repo: the switcher that runs `ln -sfn` is
-`theme-switcher.sh` in `~/.myenv/script/` — parked in `theme.bak/` in this
-checkout.
+it. `current` is a symlink to one palette directory (`generated/wallpaper-based`
+for the wallpaper flow, `generated/kanagawa-dragon-lotus` for the fixed palette).
+`matugen/palette.sh <source>` renders into `generated/<palette>`, validates, then
+flips `current`; the external `theme-switcher.sh` in `~/.myenv/script/` — parked
+in `theme.bak/` in this checkout — can point it at a named theme too.
 
 ### Flow A — wallpaper-derived (Material You)
 
 ```bash
-matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/core/palette/wallpaper-based/config.toml
+~/.dotfile/matugen/palette.sh <wallpaper>
 ```
 
 - Config: `matugen/core/palette/wallpaper-based/config.toml`
@@ -205,12 +205,13 @@ matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/core/palet
 - Vocabulary: `{{ colors.<role>.<scheme>.<format> }}` (MD3 roles: `primary`,
   `surface`, `on_surface`, …)
 - Output: `~/.myenv/theme/generated/wallpaper-based/<tool>/…`
+- Config writes **relative** paths (`/kitty/theme.conf`); `palette.sh` owns the
+  `-p ~/.myenv/theme/generated/<palette>` prefix and the `current` flip
 
 ### Flow B — fixed palette (a named theme)
 
 ```bash
-matugen json matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json \
-  -c matugen/core/palette/kanagawa-dragon-lotus/config.toml
+~/.dotfile/matugen/palette.sh ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json
 ```
 
 - Palette: `matugen/core/palette/kanagawa-dragon-lotus/blueprint/<variant>.json`
@@ -277,7 +278,7 @@ tidak ikut ke berkas tema Hyprland — itu urusan switcher
 wlogout do, because GTK 4 does support `@import` (verified with GTK 4.22 +
 swaync 0.12.6): the file holds one import line and then only derived colors and
 metrics, no palette literals. Neither flow has a `post_hook` any more: after a
-render, `matugen/reload.sh` runs `swaync-client -rs` (only when swaync is
+render, `matugen/palette.sh` runs `swaync-client -rs` (only when swaync is
 running) so the notification center repaints too (`-R` alone reloads
 `config.json` only and leaves the stylesheet alone).
 
@@ -316,7 +317,7 @@ Then make the theme available, since generated files are not committed:
 
 ```bash
 # wallpaper theme
-matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/core/palette/wallpaper-based/config.toml
+~/.dotfile/matugen/palette.sh <wallpaper>
 
 # or the fixed palette
 matugen json ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json \
