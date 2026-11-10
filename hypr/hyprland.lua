@@ -1,7 +1,4 @@
--- Hyprland 0.56. Look & feel values come from config/core/theme.lua, binds from
--- config/core/keybinding.lua.
-
-local theme = require("config.core.theme")
+local theme = require("config.core.theme.palette")
 
 ------------------------------------------------------------------ MONITORS --
 hl.monitor({
@@ -137,4 +134,4 @@ hl.layer_rule({
 })
 
 ---------------------------------------------------------- CONFIG IMPORT -----
-require("config.core.keybinding")
+require("config.core.binding") -- Must here for rofi override animations

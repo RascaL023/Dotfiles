@@ -1,7 +1,4 @@
--- Hyprland theme. The defaults below are merged with the generated
--- ~/.myenv/theme/current/hypr/theme.lua (data only: it is loaded without env,
--- so it can only return a table) and clamped before they become hl.* payloads.
-
+-- TODO: Separation between feel and palette
 local Theme = {
     shape = {
         radius               = 4,
