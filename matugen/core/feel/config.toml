@@ -10,7 +10,7 @@ output_path = "/kitty/feel.conf"
 
 [templates.foot]
 input_path  = "~/.config/matugen/core/feel/template/foot.ini"
-output_path = "/foot/font.ini"
+output_path = "/foot/feel.ini"
 
 [templates.waybar]
 input_path  = "~/.config/matugen/core/feel/template/gtk3.css"

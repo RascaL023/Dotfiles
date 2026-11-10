@@ -133,7 +133,7 @@ Sumbu yang sudah dipindah keluar palet: **font** dan **UI terminal**
 | [x] eww (popup/profile/OSD) | `template/source.scss` | `scss/_feel.scss` | `eww/eww.scss` (`@import`, sesudah partial tema) |
 | [x] Kitty | `template/kitty.conf` | `kitty/feel.conf` | `kitty/kitty.conf` (`include`) |
 | [x] Alacritty | `template/alacritty.toml` | `alacritty/feel.toml` | `alacritty/alacritty.toml` (`import`, sesudah tema) |
-| [x] Foot | `template/foot.ini` | `foot/font.ini` | `foot/foot.ini` (`include`) |
+| [x] Foot | `template/foot.ini` | `foot/feel.ini` | `foot/foot.ini` (`include`) |
 | [x] Waybar | `template/gtk3.css` | `css/waybar-font.css` | `waybar/style.css` (`@import`, aturan `*` siap pakai — GTK 3) |
 | [x] Swaync | `template/gtk4.css` | `css/swaync-font.css` | `swaync/style.css` (`@import` + `var(--font-family-ui)`) |
 | [ ] wlogout / hyprlock / rofi | — | — | masih hardcoded |
@@ -167,5 +167,5 @@ folder, and its font through the feel store:
 
 ```ini
 include=/home/rascal/.myenv/theme/current/foot/theme.ini
-include=/home/rascal/.myenv/feel/current/foot/font.ini
+include=/home/rascal/.myenv/feel/current/foot/feel.ini
 ```

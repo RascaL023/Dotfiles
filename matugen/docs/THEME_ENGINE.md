@@ -78,7 +78,7 @@ dan tidak berisi knob WM.
 
 `font` sudah berjalan (§2.4 FEEL.md): satu profil JSON di
 `core/feel/blueprint/<profil>.json` → `core/feel/config.toml` →
-`~/.myenv/feel/current/{scss/_feel.scss, kitty/feel.conf, foot/font.ini}`.
+`~/.myenv/feel/current/{scss/_feel.scss, kitty/feel.conf, foot/feel.ini}`.
 Sisanya (`geometry` dan seterusnya) masih menjadi payload `feel` di blueprint
 Flow B sampai Fase 0 selesai.
 
@@ -408,7 +408,7 @@ Profil rasa tetap kecil dan semantik, tetapi renderer-nya boleh kaya:
 matugen/core/feel/blueprint/<profil>.json   (satu berkas per profil)
    ├── matugen (Tera) ──► scss/_feel.scss (variabel font, sudah jalan)
    │                   ├── kitty/feel.conf (sudah jalan)
-   │                   ├── foot/font.ini   (sudah jalan)
+   │                   ├── foot/feel.ini   (sudah jalan)
    │                   ├── hypr.lua        (angka + string + boolean)
    │                   ├─► niri.kdl       (angka + flag KDL)
    │                   ├── waybar.css     (angka px)
