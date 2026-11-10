@@ -118,8 +118,11 @@ Konsumen yang sudah membaca hasilnya:
   `$font-ui-icon`, `$font-terminal`, `$font-display`, `$font-weight`,
   `$font-weight-strong`); `eww.scss` baru memakai `$font-ui-text` dan
   `$font-weight`.
-- `kitty`: `include ~/.myenv/feel/current/kitty/font.conf`.
+- `kitty`: `include ~/.myenv/feel/current/kitty/feel.conf`.
 - `foot`: `include=…/feel/current/foot/font.ini`.
+- `alacritty`: `import` `~/.myenv/feel/current/alacritty/feel.toml`
+  (opacity, padding, cursor, ukuran & family font); warnanya tetap dari
+  `theme/current/alacritty/theme.toml`.
 - `waybar`: `@import` `~/myenv/feel/current/css/waybar-font.css` di baris atas
   `waybar/style.css`. GTK 3 tidak punya `var()`, jadi berkas itu berisi aturan
   `* { font-family: … }` siap pakai; `font-family` literal dihapus dari
@@ -351,7 +354,7 @@ matugen/core/feel/
 ├── blueprint/<profil>.json  ← satu-satunya sumber rasa
 ├── template/<konsumen>      ← template per konsumen
 └── config.toml              ← config render rasa
-→ ~/.myenv/feel/current/{scss/_feel.scss, kitty/font.conf, foot/font.ini,
+→ ~/.myenv/feel/current/{scss/_feel.scss, kitty/feel.conf, foot/font.ini,
                          css/waybar-font.css, css/swaync-font.css}
 ```
 

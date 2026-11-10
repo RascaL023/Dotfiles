@@ -24,6 +24,19 @@
     }
   },
 
+  "terminal": {
+    "padding": { "x": 25, "y": 20 },
+    "cursor": "Beam",
+    "kitty": {
+      "border_width": 1,
+      "margin": 6,
+      "padding": 10,
+      "cursor_shape": "beam",
+      "tab_bar_style": "powerline",
+      "tab_powerline_style": "slanted"
+    }
+  },
+
   "shape": {
     "radius": 4,
     "rounding_power": 2.0,

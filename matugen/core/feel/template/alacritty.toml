@@ -1,0 +1,33 @@
+############################
+## Generated with Matugen ##
+############################
+## Manual edit is not recomended,
+## Except for testing.
+
+
+[window]
+opacity         = {{ surface.terminal_opacity }}
+padding.x       = {{ terminal.padding.x }}
+padding.y       = {{ terminal.padding.y }}
+
+[cursor.style]
+shape           = "{{ terminal.cursor }}"
+
+[font]
+size            = {{ font.size.normal }}
+
+[font.normal]
+family          = "{{ font.terminal }}"
+style           = "Regular"
+
+[font.bold]
+family          = "{{ font.terminal }}"
+style           = "Bold"
+
+[font.italic]
+family          = "{{ font.terminal }}"
+style           = "Italic"
+
+[font.bold_italic]
+family          = "{{ font.terminal }}"
+style           = "Bold Italic"

@@ -48,7 +48,7 @@ each entry is.
 |---|---|---|
 | `kitty` | GPU terminal emulator | both flows (`kitty/theme.conf`) |
 | `foot` | Lightweight Wayland terminal | both flows (`foot/theme.ini`)¹ |
-| `alacritty` | GPU terminal emulator | both flows (`alacritty/theme.toml`) |
+| `alacritty` | GPU terminal emulator | both flows (`alacritty/theme.toml`); feel (`alacritty/feel.toml`) |
 | `cava` | Audio visualizer | — |
 | `hypr` | Hyprland compositor | — |
 | `niri` | Scrollable-tiling Wayland compositor | — |
@@ -263,7 +263,7 @@ tidak ikut ke berkas tema Hyprland — itu urusan switcher
 | Consumer | Reads |
 |---|---|
 | `kitty/kitty.conf` | `~/.myenv/theme/current/kitty/theme.conf` |
-| `alacritty/alacritty.toml` | `~/.myenv/theme/current/alacritty/theme.toml` |
+| `alacritty/alacritty.toml` | `~/.myenv/theme/current/alacritty/theme.toml` + `~/.myenv/feel/current/alacritty/feel.toml` |
 | `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` | `~/.myenv/theme/current/css/theme.css` |
 | `rofi/themes/shared/palette.rasi` (shared by all Rofi layouts) | `~/.myenv/theme/current/rasi/theme.rasi` |
 | `eww/eww.scss` | `~/.myenv/theme/current/scss/theme` |

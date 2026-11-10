@@ -6,7 +6,7 @@ output_path = "/scss/_feel.scss"
 
 [templates.kitty]
 input_path  = "~/.config/matugen/core/feel/template/kitty.conf"
-output_path = "/kitty/font.conf"
+output_path = "/kitty/feel.conf"
 
 [templates.foot]
 input_path  = "~/.config/matugen/core/feel/template/foot.ini"
@@ -19,3 +19,7 @@ output_path = "/css/waybar-font.css"
 [templates.swaync]
 input_path  = "~/.config/matugen/core/feel/template/gtk4.css"
 output_path = "/css/swaync-font.css"
+
+[templates.alacritty]
+input_path  = "~/.config/matugen/core/feel/template/alacritty.toml"
+output_path = "/alacritty/feel.toml"

@@ -5,36 +5,6 @@
 ## Except for testing.
 
 
-#########
-##  UI ##
-#########
-
-[window]
-opacity         = 0.9
-padding.x       = 25
-padding.y       = 20
-
-[cursor.style]
-shape           = "Beam"
-
-[font]
-size            = 10.9
-
-[font.normal]
-family          = "Maple Mono NF"
-style           = "Regular"
-
-[font.bold]
-family          = "Maple Mono NF"
-style           = "Bold"
-
-[font.italic]
-family          = "Maple Mono NF"
-style           = "Italic"
-
-[font.bold_italic]
-family          = "Maple Mono NF"
-style           = "Bold Italic"
 
 [colors.vi_mode_cursor]
 text            = "CellBackground"

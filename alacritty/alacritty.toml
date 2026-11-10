@@ -1,5 +1,6 @@
 [general]
 import = [
     "~/.config/alacritty/binds.toml",
-    "~/.myenv/theme/current/alacritty/theme.toml"
+    "~/.myenv/theme/current/alacritty/theme.toml",
+    "~/.myenv/feel/current/alacritty/feel.toml"
 ]

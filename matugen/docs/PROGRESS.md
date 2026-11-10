@@ -125,12 +125,14 @@ Config: `core/feel/config.toml` (satu untuk semua profil) · profil:
 `core/feel/blueprint/<profil>.json` · entry point: `matugen/feel.sh <profil>` · output root:
 `~/.myenv/feel/generated/<profil>/…` (dibalik ke `feel/current` setelah validasi).
 
-Sumbu yang sudah dipindah keluar palet: **font**.
+Sumbu yang sudah dipindah keluar palet: **font** dan **UI terminal**
+(opacity, padding, cursor).
 
 | Tool | Template | Output | Consumer reads it |
 |---|---|---|---|
 | [x] eww (popup/profile/OSD) | `template/source.scss` | `scss/_feel.scss` | `eww/eww.scss` (`@import`, sesudah partial tema) |
-| [x] Kitty | `template/kitty.conf` | `kitty/font.conf` | `kitty/kitty.conf` (`include`) |
+| [x] Kitty | `template/kitty.conf` | `kitty/feel.conf` | `kitty/kitty.conf` (`include`) |
+| [x] Alacritty | `template/alacritty.toml` | `alacritty/feel.toml` | `alacritty/alacritty.toml` (`import`, sesudah tema) |
 | [x] Foot | `template/foot.ini` | `foot/font.ini` | `foot/foot.ini` (`include`) |
 | [x] Waybar | `template/gtk3.css` | `css/waybar-font.css` | `waybar/style.css` (`@import`, aturan `*` siap pakai — GTK 3) |
 | [x] Swaync | `template/gtk4.css` | `css/swaync-font.css` | `swaync/style.css` (`@import` + `var(--font-family-ui)`) |
@@ -138,9 +140,9 @@ Sumbu yang sudah dipindah keluar palet: **font**.
 | [ ] eww bar | — | — | `eww/bar/styles/_tokens.scss` masih menyimpan font lokal |
 | [ ] Depth clock | — | — | `eww/styles/_depth-clock.scss` masih lokal |
 
-Ukuran font sengaja **tidak** ada di profil: tiap konsumen punya tuning sendiri
-(waybar 9.2px, eww 11px/13px, swaync 12px). Yang dibagi adalah **jenis** font dan
-bobotnya.
+Ukuran UI sengaja **tidak** ada di profil: tiap konsumen punya tuning sendiri
+(waybar 9.2px, eww 11px/13px, swaync 12px). Yang dibagi adalah **jenis** font,
+bobotnya, dan ukuran terminal (`font.size.normal`).
 
 ---
 
