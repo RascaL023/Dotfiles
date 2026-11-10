@@ -231,7 +231,7 @@ in `theme.bak/` in this checkout — can point it at a named theme too.
 > palette source (`wallpaper-based/`, `kanagawa-dragon-lotus/`). The **feel**
 > flow is the directory `matugen/core/feel/`: profiles in
 > `blueprint/<profile>.json`, per-consumer templates in `template/`, and one
-> shared `config.toml` (see [`matugen/docs/FEEL.md`](matugen/docs/FEEL.md)).
+> shared `config.toml` (see [`matugen/README.md`](matugen/README.md)).
 >
 > Keep the two flows in **separate config files**. Templates from Flow B fail
 > under `matugen image` (no `accent.*`), and Flow A's `colors.*` does not exist
@@ -301,7 +301,6 @@ back to plain TokyoNight and warns. See
 | [`matugen/docs/MATUGEN_SKILLS.md`](matugen/docs/MATUGEN_SKILLS.md) | How to write, register and test matugen templates |
 | [`matugen/docs/CHEATSHEETS.md`](matugen/docs/CHEATSHEETS.md) | MD3 role vocabulary and semantic mapping |
 | [`matugen/docs/VOCABULARY.md`](matugen/docs/VOCABULARY.md) | Sample `matugen --show-colors` output and how to read it |
-| [`matugen/docs/PROGRESS.md`](matugen/docs/PROGRESS.md) | Template coverage per tool |
 | [`matugen/docs/NVIM_MAPPING.md`](matugen/docs/NVIM_MAPPING.md) | Which palette key colors which part of Neovim |
 | [`eww/depth-clock/README.md`](eww/depth-clock/README.md) | Jam wallpaper berlapis: kendali, layout, dan masker foreground |
 | [`eww/depth-clock/GUIDE.md`](eww/depth-clock/GUIDE.md) | Langkah konkret membuat depth clock untuk wallpaper baru |

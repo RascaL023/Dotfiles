@@ -270,10 +270,8 @@ Rules:
 | `matugen/docs/MATUGEN_SKILLS.md` | writing/registering/testing matugen templates + verified engine gotchas |
 | `matugen/docs/CHEATSHEETS.md` | Material You role vocabulary → UI job mapping |
 | `matugen/docs/VOCABULARY.md` | sample `--show-colors` dump; how to read a role table |
-| `matugen/docs/PROGRESS.md` | template coverage per tool, per flow |
-| `matugen/docs/FEEL.md` | design for separating color from feel (WM-agnostic tokens, Hyprland/niri mapping, non-shell consumers). **Design only — not implemented yet.** |
-| `matugen/docs/WM_FEEL_MATRIX.md` | per-feature feel matrix: Hyprland-only, niri-only, differing semantics, and app-level fallbacks |
-| `matugen/docs/THEME_ENGINE.md` | session-aware reload strategy, palette/feel/manifest contracts, matugen vs Noctalia abstraction |
+| `matugen/docs/WM_FEEL_MATRIX.md` | per-feature feel matrix: Hyprland-only, niri-only, differing semantics, app-level fallbacks, niri include gotchas |
+| `matugen/docs/NOCTALIA.md` | verified Noctalia v5 facts vs matugen: config layering, template limits, color ownership, integration checklist |
 | `matugen/docs/NVIM_MAPPING.md` | which palette key colors which Neovim highlight group |
 | `matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md` | every key of the Flow B blueprint JSON |
 | `hypr/docs/ROADMAP_V56.md` | unimplemented Hyprland 0.56 features: recipes, verification steps, backlog |

@@ -351,8 +351,7 @@ Terminal UI colors:
 For each app: output file, how it is loaded, color format, template, reload. Adapt, do not copy blindly. **Always check the app version and the user's existing config first.**
 
 > These are **generic recipes for target apps**, applied only when the user asks
-> to theme that app. This repo does not ship every template listed here — its own
-> coverage is in [`PROGRESS.md`](PROGRESS.md). In particular, the niri (§6.3)
+> to theme that app. In particular, the niri (§6.3)
 > recipe is an example, not a statement about the user's setup. Hyprland is themed
 > in this repo now, but in its own shape — see the note at the top of §6.2.
 > The repo itself is compositor-agnostic.

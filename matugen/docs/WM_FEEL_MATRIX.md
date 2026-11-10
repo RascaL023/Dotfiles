@@ -1,7 +1,6 @@
 # Matriks Feel: Hyprland 0.56 vs niri 26.04
 
-> Indeks: [`README.md`](../README.md) · terkait: [`FEEL.md`](FEEL.md),
-> [`THEME_ENGINE.md`](THEME_ENGINE.md)
+> Indeks: [`README.md`](../README.md) · terkait: [`NOCTALIA.md`](NOCTALIA.md)
 
 **Status: rancangan + hasil verifikasi.** Dokumen ini memetakan setiap knob
 “rasa” yang relevan ke dua WM yang dipakai repo ini, dengan satu tujuan:
@@ -14,7 +13,7 @@ Sumber verifikasi:
   `hypr/hyprland.lua`).
 - niri 26.04: docs Configuration (Layout, Window Rules, Layer Rules, Animations,
   Include) + `niri validate` lokal dengan fragmen uji.
-- Noctalia v5: docs resmi (batas template) — dibahas di `THEME_ENGINE.md`.
+- Noctalia v5: docs resmi (batas template) — dibahas di [`NOCTALIA.md`](NOCTALIA.md).
 
 Legenda verdict:
 
@@ -284,8 +283,38 @@ Noctalia v5 punya **template compositor bawaan** yang menulis
 `niri/noctalia.kdl` (plus `include` ke `niri/config.kdl`) dan
 `hypr/noctalia.lua` (plus `dofile(...).apply_theme()`). Kalau keduanya aktif
 bersamaan dengan include warna kita, akan ada dua pemilik warna di WM yang sama.
-Aturannya ada di [`THEME_ENGINE.md`](THEME_ENGINE.md) §6: **satu pemilik warna
-per WM**, dipilih lewat manifest — bukan dideteksi otomatis.
+Aturannya: **satu pemilik warna per WM**, diputuskan sekali saat integrasi —
+bukan dideteksi otomatis (lihat [`NOCTALIA.md`](NOCTALIA.md) §1).
 
 Yang tetap aman: rasa (fragmen niri/`feel.lua`) selalu milik kita, karena
-Noctalia tidak bisa merender angka/string bebas (lihat §8 dokumen itu).
+Noctalia tidak bisa merender angka/string bebas (§2 dokumen itu).
+
+---
+
+## 9. Jebakan niri (terverifikasi)
+
+niri 26.04, dari docs Include/Layout/Animations + `niri validate` lokal:
+
+1. **Include merge per-field.** Satu fragmen boleh berisi `layout {}`,
+   `window-rule`, `layer-rule`, dan `animations`.
+2. **Section singleton.** Jangan andalkan dua `layout {}` di file yang sama;
+   yang resmi adalah `include`.
+3. **`border {}` di file include butuh `on` eksplisit**, kalau tidak border
+   tidak aktif.
+4. **`struts`, `preset-column-widths`, dan tiap sub-bagian `animations` tidak
+   di-merge** — satu file harus memiliki seluruh blok.
+5. **Tidak ada saklar blur global.** Blur dinyalakan per window/layer rule;
+   "blur off" berarti berhenti meng-emit rule blur, bukan menulis `false`.
+6. **`include optional=true`** wajib agar boot pertama sebelum ada render tidak
+   gagal.
+7. **Tidak ada aksi reload.** `niri msg action` tidak punya reload; reload
+   terjadi karena file berubah. Setelah `current` di-flip, tulis ulang file
+   include agar watch inotify menunjuk inode baru.
+
+---
+
+# KESIMPULAN
+Langkah yang diambil adalah pemisahan langsung per WM. 
+Hyprland dan Niri akan memiliki json sendiri sendiri, tidak dipaksakan.
+Untuk feel generik, contohnya padding terminal, font, atau hal lain
+yang bukan WM mungkin akan menjadi 1 json saja.

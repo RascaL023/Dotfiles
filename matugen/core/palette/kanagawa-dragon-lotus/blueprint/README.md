@@ -183,9 +183,10 @@ Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu), `f
 ### 3.11 `feel.*` — rasa compositor (bukan warna)
 
 Objek ini **tidak berisi warna**; isinya angka dan boolean yang menentukan look & feel
-Hyprland. Rancangan untuk memindahkannya keluar dari blueprint (menjadi profil rasa
-sendiri di `~/.myenv/feel/current`) ada di [`FEEL.md`](../../../../docs/FEEL.md) —
-dokumen itu masih rancangan, jadi selama belum dieksekusi `feel` tetap dibaca dari sini. Template `template/hypr.lua` menyalinnya apa adanya ke `hypr/theme.lua`,
+Hyprland. Pemindahannya ke profil rasa sendiri (`~/.myenv/feel/current`) belum
+dilakukan, jadi selama itu `feel` tetap dibaca dari sini (lihat
+[`matugen/README.md`](../../../../README.md), bagian “Warna dan rasa”).
+Template `template/hypr.lua` menyalinnya apa adanya ke `hypr/theme.lua`,
 lalu `hypr/config/core/theme.lua` menggabungkannya dengan default dan menjepit
 nilainya. Jadi dua blueprint dengan palet sama tetap bisa terasa berbeda.
 

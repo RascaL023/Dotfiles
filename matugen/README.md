@@ -44,6 +44,13 @@ Dua sumbu terpisah; jangan mencampurnya dalam satu config matugen.
 Template alur B gagal di `matugen image` (tidak ada `accent.*`), dan `colors.*`
 tidak ada di `matugen json`. Karena itu config dan templatenya dipisah per alur.
 
+Aturan profil rasa: semua key wajib ada — matugen 4.2 tidak punya filter
+`default` maupun `{% if %}` (key hilang = `ResolveError`), `null` tercetak
+`Null`, dan `feel.sh` menolak hasil yang masih menyisakan placeholder. Nama key
+mengikuti peran (`font.ui.text`), bukan nama alat; ukuran font tidak masuk
+profil karena tiap konsumen punya tuning sendiri. Menambah rasa = satu berkas
+di `core/feel/blueprint/`; `template/` dan `config.toml` tidak disentuh.
+
 ## Struktur
 
 ```text
@@ -118,12 +125,10 @@ kode adalah bug dokumentasi.
 | Dokumen | Bahasa | Isi |
 |---|---|---|
 | [`docs/MATUGEN_SKILLS.md`](docs/MATUGEN_SKILLS.md) | EN | Menulis, mendaftarkan, menguji, dan me-reload template; fakta engine + resep per aplikasi |
-| [`docs/PROGRESS.md`](docs/PROGRESS.md) | EN | Cakupan template per tool, per alur |
 | [`docs/CHEATSHEETS.md`](docs/CHEATSHEETS.md) | ID | Kosakata *role* Material You → pekerjaan UI |
 | [`docs/VOCABULARY.md`](docs/VOCABULARY.md) | ID | Contoh `matugen --show-colors` dan cara membacanya |
-| [`docs/FEEL.md`](docs/FEEL.md) | ID | Token rasa, pemetaan per WM, konsumen non-shell, rencana Noctalia |
-| [`docs/WM_FEEL_MATRIX.md`](docs/WM_FEEL_MATRIX.md) | ID | Fitur rasa Hyprland 0.56 vs niri 26.04 |
-| [`docs/THEME_ENGINE.md`](docs/THEME_ENGINE.md) | ID | Reload per sesi, kontrak engine, abstraksi matugen vs Noctalia |
+| [`docs/WM_FEEL_MATRIX.md`](docs/WM_FEEL_MATRIX.md) | ID | Fitur rasa Hyprland 0.56 vs niri 26.04, jebakan include |
+| [`docs/NOCTALIA.md`](docs/NOCTALIA.md) | ID | Fakta Noctalia v5 vs matugen: config, batas template, pemilik warna, checklist integrasi |
 | [`docs/NVIM_MAPPING.md`](docs/NVIM_MAPPING.md) | ID | Key palet → highlight group Neovim |
 | [`core/palette/kanagawa-dragon-lotus/blueprint/README.md`](core/palette/kanagawa-dragon-lotus/blueprint/README.md) | ID | Referensi setiap key JSON blueprint (alur B) |
 
