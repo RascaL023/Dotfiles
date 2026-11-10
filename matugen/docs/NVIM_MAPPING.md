@@ -6,7 +6,7 @@ itu dipakai untuk mewarnai bagian apa saja di nvim?**
 Ditulis agar bisa dibaca orang yang tidak tahu nvim. Tidak ada perubahan kode di
 dokumen ini — murni penjelasan.
 
-> Indeks dokumen: [`README.md`](README.md) · referensi key palet tetap:
+> Indeks dokumen: [`README.md`](../README.md) · referensi key palet tetap:
 > [`../core/palette/kanagawa-dragon-lotus/blueprint/README.md`](../core/palette/kanagawa-dragon-lotus/blueprint/README.md).
 
 ---
@@ -379,5 +379,5 @@ Bukan bug — sebagian kunci sengaja disamakan bentuknya dengan template tool la
   tambahan `source`.
 - Ringkasnya: ubah **nilai warna** → template di `matugen/templates/`; ubah
   **tujuan pemakaian** → `nvim/lua/core/theme.lua`.
-- Perubahan alur A berlaku setelah `matugen/palette.sh <wallpaper>`; perubahan alur B
+- Perubahan alur A berlaku setelah `matugen/script/palette.sh <wallpaper>`; perubahan alur B
   setelah `matugen json <blueprint>` (atau reload tema yang sedang jalan).

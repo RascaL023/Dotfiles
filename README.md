@@ -30,7 +30,8 @@ a wallpaper or a hand-written palette.
 │   │       ├── blueprint/  #   hand-written palette JSON (see its README)
 │   │       ├── template/   #   templates for the fixed palette
 │   │       └── config.toml #   renders the fixed palette
-│   └── docs/               # documentation (start at docs/README.md)
+│   ├── README.md           # entry point, flows, and docs index
+│   └── docs/               # theming docs
 ├── hypr/                   # compositor config (Lua)
 │   └── docs/               #   backlog fitur 0.56 yang belum dipakai
 ├── nvim/ kitty/ foot/ alacritty/ …   # one directory per tool
@@ -174,11 +175,13 @@ works and is resolved under `$XDG_CONFIG_HOME`.
 
 ## Theming
 
-Source of truth: [`matugen/`](matugen) (symlinked as `~/.config/matugen`).
+Source of truth: [`matugen/`](matugen) (symlinked as `~/.config/matugen`). Entry
+point is `matugen/matugen-ctl` — `palette <source>` (Flow A/B), `feel <profile>`,
+`reload [consumer ...]`, `list`, `status`; the renderers live in `matugen/script/`.
 
 ```text
         ┌─ wallpaper ─┐
-color ──┤              ├─ palette.sh ─► template ─► ~/.myenv/theme/generated/<palette>/
+color ──┤              ├─ matugen-ctl ─► template ─► ~/.myenv/theme/generated/<palette>/
         └─ blueprint ──┘                                     │
                                                               ▼
                                               ~/.myenv/theme/current  ◄─ symlink
@@ -190,14 +193,14 @@ color ──┤              ├─ palette.sh ─► template ─► ~/.myenv/t
 `~/.myenv` is the theme store **outside** this repo; the repo only renders into
 it. `current` is a symlink to one palette directory (`generated/wallpaper-based`
 for the wallpaper flow, `generated/kanagawa-dragon-lotus` for the fixed palette).
-`matugen/palette.sh <source>` renders into `generated/<palette>`, validates, then
+`matugen-ctl palette <source>` renders into `generated/<palette>`, validates, then
 flips `current`; the external `theme-switcher.sh` in `~/.myenv/script/` — parked
 in `theme.bak/` in this checkout — can point it at a named theme too.
 
 ### Flow A — wallpaper-derived (Material You)
 
 ```bash
-~/.dotfile/matugen/palette.sh <wallpaper>
+~/.dotfile/matugen/matugen-ctl palette <wallpaper>
 ```
 
 - Config: `matugen/core/palette/wallpaper-based/config.toml`
@@ -205,13 +208,13 @@ in `theme.bak/` in this checkout — can point it at a named theme too.
 - Vocabulary: `{{ colors.<role>.<scheme>.<format> }}` (MD3 roles: `primary`,
   `surface`, `on_surface`, …)
 - Output: `~/.myenv/theme/generated/wallpaper-based/<tool>/…`
-- Config writes **relative** paths (`/kitty/theme.conf`); `palette.sh` owns the
+- Config writes **relative** paths (`/kitty/theme.conf`); `matugen-ctl palette` owns the
   `-p ~/.myenv/theme/generated/<palette>` prefix and the `current` flip
 
 ### Flow B — fixed palette (a named theme)
 
 ```bash
-~/.dotfile/matugen/palette.sh ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json
+~/.dotfile/matugen/matugen-ctl palette ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json
 ```
 
 - Palette: `matugen/core/palette/kanagawa-dragon-lotus/blueprint/<variant>.json`
@@ -278,7 +281,7 @@ tidak ikut ke berkas tema Hyprland — itu urusan switcher
 wlogout do, because GTK 4 does support `@import` (verified with GTK 4.22 +
 swaync 0.12.6): the file holds one import line and then only derived colors and
 metrics, no palette literals. Neither flow has a `post_hook` any more: after a
-render, `matugen/palette.sh` runs `swaync-client -rs` (only when swaync is
+render, `matugen/script/palette.sh` runs `swaync-client -rs` (only when swaync is
 running) so the notification center repaints too (`-R` alone reloads
 `config.json` only and leaves the stylesheet alone).
 
@@ -294,7 +297,7 @@ back to plain TokyoNight and warns. See
 | Document | Contents |
 |---|---|
 | [`AGENTS.md`](AGENTS.md) | Rules and repo map for AI agents |
-| [`matugen/docs/README.md`](matugen/docs/README.md) | Index of the theming docs |
+| [`matugen/README.md`](matugen/README.md) | Matugen entry point, flows, and docs index |
 | [`matugen/docs/MATUGEN_SKILLS.md`](matugen/docs/MATUGEN_SKILLS.md) | How to write, register and test matugen templates |
 | [`matugen/docs/CHEATSHEETS.md`](matugen/docs/CHEATSHEETS.md) | MD3 role vocabulary and semantic mapping |
 | [`matugen/docs/VOCABULARY.md`](matugen/docs/VOCABULARY.md) | Sample `matugen --show-colors` output and how to read it |
@@ -317,11 +320,10 @@ Then make the theme available, since generated files are not committed:
 
 ```bash
 # wallpaper theme
-~/.dotfile/matugen/palette.sh <wallpaper>
+~/.dotfile/matugen/matugen-ctl palette <wallpaper>
 
 # or the fixed palette
-matugen json ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json \
-  -c ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/config.toml
+~/.dotfile/matugen/matugen-ctl palette ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json
 ```
 
 Requires `matugen` (4.x) on `PATH` and a `~/.myenv/theme` store with a `current`

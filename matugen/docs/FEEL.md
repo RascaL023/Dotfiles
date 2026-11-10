@@ -1,6 +1,6 @@
 # Feel — Rasa di Luar Warna
 
-> Indeks: [`README.md`](README.md) · terkait:
+> Indeks: [`README.md`](../README.md) · terkait:
 > [`PROGRESS.md`](PROGRESS.md), [`MATUGEN_SKILLS.md`](MATUGEN_SKILLS.md),
 > [`WM_FEEL_MATRIX.md`](WM_FEEL_MATRIX.md) (matriks fitur per WM),
 > [`THEME_ENGINE.md`](THEME_ENGINE.md) (reload & abstraksi engine),
@@ -88,7 +88,7 @@ font hari ini ikut ditulis template warna. Yang sudah berjalan:
 | Profil (nilai) | `matugen/core/feel/blueprint/<profil>.json` — sekarang baru `default.json` |
 | Template per konsumen | `matugen/core/feel/template/{source.scss, kitty.conf, foot.ini, gtk3.css, gtk4.css}` |
 | Mapping (template → output) | `matugen/core/feel/config.toml`, satu untuk semua profil |
-| Renderer | `matugen/feel.sh <profil>` → `~/.myenv/feel/generated/<profil>`, lalu flip `feel/current` |
+| Renderer | `matugen/matugen-ctl feel <profil>` (skrip: `matugen/script/feel.sh`) → `~/.myenv/feel/generated/<profil>`, lalu flip `feel/current` |
 
 Bentuk foldernya:
 
@@ -101,7 +101,7 @@ matugen/core/feel/
 
 Menambah rasa = menambah satu berkas di `blueprint/`; `config.toml` dan
 `template/` tidak disentuh. Nama berkas profil = nama rasa yang dipakai
-`feel.sh` (`feel.sh default` membaca `blueprint/default.json`).
+`matugen-ctl feel` (`matugen-ctl feel default` membaca `blueprint/default.json`).
 
 > Catatan jujur: `blueprint/default.json` dan `template/*` **belum sinkron**.
 > Profil memakai `font.{ui.text, ui.tooltip, ui.title, icon, system, terminal, weight}`,
@@ -270,7 +270,7 @@ Aturan:
    dan tidak ada filter `default` maupun `{% if %}` (blok `if` malah lolos
    sebagai teks). Jadi "kosong berarti pakai nilai lain" tidak mungkin di dalam
    template: itu tugas konsumen (contoh `hypr/config/core/theme.lua:340`) atau
-   `matugen/feel.sh`, yang menolak render bila ada placeholder tersisa.
+   `matugen/script/feel.sh`, yang menolak render bila ada placeholder tersisa.
    Ukuran font **tidak** masuk profil: tiap konsumen punya tuning sendiri.
    Pola validasi palet: `check_palette` di `nvim/lua/core/theme.lua`.
 2. **Angka dijepit** ke rentang aman, alasan penolakan ditulis ke stderr.
@@ -367,7 +367,7 @@ matugen/core/feel/
   konsumen membaca profil setengah jadi.
 - Warna dan rasa tidak pernah menulis file yang sama, kecuali
   `hypr/theme.lua` yang dipecah.
-- Entry point-nya `matugen/feel.sh <profil>` (bukan perintah matugen manual):
+- Entry point-nya `matugen/matugen-ctl feel <profil>` (skrip: `matugen/script/feel.sh`; bukan perintah matugen manual):
   render → cek berkas kosong/placeholder sisa → `sassc` untuk partial SCSS →
   baru flip `feel/current`.
 

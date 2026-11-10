@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# One entry point for matugen: palettes, feel profiles and reloads.
+set -u
+
+usage() {
+    cat <<'EOF'
+Usage: matugen-ctl <command> [args...]
+
+  palette <wallpaper|blueprint.json> [options]
+                     Render a palette, activate it, then reload consumers
+  feel <profile>     Render a feel profile, activate it, then reload
+  reload [consumer ...]
+                     Reload consumers without rendering
+  list               Show palettes, feel profiles and consumers
+  status             Show the active palette and feel profile
+  help               This text
+
+`palette` passes its options through to script/palette.sh (-n/--dry-run, --list).
+THEME_ROOT and FEEL_ROOT override the two stores.
+Exit: 0 ok, 1 render/reload failed, 2 usage, 127 matugen is missing.
+EOF
+}
+
+fail() {
+    printf 'matugen-ctl: %s\n' "$*" >&2
+    exit 2
+}
+
+# Builtins only: resolve the real path, so a symlink in ~/.local/bin still works.
+dir=$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" && pwd -P) || exit 1
+palette=$dir/script/palette.sh
+feel=$dir/script/feel.sh
+theme_store=${THEME_ROOT:-$HOME/.myenv/theme}
+feel_store=${FEEL_ROOT:-$HOME/.myenv/feel}
+
+command_name=${1:-help}
+if (( $# > 0 )); then
+    shift
+fi
+
+case $command_name in
+    -h|--help|help)
+        usage
+        exit 0
+        ;;
+esac
+
+# A copied script finds no config; fail here instead of inside matugen.
+[[ -x $palette && -x $feel ]] || fail "no script/palette.sh and script/feel.sh in $dir (install a symlink, not a copy)"
+
+list_palettes() {
+    local cfg name variants bp
+    for cfg in "$dir"/core/palette/*/config.toml; do
+        [[ -f $cfg ]] || continue
+        name=${cfg%/config.toml}
+        name=${name##*/}
+        variants=''
+        for bp in "$dir"/core/palette/"$name"/blueprint/*.json; do
+            [[ -f $bp ]] || continue
+            variants="$variants ${bp##*/}"
+        done
+        if [[ -n $variants ]]; then
+            printf '  %-24s blueprint:%s\n' "$name" "${variants//.json/}"
+        else
+            printf '  %-24s image\n' "$name"
+        fi
+    done
+}
+
+list_feel() {
+    local profile
+    for profile in "$dir"/core/feel/blueprint/*.json; do
+        [[ -f $profile ]] || continue
+        profile=${profile##*/}
+        printf '  %s\n' "${profile%.json}"
+    done
+}
+
+list_consumers() {
+    local tool count=0
+    while read -r tool; do
+        printf '%s ' "$tool"
+        count=$((count + 1))
+    done < <("$palette" --list)
+    (( count )) && printf '\n'
+    return 0
+}
+
+case $command_name in
+    palette)
+        (( $# )) || fail 'palette needs a wallpaper or a blueprint .json'
+        exec "$palette" "$@"
+        ;;
+    feel)
+        (( $# )) || fail 'feel needs a profile (see list)'
+        exec "$feel" "$@"
+        ;;
+    reload)
+        exec "$palette" "$@"
+        ;;
+    list)
+        printf 'palettes:\n'
+        list_palettes
+        printf 'feel profiles:\n'
+        list_feel
+        printf 'consumers:\n'
+        list_consumers
+        ;;
+    status)
+        status=0
+        palette_now=$(readlink -f -- "$theme_store/current" 2>/dev/null) || palette_now=''
+        feel_now=$(readlink -f -- "$feel_store/current" 2>/dev/null) || feel_now=''
+        if [[ -n $palette_now && -d $palette_now ]]; then
+            printf 'palette  %s  (%s)\n' "${palette_now##*/}" "$palette_now"
+        else
+            printf 'palette  none\n'
+            status=1
+        fi
+        if [[ -n $feel_now && -d $feel_now ]]; then
+            printf 'feel     %s  (%s)\n' "${feel_now##*/}" "$feel_now"
+        else
+            printf 'feel     none\n'
+            status=1
+        fi
+        exit "$status"
+        ;;
+    *)
+        fail "unknown command: $command_name (use --help)"
+        ;;
+esac

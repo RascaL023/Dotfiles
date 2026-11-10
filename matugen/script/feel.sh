@@ -11,7 +11,7 @@
 set -euo pipefail
 
 REPO="${HOME}/.dotfile"
-STORE="${HOME}/.myenv/feel"
+STORE="${FEEL_ROOT:-${HOME}/.myenv/feel}"
 CONFIG="${REPO}/matugen/core/feel/config.toml"
 PROFILES="${REPO}/matugen/core/feel/blueprint"
 

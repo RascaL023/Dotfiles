@@ -3,7 +3,7 @@
 > Pegangan praktis untuk memahami **arti semantic color Matugen** dan memilih warna yang cocok untuk aplikasi seperti Alacritty, Neovim, Waybar, Kitty, dll.
 > Fokus dokumen ini: **memetakan peran UI → semantic color Matugen**, bukan menghafalkan semua hex.
 >
-> Indeks dokumen: [`README.md`](README.md) · daftar nilai mentah:
+> Indeks dokumen: [`README.md`](../README.md) · daftar nilai mentah:
 > [`VOCABULARY.md`](VOCABULARY.md) · contoh pemakaian di repo:
 > [`../core/palette/wallpaper-based/`](../core/palette/wallpaper-based/).
 >

@@ -1,6 +1,6 @@
 # Blueprint JSON — `kanagawa-dragon-lotus`
 
-> Indeks dokumen: [`matugen/docs/README.md`](../../../../docs/README.md) · terkait: [`NVIM_MAPPING.md`](../../../../docs/NVIM_MAPPING.md), [`MATUGEN_SKILLS.md`](../../../../docs/MATUGEN_SKILLS.md)
+> Indeks dokumen: [`matugen/README.md`](../../../../README.md) · terkait: [`NVIM_MAPPING.md`](../../../../docs/NVIM_MAPPING.md), [`MATUGEN_SKILLS.md`](../../../../docs/MATUGEN_SKILLS.md)
 
 Dokumen ini menjelaskan **isi `dark.json` dan `light.json`**: apa arti setiap key, nilainya dipakai untuk apa, dan di file mana nilainya mendarat. Ditulis supaya bisa dibaca tanpa hafal matugen.
 

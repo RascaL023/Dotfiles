@@ -1,6 +1,6 @@
 # Kosakata Warna Matugen (contoh keluaran)
 
-> Indeks: [`README.md`](README.md) · dokumen ini melengkapi
+> Indeks: [`README.md`](../README.md) · dokumen ini melengkapi
 > [`CHEATSHEETS.md`](CHEATSHEETS.md) (yang menjelaskan *perannya* untuk UI),
 > sedangkan halaman ini menunjukkan *daftar mentah* nama-nama warna.
 >

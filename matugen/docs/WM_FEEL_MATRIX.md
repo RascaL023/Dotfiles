@@ -1,6 +1,6 @@
 # Matriks Feel: Hyprland 0.56 vs niri 26.04
 
-> Indeks: [`README.md`](README.md) · terkait: [`FEEL.md`](FEEL.md),
+> Indeks: [`README.md`](../README.md) · terkait: [`FEEL.md`](FEEL.md),
 > [`THEME_ENGINE.md`](THEME_ENGINE.md)
 
 **Status: rancangan + hasil verifikasi.** Dokumen ini memetakan setiap knob

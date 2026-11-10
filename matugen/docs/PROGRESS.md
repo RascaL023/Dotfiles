@@ -1,7 +1,7 @@
 # Template Coverage
 
-> Index: [`README.md`](README.md) · flows are described in
-> [`README.md`](README.md) and [`../../AGENTS.md`](../../AGENTS.md).
+> Index: [`README.md`](../README.md) · flows are described in
+> [`README.md`](../README.md) and [`../../AGENTS.md`](../../AGENTS.md).
 >
 > [x] = template exists in this repo · [ ] = consumer reads a generated file,
 > but the file is produced elsewhere (or the tool is not themed yet).
@@ -11,10 +11,10 @@ Last verified against the repo: 2026-11-11.
 > Template layout: every color template lives under `core/palette/<source>/`,
 > every feel template under `core/feel/template/<consumer>`, with feel
 > profiles in `core/feel/blueprint/<profile>.json`. Neither color config has
-> a `post_hook`: `matugen/palette.sh <wallpaper|blueprint.json>` renders into
+> a `post_hook`: `matugen-ctl palette <wallpaper|blueprint.json>` renders into
 > `~/.myenv/theme/generated/<palette>`, flips `theme/current` once the result
-> validates, then reloads the running desktop. Feel has its own entry point,
-> `matugen/feel.sh <profile>`.
+> validates, then reloads the running desktop. Feel has its own command,
+> `matugen-ctl feel <profile>`.
 
 ---
 
@@ -30,26 +30,26 @@ Config: `matugen/core/palette/wallpaper-based/config.toml` · output root:
 | [x] Neovim | `nvim.lua` | `nvim/theme.lua` ¹ | `nvim/lua/core/theme.lua` (`require`) |
 | [x] Lazygit | `lazygit.yml` | `lazygit/config.yml` | —² |
 | [x] Herdr | `herdr.toml` | `herdr/config.toml` | —² |
-| [x] GTK / CSS | `source.css` | `css/theme.css` (reload: `matugen/palette.sh`) | `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` |
+| [x] GTK / CSS | `source.css` | `css/theme.css` (reload: `matugen/script/palette.sh`) | `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` |
 | [x] SCSS | `source.scss` | `scss/_theme.scss` | `eww/eww.scss` |
 | [x] Rofi | `source.rasi` | `rasi/theme.rasi` | `rofi/themes/shared/palette.rasi` (all layouts) |
 | [x] Yazi | `yazi-flavor.toml`, `yazi-tmtheme.xml` | `yazi/flavor.toml`, `yazi/tmtheme.xml` | `yazi/theme.toml` (`[flavor] dark = "matugen"`) ³ |
 | [x] Foot | `foot.ini` | `foot/theme.ini` | `foot/foot.ini` (`include` via `current`) ⁴ |
-| [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (reload lewat `matugen/palette.sh`) | `hypr/config/core/theme.lua` (`require`, `load` modul data) ⁵ |
+| [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (reload lewat `matugen/script/palette.sh`) | `hypr/config/core/theme.lua` (`require`, `load` modul data) ⁵ |
 | [ ] Cava | — | — | not themed |
 
 > **Activation.** Writing into `generated/<palette>/` does not change the running
-> session: every reader goes through `current/…`. `matugen/palette.sh` renders
+> session: every reader goes through `current/…`. `matugen-ctl palette` renders
 > into `generated/.<palette>.tmp`, validates, moves it to `generated/<palette>`
 > and only then flips `current`, so Flow A is one command
-> (`matugen/palette.sh <wallpaper>`) and a failed render leaves the old theme
+> (`matugen-ctl palette <wallpaper>`) and a failed render leaves the old theme
 > active.
 
 ¹ Flow A writes Neovim into the same theme folder as every other tool
 (`nvim/theme.lua` under `generated/wallpaper-based/`), so a wallpaper render never
 touches the active theme; the palette reaches Neovim only once `current` points
 at `wallpaper-based` (see the activation note above). ² The generated file exists,
-but no include line inside this repo points at it yet (reload: `matugen/palette.sh`). ³ Yazi is split in two: the
+but no include line inside this repo points at it yet (reload: `matugen/script/palette.sh`). ³ Yazi is split in two: the
 generated file holds **colors only** (a flavor), while `yazi/theme.toml` keeps
 the glyphs and separators, the notify & cmp icons and the `which` columns, and
 never gets rewritten. The consumer is
@@ -72,7 +72,7 @@ memuatnya dengan `load(…, "t", {})` (env kosong: berkas hanya boleh
 mengembalikan tabel) lalu menimpa nilai default, dengan clamp untuk nilai di
 luar rentang aman. Nama field tidak boleh diubah; kalau berkas hilang atau gagal
 dimuat, nilai default dipakai dan alasannya ditulis ke stderr. Validasi tanpa
-reload: `luac -p ~/.myenv/theme/current/hypr/theme.lua` (`matugen/palette.sh`
+reload: `luac -p ~/.myenv/theme/current/hypr/theme.lua` (`matugen/script/palette.sh`
 menjalankan pemeriksaan ini sebelum reload).
 
 Bagian "rasa" (radius, opacity, blur, motion) berasal dari objek `feel` di
@@ -99,11 +99,11 @@ Config: `core/palette/kanagawa-dragon-lotus/config.toml` · blueprints:
 | [x] Rofi | `source.rasi` | `rasi/theme.rasi` |
 | [x] Lazygit | `lazygit.yml` | `lazygit/config.yml` |
 | [x] Herdr | `herdr.toml` | `herdr/config.toml` |
-| [x] GTK-3 | `gtk3.css` | `css/theme.css` (reload: `matugen/palette.sh`) |
+| [x] GTK-3 | `gtk3.css` | `css/theme.css` (reload: `matugen/script/palette.sh`) |
 | [x] SCSS | `source.scss` | `scss/_theme.scss` |
 | [x] Yazi | `yazi-flavor.toml`, `yazi-tmtheme.xml` | `yazi/flavor.toml`, `yazi/tmtheme.xml` (colors only; see ³) |
 | [x] Foot | `foot.ini` | `foot/theme.ini` |
-| [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (reload: `matugen/palette.sh`; lihat ⁵) |
+| [x] Hyprland | `hypr.lua` | `hypr/theme.lua` (reload: `matugen/script/palette.sh`; lihat ⁵) |
 
 Konsumen yang membaca lewat `~/.myenv/theme/current/…`: `kitty/kitty.conf`
 (`include`), `foot/foot.ini` (`include`),
@@ -123,7 +123,7 @@ Key reference for the JSON these templates read:
 ## Flow C — feel (`core/feel/*`)
 
 Config: `core/feel/config.toml` (satu untuk semua profil) · profil:
-`core/feel/blueprint/<profil>.json` · entry point: `matugen/feel.sh <profil>` · output root:
+`core/feel/blueprint/<profil>.json` · entry point: `matugen-ctl feel <profil>` · output root:
 `~/.myenv/feel/generated/<profil>/…` (dibalik ke `feel/current` setelah validasi).
 
 Sumbu yang sudah dipindah keluar palet: **font**, **UI terminal**

@@ -1,6 +1,6 @@
 # Theme Engine: Reload Mulus & Abstraksi
 
-> Indeks: [`README.md`](README.md) · terkait: [`FEEL.md`](FEEL.md),
+> Indeks: [`README.md`](../README.md) · terkait: [`FEEL.md`](FEEL.md),
 > [`WM_FEEL_MATRIX.md`](WM_FEEL_MATRIX.md)
 
 **Status: rancangan.** Yang dijelaskan di sini belum diterapkan. Fakta tentang
@@ -22,7 +22,7 @@ Dokumen ini menjawab tiga hal:
 
 Sekarang:
 
-- `matugen/palette.sh` merender satu palet ke `generated/<palette>`, memvalidasi,
+- `matugen/script/palette.sh` merender satu palet ke `generated/<palette>`, memvalidasi,
   lalu membalik `current`. Yang belum ada: pemilihan tema otomatis dan
   `current-status.json` (masih dipegang `theme-switcher.sh` di luar repo).
 - Post-hook matugen berjalan **tanpa tahu sesi**: `hyprctl reload` dipanggil
@@ -248,7 +248,7 @@ Tambahan yang membuat mulus:
 - **Tidak ada reload lintas sesi.** Guard ganda: manifest + deteksi env +
   flag `--session`. Kalau `--session=hypr` tapi env menunjukkan niri → tolak.
 - **Reload tidak lagi hidup di post_hook matugen.** Kedua config tidak punya
-  `post_hook`; sementara ini `matugen/palette.sh` yang menjadi dispatcher
+  `post_hook`; sementara ini `matugen/script/palette.sh` yang menjadi dispatcher
   (sadar pemilik proses, sadar sesi, tervalidasi, ber-`timeout`). Saat switcher
   memegang aktivasi, script itu pindah ke sana dan matugen berhenti tahu soal
   reload sama sekali.
@@ -292,7 +292,7 @@ Dua sumber, satu kontrak (`palette.json`), lalu renderer yang sama.
 | Custom color | via config/palet | `[config.custom_colors]` → **role warna** saja |
 | Output | file per template | file per template, `output_path_dynamic`, hook |
 | Skip file tak berubah | tidak dijamin | ya (docs: skips rewriting unchanged files) |
-| Hot reload | lewat `matugen/palette.sh` (sementara) | ya (~150 ms), state GUI menang |
+| Hot reload | lewat `matugen/script/palette.sh` (sementara) | ya (~150 ms), state GUI menang |
 | Integrasi WM otomatis | tidak (kita tulis template) | ya: `niri/noctalia.kdl`, `hypr/noctalia.lua` |
 
 ### 6.1 Tiga skenario
