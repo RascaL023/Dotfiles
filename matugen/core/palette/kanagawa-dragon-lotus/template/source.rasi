@@ -37,8 +37,4 @@
   // ── Efek ──
   effect-scrim          : {{ effect.scrim | to_color | set_alpha: 0.45 | format: rgba }};
 
-  // ── Ukuran (bukan warna) ──
-  launcher-width        : 45%;
-  wallpaper-width       : 100%;
-  window-radius         : {{ feel.chrome.rofi_radius }}px;
 }

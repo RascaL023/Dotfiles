@@ -23,3 +23,7 @@ output_path = "/css/swaync-font.css"
 [templates.alacritty]
 input_path  = "~/.config/matugen/core/feel/template/alacritty.toml"
 output_path = "/alacritty/feel.toml"
+
+[templates.rofi]
+input_path  = "~/.config/matugen/core/feel/template/rofi.rasi"
+output_path = "/rasi/feel.rasi"

@@ -94,6 +94,8 @@
   "chrome": {
     "layer_blur": true,
     "rofi_radius": 10,
+    "rofi_launcher_width": "45%",
+    "rofi_wallpaper_width": "100%",
     "font_family": "",
     "groupbar": {
       "enabled": false,

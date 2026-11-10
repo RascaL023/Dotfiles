@@ -1,0 +1,12 @@
+// ############################
+// ## Generated with Matugen ##
+// ############################
+// ## Manual edit is not recomended,
+// ## Except for testing.
+
+
+* {
+  window-radius         : {{ chrome.rofi_radius }}px;
+  launcher-width        : {{ chrome.rofi_launcher_width }};
+  wallpaper-width       : {{ chrome.rofi_wallpaper_width }};
+}

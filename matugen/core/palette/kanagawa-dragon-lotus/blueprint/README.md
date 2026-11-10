@@ -213,7 +213,7 @@ nilainya. Jadi dua blueprint dengan palet sama tetap bisa terasa berbeda.
 | `motion.style_ws_in` / `style_ws_out` | `slidefade` / `slidevert` | — | gaya animasi workspace |
 | `motion.layers_speed` | `1.0` | 0.4–2.5 | kecepatan layer (bar/launcher) |
 | `chrome.layer_blur` | `true` | — | blur untuk waybar/rofi/swaync |
-| `chrome.rofi_radius` | `10` | 0–24 | radius window rofi (`@window-radius`) |
+| `chrome.rofi_radius` | `10` | 0–24 | radius rofi; kini dibaca `core/feel`, bukan template palet |
 | `chrome.font_family` | `""` | — | `misc.font_family`; kosong = default |
 | `chrome.groupbar.enabled` / `gradient` | `false` / `true` | — | tab group |
 | `chrome.groupbar.height` / `radius` | `14` / `4` | 0–40 / 0–24 | ukuran groupbar |

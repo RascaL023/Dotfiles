@@ -626,15 +626,16 @@ Template `gtk-colors.css` (libadwaita named colors):
   | `selection-fg` | Text on `selection-bg` |
   | `selection-accent-bg` | Accent selection used by the wallpaper gallery |
   | `effect-scrim` | Translucent fullscreen backdrop |
-  | `launcher-width` | Launcher window width |
-  | `wallpaper-width` | Wallpaper width token, currently unused by the fullscreen layout |
-  | `window-radius` | Theme-provided window corner radius |
+  | `launcher-width` | Launcher window width (feel) |
+  | `wallpaper-width` | Wallpaper width token, currently unused by the fullscreen layout (feel) |
+  | `window-radius` | Window corner radius, from the feel profile |
 
   Selection tokens retain the existing Rofi color assignments. Current prompt
   backgrounds use `accent-prompt`, and their text uses `layer-base`, preserving
   the existing appearance. New layouts can use `accent-primary` with `accent-on`.
-  Flow B's `window-radius` still reads `feel.chrome.rofi_radius`; blueprint
-  keys are unchanged. Layouts with a literal radius keep that override.
+  `launcher-width`, `wallpaper-width` and `window-radius` now come from
+  `~/.myenv/feel/current/rasi/feel.rasi`; the colour template no longer
+  writes them. Layouts with a literal radius keep that override.
   Re-render existing generated Rofi palettes after renaming tokens; the
   layouts now reference the new names. No app reload hook is needed.
 

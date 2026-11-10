@@ -52,9 +52,8 @@ Kalau nanti dieksekusi, perbarui dokumen ini di commit yang sama — bagian
   `feel` tinggal di dalam blueprint.
 - Akibatnya warna dan rasa berbagi satu file, satu render, dan satu pilihan
   tema. Ini yang mau dipisah.
-- `chrome.rofi_radius` sudah ditulis template Flow B dan dipakai
-  `template/source.rasi` (`window-radius`), tetapi **belum dipetakan** di
-  `hypr/config/core/theme.lua` — hanya lewat rofi, bukan Hyprland.
+- `chrome.rofi_radius` kini dirender flow rasa ke `rasi/feel.rasi`; template
+  palet tidak lagi menulis `window-radius`.
 
 ### 2.2 niri
 
@@ -123,6 +122,9 @@ Konsumen yang sudah membaca hasilnya:
 - `alacritty`: `import` `~/.myenv/feel/current/alacritty/feel.toml`
   (opacity, padding, cursor, ukuran & family font); warnanya tetap dari
   `theme/current/alacritty/theme.toml`.
+- `rofi`: `@import` `~/.myenv/feel/current/rasi/feel.rasi` dari
+  `rofi/themes/shared/palette.rasi` (dipakai semua layout), berisi
+  `window-radius`, `launcher-width`, `wallpaper-width`.
 - `waybar`: `@import` `~/myenv/feel/current/css/waybar-font.css` di baris atas
   `waybar/style.css`. GTK 3 tidak punya `var()`, jadi berkas itu berisi aturan
   `* { font-family: … }` siap pakai; `font-family` literal dihapus dari
@@ -136,7 +138,7 @@ Konsekuensinya: `matugen/core/palette/*/source.scss` **tidak lagi** menulis
 mengubah satu profil rasa, tidak menyentuh palet sama sekali.
 
 Yang **belum** ikut (masih hardcoded, jangan diklaim sudah): `wlogout`,
-`hyprlock`, `rofi`, bar `eww` (`eww/bar/styles/_tokens.scss` masih menyimpan font
+`hyprlock`, bar `eww` (`eww/bar/styles/_tokens.scss` masih menyimpan font
 lokal karena bar sengaja bisa jalan tanpa theme store), dan font display depth
 clock.
 
@@ -301,7 +303,7 @@ Kelas ini **tidak perlu file hasil render**: profil rasa sudah berupa Lua.
 | Konsumen | Mekanisme |
 |---|---|
 | niri | `include optional=true "~/.myenv/feel/current/niri.kdl"` (lihat §8) |
-| rofi | `feel.rasi` berisi variabel (`window-radius`, `element-radius`, …), di-`@import` dari `shared/list.rasi`; hapus radius literal |
+| rofi | `feel.rasi` berisi variabel (`window-radius`, `launcher-width`, `wallpaper-width`), di-`@import` dari `shared/palette.rasi` |
 | swaync | `feel.css` berisi blok `:root { --radius: …; --hover-transition: … }`; `style.css` meng-`@import` paling atas dan **tidak lagi** mendefinisikan `:root` sendiri |
 | eww | `_feel.scss` berisi variabel; `eww.scss` meng-import setelah `theme`; aturan memakai `$radius-bar` dsb. |
 | kitty / foot / alacritty | include kedua untuk padding/opacity bila diperlukan; **opacity tetap di WM** agar tidak dobel |

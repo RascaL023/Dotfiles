@@ -125,8 +125,8 @@ Config: `core/feel/config.toml` (satu untuk semua profil) · profil:
 `core/feel/blueprint/<profil>.json` · entry point: `matugen/feel.sh <profil>` · output root:
 `~/.myenv/feel/generated/<profil>/…` (dibalik ke `feel/current` setelah validasi).
 
-Sumbu yang sudah dipindah keluar palet: **font** dan **UI terminal**
-(opacity, padding, cursor).
+Sumbu yang sudah dipindah keluar palet: **font**, **UI terminal**
+(opacity, padding, cursor), dan **chrome rofi** (radius, lebar menu).
 
 | Tool | Template | Output | Consumer reads it |
 |---|---|---|---|
@@ -134,6 +134,7 @@ Sumbu yang sudah dipindah keluar palet: **font** dan **UI terminal**
 | [x] Kitty | `template/kitty.conf` | `kitty/feel.conf` | `kitty/kitty.conf` (`include`) |
 | [x] Alacritty | `template/alacritty.toml` | `alacritty/feel.toml` | `alacritty/alacritty.toml` (`import`, sesudah tema) |
 | [x] Foot | `template/foot.ini` | `foot/feel.ini` | `foot/foot.ini` (`include`) |
+| [x] Rofi | `template/rofi.rasi` | `rasi/feel.rasi` | `rofi/themes/shared/palette.rasi` (`@import`) |
 | [x] Waybar | `template/gtk3.css` | `css/waybar-font.css` | `waybar/style.css` (`@import`, aturan `*` siap pakai — GTK 3) |
 | [x] Swaync | `template/gtk4.css` | `css/swaync-font.css` | `swaync/style.css` (`@import` + `var(--font-family-ui)`) |
 | [ ] wlogout / hyprlock / rofi | — | — | masih hardcoded |
