@@ -16,7 +16,7 @@ Blueprint = **palet warna yang ditulis tangan**, bukan hasil matugen. Ini kebali
 |---|---|---|
 | Sumber warna | gambar wallpaper | JSON yang ditulis manusia |
 | Yang menentukan warna | matugen (Material You) | kamu, di editor |
-| Perintah | `matugen image <gambar> -c matugen/config.toml` | `matugen json <blueprint.json> -c .../config.toml` |
+| Perintah | `matugen image <gambar> -c matugen/core/palette/wallpaper-based/config.toml` | `matugen json <blueprint.json> -c .../config.toml` |
 | Kosakata template | `{{ colors.<role>.default.hex }}` | `{{ accent.primary }}`, `{{ syntax.keyword }}`, dst. |
 | Output | `~/.myenv/theme/generated/wallpaper-based/<tool>/…` | `~/.myenv/theme/generated/kanagawa-dragon-lotus/<tool>/…` |
 
@@ -261,7 +261,7 @@ Tabel ini tidak lengkap untuk semua tool (ada tool yang memakai kombinasi sendir
    [config]
 
    [templates.tool]
-   input_path  = "~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/template/tool.conf"
+   input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/tool.conf"
    output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/tool/theme.conf"
    ```
    Config matugen **wajib** diawali `[config]`. Selalu uji ke `/tmp` dulu (bagian 2), baru render ke jalur sebenarnya.
@@ -291,7 +291,7 @@ Jalurnya:
 - → dibaca lewat tema aktif: `~/.myenv/theme/current/foot/theme.ini`
 - → pemuat repo: `foot/foot.ini` (`include=.../current/foot/theme.ini`)
 
-Alur wallpaper punya pasangan yang sama: `palette/wallpaper-based/foot.ini` → `generated/wallpaper-based/foot/theme.ini`. Karena pemuatnya menunjuk ke `current`, foot ikut tema yang sedang aktif, bukan terpaku pada folder kanagawa.
+Alur wallpaper punya pasangan yang sama: `palette/wallpaper-based/template/foot.ini` → `generated/wallpaper-based/foot/theme.ini`. Karena pemuatnya menunjuk ke `current`, foot ikut tema yang sedang aktif, bukan terpaku pada folder kanagawa.
 
 Pola render Foot sederhana:
 - `foreground`, `background` → `[colors]` utama.

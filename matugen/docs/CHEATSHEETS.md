@@ -5,12 +5,12 @@
 >
 > Indeks dokumen: [`README.md`](README.md) · daftar nilai mentah:
 > [`VOCABULARY.md`](VOCABULARY.md) · contoh pemakaian di repo:
-> [`../templates/palette/wallpaper-based/`](../templates/palette/wallpaper-based/).
+> [`../core/palette/wallpaper-based/`](../core/palette/wallpaper-based/).
 >
 > **Cakupan:** dokumen ini hanya berlaku untuk alur **wallpaper → Material You**
 > (`matugen image`). Tema berpalet tetap tidak memakai nama role di sini;
 > kosakatanya ada di
-> [`../templates/palette/kanagawa-dragon-lotus/blueprint/README.md`](../templates/palette/kanagawa-dragon-lotus/blueprint/README.md).
+> [`../core/palette/kanagawa-dragon-lotus/blueprint/README.md`](../core/palette/kanagawa-dragon-lotus/blueprint/README.md).
 
 ---
 

@@ -6,19 +6,19 @@
 > [x] = template exists in this repo · [ ] = consumer reads a generated file,
 > but the file is produced elsewhere (or the tool is not themed yet).
 
-Last verified against the repo: 2026-11-03.
+Last verified against the repo: 2026-11-11.
 
-> Template layout: every color template lives under `templates/palette/<source>/`,
-> every feel template under `templates/feel/template/<consumer>`, with feel
-> profiles in `templates/feel/blueprint/<profile>.json`. Neither color config has
+> Template layout: every color template lives under `core/palette/<source>/`,
+> every feel template under `core/feel/template/<consumer>`, with feel
+> profiles in `core/feel/blueprint/<profile>.json`. Neither color config has
 > a `post_hook`: after a render, `matugen/reload.sh` makes the running desktop
 > pick the files up. Feel has its own entry point, `matugen/feel.sh <profile>`.
 
 ---
 
-## Flow A — wallpaper (`templates/palette/wallpaper-based/*`)
+## Flow A — wallpaper (`core/palette/wallpaper-based/template/*`)
 
-Config: `matugen/config.toml` · output root:
+Config: `matugen/core/palette/wallpaper-based/config.toml` · output root:
 `~/.myenv/theme/generated/wallpaper-based/<tool>/…`
 
 | Tool | Template | Output | Consumer reads it |
@@ -84,9 +84,9 @@ menerapkannya.
 
 ---
 
-## Flow B — fixed palette (`templates/palette/kanagawa-dragon-lotus/template/*`)
+## Flow B — fixed palette (`core/palette/kanagawa-dragon-lotus/template/*`)
 
-Config: `templates/palette/kanagawa-dragon-lotus/config.toml` · blueprints:
+Config: `core/palette/kanagawa-dragon-lotus/config.toml` · blueprints:
 `blueprint/<variant>.json` (`dark.json`, `light.json`) · output root:
 `~/.myenv/theme/generated/kanagawa-dragon-lotus/<tool>/…`
 
@@ -115,14 +115,14 @@ yang memilikinya, jadi `current` boleh menunjuk ke folder kanagawa tanpa
 kehilangan warna.
 
 Key reference for the JSON these templates read:
-[`blueprint/README.md`](../templates/palette/kanagawa-dragon-lotus/blueprint/README.md).
+[`blueprint/README.md`](../core/palette/kanagawa-dragon-lotus/blueprint/README.md).
 
 ---
 
-## Flow C — feel (`templates/feel/*`)
+## Flow C — feel (`core/feel/*`)
 
-Config: `templates/feel/feel.toml` (satu untuk semua profil) · profil:
-`templates/feel/blueprint/<profil>.json` · entry point: `matugen/feel.sh <profil>` · output root:
+Config: `core/feel/config.toml` (satu untuk semua profil) · profil:
+`core/feel/blueprint/<profil>.json` · entry point: `matugen/feel.sh <profil>` · output root:
 `~/.myenv/feel/generated/<profil>/…` (dibalik ke `feel/current` setelah validasi).
 
 Sumbu yang sudah dipindah keluar palet: **font**.
@@ -157,7 +157,7 @@ Yazi theme): nothing reads it, because `yazi/theme.toml` in this repo selects th
 `matugen` flavor. `foot/theme.ini`, `kitty/theme.conf` and `hypr/theme.lua` in
 that folder are produced by the flows above now, not by the legacy engine.
 Do not add a template
-to `matugen/config.toml` here to "fix" a mismatch; check which side owns the path
+to `matugen/core/palette/wallpaper-based/config.toml` here to "fix" a mismatch; check which side owns the path
 first.
 
 `foot/foot.ini` reaches its palette through the active theme, not a fixed

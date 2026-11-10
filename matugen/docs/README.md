@@ -14,7 +14,7 @@ dokumentasi, bukan sekadar catatan usang.
 | [`WM_FEEL_MATRIX.md`](WM_FEEL_MATRIX.md) | ID | Matriks fitur feel Hyprland 0.56 vs niri 26.04: mana yang sama, beda semantik, hanya di satu WM, dan mana yang harus di app. |
 | [`THEME_ENGINE.md`](THEME_ENGINE.md) | ID | Strategi reload per sesi (Hyprland/niri), kontrak `palette.json`/`feel.json`/manifest, dan abstraksi engine matugen vs Noctalia. |
 | [`NVIM_MAPPING.md`](NVIM_MAPPING.md) | ID | Key palet → highlight group Neovim. |
-| [`../templates/palette/kanagawa-dragon-lotus/blueprint/README.md`](../templates/palette/kanagawa-dragon-lotus/blueprint/README.md) | ID | Referensi setiap key JSON blueprint (alur palet tetap). |
+| [`../core/palette/kanagawa-dragon-lotus/blueprint/README.md`](../core/palette/kanagawa-dragon-lotus/blueprint/README.md) | ID | Referensi setiap key JSON blueprint (alur palet tetap). |
 
 ---
 
@@ -25,19 +25,19 @@ memang untuk alur itu:
 
 | | A — wallpaper | B — palet tetap |
 |---|---|---|
-| Config | `matugen/config.toml` | `matugen/templates/palette/kanagawa-dragon-lotus/config.toml` |
-| Template | `matugen/templates/palette/wallpaper-based/*` | `matugen/templates/palette/kanagawa-dragon-lotus/template/*` |
+| Config | `matugen/core/palette/wallpaper-based/config.toml` | `matugen/core/palette/kanagawa-dragon-lotus/config.toml` |
+| Template | `matugen/core/palette/wallpaper-based/template/*` | `matugen/core/palette/kanagawa-dragon-lotus/template/*` |
 | Sumber warna | gambar | JSON tulis tangan di `blueprint/` |
 | Perintah | `matugen image …` | `matugen json …` |
 | Kosakata template | `{{ colors.<role>.<scheme>.<format> }}` | `{{ accent.primary }}`, `{{ syntax.keyword }}`, … |
 | Dokumen rujukan | `CHEATSHEETS.md`, `VOCABULARY.md`, bagian §1–11 `MATUGEN_SKILLS.md` | `blueprint/README.md`, `NVIM_MAPPING.md` |
 | Output | `~/.myenv/theme/generated/wallpaper-based/<tool>/…` | `~/.myenv/theme/generated/<theme>/<tool>/…` |
 
-Semua template **warna** tinggal di `matugen/templates/palette/<sumber>/` — satu
+Semua template **warna** tinggal di `matugen/core/palette/<sumber>/` — satu
 folder per sumber palet (`wallpaper-based/`, `kanagawa-dragon-lotus/`). Template
-**rasa** tinggal di `matugen/templates/feel/`: profil di
+**rasa** tinggal di `matugen/core/feel/`: profil di
 `blueprint/<profil>.json`, template per konsumen di `template/`, dan satu config
-render `feel.toml` yang dipakai semua profil; render lewat
+render `config.toml` yang dipakai semua profil; render lewat
 `matugen/feel.sh <profil>` (lihat [`FEEL.md`](FEEL.md) §7).
 
 Aturan singkat: **jangan pernah mencampur keduanya dalam satu config matugen.**

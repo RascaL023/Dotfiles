@@ -42,20 +42,20 @@ script and the theming pipeline work with any compositor.
 ├── .synchronizer/{.sync.sh,state.tmp}
 ├── tools.list                    # tools the synchronizer manages
 ├── matugen/
-│   ├── config.toml               # Flow A (wallpaper → Material You)
 │   ├── feel.sh                   # Flow C: render a feel profile, flip feel/current
-│   ├── templates/
-│   │   ├── feel/                         # Flow C
-│   │   │   ├── blueprint/<profile>.json  #   values (one file per profile)
-│   │   │   ├── template/*                #   per-consumer templates
-│   │   │   └── feel.toml                 #   render config, shared by all profiles
-│   │   ├── palette/                      # color templates, one dir per source
-│   │   │   ├── wallpaper-based/*         # Flow A templates
-│   │   │   └── kanagawa-dragon-lotus/
-│   │   │       ├── blueprint/*.json      # Flow B palette (one per variant)
-│   │   │       ├── template/*            # Flow B templates
-│   │   │       ├── config.toml           # Flow B render config
-│   │   │       └── blueprint/README.md   # key-by-key reference
+│   ├── core/feel/                        # Flow C
+│   │   ├── blueprint/<profile>.json      #   values (one file per profile)
+│   │   ├── template/*                    #   per-consumer templates
+│   │   └── config.toml                   #   render config, shared by all profiles
+│   ├── core/palette/                     # color templates, one dir per source
+│   │   ├── wallpaper-based/
+│   │   │   ├── config.toml               #   Flow A render config
+│   │   │   └── template/*                #   Flow A templates
+│   │   └── kanagawa-dragon-lotus/
+│   │       ├── blueprint/*.json          #   Flow B palette (one per variant)
+│   │       ├── template/*                #   Flow B templates
+│   │       ├── config.toml               #   Flow B render config
+│   │       └── blueprint/README.md       #   key-by-key reference
 │   └── docs/                     # start at docs/README.md
 ├── nvim/ kitty/ foot/ …          # one directory per tool, symlinked to ~/.config
 └── README.md                     # user-facing overview
@@ -64,7 +64,7 @@ script and the theming pipeline work with any compositor.
 Entry points:
 
 - Config sync: `.synchronizer/.sync.sh`
-- Theming: `matugen/config.toml` (Flow A), `matugen/templates/palette/<theme>/config.toml` (Flow B)
+- Theming: `matugen/core/palette/wallpaper-based/config.toml` (Flow A), `matugen/core/palette/<theme>/config.toml` (Flow B)
 - Agent docs: this file + `matugen/docs/`
 
 ---
@@ -92,11 +92,11 @@ bash ~/.dotfile/.synchronizer/.sync.sh
 
 ```bash
 # Flow A: wallpaper-derived
-matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/config.toml
+matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/core/palette/wallpaper-based/config.toml
 
 # Flow B: fixed palette (pick the variant with the file you pass)
-matugen json ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/blueprint/dark.json \
-  -c ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/config.toml
+matugen json ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json \
+  -c ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/config.toml
 
 # Flow C: feel (one JSON per profile, same toml and templates)
 ~/.dotfile/matugen/feel.sh default
@@ -114,7 +114,7 @@ Test a template into `/tmp` before rendering over a live path — recipe in
 
 | | Flow A — wallpaper | Flow B — fixed palette |
 |---|---|---|
-| Config | `matugen/config.toml` | `matugen/templates/palette/<theme>/config.toml` |
+| Config | `matugen/core/palette/wallpaper-based/config.toml` | `matugen/core/palette/<theme>/config.toml` |
 | Palette source | the image | `blueprint/<variant>.json` (hand-written) |
 | Command | `matugen image …` | `matugen json <blueprint>.json …` |
 | Template vocabulary | `{{ colors.<role>.<scheme>.<format> }}` | root-level keys: `{{ accent.primary }}`, `{{ syntax.keyword }}` |
@@ -123,14 +123,14 @@ Test a template into `/tmp` before rendering over a live path — recipe in
 
 Rules:
 
-- **Separate config per flow.** Adding a Flow B template to `matugen/config.toml`
+- **Separate config per flow.** Adding a Flow B template to `matugen/core/palette/wallpaper-based/config.toml`
   breaks every `matugen image` run (no `accent.*` in a Material You palette).
 - **Feel is its own flow, not part of a palette.** Colors write
   `~/.myenv/theme/current`, feel writes `~/.myenv/feel/current`; no file is
   written by both. Profiles are data only:
-  `matugen/templates/feel/blueprint/<profile>.json`, with one shared
-  `matugen/templates/feel/feel.toml` and shared
-  `matugen/templates/feel/template/` — adding a profile never touches the toml
+  `matugen/core/feel/blueprint/<profile>.json`, with one shared
+  `matugen/core/feel/config.toml` and shared
+  `matugen/core/feel/template/` — adding a profile never touches the config
   or the templates.
 - **Render feel only through `matugen/feel.sh <profile>`.** It renders into
   `~/.myenv/feel/generated/<profile>` and only then flips `feel/current`, so a
@@ -181,8 +181,8 @@ Rules:
   `nvim/init.lua` starts `core.theme_watch` **before** `core.lazy` so the
   watcher survives a failing plugin spec.
 - Templates that produce it:
-  - Flow A: `matugen/templates/palette/wallpaper-based/nvim.lua` → `~/.myenv/theme/generated/wallpaper-based/nvim/theme.lua`
-  - Flow B: `matugen/templates/palette/kanagawa-dragon-lotus/template/nvim.lua` → `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua`
+  - Flow A: `matugen/core/palette/wallpaper-based/template/nvim.lua` → `~/.myenv/theme/generated/wallpaper-based/nvim/theme.lua`
+  - Flow B: `matugen/core/palette/kanagawa-dragon-lotus/template/nvim.lua` → `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua`
 - **Both flows write into their own theme folder, never into `current`.** The
   loader still reads `current/nvim/theme.lua`, so a palette only goes live after
   `current` points at that folder; activating Flow A is still manual (nothing in
@@ -260,7 +260,7 @@ Rules:
 | `matugen/docs/WM_FEEL_MATRIX.md` | per-feature feel matrix: Hyprland-only, niri-only, differing semantics, and app-level fallbacks |
 | `matugen/docs/THEME_ENGINE.md` | session-aware reload strategy, palette/feel/manifest contracts, matugen vs Noctalia abstraction |
 | `matugen/docs/NVIM_MAPPING.md` | which palette key colors which Neovim highlight group |
-| `matugen/templates/palette/kanagawa-dragon-lotus/blueprint/README.md` | every key of the Flow B blueprint JSON |
+| `matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md` | every key of the Flow B blueprint JSON |
 | `hypr/docs/ROADMAP_V56.md` | unimplemented Hyprland 0.56 features: recipes, verification steps, backlog |
 | `eww/bar/README.md` | the Eww bar: `barctl`, settings, adapter, troubleshooting |
 | `eww/depth-clock/README.md` | the wallpaper depth clock: `depthctl`, layout knobs, foreground mask |

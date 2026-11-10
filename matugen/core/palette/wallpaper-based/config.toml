@@ -1,49 +1,49 @@
 [config]
 
 [templates.alacritty]
-input_path      = "~/.config/matugen/templates/palette/wallpaper-based/alacritty.toml"
+input_path      = "~/.config/matugen/core/palette/wallpaper-based/template/alacritty.toml"
 output_path     = "~/.myenv/theme/generated/wallpaper-based/alacritty/theme.toml"
 
 [templates.kitty]
-input_path      = "~/.config/matugen/templates/palette/wallpaper-based/kitty.conf"
+input_path      = "~/.config/matugen/core/palette/wallpaper-based/template/kitty.conf"
 output_path     = "~/.myenv/theme/generated/wallpaper-based/kitty/theme.conf"
 
 [templates.lazygit]
-input_path      = "~/.config/matugen/templates/palette/wallpaper-based/lazygit.yml"
+input_path      = "~/.config/matugen/core/palette/wallpaper-based/template/lazygit.yml"
 output_path     = "~/.myenv/theme/generated/wallpaper-based/lazygit/config.yml"
 
 [templates.css]
-input_path      = "~/.config/matugen/templates/palette/wallpaper-based/source.css"
+input_path      = "~/.config/matugen/core/palette/wallpaper-based/template/source.css"
 output_path     = "~/.myenv/theme/generated/wallpaper-based/css/theme.css"
 
 [templates.scss]
-input_path      = "~/.config/matugen/templates/palette/wallpaper-based/source.scss"
+input_path      = "~/.config/matugen/core/palette/wallpaper-based/template/source.scss"
 output_path     = "~/.myenv/theme/generated/wallpaper-based/scss/_theme.scss"
 
 [templates.rasi]
-input_path      = "~/.config/matugen/templates/palette/wallpaper-based/source.rasi"
+input_path      = "~/.config/matugen/core/palette/wallpaper-based/template/source.rasi"
 output_path     = "~/.myenv/theme/generated/wallpaper-based/rasi/theme.rasi"
 
 [templates.nvim]
-input_path      = "~/.config/matugen/templates/palette/wallpaper-based/nvim.lua"
+input_path      = "~/.config/matugen/core/palette/wallpaper-based/template/nvim.lua"
 output_path     = "~/.myenv/theme/generated/wallpaper-based/nvim/theme.lua"
 
 [templates.herdr]
-input_path      = "~/.config/matugen/templates/palette/wallpaper-based/herdr.toml"
+input_path      = "~/.config/matugen/core/palette/wallpaper-based/template/herdr.toml"
 output_path     = "~/.myenv/theme/generated/wallpaper-based/herdr/config.toml"
 
 [templates.yazi]
-input_path      = "~/.config/matugen/templates/palette/wallpaper-based/yazi-flavor.toml"
+input_path      = "~/.config/matugen/core/palette/wallpaper-based/template/yazi-flavor.toml"
 output_path     = "~/.myenv/theme/generated/wallpaper-based/yazi/flavor.toml"
 
 [templates.yazi-tmtheme]
-input_path      = "~/.config/matugen/templates/palette/wallpaper-based/yazi-tmtheme.xml"
+input_path      = "~/.config/matugen/core/palette/wallpaper-based/template/yazi-tmtheme.xml"
 output_path     = "~/.myenv/theme/generated/wallpaper-based/yazi/tmtheme.xml"
 
 [templates.foot]
-input_path      = "~/.config/matugen/templates/palette/wallpaper-based/foot.ini"
+input_path      = "~/.config/matugen/core/palette/wallpaper-based/template/foot.ini"
 output_path     = "~/.myenv/theme/generated/wallpaper-based/foot/theme.ini"
 
 [templates.hypr]
-input_path      = "~/.config/matugen/templates/palette/wallpaper-based/hypr.lua"
+input_path      = "~/.config/matugen/core/palette/wallpaper-based/template/hypr.lua"
 output_path     = "~/.myenv/theme/generated/wallpaper-based/hypr/theme.lua"

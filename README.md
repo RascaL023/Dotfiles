@@ -21,10 +21,11 @@ a wallpaper or a hand-written palette.
 ├── .synchronizer/          # the link/restore/status script + local state
 ├── tools.list              # which tools the synchronizer manages
 ├── matugen/                # theming engine: configs, templates, palettes
-│   ├── config.toml         #   wallpaper-derived theme (Material You)
-│   ├── templates/
-│   │   ├── general/        #   templates for the wallpaper flow
-│   │   ├── feel/           #   rasa: blueprint/ (profil), template/, feel.toml
+│   ├── core/feel/          #   rasa: blueprint/<profil>.json, template/, config.toml
+│   ├── core/palette/       #   color templates, one dir per source
+│   │   ├── wallpaper-based/
+│   │   │   ├── config.toml #   wallpaper-derived theme (Material You)
+│   │   │   └── template/   #   templates for the wallpaper flow
 │   │   └── kanagawa-dragon-lotus/
 │   │       ├── blueprint/  #   hand-written palette JSON (see its README)
 │   │       ├── template/   #   templates for the fixed palette
@@ -196,11 +197,11 @@ checkout.
 ### Flow A — wallpaper-derived (Material You)
 
 ```bash
-matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/config.toml
+matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/core/palette/wallpaper-based/config.toml
 ```
 
-- Config: `matugen/config.toml`
-- Templates: `matugen/templates/palette/wallpaper-based/*`
+- Config: `matugen/core/palette/wallpaper-based/config.toml`
+- Templates: `matugen/core/palette/wallpaper-based/template/*`
 - Vocabulary: `{{ colors.<role>.<scheme>.<format> }}` (MD3 roles: `primary`,
   `surface`, `on_surface`, …)
 - Output: `~/.myenv/theme/generated/wallpaper-based/<tool>/…`
@@ -208,25 +209,25 @@ matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/config.tom
 ### Flow B — fixed palette (a named theme)
 
 ```bash
-matugen json matugen/templates/palette/kanagawa-dragon-lotus/blueprint/dark.json \
-  -c matugen/templates/palette/kanagawa-dragon-lotus/config.toml
+matugen json matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json \
+  -c matugen/core/palette/kanagawa-dragon-lotus/config.toml
 ```
 
-- Palette: `matugen/templates/palette/kanagawa-dragon-lotus/blueprint/<variant>.json`
+- Palette: `matugen/core/palette/kanagawa-dragon-lotus/blueprint/<variant>.json`
   — hand-authored, **one file per variant**, named after the variant only
   (`dark.json`, `light.json`). The theme name comes from the directory and
   `meta.name`, so a theme always resolves to `<theme>/blueprint/<variant>.json`.
-- Templates: `matugen/templates/palette/kanagawa-dragon-lotus/template/*`
+- Templates: `matugen/core/palette/kanagawa-dragon-lotus/template/*`
 - Vocabulary: the JSON is exposed at the template root, so templates read
   `{{ accent.primary }}`, `{{ syntax.keyword }}`, … — never `colors.*`
 - Output: `~/.myenv/theme/generated/kanagawa-dragon-lotus/<tool>/…`
-- Full key-by-key reference: [`blueprint/README.md`](matugen/templates/palette/kanagawa-dragon-lotus/blueprint/README.md)
+- Full key-by-key reference: [`blueprint/README.md`](matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md)
 
-> Color templates live in `matugen/templates/palette/` — one directory per
+> Color templates live in `matugen/core/palette/` — one directory per
 > palette source (`wallpaper-based/`, `kanagawa-dragon-lotus/`). The **feel**
-> flow is the directory `matugen/templates/feel/`: profiles in
+> flow is the directory `matugen/core/feel/`: profiles in
 > `blueprint/<profile>.json`, per-consumer templates in `template/`, and one
-> shared `feel.toml` (see [`matugen/docs/FEEL.md`](matugen/docs/FEEL.md)).
+> shared `config.toml` (see [`matugen/docs/FEEL.md`](matugen/docs/FEEL.md)).
 >
 > Keep the two flows in **separate config files**. Templates from Flow B fail
 > under `matugen image` (no `accent.*`), and Flow A's `colors.*` does not exist
@@ -243,7 +244,7 @@ lewat modul Hyprland:
 
 - **Flow B** — tulis di objek `feel` pada blueprint; template menyalinnya apa
   adanya. Referensi key ada di
-  [`blueprint/README.md`](matugen/templates/palette/kanagawa-dragon-lotus/blueprint/README.md).
+  [`blueprint/README.md`](matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md).
 - **Flow A** — template hanya menghasilkan **warna**; rasa tidak ditulis, jadi
   yang berlaku adalah default di `hypr/config/core/theme.lua`. Sama seperti
   `nvim`: berkas hasil matugen berisi data yang dipunya saja, sisanya diurus
@@ -300,7 +301,7 @@ back to plain TokyoNight and warns. See
 | [`matugen/docs/NVIM_MAPPING.md`](matugen/docs/NVIM_MAPPING.md) | Which palette key colors which part of Neovim |
 | [`eww/depth-clock/README.md`](eww/depth-clock/README.md) | Jam wallpaper berlapis: kendali, layout, dan masker foreground |
 | [`eww/depth-clock/GUIDE.md`](eww/depth-clock/GUIDE.md) | Langkah konkret membuat depth clock untuk wallpaper baru |
-| [`…/blueprint/README.md`](matugen/templates/palette/kanagawa-dragon-lotus/blueprint/README.md) | Every key of the fixed-palette JSON |
+| [`…/blueprint/README.md`](matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md) | Every key of the fixed-palette JSON |
 
 ---
 
@@ -315,11 +316,11 @@ Then make the theme available, since generated files are not committed:
 
 ```bash
 # wallpaper theme
-matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/config.toml
+matugen image <wallpaper> --source-color-index 0 -c ~/.config/matugen/core/palette/wallpaper-based/config.toml
 
 # or the fixed palette
-matugen json ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/blueprint/dark.json \
-  -c ~/.dotfile/matugen/templates/palette/kanagawa-dragon-lotus/config.toml
+matugen json ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json \
+  -c ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/config.toml
 ```
 
 Requires `matugen` (4.x) on `PATH` and a `~/.myenv/theme` store with a `current`

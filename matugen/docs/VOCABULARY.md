@@ -5,8 +5,8 @@
 > sedangkan halaman ini menunjukkan *daftar mentah* nama-nama warna.
 >
 > **Hanya berlaku untuk alur wallpaper (Material You).** Alur palet tetap
-> (`templates/palette/kanagawa-dragon-lotus/`) tidak memakai nama-nama ini — lihat
-> [`../templates/palette/kanagawa-dragon-lotus/blueprint/README.md`](../templates/palette/kanagawa-dragon-lotus/blueprint/README.md).
+> (`core/palette/kanagawa-dragon-lotus/`) tidak memakai nama-nama ini — lihat
+> [`../core/palette/kanagawa-dragon-lotus/blueprint/README.md`](../core/palette/kanagawa-dragon-lotus/blueprint/README.md).
 
 ## Dari mana tabel ini
 

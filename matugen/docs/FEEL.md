@@ -4,7 +4,7 @@
 > [`PROGRESS.md`](PROGRESS.md), [`MATUGEN_SKILLS.md`](MATUGEN_SKILLS.md),
 > [`WM_FEEL_MATRIX.md`](WM_FEEL_MATRIX.md) (matriks fitur per WM),
 > [`THEME_ENGINE.md`](THEME_ENGINE.md) (reload & abstraksi engine),
-> [`../templates/palette/kanagawa-dragon-lotus/blueprint/README.md`](../templates/palette/kanagawa-dragon-lotus/blueprint/README.md)
+> [`../core/palette/kanagawa-dragon-lotus/blueprint/README.md`](../core/palette/kanagawa-dragon-lotus/blueprint/README.md)
 
 **Status: rancangan.** Dokumen ini menjelaskan kondisi yang ada sekarang,
 perbedaan Hyprland vs niri, dan rancangan pemisahan **warna** dari **rasa**.
@@ -45,10 +45,10 @@ Kalau nanti dieksekusi, perbarui dokumen ini di commit yang sama — bagian
 | Nilai dari tema | `~/.myenv/theme/current/hypr/theme.lua` | digabung di atas default, dimuat dengan `load(..., "t", {})` |
 | Penerapan | `hypr/hyprland.lua` | `hl.config(theme.hypr)`, `hl.curve`, `hl.animation`, layer rule (`blur = theme.layer_blur`) |
 
-- **Flow A (wallpaper)** menulis warna saja (`matugen/templates/palette/wallpaper-based/hypr.lua`),
+- **Flow A (wallpaper)** menulis warna saja (`matugen/core/palette/wallpaper-based/template/hypr.lua`),
   jadi tema wallpaper **selalu memakai feel default**.
 - **Flow B (blueprint)** menulis warna **dan** `feel` ke file yang sama
-  (`matugen/templates/palette/kanagawa-dragon-lotus/template/hypr.lua`) karena objek
+  (`matugen/core/palette/kanagawa-dragon-lotus/template/hypr.lua`) karena objek
   `feel` tinggal di dalam blueprint.
 - Akibatnya warna dan rasa berbagi satu file, satu render, dan satu pilihan
   tema. Ini yang mau dipisah.
@@ -86,21 +86,21 @@ font hari ini ikut ditulis template warna. Yang sudah berjalan:
 
 | Bagian | Berkas |
 |---|---|
-| Profil (nilai) | `matugen/templates/feel/blueprint/<profil>.json` — sekarang baru `default.json` |
-| Template per konsumen | `matugen/templates/feel/template/{source.scss, kitty.conf, foot.ini, gtk3.css, gtk4.css}` |
-| Mapping (template → output) | `matugen/templates/feel/feel.toml`, satu untuk semua profil |
+| Profil (nilai) | `matugen/core/feel/blueprint/<profil>.json` — sekarang baru `default.json` |
+| Template per konsumen | `matugen/core/feel/template/{source.scss, kitty.conf, foot.ini, gtk3.css, gtk4.css}` |
+| Mapping (template → output) | `matugen/core/feel/config.toml`, satu untuk semua profil |
 | Renderer | `matugen/feel.sh <profil>` → `~/.myenv/feel/generated/<profil>`, lalu flip `feel/current` |
 
 Bentuk foldernya:
 
 ```text
-matugen/templates/feel/
+matugen/core/feel/
 ├── blueprint/   # isi profil rasa: satu JSON per rasa
 ├── template/    # template per konsumen, dipakai semua profil
-└── feel.toml    # config render, satu untuk semua profil
+└── config.toml  # config render, satu untuk semua profil
 ```
 
-Menambah rasa = menambah satu berkas di `blueprint/`; `feel.toml` dan
+Menambah rasa = menambah satu berkas di `blueprint/`; `config.toml` dan
 `template/` tidak disentuh. Nama berkas profil = nama rasa yang dipakai
 `feel.sh` (`feel.sh default` membaca `blueprint/default.json`).
 
@@ -128,7 +128,7 @@ Konsumen yang sudah membaca hasilnya:
   `style.css` memakai `font-family: var(--font-family-ui)`. Berkas feel hanya
   mendefinisikan variabel; `--font-size-*` tetap milik swaync.
 
-Konsekuensinya: `matugen/templates/palette/*/source.scss` **tidak lagi** menulis
+Konsekuensinya: `matugen/core/palette/*/source.scss` **tidak lagi** menulis
 `$font-system`/`$font-widget`/`$font-terminal`. Mengganti font sekarang berarti
 mengubah satu profil rasa, tidak menyentuh palet sama sekali.
 
@@ -196,7 +196,7 @@ Satu profil = satu JSON kecil. Contoh (angka hanya ilustrasi):
   "meta": { "name": "default", "version": 1 },
 
   // Sumbu font — sudah jalan (lihat §2.4). Isi key masih dibahas; yang sudah
-  // tetap: profil = data, `template/` = konsumen, `feel.toml` = pemetaan.
+  // tetap: profil = data, `template/` = konsumen, `config.toml` = pemetaan.
   // Nama key mengikuti peran, bukan nama alat: satu font bisa dipakai beberapa
   // konsumen.
   "font": {
@@ -342,15 +342,15 @@ seluruh stylesheet GTK setiap kali rasa berganti.
 template dari JSON sembarang. Jadi flow rasa:
 
 ```bash
-matugen json ~/.dotfile/matugen/templates/feel/blueprint/default.json \
-  -c ~/.dotfile/matugen/templates/feel/feel.toml
+matugen json ~/.dotfile/matugen/core/feel/blueprint/default.json \
+  -c ~/.dotfile/matugen/core/feel/config.toml
 ```
 
 ```text
-matugen/templates/feel/
+matugen/core/feel/
 ├── blueprint/<profil>.json  ← satu-satunya sumber rasa
 ├── template/<konsumen>      ← template per konsumen
-└── feel.toml                ← config render rasa
+└── config.toml              ← config render rasa
 → ~/.myenv/feel/current/{scss/_feel.scss, kitty/font.conf, foot/font.ini,
                          css/waybar-font.css, css/swaync-font.css}
 ```
@@ -367,10 +367,10 @@ matugen/templates/feel/
   baru flip `feel/current`.
 
 Pemisahan folder template mengikuti keputusan struktur repo: template **warna**
-tinggal di `matugen/templates/palette/<sumber>/`, template **rasa** di
-`matugen/templates/feel/template/<konsumen>`, profil rasa di
-`matugen/templates/feel/blueprint/<profil>.json`, dan satu config render
-`matugen/templates/feel/feel.toml` dipakai bersama semua profil. Jadi satu render
+tinggal di `matugen/core/palette/<sumber>/`, template **rasa** di
+`matugen/core/feel/template/<konsumen>`, profil rasa di
+`matugen/core/feel/blueprint/<profil>.json`, dan satu config render
+`matugen/core/feel/config.toml` dipakai bersama semua profil. Jadi satu render
 warna dan satu render rasa tidak pernah berbagi folder template maupun berkas
 hasil.
 
@@ -548,7 +548,7 @@ Kunci: **profil rasa adalah kontrak**, bukan milik salah satu shell.
 
 | Fase | Isi | Kriteria selesai |
 |---|---|---|
-| 0 | Angkat `feel` dari blueprint ke `matugen/templates/feel/blueprint/<profil>.json` + `matugen/templates/feel/feel.toml`; pecah `current/hypr/` jadi `theme.lua` + `feel.lua`; `hypr/config/core/theme.lua` memuat keduanya | Tampilan Hyprland identik dengan sebelum perubahan; `luac -p` lolos; Flow A tetap jalan |
+| 0 | Angkat `feel` dari blueprint ke `matugen/core/feel/blueprint/<profil>.json` + `matugen/core/feel/config.toml`; pecah `current/hypr/` jadi `theme.lua` + `feel.lua`; `hypr/config/core/theme.lua` memuat keduanya | Tampilan Hyprland identik dengan sebelum perubahan; `luac -p` lolos; Flow A tetap jalan |
 | 1 | `colors.kdl` + `niri.kdl`; pindahkan warna/animasi/opacity dari config tangan; `include optional=true` | `niri validate -c niri/config.kdl` exit 0; tampilan niri sama + warna dari palet |
 | 2 | swaync `:root`, eww `_feel.scss`, rofi `feel.rasi`, waybar `base.css` + `feel.css` | Ganti profil → radius/translucency bar, menu, notifikasi ikut berubah tanpa edit file |
 | 3 | Profil kedua yang kontras (flat: radius 0, blur off, shadow off, speed 1.4) | Dua profil bisa ditukar bolak-balik; warna tidak berubah |
@@ -594,6 +594,6 @@ memblokir integrasi niri.
 - niri — Configuration: Animations (spring vs easing, `cubic-bezier` 4 angka,
   `custom-shader`).
 - Repo: `hypr/config/core/theme.lua`, `hypr/hyprland.lua`,
-  `matugen/templates/palette/wallpaper-based/hypr.lua`,
-  `matugen/templates/palette/kanagawa-dragon-lotus/template/hypr.lua`,
-  `matugen/templates/palette/kanagawa-dragon-lotus/blueprint/README.md` §3.11.
+  `matugen/core/palette/wallpaper-based/template/hypr.lua`,
+  `matugen/core/palette/kanagawa-dragon-lotus/template/hypr.lua`,
+  `matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md` §3.11.
