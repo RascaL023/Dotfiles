@@ -36,6 +36,20 @@ Argumen tambahan diteruskan ke Waybar, jadi `start -- -l debug` sah. Nama perint
 yang tidak dikenal, sesi yang tidak dikenal, dan config yang hilang ditolak
 dengan exit `2`; Waybar yang tidak ada di `PATH` menghasilkan `127`.
 
+## Registrasi ke PATH
+
+```bash
+~/.dotfile/waybar/install.sh --dry-run   # lihat rencana, tidak mengubah apa pun
+~/.dotfile/waybar/install.sh             # pasang symlink, aman diulang
+~/.dotfile/waybar/install.sh --remove    # cabut, hanya symlink milik checkout ini
+```
+
+Installer hanya mengurus Waybar dan membuat dua symlink:
+`~/.local/bin/waybar-ctl` dan `~/.config/fish/completions/waybar-ctl.fish`. Ia
+idempoten, menolak menimpa berkas biasa atau symlink milik pihak lain (exit `1`),
+dan menerima `BIN_DIR` / `FISH_COMPLETION_DIR` untuk mengarahkan tujuan saat
+menguji.
+
 ## Pemilihan sesi
 
 Urutannya `--session hyprland|niri`, lalu `NIRI_SOCKET`, lalu
@@ -59,6 +73,8 @@ Style tidak perlu sinyal tersendiri: `reload_style_on_change` aktif di
 ```text
 waybar/
 ├── waybar-ctl                  # start/stop/toggle/reload, pemilihan sesi, PID
+├── install.sh                  # symlink waybar-ctl + completion ke PATH dan fish
+├── completions/waybar-ctl.fish # completion fish untuk waybar-ctl
 ├── launch.sh -> waybar-ctl     # symlink kompatibilitas
 ├── config.jsonc                # modul dan tampilan bersama
 ├── config.hyprland.jsonc       # modules-left untuk Hyprland
@@ -70,10 +86,14 @@ waybar/
 `launch.sh` adalah symlink relatif ke `waybar-ctl`, dipakai pemanggil lama.
 Setelah semuanya memakai `waybar-ctl`, symlink itu bisa dihapus.
 
+Completion fish ada di `completions/waybar-ctl.fish`; fish memuatnya hanya bila
+berkasnya terbaca sebagai `~/.config/fish/completions/waybar-ctl.fish`.
+
 ## Pemeriksaan
 
 ```bash
 bash -n ~/.config/waybar/waybar-ctl
+bash -n ~/.config/waybar/install.sh
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s ~/.config/waybar/tests -v
 ```
 

@@ -30,6 +30,20 @@ tetap sah. `THEME_ROOT` dan `FEEL_ROOT` mengarahkan kedua store ke tempat lain.
 Exit: `0` berhasil, `1` render/reload gagal, `2` salah pakai, `127` matugen tidak
 ada di `PATH`.
 
+## Registrasi ke PATH
+
+```bash
+~/.dotfile/matugen/install.sh --dry-run   # lihat rencana, tidak mengubah apa pun
+~/.dotfile/matugen/install.sh             # pasang symlink, aman diulang
+~/.dotfile/matugen/install.sh --remove    # cabut, hanya symlink milik checkout ini
+```
+
+Installer hanya mengurus Matugen dan membuat dua symlink:
+`~/.local/bin/matugen-ctl` dan `~/.config/fish/completions/matugen-ctl.fish`.
+Tidak ada render, store, atau config yang disentuh. Ia idempoten, menolak menimpa
+berkas biasa atau symlink milik pihak lain (exit `1`), dan menerima `BIN_DIR` /
+`FISH_COMPLETION_DIR` untuk mengarahkan tujuan saat menguji.
+
 ## Warna dan rasa
 
 Dua sumbu terpisah; jangan mencampurnya dalam satu config matugen.
@@ -56,6 +70,8 @@ di `core/feel/blueprint/`; `template/` dan `config.toml` tidak disentuh.
 ```text
 matugen/
 ├── matugen-ctl                 # palette | feel | reload | list | status
+├── install.sh                  # symlink matugen-ctl + completion ke PATH dan fish
+├── completions/matugen-ctl.fish # completion fish (profil & konsumen dinamis)
 ├── script/
 │   ├── palette.sh              # render palet, validasi, flip palette/current, reload
 │   └── feel.sh                 # render profil rasa, flip feel/current, reload CSS
@@ -69,6 +85,11 @@ matugen/
 ├── docs/                       # dokumen rinci (lihat daftar di bawah)
 └── tests/test_matugen_ctl.py   # kontrak perintah, status, dan passthrough
 ```
+
+Completion fish ada di `completions/matugen-ctl.fish`; fish memuatnya hanya bila
+berkasnya terbaca sebagai `~/.config/fish/completions/matugen-ctl.fish`. Daftar
+profil rasa dan konsumen dibaca dari checkout tempat symlink `matugen-ctl`
+menunjuk, jadi tidak ikut basi saat blueprint atau konsumen ditambah.
 
 ## Cara satu render menjadi aktif
 
@@ -98,12 +119,13 @@ benar-benar aktif adalah tujuan symlink `theme/palette/current` dan
 | `nvim/lua/core/theme.lua` | `theme/palette/current/nvim/theme.lua` |
 | `yazi/flavors/matugen.yazi/*` | `theme/palette/current/yazi/` |
 | `hypr/config/core/theme/palette.lua` | `theme/palette/current/hypr/theme.lua` |
-| `lazygit`, `herdr` | `theme/current/lazygit/config.yml`, `theme/current/herdr/config.toml` |
+| `lazygit`, `herdr` | `theme/palette/current/lazygit/config.yml`, `theme/palette/current/herdr/config.toml` |
 
 ## Pemeriksaan
 
 ```bash
 bash -n ~/.config/matugen/matugen-ctl
+bash -n ~/.config/matugen/install.sh
 bash -n ~/.config/matugen/script/palette.sh
 bash -n ~/.config/matugen/script/feel.sh
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s ~/.config/matugen/tests -v

@@ -48,20 +48,32 @@ wrapper tidak membaca ulang atau memodifikasi data tersebut.
 ## Registrasi ke PATH
 
 ```bash
-ln -s ~/.dotfile/rofi/rofi-ctl ~/.local/bin/rofi-ctl
-rofi-ctl apps orbit
+~/.dotfile/rofi/install.sh --dry-run   # lihat rencana, tidak mengubah apa pun
+~/.dotfile/rofi/install.sh             # pasang symlink, aman diulang
+~/.dotfile/rofi/install.sh --remove    # cabut, hanya symlink milik checkout ini
 ```
+
+Installer hanya mengurus Rofi dan membuat dua symlink: `~/.local/bin/rofi-ctl`
+dan `~/.config/fish/completions/rofi-ctl.fish`. Ia idempoten (`ok` bila sudah
+benar), menolak menimpa berkas biasa atau symlink milik pihak lain (exit `1`),
+dan menerima `BIN_DIR` / `FISH_COMPLETION_DIR` untuk mengarahkan tujuan saat
+menguji.
 
 Pakai symlink, bukan salinan: skrip mencari `config.rasi` dan `themes/` di
 direktori aslinya, dan itu hanya benar bila dipanggil lewat symlink. Salinan
 ditolak dengan exit status 2 dan pesan di stderr, bukan kegagalan Rofi.
+
+Completion fish dimuat lazy, hanya saat `rofi-ctl` dipakai, jadi symlink-nya
+tidak menambah waktu start shell.
 
 ## Struktur
 
 ```text
 rofi/
 ├── rofi-ctl                  # pemilihan mode, layout, opsi, dan toggle
+├── install.sh                # symlink rofi-ctl + completion ke PATH dan fish
 ├── launch.sh                 # symlink kompatibilitas ke rofi-ctl
+├── completions/rofi-ctl.fish # completion fish untuk rofi-ctl
 ├── config.rasi               # pengaturan umum + layout default
 ├── themes/
 │   ├── shared/
@@ -147,6 +159,10 @@ Jangan mengedit palet hasil generate secara manual.
 
 ```bash
 bash -n ~/.config/rofi/rofi-ctl
+bash -n ~/.config/rofi/install.sh
+CLEAN_HOME=$(mktemp -d)
+BIN_DIR=$CLEAN_HOME/bin FISH_COMPLETION_DIR=$CLEAN_HOME/fish \
+  ~/.config/rofi/install.sh --dry-run
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s ~/.config/rofi/tests -v
 ```
 
