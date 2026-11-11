@@ -7,12 +7,12 @@ path konfigurasi, tema, dan PID diurus di folder ini.
 ## Pemanggilan
 
 ```bash
-~/.config/rofi/rofi-ctl apps
-~/.config/rofi/rofi-ctl apps orbit
-~/.config/rofi/rofi-ctl run orbit
-~/.config/rofi/rofi-ctl toggle apps
-~/.config/rofi/rofi-ctl shell
-~/.config/rofi/rofi-ctl wallpaper -d ~/Pictures/Wallpaper
+rofi-ctl apps
+rofi-ctl apps orbit
+rofi-ctl run orbit
+rofi-ctl toggle apps
+rofi-ctl shell
+rofi-ctl wallpaper -d ~/Pictures/Wallpaper
 ```
 
 Tanpa argumen, skrip membuka `apps`. Pilihan `apps` / `orbit` adalah nama style
@@ -72,12 +72,11 @@ tidak menambah waktu start shell.
 rofi/
 ├── rofi-ctl                  # pemilihan mode, layout, opsi, dan toggle
 ├── install.sh                # symlink rofi-ctl + completion ke PATH dan fish
-├── launch.sh                 # symlink kompatibilitas ke rofi-ctl
 ├── completions/rofi-ctl.fish # completion fish untuk rofi-ctl
 ├── config.rasi               # pengaturan umum + layout default
 ├── themes/
 │   ├── shared/
-│   │   ├── palette.rasi      # satu path import palet Matugen aktif
+│   │   ├── theme.rasi        # import palet + rasa Matugen aktif
 │   │   └── list.rasi         # style bersama untuk daftar klasik
 │   ├── default.rasi          # default untuk pemanggilan rofi langsung
 │   ├── apps.rasi             # launcher klasik dua kolom, dengan ikon
@@ -91,7 +90,7 @@ rofi/
 ```
 
 `config.rasi` mengatur font default, tema ikon, label, dan mode umum. Tampilan
-berada di `themes/`. Semua layout membaca palet melalui `shared/palette.rasi`;
+berada di `themes/`. Semua layout membaca palet dan rasa melalui `shared/theme.rasi`;
 style klasik digunakan bersama oleh default, aplikasi, menu teks, dan prompt.
 
 Skrip menyelesaikan path relatif terhadap lokasi aslinya, sehingga bisa berjalan
@@ -122,21 +121,22 @@ atau tidak ada ditolak dengan exit `2`; batal tetap `1` dengan stdout kosong.
 rofi-ctl wallpaper -d ~/Pictures/Wallpaper
 ```
 
-`hypr/sources/scripts/nextwall.sh` masih menyediakan data sendiri, memasang
-wallpaper, dan menyinkronkan depth clock. Logika koneksi Wi-Fi tetap dimiliki
-`hypr/sources/scripts/wifi-menu.sh`; menu daya tetap dimiliki Eww.
+`hypr/sources/scripts/nextwall.sh` memanggil `rofi-ctl wallpaper -d
+~/Pictures/Wallpaper`, lalu memasang gambar yang dipilih dan menyinkronkan depth
+clock. Logika koneksi Wi-Fi tetap dimiliki `hypr/sources/scripts/wifi-menu.sh`;
+menu daya tetap dimiliki Eww.
 
 Pemanggil yang sudah memakai wrapper:
 
-- `hypr/sources/scripts/rofi-toggle.sh`: pintu masuk kompatibilitas untuk
-  shortcut Hyprland/Niri, meneruskan ke `toggle apps`.
-- `hypr/sources/scripts/nextwall.sh`: galeri wallpaper.
+- `hypr/config/core/binding.lua` (`SUPER + SPACE`) dan
+  `niri/conf/keybinds/tool.kdl` (`Mod+Space`): `rofi-ctl toggle apps`.
+- `hypr/sources/scripts/nextwall.sh`: `rofi-ctl wallpaper -d`, lalu memasang
+  wallpaper dan menyinkronkan depth clock.
 - `hypr/sources/scripts/wifi-menu.sh`: daftar Wi-Fi dan prompt password.
 - `eww/bar/settings.json`: launcher aplikasi dan menu daya/konfirmasi.
 
-Ketiga skrip di `hypr/` masih memanggil `launch.sh`; symlink kompatibilitas
-menjaga mereka tetap berjalan. Setelah semuanya memakai `rofi-ctl`, `launch.sh`
-bisa dihapus.
+Semua memanggil `rofi-ctl` dari `PATH` (dipasang `install.sh`), jadi tidak ada
+lagi `launch.sh` maupun skrip pembungkus per-shortcut.
 
 ## Layout khusus
 
@@ -171,5 +171,5 @@ menghubungkan jaringan, atau mengganti shell. Untuk memeriksa parser layout
 melalui compositor yang sedang berjalan:
 
 ```bash
-~/.config/rofi/rofi-ctl apps orbit -dump-theme
+rofi-ctl apps orbit -dump-theme
 ```

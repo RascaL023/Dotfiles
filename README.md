@@ -280,7 +280,7 @@ tidak ikut ke berkas tema Hyprland: identitas palet adalah nama direktori di
 | `kitty/kitty.conf` | `~/.myenv/theme/palette/current/kitty/theme.conf` |
 | `alacritty/alacritty.toml` | `~/.myenv/theme/palette/current/alacritty/theme.toml` + `~/.myenv/theme/feel/current/alacritty/feel.toml` |
 | `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` | `~/.myenv/theme/palette/current/css/theme.css` |
-| `rofi/themes/shared/palette.rasi` (shared by all Rofi layouts) | `~/.myenv/theme/palette/current/rasi/theme.rasi` + `~/.myenv/theme/feel/current/rasi/feel.rasi` |
+| `rofi/themes/shared/theme.rasi` (shared by all Rofi layouts) | `~/.myenv/theme/palette/current/rasi/theme.rasi` + `~/.myenv/theme/feel/current/rasi/feel.rasi` |
 | `eww/eww.scss` | `~/.myenv/theme/palette/current/scss/theme` |
 | `nvim/lua/core/theme.lua` | `~/.myenv/theme/palette/current/nvim/theme.lua` |
 | `foot/foot.ini` | `~/.myenv/theme/palette/current/foot/theme.ini` |

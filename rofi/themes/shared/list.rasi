@@ -1,5 +1,5 @@
 /* Shared classic list styling. */
-@import "palette.rasi"
+@import "theme.rasi"
 
 element-text, element-icon, mode-switcher {
     background-color: inherit;

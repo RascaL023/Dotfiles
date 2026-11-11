@@ -4,7 +4,6 @@
 DIR="$HOME/Pictures/Wallpaper"
 WALLPAPER_ENGINE=awww
 DEPTHCTL="$HOME/.dotfile/eww/scripts/depthctl"
-ROFI_LAUNCHER="$HOME/.config/rofi/launch.sh"
 
 # Depth clock: show the matching foreground, hide it when the new wallpaper has
 # no mask. Never blocks the wallpaper transition and never fails the script.
@@ -33,24 +32,14 @@ if [[ $1 == "first" ]]; then
     exit 0
 fi
 
-# Generate list untuk rofi
-LIST=""
-for img in "${FILES[@]}"; do
-    name=$(basename "$img")
-    LIST+="$name\x00icon\x1f$img\n"
-done
-
-# PERBAIKAN: Hapus \n terakhir
-LIST="${LIST%\\n}"  # <-- Ini yang penting! Hapus \n di akhir
-
-# Panggil rofi
-SELECTED=$(echo -e "$LIST" | "$ROFI_LAUNCHER" wallpaper)
+# rofi-ctl menyusun baris + ikon sendiri dan mencetak path absolut
+SELECTED=$(rofi-ctl wallpaper -d "$DIR")
 
 # Kalau gak ada yang dipilih, exit
 [[ -z "$SELECTED" ]] && exit 0
 
 # Set wallpaper
-CHOSEN="$DIR/$SELECTED"
+CHOSEN="$SELECTED"
 
 # Init $WALLPAPER_ENGINE kalau belum jalan
 $WALLPAPER_ENGINE query || $WALLPAPER_ENGINE init

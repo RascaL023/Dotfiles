@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ROFI_LAUNCHER="$HOME/.config/rofi/launch.sh"
+ROFI_LAUNCHER=rofi-ctl
 
 networks=$(nmcli -t -f SSID,SIGNAL dev wifi list | \
   awk -F: '{if ($1 != "") print $1 " (" $2"%)"}' | sort -u)

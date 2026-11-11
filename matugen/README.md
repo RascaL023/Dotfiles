@@ -113,7 +113,7 @@ benar-benar aktif adalah tujuan symlink `theme/palette/current` dan
 | `kitty/kitty.conf` | `theme/palette/current/kitty/theme.conf` + `theme/feel/current/kitty/feel.conf` |
 | `alacritty/alacritty.toml` | `theme/palette/current/alacritty/theme.toml` + `theme/feel/current/alacritty/feel.toml` |
 | `foot/foot.ini` | `theme/palette/current/foot/theme.ini` + `theme/feel/current/foot/feel.ini` |
-| `rofi/themes/shared/palette.rasi` | `theme/palette/current/rasi/theme.rasi` + `theme/feel/current/rasi/feel.rasi` |
+| `rofi/themes/shared/theme.rasi` | `theme/palette/current/rasi/theme.rasi` + `theme/feel/current/rasi/feel.rasi` |
 | `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` | `theme/palette/current/css/theme.css` |
 | `eww/eww.scss` | `theme/palette/current/scss/theme` |
 | `nvim/lua/core/theme.lua` | `theme/palette/current/nvim/theme.lua` |

@@ -1,8 +1,5 @@
-/* Shell Select — a two-choice desktop shell picker.
- * Input rows: Noctalia, Native. Outputs the selected row; runs no commands.
- * Palette: the active Matugen Flow A / Flow B theme.
- */
-@import "shared/palette.rasi"
+/* Shell Select — a two-choice desktop shell picker. */
+@import "shared/theme.rasi"
 
 configuration {
     show-icons: false;

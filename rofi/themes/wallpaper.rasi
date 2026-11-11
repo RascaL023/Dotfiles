@@ -1,5 +1,5 @@
 /* Fullscreen wallpaper gallery; rows and thumbnails come from stdin. */
-@import "shared/palette.rasi"
+@import "shared/theme.rasi"
 
 configuration {
     show-icons: true;

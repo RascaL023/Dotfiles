@@ -596,7 +596,7 @@ Template `gtk-colors.css` (libadwaita named colors):
   `core/palette/kanagawa-dragon-lotus/template/source.rasi` (Flow B) emit the same
   23 tokens. Their generated `rasi/theme.rasi` is read through
   `~/.myenv/theme/palette/current/rasi/theme.rasi` by
-  `rofi/themes/shared/palette.rasi`, imported by every layout.
+  `rofi/themes/shared/theme.rasi`, imported by every layout.
   Accent, text, layer and border tokens use the exact names and source color
   expressions from the semantic palette in `palette/wallpaper-based/template/source.css` and
   `palette/kanagawa-dragon-lotus/template/gtk3.css`, respectively. The same groups

@@ -15,7 +15,7 @@ binds {
     Mod+C           { spawn "~/.config/hypr/sources/scripts/wifi-menu.sh"; }
     Mod+O           { spawn-sh "~/.dotfile/eww/bar/barctl toggle"; }
     Mod+Escape      { spawn "~/.config/hypr/sources/scripts/wlogout-toggle.sh"; }
-    Mod+Space       { spawn "~/.config/hypr/sources/scripts/rofi-toggle.sh"; }
+    Mod+Space       { spawn "rofi-ctl" "toggle" "apps"; }
     Mod+I           { spawn "~/.config/hypr/sources/scripts/idle-toggle.sh"; }
     Mod+W           { spawn "~/.config/hypr/sources/scripts/nextwall.sh"; }
     Mod+T           { spawn "~/.myenv/script/theme/theme-picker.sh"; }

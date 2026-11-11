@@ -87,7 +87,7 @@ Dependensi modul:
 | Musik | `playerctl` + `dbus-monitor` untuk MPRIS; `mpc` untuk MPD |
 | Baterai | `/sys/class/power_supply/*` |
 | Notifikasi | `swaync-client`, SwayNC |
-| Launcher / daya | `rofi`, `~/.config/rofi/rofi-ctl`, `hyprlock`, `systemctl`, perintah logout compositor aktif |
+| Launcher / daya | `rofi-ctl` (dari `PATH`), `hyprlock`, `systemctl`, perintah logout compositor aktif |
 
 `barctl doctor` memeriksa pengaturan, executable, lingkungan sesi, resolusi font,
 dan ketersediaan modul pada instance berjalan. Modul yang kehilangan layanan
