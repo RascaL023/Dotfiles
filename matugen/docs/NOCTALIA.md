@@ -28,8 +28,10 @@ dokumen ini tetap benar untuk versi Noctalia yang terpasang.
   digabung. `[include] files = [...]` menerima file atau direktori,
   `autoload = false` untuk memilih profil. File yang meng-include menang atas
   isi include.
-- **State menang:** `~/.local/state/noctalia/settings.toml` (tulisan GUI)
-  dimuat terakhir dan menimpa config tangan.
+- **Load order:** `*.toml` di `~/.config/noctalia/` dimuat dulu, lalu
+  `~/.local/state/noctalia/settings.toml` (tulisan GUI) yang menang saat key-nya
+  sama. Di mesin ini layer itu sengaja dikosongkan (`config_version = 14` saja),
+  jadi `config.toml` yang menentukan.
 - **Hot reload:** kedua layer di-watch, perubahan berlaku ~150 ms setelah
   disimpan.
 - **Validasi/inspeksi:** `noctalia config validate` (exit 1 hanya untuk error;
@@ -48,9 +50,18 @@ dokumen ini tetap benar untuk versi Noctalia yang terpasang.
 
 ## 3. Di repo ini
 
-- `noctalia/` berisi `settings.json`, `plugins.json`, dan `palettes/*.json` —
-  format JSON, sedangkan docs v5 memakai TOML. **Apakah v5 masih membaca JSON
-  itu belum diverifikasi.**
+- `noctalia/config.toml` adalah **satu-satunya sumber kebenaran**: isinya hasil
+  `noctalia config export` dari state lama, dan state itu sudah dikosongkan
+  (`config_version = 14`) supaya tidak ada key yang menimpa. Backup state lama:
+  `~/.local/state/noctalia/settings.toml.bak-20261111` (di luar repo).
+- JSON v4 (`settings.json`, `plugins.json`) dan direktori kosong sisa v4 sudah
+  dibuang — v5 hanya membaca TOML dan tidak memigrasikan JSON lama.
+- Kalau suatu saat ada yang diubah lewat GUI Settings, override akan muncul lagi
+  di `settings.toml` dan menang; ekspor ulang ke `config.toml` lalu kosongkan
+  state lagi kalau ingin tetap deklaratif.
+- `noctalia/palettes/*.json` tetap format 1 (`dark`/`light` + `mPrimary`…); v5
+  masih menerimanya lewat `[theme] source = "custom"` +
+  `custom_palette = "<nama file tanpa .json>"`.
 - `niri/config.kdl` menjalankan `noctalia` saat startup; niri belum memakai tema
   matugen sama sekali.
 - `matugen/script/palette.sh` sudah melewati gtk/swaync/waybar selama proses
@@ -58,14 +69,10 @@ dokumen ini tetap benar untuk versi Noctalia yang terpasang.
 
 ## 4. Wajib dicek saat integrasi
 
-1. Format config: apakah `noctalia/*.json` masih dibaca v5, atau harus migrasi
-   ke TOML?
-2. Apakah `[include]` benar-benar ada di versi terpasang (bukan hanya di docs)?
-3. Apakah `settings.toml` GUI menimpa file include kita — dan nilai mana yang
-   menang saat keduanya menyentuh key yang sama?
-4. Apakah template compositor Noctalia menambah include sendiri ke
+1. Apakah `[include]` benar-benar ada di versi terpasang (bukan hanya di docs)?
+2. Apakah template compositor Noctalia menambah include sendiri ke
    `niri/config.kdl` / `hypr/*.lua`; kalau ya, matikan include warna kita untuk
    WM itu.
-5. Apakah template bawaan menulis ke `~/.config/kitty`, `foot`, `alacritty`,
+3. Apakah template bawaan menulis ke `~/.config/kitty`, `foot`, `alacritty`,
    dsb. — bisa dobel dengan `include` kita ke `theme/current/`.
-6. `noctalia config validate` harus exit 0 sebelum file hasil render dipakai.
+4. `noctalia config validate` harus exit 0 sebelum file hasil render dipakai.
