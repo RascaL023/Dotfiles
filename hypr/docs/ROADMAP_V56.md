@@ -196,8 +196,10 @@ hl.window_rule({ match = { tag = "alpha_0.2" }, opacity = "0.2 override" })
 | `group` | opsi `barred`/`deny`/`invade`/`lock`/`new`/`set`/`unset` (+ `always`) |
 | memakai `move`/`size` + ekspresi | `move = { "cursor_x - (window_w * 0.5)", … }` untuk menu/popup |
 
-**Layer rule** yang belum dipakai: `no_screen_share`, `ignore_alpha`, `xray`,
-`dim_around`, `above_lock`, `blur_popups`, `order`.
+**Layer rule** yang belum dipakai: `no_screen_share`, `xray`, `dim_around`,
+`above_lock`, `blur_popups`, `order`. `ignore_alpha` sudah dipakai: rofi (dan
+swaync) memerlukannya agar blur mengikuti piksel transparan, bukan seluruh rect
+layer.
 
 ## 7. Event bus + timer
 

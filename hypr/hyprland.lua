@@ -115,7 +115,6 @@ hl.layer_rule({
     match     = { namespace = "swaync-control-center" },
     animation = "slide left",
     blur      = layer_blur,
-    -- Blur only the panel area, not the transparent pixels around it.
     ignore_alpha = 0,
 })
 
@@ -124,6 +123,7 @@ hl.layer_rule({
     match     = { namespace = "rofi" },
     animation = "slide bottom",
     blur      = layer_blur,
+    ignore_alpha = 0,
 })
 
 hl.layer_rule({
