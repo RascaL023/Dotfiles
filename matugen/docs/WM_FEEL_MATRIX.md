@@ -251,8 +251,8 @@ app. Jangan dua-duanya.
 Hyprland (sesi aktif):
 
 ```bash
-luac -p ~/.myenv/theme/current/hypr/theme.lua
-luac -p ~/.myenv/feel/current/hypr.lua
+luac -p ~/.myenv/theme/palette/current/hypr/theme.lua
+luac -p ~/.myenv/theme/feel/current/hypr.lua
 hyprctl reload
 hyprctl getoption decoration:rounding
 hyprctl getoption decoration:blur:enabled

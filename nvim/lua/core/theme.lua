@@ -76,7 +76,7 @@ end
 -- ============================================================================
 
 local matugen_path = vim.fn.expand(
-  "~/.myenv/theme/current/nvim/?.lua"
+  "~/.myenv/theme/palette/current/nvim/?.lua"
 )
 
 package.path = matugen_path .. ";" .. package.path

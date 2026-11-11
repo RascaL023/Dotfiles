@@ -5,7 +5,7 @@
 -- ## Except for testing.
 
 -- Dibaca oleh hypr/config/core/theme.lua lewat
--- ~/.myenv/theme/current/hypr/theme.lua. Berkas ini murni data: hanya boleh
+-- ~/.myenv/theme/palette/current/hypr/theme.lua. Berkas ini murni data: hanya boleh
 -- `return { ... }`, tanpa panggilan fungsi.
 --
 -- Flow A (wallpaper) hanya menghasilkan warna. Bagian "rasa" (shape, surface,

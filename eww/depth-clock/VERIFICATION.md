@@ -113,7 +113,7 @@ Kesimpulan tinjauan:
   `current_wallpaper` kosong sehingga `start` gagal dan `refresh` menutup jam.
 - **Tiga cacat jalur niri diperbaiki:** pemilihan output (#23–#25), offset bar
   yang tadinya di-hardcode 0 (#29–#31 → `DEPTH_TOP_RESERVED`), dan gate reload
-  `matugen/reload.sh` yang masih mewajibkan awww (#36).
+  `matugen/script/palette.sh` yang masih mewajibkan awww (#36).
 
 ## Sumber wallpaper Noctalia — 5 November 2026
 
@@ -127,8 +127,8 @@ dengan `noctalia`, `awww`, `niri` dan `hyprctl` tiruan (tidak ada sesi nyata):
 | 34 | Noctalia tidak jalan (`error: noctalia is not running`) | `wallpaper: unknown`, exit 0 |
 | 35 | Hyprland, awww hidup + Noctalia hidup | `wallpaper: ... [awww]`, `noctalia` tidak dipanggil sama sekali |
 | 36 | `depthctl start` di niri tanpa argumen | wallpaper + geometri ter-resolve (`foreground: cached`), berhenti hanya di `[ERR] failed to open depth-clock` karena shell uji tidak punya display |
-| 37 | `matugen/reload.sh --dry-run scss` tanpa daemon Eww | `[skip] depth clock: eww tidak siap` — gate awww hilang |
-| 38 | `bash -n eww/scripts/depthctl`, `bash -n matugen/reload.sh` | lolos |
+| 37 | `matugen/script/palette.sh --dry-run scss` tanpa daemon Eww | `[skip] depth clock: eww tidak siap` — gate awww hilang |
+| 38 | `bash -n eww/scripts/depthctl`, `bash -n matugen/script/palette.sh` | lolos |
 
 ## Inset bar Niri diukur — 6 November 2026
 

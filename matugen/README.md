@@ -39,7 +39,7 @@ Dua sumbu terpisah; jangan mencampurnya dalam satu config matugen.
 | Config | `core/palette/wallpaper-based/config.toml` | `core/palette/<tema>/config.toml` | `core/feel/config.toml` |
 | Sumber | gambar | `blueprint/<varian>.json` tulis tangan | `blueprint/<profil>.json` |
 | Kosakata template | `{{ colors.<role>.<scheme>.<format> }}` | `{{ accent.primary }}`, `{{ syntax.keyword }}`, … | `{{ font.* }}`, `{{ chrome.* }}`, … |
-| Output | `~/.myenv/theme/generated/wallpaper-based/` | `~/.myenv/theme/generated/<tema>/` | `~/.myenv/feel/generated/<profil>/` |
+| Output | `~/.myenv/theme/palette/generated/wallpaper-based/` | `~/.myenv/theme/palette/generated/<tema>/` | `~/.myenv/theme/feel/generated/<profil>/` |
 
 Template alur B gagal di `matugen image` (tidak ada `accent.*`), dan `colors.*`
 tidak ada di `matugen json`. Karena itu config dan templatenya dipisah per alur.
@@ -57,7 +57,7 @@ di `core/feel/blueprint/`; `template/` dan `config.toml` tidak disentuh.
 matugen/
 ├── matugen-ctl                 # palette | feel | reload | list | status
 ├── script/
-│   ├── palette.sh              # render palet, validasi, flip theme/current, reload
+│   ├── palette.sh              # render palet, validasi, flip palette/current, reload
 │   └── feel.sh                 # render profil rasa, flip feel/current, reload CSS
 ├── core/
 │   ├── palette/
@@ -81,21 +81,23 @@ pernah mengganti tema yang sedang dipakai.
 Reload berjalan sesudah aktivasi: hanya proses yang benar-benar hidup yang
 disentuh, setiap panggilan dibungkus `timeout`, dan `hyprctl reload` hanya
 dijalankan di sesi Hyprland. `~/.myenv/theme/current-status.json` bukan milik
-folder ini; itu ditulis `theme-switcher.sh` di luar repo.
+folder ini: itu state untuk switcher (belum ada yang menulisnya), sementara yang
+benar-benar aktif adalah tujuan symlink `theme/palette/current` dan
+`theme/feel/current`.
 
 ## Konsumen
 
 | Konsumen | Membaca |
 |---|---|
-| `kitty/kitty.conf` | `theme/current/kitty/theme.conf` + `feel/current/kitty/feel.conf` |
-| `alacritty/alacritty.toml` | `theme/current/alacritty/theme.toml` + `feel/current/alacritty/feel.toml` |
-| `foot/foot.ini` | `theme/current/foot/theme.ini` + `feel/current/foot/feel.ini` |
-| `rofi/themes/shared/palette.rasi` | `theme/current/rasi/theme.rasi` + `feel/current/rasi/feel.rasi` |
-| `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` | `theme/current/css/theme.css` |
-| `eww/eww.scss` | `theme/current/scss/theme` |
-| `nvim/lua/core/theme.lua` | `theme/current/nvim/theme.lua` |
-| `yazi/flavors/matugen.yazi/*` | `theme/current/yazi/` |
-| `hypr/config/core/theme/palette.lua` | `theme/current/hypr/theme.lua` |
+| `kitty/kitty.conf` | `theme/palette/current/kitty/theme.conf` + `theme/feel/current/kitty/feel.conf` |
+| `alacritty/alacritty.toml` | `theme/palette/current/alacritty/theme.toml` + `theme/feel/current/alacritty/feel.toml` |
+| `foot/foot.ini` | `theme/palette/current/foot/theme.ini` + `theme/feel/current/foot/feel.ini` |
+| `rofi/themes/shared/palette.rasi` | `theme/palette/current/rasi/theme.rasi` + `theme/feel/current/rasi/feel.rasi` |
+| `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` | `theme/palette/current/css/theme.css` |
+| `eww/eww.scss` | `theme/palette/current/scss/theme` |
+| `nvim/lua/core/theme.lua` | `theme/palette/current/nvim/theme.lua` |
+| `yazi/flavors/matugen.yazi/*` | `theme/palette/current/yazi/` |
+| `hypr/config/core/theme/palette.lua` | `theme/palette/current/hypr/theme.lua` |
 | `lazygit`, `herdr` | `theme/current/lazygit/config.yml`, `theme/current/herdr/config.toml` |
 
 ## Pemeriksaan

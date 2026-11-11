@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
-# Render satu profil rasa (feel) dan balik ~/.myenv/feel/current ke hasilnya.
+# Render satu profil rasa (feel) dan balik ~/.myenv/theme/feel/current ke hasilnya.
 #
 #   matugen/feel.sh default      # render profil default
 #   matugen/feel.sh paper        # profil lain (matugen/core/feel/blueprint/paper.json)
 #
 # Kenapa skrip dan bukan sekadar perintah matugen: symlink harus dibalik
 # setelah render sukses, supaya tidak ada jendela waktu di mana konsumen
-# membaca folder setengah jadi. Render selalu ke folder konkret
-# (~/.myenv/feel/generated/<profil>), baru `current` diarahkan ke sana.
+# membaca folder setengah jadi. Render selalu ke folder sementara
+# (~/.myenv/theme/feel/generated/.<profil>.tmp), divalidasi, baru dipindah ke
+# ~/.myenv/theme/feel/generated/<profil> dan `current` diarahkan ke sana.
+# Render yang gagal tidak menyentuh profil yang sedang aktif.
 set -euo pipefail
 
 REPO="${HOME}/.dotfile"
-STORE="${FEEL_ROOT:-${HOME}/.myenv/feel}"
+STORE="${FEEL_ROOT:-${HOME}/.myenv/theme/feel}"
 CONFIG="${REPO}/matugen/core/feel/config.toml"
 PROFILES="${REPO}/matugen/core/feel/blueprint"
 
@@ -47,48 +49,55 @@ running() {
 }
 
 out="${STORE}/generated/${profile}"
-rm -rf "$out"
-mkdir -p "$out"
+tmp="${STORE}/generated/.${profile}.tmp"
 
 echo "[feel] render ${profile} -> ${out}"
-if ! matugen json "$src" -c "$CONFIG" -p "$out"; then
+rm -rf "$tmp"
+mkdir -p "$tmp"
+if ! matugen json "$src" -c "$CONFIG" -p "$tmp"; then
   echo "[ERR] matugen gagal; ${STORE}/current tidak diubah" >&2
+  rm -rf "$tmp"
   exit 1
 fi
 
 # Validasi sebelum dipakai: tidak boleh ada berkas kosong, placeholder sisa,
 # atau render yang tidak menghasilkan apa-apa.
-mapfile -t files < <(find "$out" -type f | sort)
+mapfile -t files < <(find "$tmp" -type f | sort)
 if [[ ${#files[@]} -eq 0 ]]; then
-  echo "[ERR] tidak ada berkas yang dirender" >&2
+  echo "[ERR] tidak ada berkas yang dirender; ${STORE}/current tidak diubah" >&2
+  rm -rf "$tmp"
   exit 1
 fi
 
 bad=0
 for f in "${files[@]}"; do
   if [[ ! -s $f ]]; then
-    echo "[ERR] berkas kosong: ${f}" >&2
+    echo "[ERR] berkas kosong: ${f#"$tmp"/}" >&2
     bad=1
     continue
   fi
   if grep -qE '\{\{|\}\}|<\*|\*>' "$f"; then
-    echo "[ERR] placeholder tersisa di ${f}" >&2
+    echo "[ERR] placeholder tersisa di ${f#"$tmp"/}" >&2
     bad=1
   fi
 done
 
-if command -v sassc >/dev/null 2>&1 && [[ -f ${out}/scss/_feel.scss ]]; then
-  if ! sassc "${out}/scss/_feel.scss" /dev/null; then
-    echo "[ERR] ${out}/scss/_feel.scss tidak bisa dikompilasi" >&2
+if command -v sassc >/dev/null 2>&1 && [[ -f ${tmp}/scss/_feel.scss ]]; then
+  if ! sassc "${tmp}/scss/_feel.scss" /dev/null; then
+    echo "[ERR] ${tmp}/scss/_feel.scss tidak bisa dikompilasi" >&2
     bad=1
   fi
 fi
 
 if [[ $bad -ne 0 ]]; then
   echo "[ERR] render ditolak; ${STORE}/current tidak diubah" >&2
+  rm -rf "$tmp"
   exit 1
 fi
 
+# Folder profil diganti utuh dari hasil yang sudah lolos validasi.
+rm -rf "$out"
+mv "$tmp" "$out"
 mkdir -p "$STORE"
 ln -sfn "$out" "${STORE}/current"
 echo "[ok]   ${#files[@]} berkas, current -> generated/${profile}"

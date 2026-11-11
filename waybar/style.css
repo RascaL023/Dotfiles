@@ -1,6 +1,6 @@
-@import url("/home/rascal/.myenv/theme/current/css/theme.css");
+@import url("/home/rascal/.myenv/theme/palette/current/css/theme.css");
 /* Font milik flow rasa, bukan palet (matugen/feel.sh). */
-@import url("/home/rascal/.myenv/feel/current/css/waybar-font.css");
+@import url("/home/rascal/.myenv/theme/feel/current/css/waybar-font.css");
 
 @define-color main-br @text-primary;
 @define-color main-bg @layer-crust;

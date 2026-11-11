@@ -18,7 +18,7 @@ Blueprint = **palet warna yang ditulis tangan**, bukan hasil matugen. Ini kebali
 | Yang menentukan warna | matugen (Material You) | kamu, di editor |
 | Perintah | `matugen image <gambar> -c matugen/core/palette/wallpaper-based/config.toml` | `matugen json <blueprint.json> -c .../config.toml` |
 | Kosakata template | `{{ colors.<role>.default.hex }}` | `{{ accent.primary }}`, `{{ syntax.keyword }}`, dst. |
-| Output | `~/.myenv/theme/generated/wallpaper-based/<tool>/…` | `~/.myenv/theme/generated/kanagawa-dragon-lotus/<tool>/…` |
+| Output | `~/.myenv/theme/palette/generated/wallpaper-based/<tool>/…` | `~/.myenv/theme/palette/generated/kanagawa-dragon-lotus/<tool>/…` |
 
 Karena warnanya sudah ditetapkan di sini, alur `matugen json …` cukup **mengirim** nilainya ke template, bukan menemukan warnanya.
 
@@ -44,7 +44,7 @@ Catatan teknis penting:
 
 | Key | Contoh (dark) | Arti | Dipakai di |
 |---|---|---|---|
-| `meta.name` | `kanagawa-dragon-lotus` | Nama tema; dipakai untuk nama folder output `~/.myenv/theme/generated/<name>/` | —ⁱ |
+| `meta.name` | `kanagawa-dragon-lotus` | Nama tema; dipakai untuk nama folder output `~/.myenv/theme/palette/generated/<name>/` | —ⁱ |
 | `meta.variant` | `dark` / `light` | Varian berkas ini | —ⁱ |
 | `meta.palette` | `rebelot/kanagawa.nvim#dragon` | Sumber palet | —ⁱ |
 | `meta.origin` | `Kanagawa Dark Dragon GTK CSS + kanagawa.nvim palette` | Asal-usul nilai | —ⁱ |
@@ -183,7 +183,7 @@ Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu), `f
 ### 3.11 `feel.*` — rasa compositor (bukan warna)
 
 Objek ini **tidak berisi warna**; isinya angka dan boolean yang menentukan look & feel
-Hyprland. Pemindahannya ke profil rasa sendiri (`~/.myenv/feel/current`) belum
+Hyprland. Pemindahannya ke profil rasa sendiri (`~/.myenv/theme/feel/current`) belum
 dilakukan, jadi selama itu `feel` tetap dibaca dari sini (lihat
 [`matugen/README.md`](../../../../README.md), bagian “Warna dan rasa”).
 Template `template/hypr.lua` menyalinnya apa adanya ke `hypr/theme.lua`,
@@ -222,9 +222,11 @@ nilainya. Jadi dua blueprint dengan palet sama tetap bisa terasa berbeda.
 `motion.curve` sengaja **objek** (`x1…y2`), bukan array: resolver template matugen
 4.2.0 tidak mendukung indeks array (`curve.0`/`curve[0]` sama-sama ditolak).
 
-`meta.name` + `meta.variant` **tidak** ikut ditulis ke `hypr/theme.lua`: identitas
-tema dicatat switcher di `~/.myenv/theme/current-status.json`, jadi berkas tema
-Hyprland hanya berisi warna dan `feel`.
+`meta.name` + `meta.variant` **tidak** ikut ditulis ke `hypr/theme.lua`: berkas
+tema Hyprland hanya berisi warna dan `feel`. Identitas palet adalah nama direktori
+di `~/.myenv/theme/palette/generated/`; pasangan nama + varian disimpan switcher
+di `~/.myenv/theme/current-status.json` (bentuknya di `.example`), yang sekarang
+belum diisi otomatis.
 
 ---
 
@@ -263,7 +265,7 @@ Tabel ini tidak lengkap untuk semua tool (ada tool yang memakai kombinasi sendir
 
    [templates.tool]
    input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/tool.conf"
-   output_path = "~/.myenv/theme/generated/kanagawa-dragon-lotus/tool/theme.conf"
+   output_path = "~/.myenv/theme/palette/generated/kanagawa-dragon-lotus/tool/theme.conf"
    ```
    Config matugen **wajib** diawali `[config]`. Selalu uji ke `/tmp` dulu (bagian 2), baru render ke jalur sebenarnya.
 8. **Kontras tetap tanggung jawabmu.** Blueprint tidak mengoreksi kontras; pastikan pasangan `X` / `on_X` benar-benar terbaca.
@@ -277,22 +279,22 @@ Tabel ini tidak lengkap untuk semua tool (ada tool yang memakai kombinasi sendir
 - [ ] Render uji ke `/tmp` untuk **setiap** template di `template/`.
 - [ ] Tidak ada sisa `{{ }}`, `<* *>` di hasil render.
 - [ ] `luac -p` untuk template Lua.
-- [ ] Baru setelah itu: render ke `~/.myenv/theme/generated/kanagawa-dragon-lotus/`.
+- [ ] Baru setelah itu: render ke `~/.myenv/theme/palette/generated/kanagawa-dragon-lotus/`.
 
 ---
 
 ## 7. Catatan khusus Foot
 
-Foot memuat hasil blueprint lewat `include`, pola yang sama dengan `kitty/kitty.conf` (`include ~/.myenv/theme/current/kitty/theme.conf`).
+Foot memuat hasil blueprint lewat `include`, pola yang sama dengan `kitty/kitty.conf` (`include ~/.myenv/theme/palette/current/kitty/theme.conf`).
 Jalurnya:
 
 - Blueprint `dark.json`
 - → template `template/foot.ini`
-- → output `generated/kanagawa-dragon-lotus/foot/theme.ini`
-- → dibaca lewat tema aktif: `~/.myenv/theme/current/foot/theme.ini`
+- → output `palette/generated/kanagawa-dragon-lotus/foot/theme.ini`
+- → dibaca lewat tema aktif: `~/.myenv/theme/palette/current/foot/theme.ini`
 - → pemuat repo: `foot/foot.ini` (`include=.../current/foot/theme.ini`)
 
-Alur wallpaper punya pasangan yang sama: `palette/wallpaper-based/template/foot.ini` → `generated/wallpaper-based/foot/theme.ini`. Karena pemuatnya menunjuk ke `current`, foot ikut tema yang sedang aktif, bukan terpaku pada folder kanagawa.
+Alur wallpaper punya pasangan yang sama: `palette/wallpaper-based/template/foot.ini` → `palette/generated/wallpaper-based/foot/theme.ini`. Karena pemuatnya menunjuk ke `current`, foot ikut tema yang sedang aktif, bukan terpaku pada folder kanagawa.
 
 Pola render Foot sederhana:
 - `foreground`, `background` → `[colors]` utama.

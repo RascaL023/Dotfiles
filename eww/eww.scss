@@ -1,6 +1,6 @@
-@import "/home/rascal/.myenv/theme/current/scss/theme";
+@import "/home/rascal/.myenv/theme/palette/current/scss/theme";
 // Rasa (font) adalah sumbu terpisah: hasil render matugen/feel.sh.
-@import "/home/rascal/.myenv/feel/current/scss/feel";
+@import "/home/rascal/.myenv/theme/feel/current/scss/feel";
 @import "styles/depth-clock";
 
 * {

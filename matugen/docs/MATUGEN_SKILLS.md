@@ -34,7 +34,7 @@ Repo rules (from `AGENTS.md`):
 - Command: `~/.dotfile/matugen/matugen-ctl palette <wallpaper>` (`matugen image <wallpaper> --source-color-index 0 -c <config> -p <store>` underneath)
 - Config: `matugen/core/palette/wallpaper-based/config.toml` (`alacritty`, `kitty`, `lazygit`, `scss`, `rasi`, …)
 - Templates: `matugen/core/palette/wallpaper-based/template/*`, using Material roles `{{ colors.<role>.default.hex }}`.
-- Outputs: `~/.myenv/theme/generated/wallpaper-based/<tool>/…`
+- Outputs: `~/.myenv/theme/palette/generated/wallpaper-based/<tool>/…`
 - Only run `matugen image` when the user asks for wallpaper theming. Always pass `--source-color-index 0`.
 
 **B. Fixed palette (named theme: `kanagawa-dragon-lotus`)** — the usual task in this repo
@@ -43,11 +43,11 @@ Repo rules (from `AGENTS.md`):
 - Templates: `matugen/core/palette/<theme>/template/*`.
 - Command: `~/.dotfile/matugen/matugen-ctl palette <theme>/blueprint/<variant>.json` (`matugen json <blueprint.json> -c <theme-config.toml> -p <store>` underneath). The JSON is exposed **at the template root**, so templates read root-level keys (`{{ accent.primary }}`, `{{ syntax.keyword }}`) — never `colors.*`, and there is no `dark.*`/`light.*` wrapper: the variant you pass is the variant you get.
 - Config: use a **separate config per theme** (`core/palette/kanagawa-dragon-lotus/config.toml`). Do NOT add fixed-theme templates to `matugen/core/palette/wallpaper-based/config.toml`, otherwise every `matugen image` run fails because `accent.*` / `syntax.*` only exist in `json` mode.
-- Outputs: `~/.myenv/theme/generated/<theme>/<tool>/…` (here: `generated/kanagawa-dragon-lotus/nvim/`).
+- Outputs: `~/.myenv/theme/palette/generated/<theme>/<tool>/…` (here: `generated/kanagawa-dragon-lotus/nvim/`).
 
 ### Engine facts verified on this machine (matugen 4.1.0)
 - `matugen json <file> -c <cfg>` needs no source color. `-m dark|light` is irrelevant here: the variant comes from which blueprint file you pass.
-- **`output_path` is relative** in both palette configs (`/kitty/theme.conf`), like the feel config. `matugen -p <dir>` makes it `<dir>/kitty/theme.conf` (verified on 4.2.0); without `-p` the file lands at `/kitty/theme.conf` on the filesystem root. `matugen-ctl palette` supplies `-p ~/.myenv/theme/generated/<palette>`, validates the result, then flips `theme/current`.
+- **`output_path` is relative** in both palette configs (`/kitty/theme.conf`), like the feel config. `matugen -p <dir>` makes it `<dir>/kitty/theme.conf` (verified on 4.2.0); without `-p` the file lands at `/kitty/theme.conf` on the filesystem root. `matugen-ctl palette` supplies `-p ~/.myenv/theme/palette/generated/<palette>`, validates the result, then flips `theme/palette/current`.
 - `--import-json <file>` adds the same JSON as render data for `matugen image` / `matugen color` runs.
 - Dotted access works even for keyword-like keys: `{{ syntax.function }}`, `.return`, `.class`, `.import` are all valid.
 - **Arrays cannot be indexed.** `colors[0]` and `colors.0` are parse errors. Loop instead:
@@ -59,11 +59,11 @@ Repo rules (from `AGENTS.md`):
 ### Neovim target (already wired)
 - Templates: `matugen/core/palette/wallpaper-based/template/nvim.lua` (flow A) and
   `matugen/core/palette/kanagawa-dragon-lotus/template/nvim.lua` (flow B, omits `source`).
-- Output: `~/.myenv/theme/generated/<theme>/nvim/theme.lua` — flow A writes to
-  `~/.myenv/theme/generated/wallpaper-based/nvim/theme.lua` and never straight into
+- Output: `~/.myenv/theme/palette/generated/<theme>/nvim/theme.lua` — flow A writes to
+  `~/.myenv/theme/palette/generated/wallpaper-based/nvim/theme.lua` and never straight into
   `current`; the palette reaches Neovim once `current` points at that folder.
 - The generated file is a **palette module only** and is consumed by
-  `nvim/lua/core/theme.lua`, which adds `~/.myenv/theme/current/nvim/?.lua` to
+  `nvim/lua/core/theme.lua`, which adds `~/.myenv/theme/palette/current/nvim/?.lua` to
   `package.path` and calls `require("theme")` (with a TokyoNight fallback when
   that fails). All tokyonight key mapping, `blend()` math and plugin highlights
   stay in `theme.lua` (the template engine cannot do colour arithmetic).
@@ -415,7 +415,7 @@ color15 {{ colors.on_surface.default.hex }}
   defaults at every `hyprctl reload`. Field names are the merge keys, so keep
   them stable. Colors are `rgba(<hex_stripped>ee)` strings; `format: rgba` is
   **not** usable here because it prints CSS decimals. Check a render without
-  reloading: `luac -p ~/.myenv/theme/current/hypr/theme.lua`. Reload is **not**
+  reloading: `luac -p ~/.myenv/theme/palette/current/hypr/theme.lua`. Reload is **not**
   a post_hook any more: `matugen/script/palette.sh` reloads Hyprland only when
   `HYPRLAND_INSTANCE_SIGNATURE` points at a running instance (a render under
   niri must never touch Hyprland), and it validates that file first.
@@ -528,12 +528,12 @@ Notes:
 - GTK CSS supports `alpha(@surface, 0.8)` for transparency. Prefer it to hand-written rgba.
 - **GTK 4 has `@import` too** (VERIFIED: GTK 4.22 + swaync 0.12.6 — a color defined in the imported file reached the widget pixel). So a GTK 4 app needs no block-splicing or a full-file template; one line is enough:
   ```css
-  @import url("/home/<user>/.myenv/theme/current/css/theme.css");
+  @import url("/home/<user>/.myenv/theme/palette/current/css/theme.css");
   ```
   Use an absolute path (there is no `~` expansion and relative paths are unreliable).
 - **A missing named color is silent in GTK 4.** Unlike a syntax error, `@undeclared` produces no warning; it just falls back to the widget default. Do not "verify" an import by grepping the log — render a probe rule (e.g. `.control-center { background: @accent; }`) and read the pixel, or check the app's own reload output.
 - `swaync` details: stylesheet is `~/.config/swaync/style.css`, palette comes from the shared `css/theme.css`; reload with `swaync-client -rs` — `-R` only reloads `config.json` and leaves the stylesheet untouched.
-- **In this repo:** `waybar`, `wlogout` and `swaync` keep **no** local `colors.css`. All three `@import` the generated `~/.myenv/theme/current/css/theme.css` (78 `@define-color`s, same names in both flows). Add a template entry for a new app rather than a second palette file, and if you must add keys, add them to `source.css` **and** `gtk3.css` so both flows stay in sync.
+- **In this repo:** `waybar`, `wlogout` and `swaync` keep **no** local `colors.css`. All three `@import` the generated `~/.myenv/theme/palette/current/css/theme.css` (78 `@define-color`s, same names in both flows). Add a template entry for a new app rather than a second palette file, and if you must add keys, add them to `source.css` **and** `gtk3.css` so both flows stay in sync.
 - `post_hook` is executed through the user's `$SHELL` (fish on this machine), not bash: keep hooks shell-agnostic. `swaync-client -rs 2>/dev/null || true` works; `$?` is a fish syntax error and fails the whole hook. **This repo stopped using hooks entirely** — both configs have none, and `matugen/script/palette.sh` (bash) owns the reload step, driven by process presence instead of a blind call.
 
 Template `waybar-colors.css`:
@@ -595,7 +595,7 @@ Template `gtk-colors.css` (libadwaita named colors):
 - **In this repo:** both `core/palette/wallpaper-based/template/source.rasi` (Flow A) and
   `core/palette/kanagawa-dragon-lotus/template/source.rasi` (Flow B) emit the same
   23 tokens. Their generated `rasi/theme.rasi` is read through
-  `~/.myenv/theme/current/rasi/theme.rasi` by
+  `~/.myenv/theme/palette/current/rasi/theme.rasi` by
   `rofi/themes/shared/palette.rasi`, imported by every layout.
   Accent, text, layer and border tokens use the exact names and source color
   expressions from the semantic palette in `palette/wallpaper-based/template/source.css` and
@@ -634,7 +634,7 @@ Template `gtk-colors.css` (libadwaita named colors):
   backgrounds use `accent-prompt`, and their text uses `layer-base`, preserving
   the existing appearance. New layouts can use `accent-primary` with `accent-on`.
   `launcher-width`, `wallpaper-width` and `window-radius` now come from
-  `~/.myenv/feel/current/rasi/feel.rasi`; the colour template no longer
+  `~/.myenv/theme/feel/current/rasi/feel.rasi`; the colour template no longer
   writes them. Layouts with a literal radius keep that override.
   Re-render existing generated Rofi palettes after renaming tokens; the
   layouts now reference the new names. No app reload hook is needed.
@@ -825,7 +825,7 @@ theme[cpu_end]="{{ colors.tertiary.default.hex }}"
 
 ### 6.14 Neovim / Lua targets
 
-- Generate a **palette module**, not a full colorscheme. In this repo the generated modules are `~/.myenv/theme/generated/wallpaper-based/nvim/theme.lua` (flow A) and `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua` (flow B); `nvim/lua/core/theme.lua` loads whichever one `~/.myenv/theme/current` points at, through `require("theme")` (see section 0).
+- Generate a **palette module**, not a full colorscheme. In this repo the generated modules are `~/.myenv/theme/palette/generated/wallpaper-based/nvim/theme.lua` (flow A) and `~/.myenv/theme/palette/generated/kanagawa-dragon-lotus/nvim/theme.lua` (flow B); `nvim/lua/core/theme.lua` loads whichever one `~/.myenv/theme/palette/current` points at, through `require("theme")` (see section 0).
 - Beware the Lua `{{` collision: do not write nested table constructors that put two `{` together. Keep one key per line, and quote Lua keyword keys (`["function"]`, `["return"]`).
 
 ```lua

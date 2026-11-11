@@ -154,12 +154,12 @@ end
 local function base_dir()
     local myenv = os.getenv("MYENV")
     if myenv and myenv ~= "" then
-        return myenv .. "/theme/current/hypr"
+        return myenv .. "/theme/palette/current/hypr"
     end
 
     local home = os.getenv("HOME") or ""
     if home ~= "" then
-        return home .. "/.myenv/theme/current/hypr"
+        return home .. "/.myenv/theme/palette/current/hypr"
     end
 
     return nil

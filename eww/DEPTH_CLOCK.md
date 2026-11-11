@@ -38,7 +38,7 @@ Respect all existing repository rules.
 
 Important observations from branch `dev`:
 
-- Eww main config already imports `~/.myenv/theme/current/scss/theme`.
+- Eww main config already imports `~/.myenv/theme/palette/current/scss/theme`.
 - Matugen already produces semantic SCSS color tokens.
 - The project supports wallpaper-derived and fixed-palette themes.
 - `eww/bar` uses a separate Eww configuration and controller.
@@ -173,7 +173,7 @@ Flow B: fixed palette (`kanagawa-dragon-lotus`).
 
 Both already generate semantic SCSS tokens and expose the active theme through:
 
-`~/.myenv/theme/current/scss/theme`
+`~/.myenv/theme/palette/current/scss/theme`
 
 The existing `eww/eww.scss` already imports that theme.
 

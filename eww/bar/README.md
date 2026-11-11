@@ -191,12 +191,12 @@ Palet lokal gelap hangat langsung bekerja tanpa theme store. Integrasi Matugen
 bersifat opsional: kedua template yang sudah ada,
 `../../matugen/templates/palette/wallpaper-based/source.scss` dan
 `../../matugen/templates/palette/kanagawa-dragon-lotus/template/source.scss`, menyediakan
-variabel berikut. Setelah memastikan `~/.myenv/theme/current/scss/_theme.scss`
+variabel berikut. Setelah memastikan `~/.myenv/theme/palette/current/scss/_theme.scss`
 (partial Sass — karena itu `@import` di bawah menulis `theme` tanpa underscore)
 tersedia, tambahkan import **sebelum** definisi token warna dan ganti nilainya:
 
 ```scss
-@import "/home/rascal/.myenv/theme/current/scss/theme";
+@import "/home/rascal/.myenv/theme/palette/current/scss/theme";
 $surface: $layer-lowest;
 $text: $text-primary;
 $muted: $text-secondary;

@@ -28,7 +28,7 @@ wallpaper  ──►  matugen  ──►  template nvim.lua  ──►  theme.lu
    Daftar lengkapnya ada di `VOCABULARY.md`.
 2. **`matugen/core/palette/wallpaper-based/template/nvim.lua`** memilih role itu menjadi nama-nama
    kunci (`background`, `extra.syntax.keyword`, ...). Hasil render-nya ditulis ke
-   `~/.myenv/theme/generated/wallpaper-based/nvim/theme.lua`, dan baru terbaca setelah
+   `~/.myenv/theme/palette/generated/wallpaper-based/nvim/theme.lua`, dan baru terbaca setelah
    `current` menunjuk folder tema itu. File template **hanya menyimpan
    nilai warna** — belum tahu warna itu akan dipakai untuk apa.
 3. **`nvim/lua/core/theme.lua`** membacanya, lalu memetakan tiap kunci ke
@@ -371,10 +371,10 @@ Bukan bug — sebagian kunci sengaja disamakan bentuknya dengan template tool la
   sama persis** (hanya sumber nilainya beda + tanpa `source`), jadi tabel
   "dipakai di mana" di atas berlaku untuk keduanya.
 - Hasil render alur B mendarat di
-  `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua`, jadi ia baru
-  terbaca nvim kalau `~/.myenv/theme/current` menunjuk ke folder tema itu
-  (dilakukan `theme-switcher.sh` di luar repo ini — di checkout ini berkasnya
-  ada di `~/.myenv/script/theme.bak/`). Perbedaan ini sudah
+  `~/.myenv/theme/palette/generated/kanagawa-dragon-lotus/nvim/theme.lua`, jadi ia baru
+  terbaca nvim kalau `~/.myenv/theme/palette/current` menunjuk ke folder tema itu
+  (flip dilakukan `matugen-ctl palette` setelah render tervalidasi; tidak ada
+  switcher yang berjalan — `~/.myenv/script/theme.bak/` hanya stub basi). Perbedaan ini sudah
   diverifikasi: daftar kunci kedua template identik, general hanya punya
   tambahan `source`.
 - Ringkasnya: ubah **nilai warna** → template di `matugen/templates/`; ubah

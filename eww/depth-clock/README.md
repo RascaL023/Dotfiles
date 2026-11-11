@@ -22,7 +22,7 @@ Quickshell.
 > dipakai.
 
 Satu-satunya sumber warna tetap Matugen: `eww/eww.scss` mengimpor
-`~/.myenv/theme/current/scss/theme`, dan [`../styles/_depth-clock.scss`](../styles/_depth-clock.scss)
+`~/.myenv/theme/palette/current/scss/theme`, dan [`../styles/_depth-clock.scss`](../styles/_depth-clock.scss)
 hanya memakai token semantik (`$primary-accent` untuk angka, `$layer-lowest`
 untuk bayangan). Tidak ada hex literal di stylesheet jam.
 
@@ -208,7 +208,7 @@ path yang tidak bisa dibaca dianggap "tidak ada gambar" — jam tertutup, bukan
 gagal. `file://` dan `~` ikut dinormalkan. `depthctl status` menampilkan
 sumbernya: `wallpaper: /path [noctalia]` atau `[awww]`.
 
-Ikutannya: `matugen/reload.sh` tidak lagi mensyaratkan awww, hanya daemon Eww
+Ikutannya: `matugen/script/palette.sh` tidak lagi mensyaratkan awww, hanya daemon Eww
 (`refresh` sendiri yang memutuskan menutup atau reposisi), jadi render tema di
 Niri tidak mematikan jam.
 
@@ -264,7 +264,7 @@ diverifikasi di sesi nyata.
 - Flow A (wallpaper) dan Flow B (palet tetap) sama-sama menghasilkan
   `$primary-accent` dan `$layer-lowest`, jadi satu stylesheet bekerja untuk
   keduanya — tidak ada palet kedua, tidak ada template matugen baru.
-- Ganti tema berarti symlink `~/.myenv/theme/current` berubah; stylesheet Eww
+- Ganti tema berarti symlink `~/.myenv/theme/palette/current` berubah; stylesheet Eww
   baru terbaca setelah reload. Kedua `[templates.scss]` di
   `matugen/config.toml` dan `matugen/templates/palette/kanagawa-dragon-lotus/config.toml`
   sekarang berakhir dengan `eww reload`, jadi render ulang tema langsung

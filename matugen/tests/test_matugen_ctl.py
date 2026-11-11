@@ -16,8 +16,9 @@ class MatugenCtlTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(prefix="matugen ctl ")
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
-        self.theme_store = self.root / "theme"
-        self.feel_store = self.root / "feel"
+        # Two axes share one store root: theme/palette and theme/feel.
+        self.theme_store = self.root / "theme" / "palette"
+        self.feel_store = self.root / "theme" / "feel"
         self.env = {
             **os.environ,
             "THEME_ROOT": str(self.theme_store),

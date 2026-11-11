@@ -2,10 +2,10 @@
 --
 -- Dua hal dipantau:
 --
---   1. ROOT (~/.myenv/theme): untuk mendeteksi symlink `current` dipindah.
+--   1. ROOT (~/.myenv/theme/palette): untuk mendeteksi symlink `current` dipindah.
 --   2. "Inner": folder nyata tempat theme.lua berada SAAT INI.
 --
--- Kenapa tidak cukup memantau ~/.myenv/theme/current/nvim saja?
+-- Kenapa tidak cukup memantau ~/.myenv/theme/palette/current/nvim saja?
 -- inotify menempel pada inode folder yang sudah di-resolve, bukan pada
 -- string path. Begitu `current` dipindah ke tema lain, watcher masih
 -- menempel di folder lama yang tidak pernah ditulis lagi, dan penulisan
@@ -16,7 +16,7 @@ local uv = vim.uv or vim.loop
 
 local M = {}
 
-local ROOT = vim.fn.expand("~/.myenv/theme")
+local ROOT = vim.fn.expand("~/.myenv/theme/palette")
 local LINK = "current"
 local SUBDIR = "nvim"
 local FILE = "theme.lua"

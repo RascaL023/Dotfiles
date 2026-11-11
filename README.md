@@ -68,7 +68,7 @@ each entry is.
 fixed-palette pipeline; see [Theming](#theming).
 
 ¹ `foot/foot.ini` loads its palette with
-`include=/home/rascal/.myenv/theme/current/foot/theme.ini`, so it follows the
+`include=/home/rascal/.myenv/theme/palette/current/foot/theme.ini`, so it follows the
 active theme the same way `kitty/kitty.conf` does. Flow A writes
 `generated/wallpaper-based/foot/theme.ini`, Flow B
 `generated/kanagawa-dragon-lotus/foot/theme.ini`; foot sees whichever one the
@@ -80,7 +80,7 @@ tab separators, `which` columns, notify/cmp icons) — the 43 KB icon table now
 lives in the ignored `yazi/theme.toml.bak`. The generated files are the color
 flavor and the preview tmTheme, both reachable inside the same flavor directory:
 `~/.config/yazi/flavors/matugen.yazi/flavor.toml` and
-`.../tmtheme.xml` → `~/.myenv/theme/current/yazi/`.
+`.../tmtheme.xml` → `~/.myenv/theme/palette/current/yazi/`.
 
 ---
 
@@ -181,21 +181,31 @@ point is `matugen/matugen-ctl` — `palette <source>` (Flow A/B), `feel <profile
 
 ```text
         ┌─ wallpaper ─┐
-color ──┤              ├─ matugen-ctl ─► template ─► ~/.myenv/theme/generated/<palette>/
+color ──┤              ├─ matugen-ctl ─► template ─► ~/.myenv/theme/palette/generated/<palette>/
         └─ blueprint ──┘                                     │
                                                               ▼
-                                              ~/.myenv/theme/current  ◄─ symlink
+                                              ~/.myenv/theme/palette/current  ◄─ symlink
                                                               │
                                           kitty, foot, alacritty, waybar, wlogout,
                                           swaync, rofi, eww, nvim, yazi, hypr, …
 ```
 
 `~/.myenv` is the theme store **outside** this repo; the repo only renders into
-it. `current` is a symlink to one palette directory (`generated/wallpaper-based`
-for the wallpaper flow, `generated/kanagawa-dragon-lotus` for the fixed palette).
+it. Colours and feel are stored side by side and switched independently:
+
+```text
+~/.myenv/theme/palette/generated/<palette>/   ← colours
+~/.myenv/theme/palette/current                ← symlink, flipped by palette.sh
+~/.myenv/theme/feel/generated/<profile>/      ← look & feel
+~/.myenv/theme/feel/current                   ← symlink, flipped by feel.sh
+```
+
 `matugen-ctl palette <source>` renders into `generated/<palette>`, validates, then
-flips `current`; the external `theme-switcher.sh` in `~/.myenv/script/` — parked
-in `theme.bak/` in this checkout — can point it at a named theme too.
+flips the palette `current`; `matugen-ctl feel <profile>` does the same for feel.
+`~/.myenv/theme/current-status.json` disediakan untuk switcher (nama + varian,
+bentuknya di `.example`), tapi belum ada yang menulisnya — jadi `current` tetap
+jadi acuan. Tidak ada switcher yang jalan: `script/theme.bak/` menyimpan stub
+lama, dan binding `Mod+T` / on-click waybar yang memanggilnya masih mati.
 
 ### Flow A — wallpaper-derived (Material You)
 
@@ -207,9 +217,9 @@ in `theme.bak/` in this checkout — can point it at a named theme too.
 - Templates: `matugen/core/palette/wallpaper-based/template/*`
 - Vocabulary: `{{ colors.<role>.<scheme>.<format> }}` (MD3 roles: `primary`,
   `surface`, `on_surface`, …)
-- Output: `~/.myenv/theme/generated/wallpaper-based/<tool>/…`
+- Output: `~/.myenv/theme/palette/generated/wallpaper-based/<tool>/…`
 - Config writes **relative** paths (`/kitty/theme.conf`); `matugen-ctl palette` owns the
-  `-p ~/.myenv/theme/generated/<palette>` prefix and the `current` flip
+  `-p ~/.myenv/theme/palette/generated/<palette>` prefix and the `current` flip
 
 ### Flow B — fixed palette (a named theme)
 
@@ -224,7 +234,7 @@ in `theme.bak/` in this checkout — can point it at a named theme too.
 - Templates: `matugen/core/palette/kanagawa-dragon-lotus/template/*`
 - Vocabulary: the JSON is exposed at the template root, so templates read
   `{{ accent.primary }}`, `{{ syntax.keyword }}`, … — never `colors.*`
-- Output: `~/.myenv/theme/generated/kanagawa-dragon-lotus/<tool>/…`
+- Output: `~/.myenv/theme/palette/generated/kanagawa-dragon-lotus/<tool>/…`
 - Full key-by-key reference: [`blueprint/README.md`](matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md)
 
 > Color templates live in `matugen/core/palette/` — one directory per
@@ -259,23 +269,24 @@ default-nya (merge rekursif, jadi berkas tema boleh hanya berisi sebagian key),
 menjepit nilai di luar rentang aman, lalu memetakan semuanya ke payload
 `hl.config` / `hl.curve` / `hl.animation`. `hypr/hyprland.lua` hanya memanggilnya,
 sehingga tetap terbaca sebagai config dan bukan peta field. Nama + varian tema
-tidak ikut ke berkas tema Hyprland — itu urusan switcher
-(`~/.myenv/theme/current-status.json`).
+tidak ikut ke berkas tema Hyprland: identitas palet adalah nama direktori di
+`theme/palette/generated/`, sedangkan nama + varian untuk switcher ada di
+`~/.myenv/theme/current-status.json` (belum diisi otomatis).
 
 ### Who reads the generated files
 
 | Consumer | Reads |
 |---|---|
-| `kitty/kitty.conf` | `~/.myenv/theme/current/kitty/theme.conf` |
-| `alacritty/alacritty.toml` | `~/.myenv/theme/current/alacritty/theme.toml` + `~/.myenv/feel/current/alacritty/feel.toml` |
-| `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` | `~/.myenv/theme/current/css/theme.css` |
-| `rofi/themes/shared/palette.rasi` (shared by all Rofi layouts) | `~/.myenv/theme/current/rasi/theme.rasi` + `~/.myenv/feel/current/rasi/feel.rasi` |
-| `eww/eww.scss` | `~/.myenv/theme/current/scss/theme` |
-| `nvim/lua/core/theme.lua` | `~/.myenv/theme/current/nvim/theme.lua` |
-| `foot/foot.ini` | `~/.myenv/theme/current/foot/theme.ini` |
-| `yazi/flavors/matugen.yazi/flavor.toml` | `~/.myenv/theme/current/yazi/flavor.toml` (symlink) |
-| `yazi/flavors/matugen.yazi/tmtheme.xml` | `~/.myenv/theme/current/yazi/tmtheme.xml` (symlink) |
-| `hypr/config/core/theme.lua` | `~/.myenv/theme/current/hypr/theme.lua` (`load`, modul data) |
+| `kitty/kitty.conf` | `~/.myenv/theme/palette/current/kitty/theme.conf` |
+| `alacritty/alacritty.toml` | `~/.myenv/theme/palette/current/alacritty/theme.toml` + `~/.myenv/theme/feel/current/alacritty/feel.toml` |
+| `waybar/style.css`, `wlogout/style.css`, `swaync/style.css` | `~/.myenv/theme/palette/current/css/theme.css` |
+| `rofi/themes/shared/palette.rasi` (shared by all Rofi layouts) | `~/.myenv/theme/palette/current/rasi/theme.rasi` + `~/.myenv/theme/feel/current/rasi/feel.rasi` |
+| `eww/eww.scss` | `~/.myenv/theme/palette/current/scss/theme` |
+| `nvim/lua/core/theme.lua` | `~/.myenv/theme/palette/current/nvim/theme.lua` |
+| `foot/foot.ini` | `~/.myenv/theme/palette/current/foot/theme.ini` |
+| `yazi/flavors/matugen.yazi/flavor.toml` | `~/.myenv/theme/palette/current/yazi/flavor.toml` (symlink) |
+| `yazi/flavors/matugen.yazi/tmtheme.xml` | `~/.myenv/theme/palette/current/yazi/tmtheme.xml` (symlink) |
+| `hypr/config/core/theme.lua` | `~/.myenv/theme/palette/current/hypr/theme.lua` (`load`, modul data) |
 
 `swaync/style.css` is GTK 4 but reaches the palette exactly like waybar and
 wlogout do, because GTK 4 does support `@import` (verified with GTK 4.22 +
@@ -325,5 +336,6 @@ Then make the theme available, since generated files are not committed:
 ~/.dotfile/matugen/matugen-ctl palette ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json
 ```
 
-Requires `matugen` (4.x) on `PATH` and a `~/.myenv/theme` store with a `current`
-entry.
+Requires `matugen` (4.x) on `PATH` and the store's `current` symlinks
+(`~/.myenv/theme/palette/current`, `~/.myenv/theme/feel/current`) pointing at
+rendered directories.

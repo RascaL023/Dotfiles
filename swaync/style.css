@@ -1,6 +1,6 @@
 /* ── 1. Palet — satu sumber, dari matugen ───────────────────────────────── */
-@import url("/home/rascal/.myenv/theme/current/css/theme.css");
-@import url("/home/rascal/.myenv/feel/current/css/swaync-font.css");
+@import url("/home/rascal/.myenv/theme/palette/current/css/theme.css");
+@import url("/home/rascal/.myenv/theme/feel/current/css/swaync-font.css");
 
 /* ── 2. Turunan + nama lama swaync ──────────────────────────────────────── */
 @define-color cc-bg              alpha(@bg-main, 0.80);

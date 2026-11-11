@@ -8,18 +8,25 @@
 #   palette.sh --dry-run ...      print what would run, change nothing
 #
 # Both palette configs write relative output_paths (`/kitty/theme.conf`), so the
-# store folder is decided here: render into `generated/.<palette>.tmp`, validate,
-# move it to `generated/<palette>`, then flip `theme/current`. A failed render
-# therefore never replaces the live theme, and config.toml carries no store path
-# (the same contract as core/feel/config.toml). Reload is process-gated and
-# wrapped in `timeout`; a Hyprland palette that fails `luac -p` is reported
-# instead of applied.
+# store folder is decided here: render into `<store>/generated/.<palette>.tmp`,
+# validate, move it to `<store>/generated/<palette>`, then flip
+# `<store>/current`. A failed render therefore never replaces the live palette,
+# and config.toml carries no store path (the same contract as
+# core/feel/config.toml). Reload is process-gated and wrapped in `timeout`; a
+# Hyprland palette that fails `luac -p` is reported instead of applied.
+#
+# Store layout (feel.sh uses the sibling directory):
+#
+#   ~/.myenv/theme/palette/generated/<palette>/   colour output
+#   ~/.myenv/theme/palette/current -> generated/<palette>
+#   ~/.myenv/theme/feel/generated/<profil>/       look & feel output
+#   ~/.myenv/theme/feel/current    -> generated/<profil>
 
 set -u
 
 timeout_s=${RELOAD_TIMEOUT:-5}
 root=${HOME}/.dotfile/matugen
-theme_root=${THEME_ROOT:-$HOME/.myenv/theme}
+theme_root=${THEME_ROOT:-$HOME/.myenv/theme/palette}
 generated=$theme_root/generated
 current=$theme_root/current
 depthctl=$HOME/.dotfile/eww/scripts/depthctl
@@ -294,8 +301,9 @@ usage: palette.sh [options] [source] [consumer ...]
   -l, --list        print known consumers
   -h, --help        this text
 
-A render goes to ~/.myenv/theme/generated/<palette> and, once it validates,
-flips ~/.myenv/theme/current. Override the store with THEME_ROOT.
+A render goes to ~/.myenv/theme/palette/generated/<palette> and, once it
+validates, flips ~/.myenv/theme/palette/current. Override the palette store
+with THEME_ROOT (the feel store stays at ~/.myenv/theme/feel).
 EOF
 }
 

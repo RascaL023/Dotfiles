@@ -284,7 +284,7 @@ jadi foreground lama tidak pernah tertinggal di atas wallpaper lain.
 
 Tema (`matugen/config.toml` dan `matugen/templates/palette/kanagawa-dragon-lotus/config.toml`):
 kedua config **tidak** lagi punya `post_hook`. Setelah render, jalankan
-`matugen/reload.sh`: ia meng-`eww reload` (kalau eww jalan) lalu
+`matugen/script/palette.sh`: ia meng-`eww reload` (kalau eww jalan) lalu
 `depthctl refresh`.
 
 `eww reload` wajib karena CSS hanya dibaca ulang saat reload (file tema di

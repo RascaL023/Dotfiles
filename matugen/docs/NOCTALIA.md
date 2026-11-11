@@ -18,7 +18,7 @@ dokumen ini tetap benar untuk versi Noctalia yang terpasang.
   diambil sekali saat integrasi, bukan dideteksi otomatis.
 - **Rasa selalu milik flow kita.** Template Noctalia membawa token warna,
   `mode`, `image`, `closest_color`; tidak ada jalur terdokumentasi untuk skalar
-  bebas (angka/string) maupun aritmetika. Karena itu `~/.myenv/feel/current/*`
+  bebas (angka/string) maupun aritmetika. Karena itu `~/.myenv/theme/feel/current/*`
   tetap dirender `matugen/json` dari profil kita. Noctalia hanya bisa mengatur
   rasa untuk dirinya sendiri lewat config TOML-nya.
 
@@ -74,5 +74,5 @@ dokumen ini tetap benar untuk versi Noctalia yang terpasang.
    `niri/config.kdl` / `hypr/*.lua`; kalau ya, matikan include warna kita untuk
    WM itu.
 3. Apakah template bawaan menulis ke `~/.config/kitty`, `foot`, `alacritty`,
-   dsb. — bisa dobel dengan `include` kita ke `theme/current/`.
+   dsb. — bisa dobel dengan `include` kita ke `theme/palette/current/`.
 4. `noctalia config validate` harus exit 0 sebelum file hasil render dipakai.

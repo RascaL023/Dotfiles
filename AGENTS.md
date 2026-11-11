@@ -25,7 +25,7 @@ script and the theming pipeline work with any compositor.
 
   | Artifact | Produced by | Ignored? |
   |---|---|---|
-  | `~/.myenv/theme/generated/**` | `matugen` (outside the repo) | n/a |
+  | `~/.myenv/theme/palette/generated/**` | `matugen` (outside the repo) | n/a |
   | `matugen/generated.bak/` | `matugen image` test runs | yes (`**.bak`) |
   | `matugen/templates/test.conf` | scratch test template | yes |
 
@@ -127,7 +127,7 @@ Test a template into `/tmp` before rendering over a live path — recipe in
 | Command | `matugen-ctl palette <wallpaper>` | `matugen-ctl palette <blueprint>.json` |
 | Template vocabulary | `{{ colors.<role>.<scheme>.<format> }}` | root-level keys: `{{ accent.primary }}`, `{{ syntax.keyword }}` |
 | Themes here | `wallpaper-based` | `kanagawa-dragon-lotus` |
-| Output | `~/.myenv/theme/generated/wallpaper-based/<tool>/…` | `~/.myenv/theme/generated/<theme>/<tool>/…` |
+| Output | `~/.myenv/theme/palette/generated/wallpaper-based/<tool>/…` | `~/.myenv/theme/palette/generated/<theme>/<tool>/…` |
 
 Rules:
 
@@ -135,11 +135,11 @@ Rules:
   breaks every `matugen image` run (no `accent.*` in a Material You palette).
 - **`output_path` is relative** in both palette configs (`/kitty/theme.conf`),
   exactly like the feel config: `matugen/script/palette.sh` supplies
-  `-p ~/.myenv/theme/generated/<palette>`, validates the result, then flips
-  `theme/current`. Rendering one of these configs with bare `matugen` writes to
+  `-p ~/.myenv/theme/palette/generated/<palette>`, validates the result, then flips
+  `palette/current`. Rendering one of these configs with bare `matugen` writes to
   `/kitty/theme.conf` at the filesystem root.
 - **Feel is its own flow, not part of a palette.** Colors write
-  `~/.myenv/theme/current`, feel writes `~/.myenv/feel/current`; no file is
+  `~/.myenv/theme/palette/current`, feel writes `~/.myenv/theme/feel/current`; no file is
   written by both. Profiles are data only:
   `matugen/core/feel/blueprint/<profile>.json`, with one shared
   `matugen/core/feel/config.toml` and shared
@@ -147,7 +147,7 @@ Rules:
   or the templates.
 - **Render feel only through `matugen-ctl feel <profile>`** (script:
   `matugen/script/feel.sh`). It renders into
-  `~/.myenv/feel/generated/<profile>` and only then flips `feel/current`, so a
+  `~/.myenv/theme/feel/generated/<profile>` and only then flips `theme/feel/current`, so a
   failed render never leaves the desktop on a half-written profile. Matugen
   cannot resolve a missing/empty key (no `default` filter, no conditionals), so
   a profile must carry every key the templates read, and empty-value semantics
@@ -161,11 +161,15 @@ Rules:
 - **Placeholder names are not shared** between flows — the same tool needs its
   own template per flow. Never assume a value exists; grep the template.
 - `~/.myenv` is the theme store **outside** this repo: this repo only renders
-  into it. `~/.myenv/theme/current` is a symlink to the active theme directory:
-  `matugen/script/palette.sh` flips it after a validated render, and the external
-  `theme-switcher.sh` (in `~/.myenv/script/`, parked under `theme.bak/` in this
-  checkout) may point it at a named theme as well; the legacy
-  engine's own `assets/templates/**` is not managed from here.
+  into it. Two independent axes live side by side: `theme/palette/` (colours,
+  flipped by `matugen/script/palette.sh`) and `theme/feel/` (look & feel,
+  flipped by `matugen/script/feel.sh`). Each has a `current` symlink to its
+  active `generated/<name>` directory, so switching is one symlink flip and
+  never re-renders. There is **no working theme switcher**: the old one in
+  `~/.myenv/script/` is parked in `theme.bak/`, its `theme-picker.sh` just execs
+  `nextwall.sh`, and the `Mod+T` bindings / waybar on-click still call the
+  missing path. The legacy engine's own `assets/templates/**` is not managed
+  from here.
 
 ---
 
@@ -173,7 +177,7 @@ Rules:
 
 - `nvim/lua/core/theme.lua` is the single source of truth for Neovim colors. It
   loads the generated palette via
-  `package.path += "~/.myenv/theme/current/nvim/?.lua"` → `require("theme")`,
+  `package.path += "~/.myenv/theme/palette/current/nvim/?.lua"` → `require("theme")`,
   maps it onto TokyoNight's keys, and owns all plugin highlight groups.
 - If that `require` fails — or the palette loads but is incomplete — the module
   enters fallback mode: `M.fallback = true` and `M.colors` holds `FALLBACK_COLORS`
@@ -196,8 +200,8 @@ Rules:
   `nvim/init.lua` starts `core.theme_watch` **before** `core.lazy` so the
   watcher survives a failing plugin spec.
 - Templates that produce it:
-  - Flow A: `matugen/core/palette/wallpaper-based/template/nvim.lua` → `~/.myenv/theme/generated/wallpaper-based/nvim/theme.lua`
-  - Flow B: `matugen/core/palette/kanagawa-dragon-lotus/template/nvim.lua` → `~/.myenv/theme/generated/kanagawa-dragon-lotus/nvim/theme.lua`
+  - Flow A: `matugen/core/palette/wallpaper-based/template/nvim.lua` → `~/.myenv/theme/palette/generated/wallpaper-based/nvim/theme.lua`
+  - Flow B: `matugen/core/palette/kanagawa-dragon-lotus/template/nvim.lua` → `~/.myenv/theme/palette/generated/kanagawa-dragon-lotus/nvim/theme.lua`
 - **Both flows write into their own theme folder, never into `current`.** The
   loader still reads `current/nvim/theme.lua`, so a palette only goes live after
   `current` points at that folder; activating Flow A is still manual (nothing in
@@ -220,8 +224,13 @@ Rules:
   - `tool` → auto-locate a file/dir/symlink under the config root
   - `tool:explicit_path` → explicit source path (e.g. `lazygit:~/.config/lazygit`)
   - blank lines and `#` comments are ignored
-- **Theme status:** `~/.myenv/theme/current-status.json` (theme name + type) is
-  written by the external switcher, not by this repo.
+- **Theme status:** `~/.myenv/theme/current-status.json` holds
+  `{version, theme:{name, type}, waybar}` — theme name + variant for the
+  switcher; its shape is the tracked `.example`. It is machine state (ignored),
+  nothing writes it today (the switcher is parked in
+  `~/.myenv/script/theme.bak/`), so the authoritative palette is still the
+  directory `theme/palette/current` resolves to. `theme/path.txt` was removed
+  in the store migration.
 
 ---
 
@@ -245,7 +254,7 @@ Rules:
 - **GTK 4 has `@import`** (verified: GTK 4.22 + swaync 0.12.6 — the imported
   value reached the rendered pixel). `swaync/style.css` therefore carries **no**
   palette literals: it imports
-  `/home/rascal/.myenv/theme/current/css/theme.css`, the same file
+  `/home/rascal/.myenv/theme/palette/current/css/theme.css`, the same file
   `waybar/style.css` and `wlogout/style.css` read. Add colors to the theme,
   never to that stylesheet.
 - **`swaync-client -rs` reloads CSS; `-R` only reloads `config.json`.** Neither
@@ -289,5 +298,5 @@ verified against the repo, so a stale line is a bug.
 1. `git clone <repo-url> ~/.dotfile`
 2. `bash ~/.dotfile/.synchronizer/.sync.sh link`
 3. Ensure `matugen` (4.x) is on `PATH`.
-4. Render a theme (Flow A or Flow B) so `~/.myenv/theme/current/…` exists —
+4. Render a theme (Flow A or Flow B) so `~/.myenv/theme/palette/current/…` exists —
    otherwise Neovim and the other consumers run without a generated palette.
