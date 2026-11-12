@@ -192,6 +192,22 @@ local function load_data(path, label)
     return data, true
 end
 
+-- Feel (look & feel) lives in its own store and is owned per WM: the
+-- Hyprland profile renders ~/.myenv/theme/feel/current/hypr/feel.lua.
+local function feel_path()
+    local myenv = os.getenv("MYENV")
+    if myenv and myenv ~= "" then
+        return myenv .. "/theme/feel/current/hypr/feel.lua"
+    end
+
+    local home = os.getenv("HOME") or ""
+    if home ~= "" then
+        return home .. "/.myenv/theme/feel/current/hypr/feel.lua"
+    end
+
+    return nil
+end
+
 local dir = base_dir()
 if not dir then
     warn("HOME dan MYENV kosong; memakai nilai default")
@@ -207,6 +223,26 @@ else
         end
     else
         merge(Theme, data)
+    end
+end
+
+-- Feel digabung SETELAH palet: palet hanya memiliki warna, sedangkan angka
+-- rasa dimiliki profil feel per WM. Urutan ini juga membuat feel tetap
+-- menang bila palet lama masih membawa angka rasa di theme.lua-nya.
+local fpath = feel_path()
+if not fpath then
+    warn("HOME dan MYENV kosong; feel memakai default")
+else
+    local feel, exists = load_data(fpath, "feel")
+
+    if not feel then
+        if exists then
+            warn("memakai default rasa karena feel.lua gagal dimuat")
+        else
+            warn("feel.lua tidak ditemukan di " .. fpath .. "; memakai default rasa")
+        end
+    else
+        merge(Theme, feel)
     end
 end
 

@@ -21,7 +21,7 @@ a wallpaper or a hand-written palette.
 ├── .synchronizer/          # the link/restore/status script + local state
 ├── tools.list              # which tools the synchronizer manages
 ├── matugen/                # theming engine: configs, templates, palettes
-│   ├── core/feel/          #   rasa: blueprint/<profil>.json, template/, config.toml
+│   ├── core/feel/          #   rasa: profiles/<profil>/{apps,hypr,niri}.json
 │   ├── core/palette/       #   color templates, one dir per source
 │   │   ├── wallpaper-based/
 │   │   │   ├── config.toml #   wallpaper-derived theme (Material You)

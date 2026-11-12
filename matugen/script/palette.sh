@@ -12,7 +12,7 @@
 # validate, move it to `<store>/generated/<palette>`, then flip
 # `<store>/current`. A failed render therefore never replaces the live palette,
 # and config.toml carries no store path (the same contract as
-# core/feel/config.toml). Reload is process-gated and wrapped in `timeout`; a
+# core/feel/config.*.toml). Reload is process-gated and wrapped in `timeout`; a
 # Hyprland palette that fails `luac -p` is reported instead of applied.
 #
 # Store layout (feel.sh uses the sibling directory):

@@ -10,11 +10,11 @@ function __matugen_ctl_root --description 'Directory of the installed matugen-ct
     path dirname (path resolve $bin)
 end
 
-function __matugen_feel_profiles --description 'Feel profiles from core/feel/blueprint'
+function __matugen_feel_profiles --description 'Feel profiles from core/feel/profiles'
     set -l root (__matugen_ctl_root); or return
-    set -l files $root/core/feel/blueprint/*.json
-    test -e $files[1]; or return
-    path basename -- $files | string replace -r '\.json$' ''
+    set -l dirs $root/core/feel/profiles/*/
+    test -d $dirs[1]; or return
+    path basename -- $dirs
 end
 
 function __matugen_consumers --description 'Render consumers reported by palette.sh'
@@ -38,4 +38,7 @@ complete -c matugen-ctl -n '__fish_seen_subcommand_from palette' -s n -l dry-run
 complete -c matugen-ctl -n '__fish_seen_subcommand_from palette' -l list -d 'List consumers and exit'
 
 complete -c matugen-ctl -n '__fish_seen_subcommand_from feel' -a '(__matugen_feel_profiles)' -d 'Feel profile'
+complete -c matugen-ctl -n '__fish_seen_subcommand_from feel' -l wm -a 'auto hypr niri' -d 'WM yang dirender'
+complete -c matugen-ctl -n '__fish_seen_subcommand_from feel' -s n -l dry-run -d 'Render tanpa aktivasi/reload'
+complete -c matugen-ctl -n '__fish_seen_subcommand_from feel' -l no-reload -d 'Aktifkan tanpa reload konsumen'
 complete -c matugen-ctl -n '__fish_seen_subcommand_from reload' -a '(__matugen_consumers)' -d 'Consumer'

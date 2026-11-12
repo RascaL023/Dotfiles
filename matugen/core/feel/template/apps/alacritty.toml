@@ -6,7 +6,7 @@
 
 
 [window]
-opacity         = {{ surface.terminal_opacity }}
+opacity         = {{ terminal.opacity }}
 padding.x       = {{ terminal.padding.x }}
 padding.y       = {{ terminal.padding.y }}
 

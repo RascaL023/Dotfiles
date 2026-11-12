@@ -1,4 +1,4 @@
-# Matriks Feel: Hyprland 0.56 vs niri 26.04
+# Matriks Feel: Hyprland 0.57 vs niri 26.04
 
 > Indeks: [`README.md`](../README.md) · terkait: [`NOCTALIA.md`](NOCTALIA.md)
 
@@ -8,7 +8,7 @@
 
 Sumber verifikasi:
 
-- Hyprland 0.56: stub resmi `share/hypr/stubs/hl.meta.lua` (daftar opsi
+- Hyprland 0.57: stub resmi `share/hypr/stubs/hl.meta.lua` (daftar opsi
   `decoration.*`, `layer_rule`, `group.*`) + config repo (`hypr/config/core/theme.lua`,
   `hypr/hyprland.lua`).
 - niri 26.04: docs Configuration (Layout, Window Rules, Layer Rules, Animations,
@@ -52,7 +52,7 @@ Legenda verdict:
 
 ### 2.1 Geometri
 
-| Fitur | Hyprland 0.56 | niri 26.04 | Verdict | Catatan adaptasi |
+| Fitur | Hyprland 0.57 | niri 26.04 | Verdict | Catatan adaptasi |
 |---|---|---|---|---|
 | Gap dalam | `general.gaps_in` | `layout.gaps` | 🔁 | niri hanya satu nilai; pakai `gaps`, bukan rata-rata |
 | Gap luar | `general.gaps_out` | `struts` negatif | 🔁 | niri: `struts` **tidak di-merge**; kalau dipakai, satu file harus memiliki seluruh blok |
@@ -251,8 +251,8 @@ app. Jangan dua-duanya.
 Hyprland (sesi aktif):
 
 ```bash
-luac -p ~/.myenv/theme/palette/current/hypr/theme.lua
-luac -p ~/.myenv/theme/feel/current/hypr.lua
+luac -p ~/.myenv/theme/palette/current/hypr/theme.lua   # warna saja
+luac -p ~/.myenv/theme/feel/current/hypr/feel.lua        # rasa Hyprland
 hyprctl reload
 hyprctl getoption decoration:rounding
 hyprctl getoption decoration:blur:enabled
@@ -314,7 +314,10 @@ niri 26.04, dari docs Include/Layout/Animations + `niri validate` lokal:
 ---
 
 # KESIMPULAN
-Langkah yang diambil adalah pemisahan langsung per WM. 
-Hyprland dan Niri akan memiliki json sendiri sendiri, tidak dipaksakan.
-Untuk feel generik, contohnya padding terminal, font, atau hal lain
-yang bukan WM mungkin akan menjadi 1 json saja.
+Langkah yang diambil adalah pemisahan langsung per WM.
+Hyprland dan niri punya json sendiri (`hypr.json`, `niri.json`), tidak
+dipaksakan. Feel generik (font, padding terminal, rofi) menjadi `apps.json`
+yang dirender di WM mana pun. `matugen-ctl feel` mendeteksi WM aktif dan hanya
+merender bagian miliknya: `apps.json` + `hypr.json` di Hyprland, sementara
+`niri.json` belum dirender karena template niri belum ada. Palet hanya memiliki
+warna; angka rasa Hyprland dibaca dari `theme/feel/current/hypr/feel.lua`.

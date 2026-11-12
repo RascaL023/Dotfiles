@@ -1,0 +1,29 @@
+[config]
+
+[templates.scss]
+input_path  = "~/.config/matugen/core/feel/template/apps/source.scss"
+output_path = "/scss/_feel.scss"
+
+[templates.kitty]
+input_path  = "~/.config/matugen/core/feel/template/apps/kitty.conf"
+output_path = "/kitty/feel.conf"
+
+[templates.foot]
+input_path  = "~/.config/matugen/core/feel/template/apps/foot.ini"
+output_path = "/foot/feel.ini"
+
+[templates.waybar]
+input_path  = "~/.config/matugen/core/feel/template/apps/gtk3.css"
+output_path = "/css/waybar-font.css"
+
+[templates.swaync]
+input_path  = "~/.config/matugen/core/feel/template/apps/gtk4.css"
+output_path = "/css/swaync-font.css"
+
+[templates.alacritty]
+input_path  = "~/.config/matugen/core/feel/template/apps/alacritty.toml"
+output_path = "/alacritty/feel.toml"
+
+[templates.rofi]
+input_path  = "~/.config/matugen/core/feel/template/apps/rofi.rasi"
+output_path = "/rasi/feel.rasi"

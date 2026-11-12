@@ -182,13 +182,13 @@ Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu), `f
 
 ### 3.11 `feel.*` — rasa compositor (bukan warna)
 
-Objek ini **tidak berisi warna**; isinya angka dan boolean yang menentukan look & feel
-Hyprland. Pemindahannya ke profil rasa sendiri (`~/.myenv/theme/feel/current`) belum
-dilakukan, jadi selama itu `feel` tetap dibaca dari sini (lihat
-[`matugen/README.md`](../../../../README.md), bagian “Warna dan rasa”).
-Template `template/hypr.lua` menyalinnya apa adanya ke `hypr/theme.lua`,
-lalu `hypr/config/core/theme.lua` menggabungkannya dengan default dan menjepit
-nilainya. Jadi dua blueprint dengan palet sama tetap bisa terasa berbeda.
+**Sudah dipindah.** Objek `feel` tidak lagi ada di blueprint palet. Angka dan
+boolean look & feel Hyprland kini tinggal di profil rasa per WM:
+`matugen/core/feel/profiles/<profil>/hypr.json`, dirender ke
+`~/.myenv/theme/feel/current/hypr/feel.lua`, lalu digabung
+`hypr/config/core/theme/palette.lua` di atas warna palet. Template palet
+(`template/hypr.lua`) hanya menulis warna. Tabel di bawah tetap menjadi
+referensi key `hypr.json`; mengubah palet tidak lagi mengubah rasa.
 
 | Key | Nilai sekarang | Rentang aman | Efek |
 |---|---|---|---|
@@ -206,7 +206,7 @@ nilainya. Jadi dua blueprint dengan palet sama tetap bisa terasa berbeda.
 | `material.blur.*` | `size 4`, `passes 4` | 1–16 / 1–6 | kekuatan blur |
 | `material.blur.noise` / `vibrancy` | `0.0` / `0.0` | 0–0.2 / 0–1 | grain & saturasi blur |
 | `material.blur.xray` / `popups` | `false` / `false` | — | blur menembus jendela / menu |
-| `material.shadow.*` | `range 20`, `power 10` | 0–60 / 1–10 | bayangan |
+| `material.shadow.*` | `range 20`, `power 4` | 0–60 / 1–4 | bayangan |
 | `material.shadow.sharp` | `false` | — | bayangan tegas (tanpa gradasi) |
 | `motion.speed` | `1.0` | 0.4–2.5 | pengali kecepatan semua animasi |
 | `motion.curve.{x1,y1,x2,y2}` | `0.05, 0.9, 0.1, 1.05` | — | kurva bezier bersama |
@@ -223,7 +223,8 @@ nilainya. Jadi dua blueprint dengan palet sama tetap bisa terasa berbeda.
 4.2.0 tidak mendukung indeks array (`curve.0`/`curve[0]` sama-sama ditolak).
 
 `meta.name` + `meta.variant` **tidak** ikut ditulis ke `hypr/theme.lua`: berkas
-tema Hyprland hanya berisi warna dan `feel`. Identitas palet adalah nama direktori
+tema Hyprland hanya berisi warna; rasa dibaca dari `feel/current/hypr/feel.lua`.
+Identitas palet adalah nama direktori
 di `~/.myenv/theme/palette/generated/`; pasangan nama + varian disimpan switcher
 di `~/.myenv/theme/current-status.json` (bentuknya di `.example`), yang sekarang
 belum diisi otomatis.

@@ -1,0 +1,41 @@
+{
+  "font": {
+    "ui": {
+      "text": "MapleMono NF",
+      "title": "Monocraft Nerd Font",
+      "tooltip": "FiraCodeNerdFontMono"
+    },
+    "icon": "JetBrainsMono Nerd Font",
+    "system": "Cantarell Regular",
+    "terminal": "MapleMono NF",
+    "weight": {
+      "normal": 500,
+      "strong": 600
+    },
+    "size": {
+      "small": 7,
+      "normal": 11,
+      "large": 15
+    }
+  },
+
+  "terminal": {
+    "padding": { "x": 25, "y": 20 },
+    "opacity": 0.9,
+    "cursor": "Beam",
+    "kitty": {
+      "border_width": 1,
+      "margin": 6,
+      "padding": 10,
+      "cursor_shape": "beam",
+      "tab_bar_style": "powerline",
+      "tab_powerline_style": "slanted"
+    }
+  },
+
+  "chrome": {
+    "rofi_radius": 10,
+    "rofi_launcher_width": "45%",
+    "rofi_wallpaper_width": "100%"
+  }
+}

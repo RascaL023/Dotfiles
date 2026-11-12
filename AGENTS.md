@@ -140,11 +140,12 @@ Rules:
   `/kitty/theme.conf` at the filesystem root.
 - **Feel is its own flow, not part of a palette.** Colors write
   `~/.myenv/theme/palette/current`, feel writes `~/.myenv/theme/feel/current`; no file is
-  written by both. Profiles are data only:
-  `matugen/core/feel/blueprint/<profile>.json`, with one shared
-  `matugen/core/feel/config.toml` and shared
-  `matugen/core/feel/template/` — adding a profile never touches the config
-  or the templates.
+  written by both. A profile is a directory of per-owner data:
+  `matugen/core/feel/profiles/<profile>/apps.json` (WM-independent apps),
+  `hypr.json` (Hyprland only) and `niri.json` (placeholder until niri
+  templates exist). `matugen-ctl feel` detects the active WM and renders only
+  that part plus `apps.json`; adding a profile never touches the templates or
+  `config.apps.toml` / `config.hypr.toml`.
 - **Render feel only through `matugen-ctl feel <profile>`** (script:
   `matugen/script/feel.sh`). It renders into
   `~/.myenv/theme/feel/generated/<profile>` and only then flips `theme/feel/current`, so a

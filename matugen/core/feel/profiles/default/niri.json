@@ -1,0 +1,10 @@
+{
+  "layout": {
+    "gaps": 4,
+    "border_width": 2
+  },
+
+  "motion": {
+    "slowdown": 1.0
+  }
+}

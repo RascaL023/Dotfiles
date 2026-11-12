@@ -120,6 +120,32 @@ class MatugenCtlTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("consumer tidak dikenal", result.stderr)
 
+    def test_feel_dry_run_renders_the_hypr_part_only(self):
+        result = self.call("feel", "default", "--wm", "hypr", "--dry-run")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("hypr.json", result.stdout)
+        self.assertIn("apps.json", result.stdout)
+        self.assertNotIn("niri.json", result.stdout)
+        self.assertIn("wm: hypr", result.stderr)
+        self.assertFalse(self.feel_store.exists())
+
+    def test_feel_niri_skips_the_hypr_part(self):
+        result = self.call("feel", "default", "--wm", "niri", "--dry-run")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("apps.json", result.stdout)
+        self.assertNotIn("hypr.json", result.stdout)
+        self.assertIn("template niri belum ada", result.stdout)
+
+    def test_feel_rejects_unknown_profile(self):
+        result = self.call("feel", "absent", "--dry-run")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("feel profile tidak ada", result.stderr)
+
+    def test_feel_rejects_unknown_wm(self):
+        result = self.call("feel", "default", "--wm", "sway", "--dry-run")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("wm tidak dikenal", result.stderr)
+
     def test_status_reports_none_without_stores(self):
         result = self.call("status")
         self.assertEqual(result.returncode, 1)

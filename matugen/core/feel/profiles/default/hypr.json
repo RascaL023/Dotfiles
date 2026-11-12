@@ -1,42 +1,4 @@
 {
-  "meta": {
-    "name": "default",
-    "version": 1
-  },
-
-  "font": {
-    "ui": {
-      "text": "MapleMono NF",
-      "title": "Monocraft Nerd Font",
-      "tooltip": "FiraCodeNerdFontMono"
-    },
-    "icon": "JetBrainsMono Nerd Font",
-    "system": "Cantarell Regular",
-    "terminal": "MapleMono NF",
-    "weight": {
-      "normal": 500,
-      "strong": 600
-    },
-    "size": {
-      "small": 7,
-      "normal": 11,
-      "large": 15
-    }
-  },
-
-  "terminal": {
-    "padding": { "x": 25, "y": 20 },
-    "cursor": "Beam",
-    "kitty": {
-      "border_width": 1,
-      "margin": 6,
-      "padding": 10,
-      "cursor_shape": "beam",
-      "tab_bar_style": "powerline",
-      "tab_powerline_style": "slanted"
-    }
-  },
-
   "shape": {
     "radius": 4,
     "rounding_power": 2.0,
@@ -46,6 +8,7 @@
     "border_angle": 45,
     "border_part_of_window": false
   },
+
   "surface": {
     "active_opacity": 1.0,
     "inactive_opacity": 1.0,
@@ -55,6 +18,7 @@
     "dim_around": 0.0,
     "terminal_opacity": 0.9
   },
+
   "material": {
     "blur": {
       "enabled": true,
@@ -73,10 +37,11 @@
     "shadow": {
       "enabled": true,
       "range": 20,
-      "power": 10,
+      "power": 4,
       "sharp": false
     }
   },
+
   "motion": {
     "speed": 1.0,
     "curve": {
@@ -91,11 +56,9 @@
     "style_ws_out": "slidefade",
     "layers_speed": 1.0
   },
+
   "chrome": {
     "layer_blur": true,
-    "rofi_radius": 10,
-    "rofi_launcher_width": "45%",
-    "rofi_wallpaper_width": "100%",
     "font_family": "",
     "groupbar": {
       "enabled": false,

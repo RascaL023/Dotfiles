@@ -19,7 +19,7 @@ konsumen diurus di folder ini.
 |---|---|
 | `palette <gambar>` | Palet turunan wallpaper (alur A), lalu aktifkan dan reload |
 | `palette <blueprint.json>` | Palet tetap dari `core/palette/<tema>/blueprint/<varian>.json` (alur B) |
-| `feel <profil>` | Rasa dari `core/feel/blueprint/<profil>.json`, lalu aktifkan dan reload |
+| `feel <profil>` | Rasa dari `core/feel/profiles/<profil>/`, dirender hanya untuk WM aktif, lalu aktifkan dan reload |
 | `reload [konsumen ...]` | Reload tanpa render; tanpa argumen = semua konsumen |
 | `list` | Palet + varian, profil rasa, daftar konsumen |
 | `status` | Palet dan rasa yang sedang aktif; exit `1` bila salah satunya kosong |
@@ -50,20 +50,33 @@ Dua sumbu terpisah; jangan mencampurnya dalam satu config matugen.
 
 | | A — wallpaper | B — palet tetap | C — rasa |
 |---|---|---|---|
-| Config | `core/palette/wallpaper-based/config.toml` | `core/palette/<tema>/config.toml` | `core/feel/config.toml` |
-| Sumber | gambar | `blueprint/<varian>.json` tulis tangan | `blueprint/<profil>.json` |
+| Config | `core/palette/wallpaper-based/config.toml` | `core/palette/<tema>/config.toml` | `core/feel/config.apps.toml` + `config.hypr.toml` |
+| Sumber | gambar | `blueprint/<varian>.json` tulis tangan | `profiles/<profil>/{apps,hypr,niri}.json` |
 | Kosakata template | `{{ colors.<role>.<scheme>.<format> }}` | `{{ accent.primary }}`, `{{ syntax.keyword }}`, … | `{{ font.* }}`, `{{ chrome.* }}`, … |
 | Output | `~/.myenv/theme/palette/generated/wallpaper-based/` | `~/.myenv/theme/palette/generated/<tema>/` | `~/.myenv/theme/feel/generated/<profil>/` |
 
 Template alur B gagal di `matugen image` (tidak ada `accent.*`), dan `colors.*`
 tidak ada di `matugen json`. Karena itu config dan templatenya dipisah per alur.
 
-Aturan profil rasa: semua key wajib ada — matugen 4.2 tidak punya filter
-`default` maupun `{% if %}` (key hilang = `ResolveError`), `null` tercetak
-`Null`, dan `feel.sh` menolak hasil yang masih menyisakan placeholder. Nama key
-mengikuti peran (`font.ui.text`), bukan nama alat; ukuran font tidak masuk
-profil karena tiap konsumen punya tuning sendiri. Menambah rasa = satu berkas
-di `core/feel/blueprint/`; `template/` dan `config.toml` tidak disentuh.
+Aturan profil rasa: semua key yang dipakai template wajib ada — matugen 4.2
+tidak punya filter `default` maupun `{% if %}` (key hilang = `ResolveError`),
+`null` tercetak `Null`, dan `feel.sh` menolak hasil yang masih menyisakan
+placeholder. Nama key mengikuti peran (`font.ui.text`), bukan nama alat.
+
+Satu profil adalah **direktori** dengan tiga pemilik yang terpisah:
+
+| Berkas | Pemilik | Dirender saat |
+|---|---|---|
+| `apps.json` | kitty, foot, alacritty, rofi, waybar/swaync (font) | WM apa pun |
+| `hypr.json` | Hyprland: shape, surface, material, motion, chrome | hanya sesi Hyprland |
+| `niri.json` | niri (placeholder; template belum ada) | belum dirender |
+
+`matugen-ctl feel` mendeteksi WM dari sesi (`HYPRLAND_INSTANCE_SIGNATURE`,
+`NIRI_SOCKET`, lalu `XDG_CURRENT_DESKTOP`) dan hanya merender bagian WM itu
+plus `apps.json`; WM lain tidak pernah ikut dirender. Di sesi niri saat ini
+hanya `apps.json` yang dirender karena template niri belum dibuat. Menambah
+rasa = satu direktori di `core/feel/profiles/`; `template/` dan `config.*.toml`
+tidak disentuh. `--wm auto|hypr|niri` menimpa deteksi (untuk uji/cron).
 
 ## Struktur
 
@@ -81,7 +94,9 @@ matugen/
 │   │   └── kanagawa-dragon-lotus/
 │   │       ├── blueprint/      # dark.json, light.json (+ README key)
 │   │       └── template/
-│   └── feel/                   # blueprint/ + template/ + config.toml
+│   └── feel/                   # profiles/<profil>/{apps,hypr,niri}.json
+│                               # template/apps + template/hypr
+│                               # config.apps.toml + config.hypr.toml
 ├── docs/                       # dokumen rinci (lihat daftar di bawah)
 └── tests/test_matugen_ctl.py   # kontrak perintah, status, dan passthrough
 ```
@@ -118,7 +133,7 @@ benar-benar aktif adalah tujuan symlink `theme/palette/current` dan
 | `eww/eww.scss` | `theme/palette/current/scss/theme` |
 | `nvim/lua/core/theme.lua` | `theme/palette/current/nvim/theme.lua` |
 | `yazi/flavors/matugen.yazi/*` | `theme/palette/current/yazi/` |
-| `hypr/config/core/theme/palette.lua` | `theme/palette/current/hypr/theme.lua` |
+| `hypr/config/core/theme/palette.lua` | `theme/palette/current/hypr/theme.lua` (warna) + `theme/feel/current/hypr/feel.lua` (rasa) |
 | `lazygit`, `herdr` | `theme/palette/current/lazygit/config.yml`, `theme/palette/current/herdr/config.toml` |
 
 ## Pemeriksaan
@@ -151,7 +166,7 @@ kode adalah bug dokumentasi.
 | [`docs/MATUGEN_SKILLS.md`](docs/MATUGEN_SKILLS.md) | EN | Menulis, mendaftarkan, menguji, dan me-reload template; fakta engine + resep per aplikasi |
 | [`docs/CHEATSHEETS.md`](docs/CHEATSHEETS.md) | ID | Kosakata *role* Material You → pekerjaan UI |
 | [`docs/VOCABULARY.md`](docs/VOCABULARY.md) | ID | Contoh `matugen --show-colors` dan cara membacanya |
-| [`docs/WM_FEEL_MATRIX.md`](docs/WM_FEEL_MATRIX.md) | ID | Fitur rasa Hyprland 0.56 vs niri 26.04, jebakan include |
+| [`docs/WM_FEEL_MATRIX.md`](docs/WM_FEEL_MATRIX.md) | ID | Fitur rasa Hyprland 0.57 vs niri 26.04, jebakan include |
 | [`docs/NOCTALIA.md`](docs/NOCTALIA.md) | ID | Fakta Noctalia v5 vs matugen: config, batas template, pemilik warna, checklist integrasi |
 | [`docs/NVIM_MAPPING.md`](docs/NVIM_MAPPING.md) | ID | Key palet → highlight group Neovim |
 | [`core/palette/kanagawa-dragon-lotus/blueprint/README.md`](core/palette/kanagawa-dragon-lotus/blueprint/README.md) | ID | Referensi setiap key JSON blueprint (alur B) |

@@ -420,15 +420,21 @@ color15 {{ colors.on_surface.default.hex }}
   `HYPRLAND_INSTANCE_SIGNATURE` points at a running instance (a render under
   niri must never touch Hyprland), and it validates that file first.
 
-  Look & feel (radius, gaps, opacity, blur, shadow, motion, layer blur,
-  groupbar) lives in the theme too, in `shape`/`surface`/`material`/`motion`/
-  `chrome`. Flow B takes it from the blueprint's `feel` object; Flow A writes
-  colours only, so the defaults in `hypr/config/core/theme.lua` apply — one
-  template, one output file, exactly like `nvim`. The loader merges nested
-  tables, so a template may emit just the keys it owns. It also clamps
-  out-of-range numbers and rejects unknown animation styles, so a hand-made
-  theme cannot wreck the session. **The template resolver has no array
-  indexing** — `feel.motion.curve` is an object (`x1…y2`), not a list.
+  The palette module is **colours only** now. Look & feel (radius, gaps,
+  opacity, blur, shadow, motion, layer blur, groupbar) is owned per WM by the
+  feel pipeline: `matugen/core/feel/template/hypr/feel.lua` renders
+  `core/feel/profiles/<profile>/hypr.json` to
+  `~/.myenv/theme/feel/current/hypr/feel.lua`. `hypr/config/core/theme/palette.lua`
+  loads the palette first and merges that feel file on top, so feel wins even
+  when an older palette render still carries numbers. Never add feel numbers
+  back to a palette template — one value, one owner.
+
+  The loader merges nested tables, so a template may emit just the keys it
+  owns. It also clamps out-of-range numbers and rejects unknown animation
+  styles, so a hand-made theme cannot wreck the session. **The template
+  resolver has no array indexing** — `motion.curve` is an object (`x1…y2`),
+  not a list. Validate a feel render with
+  `luac -p ~/.myenv/theme/feel/current/hypr/feel.lua`.
 - **VERIFY first** which config format the user runs (`hyprctl version`, look at `~/.config/hypr/`). The recipe below is for the classic hyprlang `.conf`. If the user is on a newer config format, adapt accordingly.
 - Output: `~/.config/hypr/matugen-colors.conf`
 - Load: add `source = ~/.config/hypr/matugen-colors.conf` **at the end** of `hyprland.conf` (later assignments override earlier ones).

@@ -8,7 +8,9 @@ Usage: matugen-ctl <command> [args...]
 
   palette <wallpaper|blueprint.json> [options]
                      Render a palette, activate it, then reload consumers
-  feel <profile>     Render a feel profile, activate it, then reload
+  feel <profile> [--wm auto|hypr|niri] [options]
+                     Render the profile part owned by the active WM, then reload
+                     auto (default) detects the session; --wm overrides it
   reload [consumer ...]
                      Reload consumers without rendering
   list               Show palettes, feel profiles and consumers
@@ -16,6 +18,7 @@ Usage: matugen-ctl <command> [args...]
   help               This text
 
 `palette` passes its options through to script/palette.sh (-n/--dry-run, --list).
+`feel` passes its options through to script/feel.sh (-n/--dry-run, --no-reload).
 THEME_ROOT overrides the palette store (~/.myenv/theme/palette) and FEEL_ROOT
 the feel store (~/.myenv/theme/feel).
 Exit: 0 ok, 1 render/reload failed, 2 usage, 127 matugen is missing.
@@ -33,6 +36,9 @@ palette=$dir/script/palette.sh
 feel=$dir/script/feel.sh
 theme_store=${THEME_ROOT:-$HOME/.myenv/theme/palette}
 feel_store=${FEEL_ROOT:-$HOME/.myenv/theme/feel}
+
+# shellcheck source=script/wm.sh
+source "$dir/script/wm.sh"
 
 command_name=${1:-help}
 if (( $# > 0 )); then
@@ -70,10 +76,10 @@ list_palettes() {
 
 list_feel() {
     local profile
-    for profile in "$dir"/core/feel/blueprint/*.json; do
-        [[ -f $profile ]] || continue
-        profile=${profile##*/}
-        printf '  %s\n' "${profile%.json}"
+    for profile in "$dir"/core/feel/profiles/*/; do
+        [[ -d $profile ]] || continue
+        profile=${profile%/}
+        printf '  %s\n' "${profile##*/}"
     done
 }
 
@@ -94,7 +100,37 @@ case $command_name in
         ;;
     feel)
         (( $# )) || fail 'feel needs a profile (see list)'
-        exec "$feel" "$@"
+        profile=$1
+        shift
+        [[ -d $dir/core/feel/profiles/$profile ]] || fail "feel profile tidak ada: $profile"
+
+        wm=auto
+        feel_args=()
+        while (( $# )); do
+            case $1 in
+                --wm)
+                    (( $# >= 2 )) || fail '--wm butuh auto|hypr|niri'
+                    wm=$2
+                    shift 2
+                    ;;
+                --wm=*) wm=${1#*=}; shift ;;
+                *) feel_args+=("$1"); shift ;;
+            esac
+        done
+
+        if [[ $wm == auto ]]; then
+            wm=$(wm_detect)
+        fi
+        case $wm in
+            hypr|niri|unknown) ;;
+            *) fail "wm tidak dikenal: $wm (auto|hypr|niri)" ;;
+        esac
+
+        printf 'matugen-ctl: feel %s (wm: %s)\n' "$profile" "$wm" >&2
+        if (( ${#feel_args[@]} )); then
+            exec "$feel" "$profile" --wm "$wm" "${feel_args[@]}"
+        fi
+        exec "$feel" "$profile" --wm "$wm"
         ;;
     reload)
         exec "$palette" "$@"
