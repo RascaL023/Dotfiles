@@ -93,13 +93,13 @@ Tiga key ini sengaja diduplikasi di akar supaya template yang cuma butuh "latar 
 | Key | Arti | Dipakai di |
 |---|---|---|
 | `accent.primary` | Aksen utama (fokus, tombol, border aktif) | semua template |
-| `accent.secondary` | Aksen kedua | `alacritty.toml`, `gtk3.css`, `herdr.toml`, `source.scss`, `yazi-flavor.toml` |
-| `accent.tertiary` | Aksen ketiga | `gtk3.css` |
-| `accent.on_primary` | Teks **di atas** `accent.primary` | `alacritty.toml`, `gtk3.css`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss`, `yazi-flavor.toml` |
+| `accent.secondary` | Aksen kedua | `alacritty.toml`, `source.css`, `herdr.toml`, `source.scss`, `yazi-flavor.toml` |
+| `accent.tertiary` | Aksen ketiga | `source.css` |
+| `accent.on_primary` | Teks **di atas** `accent.primary` | `alacritty.toml`, `source.css`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss`, `yazi-flavor.toml` |
 | `accent.on_secondary` | Teks di atas `accent.secondary` | `alacritty.toml`, `source.scss`, `yazi-flavor.toml` |
 | `accent.on_tertiary` | Teks di atas `accent.tertiary` | `nvim.lua`, `yazi-flavor.toml` |
-| `accent.primary_container` | Latar "berisi" aksen (badge, item terpilih) | `gtk3.css`, `nvim.lua` |
-| `accent.on_primary_container` | Teks di atas `primary_container` | `gtk3.css`, `nvim.lua` |
+| `accent.primary_container` | Latar "berisi" aksen (badge, item terpilih) | `source.css`, `nvim.lua` |
+| `accent.on_primary_container` | Teks di atas `primary_container` | `source.css`, `nvim.lua` |
 | `accent.secondary_container` | Latar berisi aksen kedua | `nvim.lua` |
 | `accent.on_secondary_container` | Teks di atasnya | `nvim.lua` |
 | `accent.tertiary_container` | Latar berisi aksen ketiga | `nvim.lua` |
@@ -111,47 +111,47 @@ Pola `X` + `on_X` selalu berpasangan: `X` untuk latar, `on_X` untuk teks di atas
 
 | Key | Arti | Dipakai di |
 |---|---|---|
-| `text.primary` | Teks utama | `gtk3.css`, `herdr.toml`, `kitty.conf`, `nvim.lua`, `source.rasi` |
-| `text.secondary` | Teks kedua (judul, aksen teks) | `gtk3.css`, `herdr.toml`, `kitty.conf`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
-| `text.muted` | Teks redup | `gtk3.css`, `nvim.lua`, `source.scss`, `yazi-flavor.toml`, `yazi-tmtheme.xml` |
-| `text.subtle` | Lebih redup lagi (→ `extra.fg.dim` nvim) | `gtk3.css`, `nvim.lua`, `source.scss` |
+| `text.primary` | Teks utama | `source.css`, `herdr.toml`, `kitty.conf`, `nvim.lua`, `source.rasi` |
+| `text.secondary` | Teks kedua (judul, aksen teks) | `source.css`, `herdr.toml`, `kitty.conf`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
+| `text.muted` | Teks redup | `source.css`, `nvim.lua`, `source.scss`, `yazi-flavor.toml`, `yazi-tmtheme.xml` |
+| `text.subtle` | Lebih redup lagi (→ `extra.fg.dim` nvim) | `source.css`, `nvim.lua`, `source.scss` |
 | `text.faint` | Paling redup (→ `extra.fg.dim_muted` nvim) | sama seperti `text.subtle` |
 | `text.disabled` | Teks nonaktif | sama seperti `text.subtle` |
-| `text.link` | Tautan | `gtk3.css`, `nvim.lua` |
-| `text.visited` | Tautan sudah dikunjungi | `gtk3.css`, `nvim.lua`, `source.scss` |
+| `text.link` | Tautan | `source.css`, `nvim.lua` |
+| `text.visited` | Tautan sudah dikunjungi | `source.css`, `nvim.lua`, `source.scss` |
 | `text.on_inverse` | Teks di atas permukaan terbalik | —ⁱ |
 
 ### 3.6 `surface.*` — tangga ketinggian latar
 
 | Key | Arti | Padanan umum | Dipakai di |
 |---|---|---|---|
-| `surface.lowest` | Paling bawah/gelap | `mantle` | `gtk3.css`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
-| `surface.low` | Satu tingkat di atasnya | `crust` | `gtk3.css`, `kitty.conf`, `nvim.lua`, `source.rasi`, `source.scss`, `yazi-flavor.toml` |
-| `surface.base` | Latar utama (window) | `base` | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.rasi`, `source.scss`, `yazi-tmtheme.xml` |
-| `surface.medium` | Panel | `surface` | `gtk3.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss`, `yazi-tmtheme.xml` |
-| `surface.high` | Panel menonjol / statusline | `surface_raised` | `gtk3.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml`, `yazi-tmtheme.xml` |
-| `surface.highest` | Paling menonjol / gutter | `surface_overlay` | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
-| `surface.track` | Jalur progres (disk usage) | — | `gtk3.css`, `nvim.lua`, `source.scss` |
+| `surface.lowest` | Paling bawah/gelap | `mantle` | `source.css`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
+| `surface.low` | Satu tingkat di atasnya | `crust` | `source.css`, `kitty.conf`, `nvim.lua`, `source.rasi`, `source.scss`, `yazi-flavor.toml` |
+| `surface.base` | Latar utama (window) | `base` | `source.css`, `herdr.toml`, `nvim.lua`, `source.rasi`, `source.scss`, `yazi-tmtheme.xml` |
+| `surface.medium` | Panel | `surface` | `source.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss`, `yazi-tmtheme.xml` |
+| `surface.high` | Panel menonjol / statusline | `surface_raised` | `source.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml`, `yazi-tmtheme.xml` |
+| `surface.highest` | Paling menonjol / gutter | `surface_overlay` | `source.css`, `herdr.toml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
+| `surface.track` | Jalur progres (disk usage) | — | `source.css`, `nvim.lua`, `source.scss` |
 | `surface.inverse` | Permukaan terbalik (tooltip) | — | —ⁱ |
 
 ### 3.7 `border.*`
 
 | Key | Arti | Dipakai di |
 |---|---|---|
-| `border.default` | Garis/tepi biasa | `gtk3.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss` |
-| `border.medium` | Garis pemisah (split) | `gtk3.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml`, `yazi-tmtheme.xml` |
-| `border.active` | Garis saat fokus | `gtk3.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss` |
+| `border.default` | Garis/tepi biasa | `source.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss` |
+| `border.medium` | Garis pemisah (split) | `source.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml`, `yazi-tmtheme.xml` |
+| `border.active` | Garis saat fokus | `source.css`, `herdr.toml`, `kitty.conf`, `lazygit.yml`, `nvim.lua`, `source.rasi`, `source.scss` |
 
 ### 3.8 `status.*`
 
 | Key | Arti | Dipakai di |
 |---|---|---|
-| `status.info` | Informasi | `gtk3.css`, `nvim.lua`, `source.scss` |
-| `status.success` | Sukses (git add, dsb.) | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss` |
-| `status.warning` | Peringatan | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
-| `status.error` | Galat | `gtk3.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
-| `status.critical` | Galat berat | `gtk3.css`, `nvim.lua`, `source.scss` |
-| `status.warning_container` | Latar peringatan | `gtk3.css`, `herdr.toml`, `nvim.lua`, `source.scss` |
+| `status.info` | Informasi | `source.css`, `nvim.lua`, `source.scss` |
+| `status.success` | Sukses (git add, dsb.) | `source.css`, `herdr.toml`, `nvim.lua`, `source.scss` |
+| `status.warning` | Peringatan | `source.css`, `herdr.toml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
+| `status.error` | Galat | `source.css`, `herdr.toml`, `lazygit.yml`, `nvim.lua`, `source.scss`, `yazi-flavor.toml` |
+| `status.critical` | Galat berat | `source.css`, `nvim.lua`, `source.scss` |
+| `status.warning_container` | Latar peringatan | `source.css`, `herdr.toml`, `nvim.lua`, `source.scss` |
 | `status.error_container` | Latar galat | —ⁱ |
 
 ### 3.9 `effect.*`

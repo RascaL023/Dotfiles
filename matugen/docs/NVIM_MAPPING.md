@@ -191,7 +191,7 @@ Perhatikan: `success`, `warning`, `critical` masih **hardcode hex** di template
 > (`kanagawa-*.json`) ketiga kunci itu diisi role yang **setara tapi bukan sama**
 > (lihat tabel di `blueprint/README.md`): `dim` = `text.subtle`, `dim_muted` =
 > `text.faint`, `disabled` = `text.disabled` — pola yang sama dipakai
-> `template/gtk3.css` & `template/source.scss`. Jangan diseragamkan ke
+> `template/source.css` & `template/source.scss`. Jangan diseragamkan ke
 > `text.primary`: kalau itu terjadi, `dark3`/`dark5` jadi seterang teks biasa dan
 > elemen redup (`NonText`, `Conceal`, `WhichKeyValue`, `LspInlayHint`, backdrop
 > Flash/Leap) ikut menyala.

@@ -539,7 +539,7 @@ Notes:
   Use an absolute path (there is no `~` expansion and relative paths are unreliable).
 - **A missing named color is silent in GTK 4.** Unlike a syntax error, `@undeclared` produces no warning; it just falls back to the widget default. Do not "verify" an import by grepping the log — render a probe rule (e.g. `.control-center { background: @accent; }`) and read the pixel, or check the app's own reload output.
 - `swaync` details: stylesheet is `~/.config/swaync/style.css`, palette comes from the shared `css/theme.css`; reload with `swaync-client -rs` — `-R` only reloads `config.json` and leaves the stylesheet untouched.
-- **In this repo:** `waybar`, `wlogout` and `swaync` keep **no** local `colors.css`. All three `@import` the generated `~/.myenv/theme/palette/current/css/theme.css` (78 `@define-color`s, same names in both flows). Add a template entry for a new app rather than a second palette file, and if you must add keys, add them to `source.css` **and** `gtk3.css` so both flows stay in sync.
+- **In this repo:** `waybar`, `wlogout` and `swaync` keep **no** local `colors.css`. All three `@import` the generated `~/.myenv/theme/palette/current/css/theme.css` (78 `@define-color`s, same names in both flows). Add a template entry for a new app rather than a second palette file, and if you must add keys, add them to `source.css` in **both** flows (`palette/wallpaper-based/` and `palette/kanagawa-dragon-lotus/template/`) so both palettes stay in sync.
 - `post_hook` is executed through the user's `$SHELL` (fish on this machine), not bash: keep hooks shell-agnostic. `swaync-client -rs 2>/dev/null || true` works; `$?` is a fish syntax error and fails the whole hook. **This repo stopped using hooks entirely** — both configs have none, and `matugen/script/palette.sh` (bash) owns the reload step, driven by process presence instead of a blind call.
 
 Template `waybar-colors.css`:
@@ -605,7 +605,7 @@ Template `gtk-colors.css` (libadwaita named colors):
   `rofi/themes/shared/theme.rasi`, imported by every layout.
   Accent, text, layer and border tokens use the exact names and source color
   expressions from the semantic palette in `palette/wallpaper-based/template/source.css` and
-  `palette/kanagawa-dragon-lotus/template/gtk3.css`, respectively. The same groups
+  `palette/kanagawa-dragon-lotus/template/source.css`, respectively. The same groups
   also exist in `source.scss` (SCSS calls the accents `primary-accent` and
   `secondary-accent`, with layers named `layer-low`, `layer-medium`, etc.).
   Keep both templates and all Rofi consumers in sync when changing a name.

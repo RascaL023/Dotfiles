@@ -5,7 +5,7 @@ input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/nv
 output_path = "/nvim/theme.lua"
 
 [templates.css]
-input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/gtk3.css"
+input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/source.css"
 output_path = "/css/theme.css"
 
 [templates.scss]
