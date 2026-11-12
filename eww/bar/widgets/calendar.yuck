@@ -10,7 +10,7 @@
           (label :class "calendar-date-weekday" :text {bar.calendar.weekday})
           (label :class "calendar-date-month" :text {bar.calendar.month_year}))
         (box :class "calendar-divider")
-        (box :class "calendar-month" :orientation "v" :space-evenly false
+        (box :class "calendar-month cal-${bar.calendar.motion}" :orientation "v" :space-evenly false
           (box :class "calendar-header" :space-evenly false
             (button :class "calendar-nav icon" :active {bar.calendar.previous}
               :tooltip "Previous month"
@@ -34,6 +34,7 @@
     :width "1px" :height "1px" :anchor "top center")
   :exclusive false
   :focusable false
-  :stacking "overlay"
+  ;; Below the bar so the bar's tooltips stay above this popup.
+  :stacking "fg"
   :namespace "eww-islands-calendar"
   (calendar-panel))

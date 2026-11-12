@@ -120,7 +120,9 @@ berikutnya. Tombol **Today** kembali ke bulan saat ini; membuka ulang panel
 juga kembali ke bulan saat ini. Tooltip jam hanya berisi tanggal hari ini.
 Panel mengikuti monitor pilihan bar, tidak mengambil fokus atau menambah
 ruang eksklusif. Animasi buka/tutup memakai `revealer` Eww dengan durasi
-`$calendar-transition`.
+`$calendar-transition`; perpindahan bulan memakai slide `$calendar-slide`
+(240 ms) searah panah, dengan dua nama kelas bergantian agar animasi tetap
+berputar saat panah yang sama ditekan berkali-kali.
 Klik jam lagi untuk menutup; keluar dari panel tidak menutupnya.
 
 Penutupan memakai **toggle saja**; klik di luar dan Esc tidak menutup panel.
@@ -148,7 +150,9 @@ cover art, polling posisi lagu, unduhan, atau listener baru. Callback musik
 menggunakan FIFO yang sama dengan kontrol kanan agar scroll tidak menunggu
 startup Python. Semua tombol mengontrol sumber MPD/MPRIS yang ditampilkan.
 Popup tidak mengambil fokus atau menambah ruang eksklusif; penutupan menunggu
-animasi selesai dan dapat dibatalkan ketika panel segera dibuka ulang.
+animasi selesai dan dapat dibatalkan ketika panel segera dibuka ulang. Panel
+kalender dan musik berada satu lapis di bawah bar, sehingga tooltip bar tetap
+tampil di atas panel.
 
 Seluruh tooltip bawaan menggunakan bahasa Inggris. Tooltip bagian kanan hanya
 menampilkan nilai atau status, tanpa petunjuk klik maupun gulir. Nama workspace,
@@ -254,10 +258,13 @@ Alur data:
 - Workspace Niri: langganan JSON `EventStream`, snapshot setelah event workspace
   atau penambahan/penghapusan jendela. Event layout/animasi diabaikan. Fokus
   memakai request JSON `FocusWorkspace` dengan `Id`, tanpa evaluasi nama workspace.
-- Audio: stream `pw-dump --monitor --no-colors`, snapshot `wpctl get-volume`.
+- Audio: stream `pw-dump --monitor --no-colors` menyuplai level dan mute default
+  sink; `wpctl get-volume` hanya dipakai saat stream belum siap atau terputus.
   Parser incremental hanya meneruskan perubahan volume/mute sink, penambahan/
-  penghapusan sink, dan metadata default sink. Event klien `wpctl` sendiri
-  diabaikan agar pembacaan volume tidak membuat loop event.
+  penghapusan sink, dan metadata default sink. Level channel PipeWire bersifat
+  linear, sedangkan `wpctl` menampilkan/menerima volume kubik, jadi persentase
+dihitung dari akar tiga level channel. Event klien `wpctl` sendiri diabaikan
+  agar pembacaan volume tidak membuat loop event.
 - Brightness: `udevadm monitor --udev --subsystem-match=backlight` memberi
   event perubahan, kemudian nilai dibaca dari sysfs. Perubahan lewat tombol
   keyboard ikut tersinkron tanpa polling berkala. Penulisan melalui

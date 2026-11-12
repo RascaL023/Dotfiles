@@ -16,7 +16,7 @@ from common import ROOT, initial_state, runtime_dir, settings, workspace_layout
 from calendar_data import calendar_state, shift_month
 from music_panel import MusicPanel
 from sources import (Commands, PipeWireEvents, battery_state, brightness_state, choose_player, clock_state, compositor,
-                     music_players, music_state, network_state, notification_state, volume_state)
+                     music_players, music_state, network_state, notification_state, volume_display, volume_state)
 
 DBUS_MATCHES = [
     "type='signal',interface='org.freedesktop.DBus.Properties',member='PropertiesChanged',path='/org/mpris/MediaPlayer2',arg0='org.mpris.MediaPlayer2.Player'",
@@ -31,6 +31,7 @@ class Collector:
         self.state = initial_state(cfg)
         self.commands = Commands(cfg["intervals"]["command_timeout"])
         self.compositor = compositor(cfg)
+        self.pipewire = None
         self.selected = None
         self.next_selected = None
         self.dirty = set()
@@ -94,9 +95,14 @@ class Collector:
             if name == "calendar-today":
                 self.state["calendar"] = calendar_state(opened=True)
             else:
-                year, month = shift_month(state["year"], state["month"],
-                                          -1 if name == "calendar-previous" else 1)
-                self.state["calendar"] = calendar_state(year, month, opened=True)
+                step = -1 if name == "calendar-previous" else 1
+                year, month = shift_month(state["year"], state["month"], step)
+                next_state = calendar_state(year, month, opened=True)
+                # Two class names per direction: GTK only restarts keyframes when the
+                # animation name itself changes, and the month parity flips each step.
+                next_state["motion"] = "%s-%s" % ("prev" if step < 0 else "next",
+                                                  "a" if (year + month) % 2 else "b")
+                self.state["calendar"] = next_state
         else:
             raise ValueError("unknown calendar action")
         self.emit()
@@ -145,7 +151,11 @@ class Collector:
                                              "set", f"{percent}%")
         if result is None:
             print(f"bar: {module}: setting value failed", file=sys.stderr)
-        await self.snapshot(module)
+        if module == "volume":
+            # Show the requested level at once; the next PipeWire event corrects it.
+            self.state["volume"] = volume_display(percent, self.state["volume"]["muted"])
+        else:
+            await self.snapshot(module)
         self.emit()
 
     async def control_updates(self):
@@ -213,7 +223,11 @@ class Collector:
             if module == "workspaces":
                 value = await self.compositor.snapshot(run, self.cfg)
             elif module == "volume":
-                value = volume_state(await run("wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"))
+                # The pw-dump monitor already streams the default sink, so the steady
+                # state costs no process; wpctl only covers startup and stream loss.
+                reading = self.pipewire.volume() if self.pipewire is not None else None
+                value = (volume_display(*reading) if reading is not None else
+                         volume_state(await run("wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@")))
             elif module == "brightness":
                 value = brightness_state(self.cfg["brightness"]["device"])
             elif module == "network":
@@ -258,6 +272,8 @@ class Collector:
         while True:
             proc = None
             pipewire = PipeWireEvents() if mode == "pipewire" else None
+            if pipewire is not None:
+                self.pipewire = pipewire
             started = time.monotonic()
             try:
                 proc = await asyncio.create_subprocess_exec(
