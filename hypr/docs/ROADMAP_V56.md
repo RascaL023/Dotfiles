@@ -375,10 +375,22 @@ local farben = hl.get_windows({ class = "firefox", mapped = true })
   di dalamnya: event-nya jalan (terbukti), tapi rule-nya terlambat — animasi
   tetap memakai rule lama (diukur dari tangkapan frame: kurva tepi kotak masih
   slide). Yang dipakai: rule bernama yang dibuat sekali dengan
-  `set_enabled(false)`, dinyalakan dari bind sebelum prosesnya diluncurkan,
-  lalu dimatikan lagi di event `layer.closed` (lihat
-  [`../config/core/rofi.lua`](../config/core/rofi.lua)). Nol proses tambahan,
-  dan rule yang menang = yang **terakhir dibuat**.
+  `set_enabled(false)` dan dinyalakan dari bind sebelum prosesnya diluncurkan.
+  Nol proses tambahan, dan rule yang menang = yang **terakhir dibuat**.
+- Layer rule hanya bisa menyetel **style** animasi, dan style itu dipakai untuk
+  `layersIn` **dan** `layersOut`; tidak ada cara menyetel style masuk/keluar
+  secara terpisah (`layersIn`/`layersOut` hanya ada di blok `animation` global,
+  bukan di rule — [hyprwm/Hyprland#9894](https://github.com/hyprwm/Hyprland/issues/9894)).
+  Konsekuensinya: mematikan rule tepat di `layer.closed` membuat animasi keluar
+  kembali memakai rule dasar (rofi: `slide bottom`). Karena itu rule override
+  harus tetap aktif selama animasi keluar; helper yang dipakai:
+  [`../config/core/override/anim.lua`](../config/core/override/anim.lua) —
+  `anim.layer{ namespace, animation, hold_ms }` lalu `handle.launch(cmd)`.
+  Helper menunda `set_enabled(false)` selama `hold_ms` (default 700 ms, dihitung
+  dari `layers` 4 ds + margin) lewat `hl.timer(callback, { timeout, type =
+  "oneshot" })` (bentuk ini yang ada di stub 0.57.1), dengan pengaman generasi
+  agar hold dari penutupan lama tidak mematikan peluncuran baru. Tool lain
+  cukup memakai helper ini; tidak perlu menulis ulang logika rule + event.
 - `hyprctl eval` tidak memvalidasi string style animasi: nama style yang salah
   tetap dijawab `ok` dan diam-diam tidak berefek (jangan andalkan pesan error).
 - `hyprctl dispatch` di 0.56 menerjemahkan argumennya sebagai Lua, jadi
