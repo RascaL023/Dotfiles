@@ -1,12 +1,4 @@
 ;; ============================ Depth clock ============================
-;; Wallpaper depth clock: a live HH:MM label with a static transparent
-;; foreground cutout drawn over it, so the wallpaper subject hides part of the
-;; clock. Open it with scripts/depthctl (it sizes the window for the output
-;; and generates the foreground); the geometry below is only the fallback used
-;; by a bare `eww open depth-clock`.
-;;
-;; Layers: awww wallpaper < bottom-layer window < normal windows.
-
 ;; Prints once per minute boundary instead of polling.
 (deflisten depth-clock-time
   :initial "00:00"

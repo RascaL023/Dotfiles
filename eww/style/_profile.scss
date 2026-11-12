@@ -1,0 +1,28 @@
+/* ============================= Profile ============================= */
+/* Sidebar profile card used by window/power-menu.yuck (widget/profile.yuck). */
+
+.profile {
+  background-color: rgba($layer-lowest, 0.999);
+  border-radius: 16px;
+  padding: 20px;
+  font-family: $font-ui-title;
+}
+
+.profile-box {
+  background-color: $layer-low;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.profile-pic {
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.profile-name {
+  color: $text-primary;
+  font-size: 20px;
+  font-weight: 600;
+  font-style: italic;
+}

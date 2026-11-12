@@ -12,16 +12,16 @@
   :initial "No Music"
   `bash -c '
     {
-      mpc idleloop player | while read e; do ./scripts/music.sh; done &
-      tail -F ~/.local/share/mpd/log -n 2 | while read e; do ./scripts/music.sh "info"; done &
+      mpc idleloop player | while read e; do ./script/music-ctl; done &
+      tail -F ~/.local/share/mpd/log -n 2 | while read e; do ./script/music-ctl "info"; done &
       wait
     }
 '`)
-(deflisten music-status "./scripts/music.sh 'status'")
-(deflisten music-cover "scripts/music.sh 'cover'")
+(deflisten music-status "./script/music-ctl 'status'")
+(deflisten music-cover "script/music-ctl 'cover'")
 (deflisten music-progress 
   :initial "0:00|0:00|0"
-  "while true; do ~/.config/eww/scripts/music.sh 'stream'; sleep 1; done")
+  "while true; do ~/.config/eww/script/music-ctl 'stream'; sleep 1; done")
 
 
 ;;##################
@@ -36,8 +36,7 @@
 ;;##### Windows #####
 ;;###################
 
-;; (include "windows/try.yuck")
-(include "windows/power-user.yuck")
-(include "windows/distro.yuck")
-(include "windows/depth-clock.yuck")
+(include "window/power-menu.yuck")
+(include "window/distro.yuck")
+(include "window/depth-clock.yuck")
 

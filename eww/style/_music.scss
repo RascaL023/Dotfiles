@@ -1,0 +1,94 @@
+/* ============================== Music ============================== */
+/* Music player widgets (widget/music.yuck) shown inside window/distro.yuck. */
+
+/* -------------- Music --------------*/
+/* .music-container { */
+/*   border-radius: 20px; */
+/*   background-color: $layer-highest; */
+/* } */
+
+.music-player {
+  background-color: $layer-low;
+  border-radius: 20px;
+  padding: 12px 20px;
+  color: $text-muted;
+  font-size: 11pt;
+  font-family: $font-ui-text;
+}
+
+.music-btn {
+  color: $primary-accent;
+  padding: 4px 10px;
+  transition: 150ms;
+  border-radius: 8px;
+  &:hover {
+    color: $primary-accent;
+    background-color: rgba($text-primary, 0.15);
+  }
+  &:active {
+    background-color: rgba($secondary-accent, 0.25);
+  }
+}
+
+.prev-btn{
+  padding-right: 14px;
+  padding-left: 9px;
+}
+
+.next-btn{
+  padding-right: 13.5px;
+}
+
+.music-text {
+  color: $text-primary;
+  font-weight: 500;
+  margin: 0 10px;
+}
+
+/* Music progress bar */
+.music-progress-container {
+  padding: 5px 10px;
+}
+
+.music-progress-bar {
+  min-height: 20px;
+
+  trough {
+    min-height: 4px;
+    min-width: 100px;
+    border-radius: 2px;
+    background-color: rgba($layer-high, 0.5);
+  }
+
+  highlight {
+    min-height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, $primary-accent, $secondary-accent);
+  }
+
+  slider {
+    min-width: 7px;
+    min-height: 7px;
+    margin: -1px;
+    border-radius: 50%;
+    background-color: mix($primary-accent, $secondary-accent, 0.5);
+
+    &:hover {
+      background-color: $text-secondary;
+      min-width: 9px;
+      min-height: 9px;
+      margin: -4px;
+    }
+  }
+}
+
+.music-time {
+  font-size: 10px;
+  color: rgba($text-muted, 0.8);
+  padding: 0 5px;
+  margin-top: 2px;
+
+  .time-elapsed, .time-total {
+    font-family: $font-ui-text;
+  }
+}

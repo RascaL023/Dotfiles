@@ -29,7 +29,7 @@ root=${HOME}/.dotfile/matugen
 theme_root=${THEME_ROOT:-$HOME/.myenv/theme/palette}
 generated=$theme_root/generated
 current=$theme_root/current
-depthctl=$HOME/.dotfile/eww/scripts/depthctl
+depth_ctl=$HOME/.dotfile/eww/script/depth-ctl
 
 dry_run=0
 source_path=""
@@ -225,9 +225,9 @@ reload_scss() {
     else
         skip "eww: tidak jalan"
     fi
-    # depthctl resolves the wallpaper itself; refresh only repositions.
-    if [[ -x $depthctl ]] && running eww; then
-        run "depth clock" "$depthctl" refresh
+    # depth-ctl resolves the wallpaper itself; refresh only repositions.
+    if [[ -x $depth_ctl ]] && running eww; then
+        run "depth clock" "$depth_ctl" refresh
     else
         skip "depth clock: eww tidak siap"
     fi

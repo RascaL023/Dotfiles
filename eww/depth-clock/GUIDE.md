@@ -69,7 +69,7 @@ wallpaper itu (lebih baik daripada foreground salah posisi).
 ## 2. Bangun foreground (sekali per wallpaper + resolusi)
 
 ```sh
-~/.dotfile/eww/scripts/depthctl generate
+~/.dotfile/eww/script/depth-ctl generate
 # foreground: /home/rascal/.cache/eww-depth-clock/foreground.png (484x580, 388K)
 ```
 
@@ -105,7 +105,7 @@ magick -size 484x580 xc:'#c02020' fg.png -compose over -composite /tmp/cek.png
 Harus terlihat subjek dengan tepi bersih, tanpa kotak atau rim krem. Kalau ada
 sisa latar besar, naikkan toleransi; kalau rambut hilang, turunkan.
 
-`depthctl` menolak hasil yang gagal: cakupan masker harus 2–60%, corner
+`depth-ctl` menolak hasil yang gagal: cakupan masker harus 2–60%, corner
 transparan, dan kanal alpha harus ada. Kalau keluar `[ERR]`, perbaiki warna
 latar/toleransi, jangan lanjutkan.
 
@@ -116,14 +116,14 @@ latar/toleransi, jangan lanjutkan.
 Tambah include di `eww/eww.yuck` dan import SCSS di `eww/eww.scss`:
 
 ```lisp
-(include "windows/depth-clock.yuck")
+(include "window/depth-clock.yuck")
 ```
 
 ```scss
-@import "styles/depth-clock";
+@import "style/depth-clock";
 ```
 
-Isi `eww/windows/depth-clock.yuck` (ringkas):
+Isi `eww/window/depth-clock.yuck` (ringkas):
 
 ```lisp
 (deflisten depth-clock-time
@@ -158,7 +158,7 @@ Kunci-kunci yang penting:
 
 ## 4. Setel tampilan di SCSS
 
-`eww/styles/_depth-clock.scss` — semua warna dari token Matugen, bukan hex:
+`eww/style/_depth-clock.scss` — semua warna dari token Matugen, bukan hex:
 
 ```scss
 $depth-clock-font: "Noto Serif Display";
@@ -196,30 +196,30 @@ Sesuaikan tinggi band supaya foreground menutupi seluruh line box label:
 ```sh
 # padding + line box (380px font ≈ 520px) + margin
 DEPTH_BAND_HEIGHT=580      # eww/depth-clock/settings.conf
-:height "580px"            # eww/windows/depth-clock.yuck
+:height "580px"            # eww/window/depth-clock.yuck
 ```
 
 Lalu bangun ulang aset dan muat ulang:
 
 ```sh
-~/.dotfile/eww/scripts/depthctl reload
+~/.dotfile/eww/script/depth-ctl reload
 ```
 
 ---
 
 ## 5. Buka jendela dan cek posisinya
 
-`depthctl` yang membuka jendela (bukan `eww open` polos), karena ia mengukur
+`depth-ctl` yang membuka jendela (bukan `eww open` polos), karena ia mengukur
 output dan mengompensasi ruang yang dipesan bar:
 
 ```sh
-~/.dotfile/eww/scripts/depthctl start
+~/.dotfile/eww/script/depth-ctl start
 # depth clock: open on LVDS-1 (1366x580, top offset 34px)
 ```
 
 Kenapa ada "top offset": layer surface ditempatkan di dalam *usable area*.
 Dengan bar memesan 34 px di atas, jendela `y=0` mendarat di `y=34` dan seluruh
-foreground bergeser 34 px dari wallpaper. `depthctl` membaca `reserved` dari
+foreground bergeser 34 px dari wallpaper. `depth-ctl` membaca `reserved` dari
 `hyprctl -j monitors` dan membuka dengan `--pos 0x-34` sehingga band mulai di
 `y=0`.
 
@@ -272,8 +272,8 @@ Wallpaper (`hypr/sources/scripts/nextwall.sh`):
 
 ```sh
 depth_sync() {
-    [[ -x "$HOME/.dotfile/eww/scripts/depthctl" ]] || return 0
-    "$HOME/.dotfile/eww/scripts/depthctl" wallpaper "$1" >/dev/null 2>&1 || true
+    [[ -x "$HOME/.dotfile/eww/script/depth-ctl" ]] || return 0
+    "$HOME/.dotfile/eww/script/depth-ctl" wallpaper "$1" >/dev/null 2>&1 || true
 }
 # setelah awww img ... (dan pada mode "first")
 depth_sync "$CHOSEN"
@@ -285,10 +285,10 @@ jadi foreground lama tidak pernah tertinggal di atas wallpaper lain.
 Tema (`matugen/config.toml` dan `matugen/templates/palette/kanagawa-dragon-lotus/config.toml`):
 kedua config **tidak** lagi punya `post_hook`. Setelah render, jalankan
 `matugen/script/palette.sh`: ia meng-`eww reload` (kalau eww jalan) lalu
-`depthctl refresh`.
+`depth-ctl refresh`.
 
 `eww reload` wajib karena CSS hanya dibaca ulang saat reload (file tema di
-`~/.myenv` berada di luar config Eww). `depthctl refresh` memulihkan ukuran dan
+`~/.myenv` berada di luar config Eww). `depth-ctl refresh` memulihkan ukuran dan
 offset jendela yang hilang setelah reload, dan tidak melakukan apa-apa kalau
 jam sedang tertutup.
 
@@ -297,10 +297,10 @@ jam sedang tertutup.
 ## 8. Perintah harian
 
 ```sh
-~/.dotfile/eww/scripts/depthctl start|stop|toggle|reload|status
-~/.dotfile/eww/scripts/depthctl generate     # bangun ulang foreground saja
-~/.dotfile/eww/scripts/depthctl refresh      # reposisi setelah `eww reload`
-~/.dotfile/eww/scripts/depthctl wallpaper "<gambar>"
+~/.dotfile/eww/script/depth-ctl start|stop|toggle|reload|status
+~/.dotfile/eww/script/depth-ctl generate     # bangun ulang foreground saja
+~/.dotfile/eww/script/depth-ctl refresh      # reposisi setelah `eww reload`
+~/.dotfile/eww/script/depth-ctl wallpaper "<gambar>"
 ```
 
 ---
@@ -309,11 +309,11 @@ jam sedang tertutup.
 
 | Gejala | Penyebab | Perbaikan |
 |---|---|---|
-| Jam tidak muncul | wallpaper tanpa masker / salah nama berkas | cek `depthctl status`, samakan `basename` di `settings.conf` |
-| Jam bergeser turun ±34 px dari subjek | offset bar tidak dipakai | pastikan dibuka lewat `depthctl start`, bukan `eww open` |
+| Jam tidak muncul | wallpaper tanpa masker / salah nama berkas | cek `depth-ctl status`, samakan `basename` di `settings.conf` |
+| Jam bergeser turun ±34 px dari subjek | offset bar tidak dipakai | pastikan dibuka lewat `depth-ctl start`, bukan `eww open` |
 | Angka putih dan latar hitam | stylesheet ditolak GTK | cari non-ASCII di `.scss`; cek log `~/.cache/eww/eww_<hash>.log` |
 | Angka tetap jam lama | listener tidak mencetak baris baru | uji perintahnya: `bash -c 'while :; do date +%H:%M; sleep 5; done'` |
-| Foreground memotong rambut | toleransi terlalu tinggi | turunkan angka toleransi, `depthctl generate` lagi |
+| Foreground memotong rambut | toleransi terlalu tinggi | turunkan angka toleransi, `depth-ctl generate` lagi |
 | Ada rim/kotak krem di tepi subjek | tidak ada erode / masker mentah dipakai | pastikan langkah `-morphology Erode Disk:1 -blur 0x0.8` dipakai |
 | `[ERR] mask coverage ...` | warna latar salah atau latar tidak rata | ambil warna dari histogram; kalau latar bergradasi, wallpaper ini tidak cocok untuk keying otomatis |
 | Bar hilang setelah utak-atik | bar punya daemon sendiri | `~/.dotfile/eww/bar/barctl start` |

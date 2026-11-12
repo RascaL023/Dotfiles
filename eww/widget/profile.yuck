@@ -1,6 +1,6 @@
 ; /* ============== Profile ============== */
 
-(include "widgets/power-buttons.yuck")
+(include "widget/power-buttons.yuck")
 
 (defwidget profile []
   (box :orientation "v" :class "profile" :spacing 1

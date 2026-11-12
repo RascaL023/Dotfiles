@@ -1,0 +1,12 @@
+/* ============================= Distro ============================= */
+/* Distro window (window/distro.yuck) that hosts the music player. */
+
+.distro {
+  background-color: rgba($layer-lowest, 0.999);
+  border-radius: 18px;
+  padding: 30px
+}
+
+.content-container {
+  background-color: transparent;
+}

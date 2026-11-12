@@ -1,4 +1,4 @@
-(include "widgets/music.yuck")
+(include "widget/music.yuck")
 
 (defwindow distro
   :monitor 0

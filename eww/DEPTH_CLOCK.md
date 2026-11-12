@@ -133,12 +133,12 @@ Suggested structure (adjust if the repository conventions indicate a better arra
 eww/
 ├── eww.yuck
 ├── eww.scss
-├── windows/
+├── window/
 │   └── depth-clock.yuck
-├── styles/
+├── style/
 │   └── _depth-clock.scss
-└── scripts/
-    └── depthctl
+└── script/
+    └── depth-ctl
 ```
 
 Use namespaced variables and CSS classes to avoid conflicts with existing widgets.
@@ -261,7 +261,7 @@ When the wallpaper changes:
 - Handle filenames containing spaces.
 - Avoid modifying Niri or Hyprland configuration unless genuinely necessary.
 
-If integrating directly with the wallpaper selector adds too much coupling, implement a minimal reusable `depthctl` command that the selector can invoke.
+If integrating directly with the wallpaper selector adds too much coupling, implement a minimal reusable `depth-ctl` command that the selector can invoke.
 
 Do not refactor the entire wallpaper-management system as part of this task.
 

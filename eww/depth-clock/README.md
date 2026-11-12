@@ -22,7 +22,7 @@ Quickshell.
 > dipakai.
 
 Satu-satunya sumber warna tetap Matugen: `eww/eww.scss` mengimpor
-`~/.myenv/theme/palette/current/scss/theme`, dan [`../styles/_depth-clock.scss`](../styles/_depth-clock.scss)
+`~/.myenv/theme/palette/current/scss/theme`, dan [`../style/_depth-clock.scss`](../style/_depth-clock.scss)
 hanya memakai token semantik (`$primary-accent` untuk angka, `$layer-lowest`
 untuk bayangan). Tidak ada hex literal di stylesheet jam.
 
@@ -30,10 +30,10 @@ untuk bayangan). Tidak ada hex literal di stylesheet jam.
 
 | Berkas | Isi |
 |---|---|
-| [`../windows/depth-clock.yuck`](../windows/depth-clock.yuck) | `deflisten` jam, `overlay` jam + gambar, `defwindow` |
-| [`../styles/_depth-clock.scss`](../styles/_depth-clock.scss) | warna, font, ukuran, bayangan |
+| [`../window/depth-clock.yuck`](../window/depth-clock.yuck) | `deflisten` jam, `overlay` jam + gambar, `defwindow` |
+| [`../style/_depth-clock.scss`](../style/_depth-clock.scss) | warna, font, ukuran, bayangan |
 | [`settings.conf`](settings.conf) | tinggi band + daftar wallpaper yang punya mask |
-| [`../scripts/depthctl`](../scripts/depthctl) | generate foreground dan kendali jendela |
+| [`../script/depth-ctl`](../script/depth-ctl) | generate foreground dan kendali jendela |
 | `~/.cache/eww-depth-clock/foreground.png` | artefak hasil (di luar repo, git-ignored by nature) |
 
 Jam memakai daemon Eww utama (`eww daemon --force-wayland`) — tidak ada daemon
@@ -41,20 +41,20 @@ kedua dan tidak ada konflik dengan [`../bar/barctl`](../bar/barctl).
 
 `depth-clock.yuck` menulis path PNG sebagai `/home/rascal/.cache/...`, sama
 seperti `eww.scss` yang menulis path theme absolut; sesuaikan keduanya pada
-mesin lain. `depthctl` sendiri selalu memakai `$XDG_CACHE_HOME` atau
+mesin lain. `depth-ctl` sendiri selalu memakai `$XDG_CACHE_HOME` atau
 `~/.cache` sesuai lingkungannya.
 
 ## Menjalankan
 
 ```sh
-~/.dotfile/eww/scripts/depthctl start      # buka untuk wallpaper aktif
-~/.dotfile/eww/scripts/depthctl stop       # tutup jendela, daemon tetap hidup
-~/.dotfile/eww/scripts/depthctl toggle
-~/.dotfile/eww/scripts/depthctl reload     # bangun ulang aset lalu buka lagi
-~/.dotfile/eww/scripts/depthctl status
-~/.dotfile/eww/scripts/depthctl generate   # hanya bangun ulang foreground
-~/.dotfile/eww/scripts/depthctl refresh    # reposisi jendela yang sudah terbuka
-~/.dotfile/eww/scripts/depthctl wallpaper "<path gambar>"
+~/.dotfile/eww/script/depth-ctl start      # buka untuk wallpaper aktif
+~/.dotfile/eww/script/depth-ctl stop       # tutup jendela, daemon tetap hidup
+~/.dotfile/eww/script/depth-ctl toggle
+~/.dotfile/eww/script/depth-ctl reload     # bangun ulang aset lalu buka lagi
+~/.dotfile/eww/script/depth-ctl status
+~/.dotfile/eww/script/depth-ctl generate   # hanya bangun ulang foreground
+~/.dotfile/eww/script/depth-ctl refresh    # reposisi jendela yang sudah terbuka
+~/.dotfile/eww/script/depth-ctl wallpaper "<path gambar>"
 ```
 
 `start` membaca wallpaper yang sedang ditampilkan (`awww query`, atau
@@ -87,17 +87,17 @@ memanggilnya otomatis.
 
 | Parameter | Lokasi | Catatan |
 |---|---|---|
-| Warna angka | `../styles/_depth-clock.scss` (`$primary-accent`) | ikut tema aktif |
+| Warna angka | `../style/_depth-clock.scss` (`$primary-accent`) | ikut tema aktif |
 | Bayangan | `$depth-clock-shadow` | `rgba($layer-lowest, 0.55)`, offset 10×12 px |
 | Font | `$depth-clock-font` / `$depth-clock-weight` | Noto Serif Display regular (serif display, kontras tinggi) |
 | Ukuran | `$depth-clock-size: 380px` | 380 px ≈ 960 px lebar untuk `12:00` (70% layar 1366) |
 | Posisi vertikal | `$depth-clock-padding-top: 49px` | glyph atas jatuh di ±180 px (23% tinggi 768) |
 | Tinggi band | `DEPTH_BAND_HEIGHT` di `settings.conf` | harus ≥ padding + line box label (49 + 520 = 569 px) |
-| Ukuran jendela | `:height`/`:width` di `depth-clock.yuck` + `--size` dari `depthctl` | GTK menaikkan tinggi ke minimum label, jadi nilainya bisa tumbuh |
+| Ukuran jendela | `:height`/`:width` di `depth-clock.yuck` + `--size` dari `depth-ctl` | GTK menaikkan tinggi ke minimum label, jadi nilainya bisa tumbuh |
 
 Kalau `$depth-clock-size` atau `$depth-clock-padding-top` diubah, sesuaikan
 `DEPTH_BAND_HEIGHT` dan `:height` (padding + tinggi line box, ditambah sedikit
-margin) lalu `depthctl reload`. Band harus menutupi seluruh line box label,
+margin) lalu `depth-ctl reload`. Band harus menutupi seluruh line box label,
 kalau tidak PNG berhenti sebelum dasar angka dan digit bawah akan tergambar di
 atas subjek. Komposisi awal mengikuti acuan visual: jam selebar ±70% layar
 dengan tepi atas di ±23% tinggi layar.
@@ -108,15 +108,15 @@ bar), dan `:focusable "none"` (tanpa fokus keyboard).
 
 **Offset bar.** Layer surface ditempatkan di dalam *usable area*, jadi selama
 bar memesan 34 px di atas, jendela dengan `y=0` mendarat di `y=34` dan seluruh
-foreground ikut turun 34 px dari wallpaper. `depthctl` membaca field `reserved`
+foreground ikut turun 34 px dari wallpaper. `depth-ctl` membaca field `reserved`
 dari `hyprctl -j monitors` dan membuka jendela dengan `--pos 0x-<reserved>`,
 sehingga band tetap mulai di `y=0` layar. Kalau tinggi bar berubah, jalankan
-`depthctl refresh` supaya offset baru dipakai.
+`depth-ctl refresh` supaya offset baru dipakai.
 
 ## Foreground: cara membuatnya
 
 Semua langkah berjalan sekali per kombinasi wallpaper + ukuran layar, di
-`depthctl generate`, memakai ImageMagick (`magick`):
+`depth-ctl generate`, memakai ImageMagick (`magick`):
 
 1. Wallpaper di-resize dan di-crop persis seperti `awww` (`--resize crop`,
    gravity center), lalu diambil band atas setinggi `DEPTH_BAND_HEIGHT`.
@@ -177,7 +177,7 @@ dengan latar rata seperti Nyx.
 ## Ganti wallpaper
 
 `hypr/sources/scripts/nextwall.sh` memanggil
-`depthctl wallpaper "$CHOSEN"` setelah `awww img` selesai (dan juga pada mode
+`depth-ctl wallpaper "$CHOSEN"` setelah `awww img` selesai (dan juga pada mode
 `first`). Perilakunya:
 
 - wallpaper punya masker → foreground dibangun/dipakai ulang, jam dibuka;
@@ -186,12 +186,12 @@ dengan latar rata seperti Nyx.
 - transisi `awww` tidak diubah; panggilan berjalan setelahnya dan tidak pernah
   menggagalkan skrip (`|| true`).
 
-Kalau wallpaper diganti dengan cara lain, panggil `depthctl wallpaper "<path>"`
-atau `depthctl stop` sendiri.
+Kalau wallpaper diganti dengan cara lain, panggil `depth-ctl wallpaper "<path>"`
+atau `depth-ctl stop` sendiri.
 
 ## Niri
 
-Di Niri wallpaper digambar Noctalia, bukan awww, jadi `depthctl` tidak lagi
+Di Niri wallpaper digambar Noctalia, bukan awww, jadi `depth-ctl` tidak lagi
 mengandalkan `awww query`:
 
 ```text
@@ -205,7 +205,7 @@ Monitor ditanya lebih dulu (`wallpaper-get <connector>`) supaya wallpaper
 per-monitor menang atas default; kalau Noctalia tidak menjawab, dipakai
 `wallpaper-get` tanpa argumen. Path `color:#RRGGBB` (wallpaper warna solid) dan
 path yang tidak bisa dibaca dianggap "tidak ada gambar" — jam tertutup, bukan
-gagal. `file://` dan `~` ikut dinormalkan. `depthctl status` menampilkan
+gagal. `file://` dan `~` ikut dinormalkan. `depth-ctl status` menampilkan
 sumbernya: `wallpaper: /path [noctalia]` atau `[awww]`.
 
 Ikutannya: `matugen/script/palette.sh` tidak lagi mensyaratkan awww, hanya daemon Eww
@@ -233,12 +233,12 @@ Belum ada autostart: `niri/config.kdl` hanya menjalankan `noctalia`, dan baris
 
 ```sh
 eww daemon --force-wayland &          # jendela jam butuh daemon ini
-~/.dotfile/eww/scripts/depthctl start # wallpaper dibaca dari Noctalia
+~/.dotfile/eww/script/depth-ctl start # wallpaper dibaca dari Noctalia
 ```
 
 Bar Noctalia tidak perlu dimatikan dan tidak perlu awww sama sekali — yang
 dibutuhkan hanya daemon Eww, bukan bar Eww. Setelah mengganti wallpaper lewat
-panel Noctalia, panggil `depthctl refresh` (belum ada hook; `nextwall.sh` hanya
+panel Noctalia, panggil `depth-ctl refresh` (belum ada hook; `nextwall.sh` hanya
 untuk Hyprland).
 
 `DEPTH_TOP_RESERVED` sudah diukur di sesi Niri (LVDS-1, bar Noctalia `framed`
@@ -250,7 +250,7 @@ dipesan bar. Probe lalu ditutup dan dihapus. Kalau bar Noctalia diubah tingginya
 atau di-set auto-hide, angka ini harus diukur ulang.
 
 Sisa yang belum diverifikasi: kecocokan crop Noctalia (`fillMode "crop"`)
-dengan asumsi crop-tengah `depthctl` saat membangun foreground.
+dengan asumsi crop-tengah `depth-ctl` saat membangun foreground.
 
 Catatan perilaku: `:stacking "bg"` menaruh jam di layer background, dan
 `niri/config.kdl` punya `layer-rule { place-within-backdrop true }` global tanpa
@@ -287,7 +287,7 @@ diverifikasi di sesi nyata.
   Hyprland, jadi tidak dipakai di sini).
 - Skala output 1× adalah target yang diverifikasi. Pada skala 2× PNG akan
   diperbesar GTK dan ketajaman/presisinya menurun.
-- Satu output (yang fokus). Multi-monitor butuh `depthctl start` per output
+- Satu output (yang fokus). Multi-monitor butuh `depth-ctl start` per output
   dengan `--screen`, belum diotomatiskan.
 - GTK menaikkan tinggi jendela ke minimum label, jadi tinggi nyata bisa lebih
   besar dari nilai `--size`; `depth-clock.yuck` dan `DEPTH_BAND_HEIGHT` sudah
@@ -296,7 +296,7 @@ diverifikasi di sesi nyata.
 ## Pemeriksaan
 
 ```sh
-~/.dotfile/eww/scripts/depthctl status
+~/.dotfile/eww/script/depth-ctl status
 hyprctl -j layers | jq '.[] | .levels[][] | select(.namespace=="gtk-layer-shell")'
 hyprctl -j monitors | jq '.[] | {name, reserved}'     # harus tetap [0,34,0,0]
 timeout 5 eww --force-wayland -c ~/.dotfile/eww active-windows

@@ -1,0 +1,23 @@
+/* ============================ Power menu ============================ */
+/* Power buttons used by widget/power-buttons.yuck inside the power menu. */
+
+.power-item {
+  margin-top: 8px;
+  min-height: 45px;
+}
+
+.power-btn {
+  font-size: 24px;
+  color: $text-secondary;
+  background-color: $layer-low;
+  border-radius: 12px;
+  padding: 10px 15px;
+  margin: 0 4px;
+  min-width: 40px;
+  transition: 600ms;
+}
+
+.power-btn:hover {
+  background-color: $primary-accent;
+  color: $on-primary;
+}

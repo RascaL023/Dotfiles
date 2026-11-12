@@ -3,7 +3,7 @@
 # Folder wallpaper
 DIR="$HOME/Pictures/Wallpaper"
 WALLPAPER_ENGINE=awww
-DEPTHCTL="$HOME/.dotfile/eww/scripts/depthctl"
+DEPTHCTL="$HOME/.dotfile/eww/script/depth-ctl"
 
 # Depth clock: show the matching foreground, hide it when the new wallpaper has
 # no mask. Never blocks the wallpaper transition and never fails the script.

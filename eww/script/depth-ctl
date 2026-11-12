@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# depthctl — wallpaper depth clock for the main Eww configuration.
+# depth-ctl — wallpaper depth clock for the main Eww configuration.
 #
 #   awww wallpaper          (background, untouched)
 #   Eww clock (HH:MM)       (middle, live)
@@ -13,14 +13,14 @@
 # never touches the image pipeline. See eww/depth-clock/README.md.
 #
 # Usage:
-#   depthctl start              open the clock for the current wallpaper
-#   depthctl stop               close the clock (the Eww daemon keeps running)
-#   depthctl toggle             toggle the clock
-#   depthctl reload             rebuild assets and reopen
-#   depthctl status             report state, assets and layout
-#   depthctl generate [img]     rebuild the foreground PNG only
-#   depthctl refresh            reposition an already open clock
-#   depthctl wallpaper <img>    show for a masked wallpaper, hide otherwise
+#   depth-ctl start              open the clock for the current wallpaper
+#   depth-ctl stop               close the clock (the Eww daemon keeps running)
+#   depth-ctl toggle             toggle the clock
+#   depth-ctl reload             rebuild assets and reopen
+#   depth-ctl status             report state, assets and layout
+#   depth-ctl generate [img]     rebuild the foreground PNG only
+#   depth-ctl refresh            reposition an already open clock
+#   depth-ctl wallpaper <img>    show for a masked wallpaper, hide otherwise
 
 set -euo pipefail
 
@@ -352,7 +352,7 @@ cmd_generate() {
 
 cmd_wallpaper() {
   local wallpaper=${1:-} name
-  [[ -n $wallpaper ]] || die "usage: depthctl wallpaper <image path>"
+  [[ -n $wallpaper ]] || die "usage: depth-ctl wallpaper <image path>"
   name=${wallpaper##*/}
   load_settings
   if ! mask_spec "$name" >/dev/null; then
@@ -399,7 +399,7 @@ cmd_status() {
 
 usage() {
   cat <<'EOF'
-usage: depthctl <command> [wallpaper]
+usage: depth-ctl <command> [wallpaper]
 
   start              open the clock for the current wallpaper
   stop               close the clock (the Eww daemon keeps running)

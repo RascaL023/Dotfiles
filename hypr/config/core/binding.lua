@@ -77,7 +77,7 @@ hl.bind(mod .. " + SHIFT + N",      script("bluelight-toggle.sh"))
 
 hl.bind(mod .. " + X",              exec("eww open --toggle profile"))
 hl.bind(mod .. " + D",              exec("eww open --toggle distro"))
-hl.bind(mod .. " + A",              exec(home .. "/.config/eww/scripts/ctl.sh toggle"))
+-- hl.bind(mod .. " + A",              exec(home .. "/.config/eww/script/ctl.sh toggle"))
 hl.bind(mod .. " + CTRL + X",       exec("pkill eww; eww daemon --force-wayland"))
 
 hl.bind(mod .. " + CTRL + P", exec([[hyprpicker -a | wl-copy && notify-send "Color picked!" "$(wl-paste)"]]))

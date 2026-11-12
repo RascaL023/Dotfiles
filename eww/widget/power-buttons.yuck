@@ -1,0 +1,23 @@
+(defwidget power-buttons []
+  (box :orientation "v"
+       :spacing 2
+       :space-evenly false
+
+    (box :orientation "h"
+         :space-evenly false
+         :spacing 2
+         :halign "center"
+         :class "power-item"
+
+      (button :class "power-btn" :onclick "./script/power-ctl 'shutdown'" "")
+      (button :class "power-btn" :onclick "./script/power-ctl 'sleep'" "")
+      (button :class "power-btn" :onclick "./script/power-ctl 'reboot'" ""))
+
+    (box :orientation "h"
+         :space-evenly false
+         :spacing 2
+         :halign "center"
+         :class "power-item"
+
+      (button :class "power-btn" :onclick "./script/power-ctl 'logout'" "󰍃")
+      (button :class "power-btn" :onclick "./script/power-ctl 'lock'" ""))))

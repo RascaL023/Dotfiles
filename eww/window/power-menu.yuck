@@ -1,6 +1,6 @@
-;; ============================ Power-User =============================
+;; ============================ Power-Menu =============================
 
-(include "widgets/profile.yuck")
+(include "widget/profile.yuck")
 
 (defwindow profile
   :monitor 0
