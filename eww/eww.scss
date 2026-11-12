@@ -1,8 +1,5 @@
 // Orchestrator only: theme, global reset, then one partial per window/widget.
-
-// Active theme and feel (rendered by matugen)
 @import "/home/rascal/.myenv/theme/palette/current/scss/theme";
-// Rasa (font) adalah sumbu terpisah: hasil render matugen/feel.sh.
 @import "/home/rascal/.myenv/theme/feel/current/scss/feel";
 
 // Global reset

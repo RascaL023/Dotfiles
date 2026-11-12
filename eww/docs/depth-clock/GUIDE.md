@@ -2,8 +2,7 @@
 
 Panduan konkret dari nol sampai jam berjalan. Semua langkah sudah dieksekusi di
 mesin ini (Hyprland 0.56.2, Eww 0.6.0, awww 0.12.1, ImageMagick 7,
-1366×768 skala 1, bar Eww 34 px). Referensi hasil akhir:
-`~/Downloads/Wallpaper-Depth-Example.webp`.
+1366×768 skala 1, bar Eww 34 px).
 
 Referensi pemakaian sehari-hari ada di [`README.md`](README.md); hasil
 pengujian ada di [`VERIFICATION.md`](VERIFICATION.md).
@@ -46,7 +45,7 @@ magick "$WP" -format %c histogram:info:- | sort -rn | head -3
 
 Histogram Nyx: `(240,235,217)` mendominasi → itulah warna latar `#F0EBD9`.
 
-Daftarkan di [`settings.conf`](settings.conf):
+Daftarkan di [`config/depth-clock.conf`](../../config/depth-clock.conf):
 
 ```sh
 DEPTH_MASKS=(
@@ -158,7 +157,8 @@ Kunci-kunci yang penting:
 
 ## 4. Setel tampilan di SCSS
 
-`eww/style/_depth-clock.scss` — semua warna dari token Matugen, bukan hex:
+`eww/style/_depth-clock.scss` — warna memakai variabel tema (bukan hex), geometri
+diatur di sini:
 
 ```scss
 $depth-clock-font: "Noto Serif Display";
@@ -195,7 +195,7 @@ Sesuaikan tinggi band supaya foreground menutupi seluruh line box label:
 
 ```sh
 # padding + line box (380px font ≈ 520px) + margin
-DEPTH_BAND_HEIGHT=580      # eww/depth-clock/settings.conf
+DEPTH_BAND_HEIGHT=580      # eww/config/depth-clock.conf
 :height "580px"            # eww/window/depth-clock.yuck
 ```
 
@@ -266,7 +266,7 @@ Dipilih beberapa uji yang benar-benar membuktikan efeknya:
 
 ---
 
-## 7. Sambungkan ke ganti wallpaper dan ganti tema
+## 7. Sambungkan ke ganti wallpaper dan render tema
 
 Wallpaper (`hypr/sources/scripts/nextwall.sh`):
 
@@ -282,15 +282,14 @@ depth_sync "$CHOSEN"
 Perilakunya: wallpaper punya masker → jam tampil; tidak punya → jam ditutup,
 jadi foreground lama tidak pernah tertinggal di atas wallpaper lain.
 
-Tema (`matugen/config.toml` dan `matugen/templates/palette/kanagawa-dragon-lotus/config.toml`):
-kedua config **tidak** lagi punya `post_hook`. Setelah render, jalankan
-`matugen/script/palette.sh`: ia meng-`eww reload` (kalau eww jalan) lalu
-`depth-ctl refresh`.
+Tema: setelah tema dirender, `eww reload` lalu `depth-ctl refresh`. Keduanya
+biasanya sudah dirangkai oleh skrip render tema; jalankan manual kalau tema
+diganti dengan cara lain.
 
-`eww reload` wajib karena CSS hanya dibaca ulang saat reload (file tema di
-`~/.myenv` berada di luar config Eww). `depth-ctl refresh` memulihkan ukuran dan
-offset jendela yang hilang setelah reload, dan tidak melakukan apa-apa kalau
-jam sedang tertutup.
+`eww reload` wajib karena CSS hanya dibaca ulang saat reload (stylesheet tema
+berada di luar config Eww). `depth-ctl refresh` memulihkan ukuran dan offset
+jendela yang hilang setelah reload, dan tidak melakukan apa-apa kalau jam sedang
+tertutup. Detail pipeline tema tidak dibahas di dokumen ini.
 
 ---
 
@@ -309,7 +308,7 @@ jam sedang tertutup.
 
 | Gejala | Penyebab | Perbaikan |
 |---|---|---|
-| Jam tidak muncul | wallpaper tanpa masker / salah nama berkas | cek `depth-ctl status`, samakan `basename` di `settings.conf` |
+| Jam tidak muncul | wallpaper tanpa masker / salah nama berkas | cek `depth-ctl status`, samakan `basename` di `config/depth-clock.conf` |
 | Jam bergeser turun ±34 px dari subjek | offset bar tidak dipakai | pastikan dibuka lewat `depth-ctl start`, bukan `eww open` |
 | Angka putih dan latar hitam | stylesheet ditolak GTK | cari non-ASCII di `.scss`; cek log `~/.cache/eww/eww_<hash>.log` |
 | Angka tetap jam lama | listener tidak mencetak baris baru | uji perintahnya: `bash -c 'while :; do date +%H:%M; sleep 5; done'` |

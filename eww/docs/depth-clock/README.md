@@ -21,26 +21,26 @@ Quickshell.
 > [`GUIDE.md`](GUIDE.md) — langkah konkret beserta perintah dan angka yang
 > dipakai.
 
-Satu-satunya sumber warna tetap Matugen: `eww/eww.scss` mengimpor
-`~/.myenv/theme/palette/current/scss/theme`, dan [`../style/_depth-clock.scss`](../style/_depth-clock.scss)
-hanya memakai token semantik (`$primary-accent` untuk angka, `$layer-lowest`
-untuk bayangan). Tidak ada hex literal di stylesheet jam.
+Warna jam tidak diatur di dokumen ini. Stylesheet jam memakai variabel tema
+yang sudah tersedia di Eww (`$primary-accent` untuk angka, `$layer-lowest`
+untuk bayangan), jadi jam otomatis mengikuti tema yang aktif; tidak ada hex
+literal di stylesheet jam.
 
 ## Berkas
 
 | Berkas | Isi |
 |---|---|
-| [`../window/depth-clock.yuck`](../window/depth-clock.yuck) | `deflisten` jam, `overlay` jam + gambar, `defwindow` |
-| [`../style/_depth-clock.scss`](../style/_depth-clock.scss) | warna, font, ukuran, bayangan |
-| [`settings.conf`](settings.conf) | tinggi band + daftar wallpaper yang punya mask |
-| [`../script/depth-ctl`](../script/depth-ctl) | generate foreground dan kendali jendela |
+| [`window/depth-clock.yuck`](../../window/depth-clock.yuck) | `deflisten` jam, `overlay` jam + gambar, `defwindow` |
+| [`style/_depth-clock.scss`](../../style/_depth-clock.scss) | warna, font, ukuran, bayangan |
+| [`config/depth-clock.conf`](../../config/depth-clock.conf) | tinggi band + daftar wallpaper yang punya mask |
+| [`script/depth-ctl`](../../script/depth-ctl) | generate foreground dan kendali jendela |
 | `~/.cache/eww-depth-clock/foreground.png` | artefak hasil (di luar repo, git-ignored by nature) |
 
 Jam memakai daemon Eww utama (`eww daemon --force-wayland`) — tidak ada daemon
-kedua dan tidak ada konflik dengan [`../bar/barctl`](../bar/barctl).
+kedua dan tidak ada konflik dengan [`bar/barctl`](../../bar/barctl).
 
 `depth-clock.yuck` menulis path PNG sebagai `/home/rascal/.cache/...`, sama
-seperti `eww.scss` yang menulis path theme absolut; sesuaikan keduanya pada
+seperti `eww.scss` yang menulis path tema absolut; sesuaikan keduanya pada
 mesin lain. `depth-ctl` sendiri selalu memakai `$XDG_CACHE_HOME` atau
 `~/.cache` sesuai lingkungannya.
 
@@ -66,9 +66,9 @@ tetap hidup.
 
 Jangan memakai `eww open depth-clock` langsung untuk pemakaian normal: geometri
 di Yuck adalah fallback (1366×768) dan tidak membawa ukuran band dari
-`settings.conf` maupun offset bar. `refresh` dipakai setelah `eww reload`
-(reload Eww membuka ulang jendela dari geometri Yuck), dan hook tema Matugen
-memanggilnya otomatis.
+`config/depth-clock.conf` maupun offset bar. `refresh` dipakai setelah
+`eww reload` (reload Eww membuka ulang jendela dari geometri Yuck), dan render
+ulang tema memanggilnya otomatis.
 
 ## Bagaimana jam dan foreground bekerja bersama
 
@@ -92,7 +92,7 @@ memanggilnya otomatis.
 | Font | `$depth-clock-font` / `$depth-clock-weight` | Noto Serif Display regular (serif display, kontras tinggi) |
 | Ukuran | `$depth-clock-size: 380px` | 380 px ≈ 960 px lebar untuk `12:00` (70% layar 1366) |
 | Posisi vertikal | `$depth-clock-padding-top: 49px` | glyph atas jatuh di ±180 px (23% tinggi 768) |
-| Tinggi band | `DEPTH_BAND_HEIGHT` di `settings.conf` | harus ≥ padding + line box label (49 + 520 = 569 px) |
+| Tinggi band | `DEPTH_BAND_HEIGHT` di `config/depth-clock.conf` | harus ≥ padding + line box label (49 + 520 = 569 px) |
 | Ukuran jendela | `:height`/`:width` di `depth-clock.yuck` + `--size` dari `depth-ctl` | GTK menaikkan tinggi ke minimum label, jadi nilainya bisa tumbuh |
 
 Kalau `$depth-clock-size` atau `$depth-clock-padding-top` diubah, sesuaikan
@@ -134,7 +134,7 @@ Hasilnya PNG kecil (484×580, ±390 KB), bukan wallpaper penuh.
 
 ### Menambah wallpaper baru
 
-Tambahkan satu baris ke `DEPTH_MASKS` di [`settings.conf`](settings.conf):
+Tambahkan satu baris ke `DEPTH_MASKS` di [`config/depth-clock.conf`](../../config/depth-clock.conf):
 
 ```sh
 DEPTH_MASKS=(
@@ -208,7 +208,7 @@ path yang tidak bisa dibaca dianggap "tidak ada gambar" — jam tertutup, bukan
 gagal. `file://` dan `~` ikut dinormalkan. `depth-ctl status` menampilkan
 sumbernya: `wallpaper: /path [noctalia]` atau `[awww]`.
 
-Ikutannya: `matugen/script/palette.sh` tidak lagi mensyaratkan awww, hanya daemon Eww
+Ikutannya: render tema tidak lagi mensyaratkan awww, hanya daemon Eww
 (`refresh` sendiri yang memutuskan menutup atau reposisi), jadi render tema di
 Niri tidak mematikan jam.
 
@@ -222,7 +222,7 @@ Hal lain yang sudah dibereskan untuk Niri:
   untuk `:exclusive false` (lihat `VERIFICATION.md` #13), dan niri menempatkan
   surface seperti itu di dalam area sisa — jam mendarat di bawah bar, bukan di
   `y=0`. niri tidak menyediakan query inset ini (`niri msg layers` tanpa
-  bounds), karena itu ada `DEPTH_TOP_RESERVED` di `settings.conf`: isi tinggi
+  bounds), karena itu ada `DEPTH_TOP_RESERVED` di `config/depth-clock.conf`: isi tinggi
   bar + margin atasnya. Di Hyprland nilai itu tidak dipakai (otomatis dari
   `reserved`).
 
@@ -259,18 +259,17 @@ Overview (di-zoom bersama workspace, kena blur/tint). Kosmetik, bukan penghalang
 Urutan tumpuk terhadap wallpaper Noctalia (sesama layer background) belum
 diverifikasi di sesi nyata.
 
-## Tema
+## Warna dan tema
 
-- Flow A (wallpaper) dan Flow B (palet tetap) sama-sama menghasilkan
-  `$primary-accent` dan `$layer-lowest`, jadi satu stylesheet bekerja untuk
-  keduanya — tidak ada palet kedua, tidak ada template matugen baru.
-- Ganti tema berarti symlink `~/.myenv/theme/palette/current` berubah; stylesheet Eww
-  baru terbaca setelah reload. Kedua `[templates.scss]` di
-  `matugen/config.toml` dan `matugen/templates/palette/kanagawa-dragon-lotus/config.toml`
-  sekarang berakhir dengan `eww reload`, jadi render ulang tema langsung
-  mewarnai ulang jam (dan jendela Eww lain).
-- Mengganti wallpaper **tidak** memicu render ulang palet; wallpaper pilihan
-  dan tema warna tetap independen.
+Warna serta font jam berasal dari tema Eww yang aktif; tidak ada palet atau
+stylesheet kedua untuk jam. Konsekuensinya:
+
+- Tema baru terbaca setelah `eww reload`, karena CSS hanya dimuat ulang saat
+  reload. `depth-ctl refresh` kemudian memulihkan ukuran dan offset jendela.
+- Mengganti wallpaper **tidak** memicu render ulang tema; keduanya independen.
+
+Cara tema dihasilkan (template, palet, hook render) berada di luar cakupan
+dokumentasi Eww ini.
 
 ## Catatan penting
 

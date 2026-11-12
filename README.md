@@ -313,8 +313,10 @@ back to plain TokyoNight and warns. See
 | [`matugen/docs/CHEATSHEETS.md`](matugen/docs/CHEATSHEETS.md) | MD3 role vocabulary and semantic mapping |
 | [`matugen/docs/VOCABULARY.md`](matugen/docs/VOCABULARY.md) | Sample `matugen --show-colors` output and how to read it |
 | [`matugen/docs/NVIM_MAPPING.md`](matugen/docs/NVIM_MAPPING.md) | Which palette key colors which part of Neovim |
-| [`eww/depth-clock/README.md`](eww/depth-clock/README.md) | Jam wallpaper berlapis: kendali, layout, dan masker foreground |
-| [`eww/depth-clock/GUIDE.md`](eww/depth-clock/GUIDE.md) | Langkah konkret membuat depth clock untuk wallpaper baru |
+| [`eww/README.md`](eww/README.md) | Indeks Eww: peta konfigurasi dan daftar dokumen |
+| [`eww/docs/bar/README.md`](eww/docs/bar/README.md) | Manual bar Eww: `barctl`, setelan, adapter, troubleshooting |
+| [`eww/docs/depth-clock/README.md`](eww/docs/depth-clock/README.md) | Jam wallpaper berlapis: kendali, layout, dan masker foreground |
+| [`eww/docs/depth-clock/GUIDE.md`](eww/docs/depth-clock/GUIDE.md) | Langkah konkret membuat depth clock untuk wallpaper baru |
 | [`…/blueprint/README.md`](matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md) | Every key of the fixed-palette JSON |
 
 ---

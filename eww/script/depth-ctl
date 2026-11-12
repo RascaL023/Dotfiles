@@ -1,31 +1,8 @@
 #!/usr/bin/env bash
-# depth-ctl — wallpaper depth clock for the main Eww configuration.
-#
-#   awww wallpaper          (background, untouched)
-#   Eww clock (HH:MM)       (middle, live)
-#   foreground.png          (foreground, transparent subject cutout)
-#
-# Where the wallpaper belongs to Noctalia instead of awww (niri), the current
-# image is read from `noctalia msg wallpaper-get`; see current_wallpaper().
-#
-# The foreground is an offline artefact: it is generated from the wallpaper
-# once per wallpaper/screen combination and then reused, so changing the time
-# never touches the image pipeline. See eww/depth-clock/README.md.
-#
-# Usage:
-#   depth-ctl start              open the clock for the current wallpaper
-#   depth-ctl stop               close the clock (the Eww daemon keeps running)
-#   depth-ctl toggle             toggle the clock
-#   depth-ctl reload             rebuild assets and reopen
-#   depth-ctl status             report state, assets and layout
-#   depth-ctl generate [img]     rebuild the foreground PNG only
-#   depth-ctl refresh            reposition an already open clock
-#   depth-ctl wallpaper <img>    show for a masked wallpaper, hide otherwise
-
 set -euo pipefail
 
 EWW_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-SETTINGS_FILE="$EWW_DIR/depth-clock/settings.conf"
+SETTINGS_FILE="$EWW_DIR/config/depth-clock.conf"
 WINDOW="depth-clock"
 EWW=(eww --force-wayland -c "$EWW_DIR")
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/eww-depth-clock"

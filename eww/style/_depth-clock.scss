@@ -1,9 +1,4 @@
 /* ========================== Depth clock =========================== */
-/* Wallpaper depth clock (window/depth-clock.yuck).
-   Colours come from the active Matugen palette imported by eww.scss:
-   $primary-accent for the clock, $layer-lowest for the offset shadow.
-   Geometry knobs below are intentional: keep them in sync with
-   depth-clock/settings.conf (DEPTH_BAND_HEIGHT); see depth-clock/README.md. */
 
 $depth-clock-font: "Noto Serif Display";
 $depth-clock-weight: 400;

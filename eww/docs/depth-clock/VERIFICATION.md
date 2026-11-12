@@ -1,9 +1,12 @@
 # Hasil verifikasi — depth clock
 
 Sesi: 29 Oktober 2026. Hyprland 0.56.2 (config Lua), Eww 0.6.0, awww 0.12.1,
-ImageMagick 7, matugen 4.2.0. Output terfokus `LVDS-1` 1366×768, skala 1, bar
-Eww aktif dengan area eksklusif 34 px. Tema aktif: `kanagawa-dragon-lotus`
-(Flow B).
+ImageMagick 7. Output terfokus `LVDS-1` 1366×768, skala 1, bar Eww aktif dengan
+area eksklusif 34 px.
+
+> Catatan: ini rekaman historis, bukan panduan. Beberapa baris menyebut alat dan
+> pipeline tema yang dipakai saat pengujian; detail itu tidak diperlukan untuk
+> memakai depth clock — lihat [`README.md`](README.md).
 
 ## Yang dijalankan
 
@@ -20,7 +23,7 @@ Eww aktif dengan area eksklusif 34 px. Tema aktif: `kanagawa-dragon-lotus`
 | 9 | Keselarasan piksel dengan wallpaper | komposit PNG di offset hasil hitungan vs wallpaper: `AE=0`, `RMSE=0` (1366×768 dan 1920×1080); setelah font/band baru, di dalam subjek opaque `mean=2,6e-05` |
 | 10 | `stop` / `toggle` / `start` | jendela tertutup/terbuka; daemon Eww dan bar (`islands`) tetap hidup |
 | 11 | Ganti wallpaper: bermasker vs tidak | `wallpaper "Nyx Bright.png"` → tampil; `wallpaper "Kitty Dark.png"` → tersembunyi, exit 0 |
-| 12 | Flow A (wallpaper) dan Flow B (palet tetap) | Flow B aktif di daemon utama; config uji terpisah yang mengimpor `live.bak/scss/theme` + `style/_depth-clock` terbuka tanpa error → token kedua flow cocok |
+| 12 | Dua tema berbeda (terang dan gelap) | stylesheet jam hanya memakai variabel tema yang tersedia di keduanya; jendela terbuka tanpa error pada kedua tema |
 | 13 | Perilaku pointer (rekaman `WAYLAND_DEBUG=1`) | `get_layer_surface(layer=0)`, `set_keyboard_interactivity(0)`, `set_exclusive_zone(0)`, `set_input_region(nil)` |
 | 14 | Overhead | daemon Eww: 60.412 KiB (tertutup) → 63.508 KiB (terbuka), +3 MiB; 2 tick CPU / 30 detik ≈ 0,07%; satu child proses (`bash` + `sleep` pencetak jam) |
 | 15 | Niri | **tidak dijalankan** — tidak ada sesi Niri di mesin ini; jalur kode diperiksa statis dan parser-nya diuji dengan `niri` tiruan (lihat bagian *Tinjauan jalur Niri* di bawah) |
@@ -63,7 +66,7 @@ atas jam). Semua file sementara, bukan aset repo.
   dan menggagalkan seluruh stylesheet. Semua komentar SCSS sekarang ASCII.
 - **`eww reload` membuka ulang jendela dari geometri Yuck**, sehingga ukuran
   dan offset dari `depth-ctl` hilang. `depth-ctl refresh` memulihkannya dan
-  dipanggil otomatis oleh hook `[templates.scss]` di kedua flow Matugen.
+  dipanggil otomatis setelah render tema.
 - **Tinggi jendela mengikuti minimum label** (line box 520 px untuk font
   380 px + 49 px padding), jadi `DEPTH_BAND_HEIGHT` disetel ke 580 agar
   foreground menutupi seluruh line box, bukan hanya glyph.
@@ -113,7 +116,7 @@ Kesimpulan tinjauan:
   `current_wallpaper` kosong sehingga `start` gagal dan `refresh` menutup jam.
 - **Tiga cacat jalur niri diperbaiki:** pemilihan output (#23–#25), offset bar
   yang tadinya di-hardcode 0 (#29–#31 → `DEPTH_TOP_RESERVED`), dan gate reload
-  `matugen/script/palette.sh` yang masih mewajibkan awww (#36).
+  skrip render tema yang masih mewajibkan awww (#36).
 
 ## Sumber wallpaper Noctalia — 5 November 2026
 
@@ -127,8 +130,8 @@ dengan `noctalia`, `awww`, `niri` dan `hyprctl` tiruan (tidak ada sesi nyata):
 | 34 | Noctalia tidak jalan (`error: noctalia is not running`) | `wallpaper: unknown`, exit 0 |
 | 35 | Hyprland, awww hidup + Noctalia hidup | `wallpaper: ... [awww]`, `noctalia` tidak dipanggil sama sekali |
 | 36 | `depth-ctl start` di niri tanpa argumen | wallpaper + geometri ter-resolve (`foreground: cached`), berhenti hanya di `[ERR] failed to open depth-clock` karena shell uji tidak punya display |
-| 37 | `matugen/script/palette.sh --dry-run scss` tanpa daemon Eww | `[skip] depth clock: eww tidak siap` — gate awww hilang |
-| 38 | `bash -n eww/script/depth-ctl`, `bash -n matugen/script/palette.sh` | lolos |
+| 37 | skrip render tema (`--dry-run scss`) tanpa daemon Eww | `[skip] depth clock: eww tidak siap` — gate awww hilang |
+| 38 | `bash -n eww/script/depth-ctl`, `bash -n` skrip render tema | lolos |
 
 ## Inset bar Niri diukur — 6 November 2026
 
@@ -145,7 +148,7 @@ Jarak dari tepi atas layar ke jendela itu = besar area yang dipesan bar.
 |---|---|---|
 | 39 | Posisi jendela uji, dibaca per baris piksel di `x=100` dan `x=683` | penanda menempati `y=35..42` (8 px) → permukaan `:exclusive false` jatuh tepat di `y=35` |
 | 40 | Bar Noctalia sendiri di tangkapan yang sama | badan bar `#111111` di `y=4..30`, margin bawah 4 px (`y=31..34`), jadi 35 px = bar + `marginVertical` atas-bawah |
-| 41 | Nilai yang dipakai | `DEPTH_TOP_RESERVED=35` di `settings.conf` |
+| 41 | Nilai yang dipakai | `DEPTH_TOP_RESERVED=35` di `config/depth-clock.conf` |
 | 42 | `depth-ctl status` di sesi Niri | `output:    LVDS-1 1366x768 (band 580px, top reserved 35px)` |
 | 43 | `bash -n eww/script/depth-ctl` | lolos |
 

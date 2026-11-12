@@ -1,5 +1,9 @@
 # Bar Eww — pulau minimalis
 
+> Dokumen ini menjelaskan bar di `eww/bar/` dan konfigurasinya (`eww.yuck`,
+> `eww.scss`, `widgets/`, `styles/`, `scripts/`). Berkas runtime ada di folder
+> tersebut, bukan di `eww/docs/`.
+
 Bar mandiri untuk **Eww 0.6.0 + Wayland**, dengan adapter **Hyprland dan Niri**,
 target awal 1366×768. Satu jendela transparan menampung kelompok kiri, jam,
 dan tiga pulau kanan, masing-masing setinggi 30 px. Padding atas 4 px dan bawah
@@ -187,30 +191,12 @@ Lebar area pil mengikuti jumlah workspace hingga batas `$workspace-area`;
 lebih dari batas itu dapat digulir. Area klik tetap 24 px tinggi meskipun pil
 hanya setinggi 6 px. Transisi hanya berjalan ketika status workspace berubah.
 
-Palet lokal gelap hangat langsung bekerja tanpa theme store. Integrasi Matugen
-bersifat opsional: kedua template yang sudah ada,
-`../../matugen/templates/palette/wallpaper-based/source.scss` dan
-`../../matugen/templates/palette/kanagawa-dragon-lotus/template/source.scss`, menyediakan
-variabel berikut. Setelah memastikan `~/.myenv/theme/palette/current/scss/_theme.scss`
-(partial Sass — karena itu `@import` di bawah menulis `theme` tanpa underscore)
-tersedia, tambahkan import **sebelum** definisi token warna dan ganti nilainya:
-
-```scss
-@import "/home/rascal/.myenv/theme/palette/current/scss/theme";
-$surface: $layer-lowest;
-$text: $text-primary;
-$muted: $text-secondary;
-$accent: $primary-accent;
-$on-accent: $on-primary;
-$border: $border-default;
-$warning: $status-warning;
-$hover: $layer-high;
-```
-
-Biarkan token font/ikon tetap lokal jika ingin mempertahankan desain.
-Import memakai path absolut; sesuaikan home pada mesin lain. Jangan menulis
-ulang berkas generated. Perubahan theme symlink dari switcher eksternal perlu
-`barctl reload`; bar ini tidak mengelola switcher atau template Matugen.
+Palet lokal gelap hangat langsung bekerja tanpa theme store. Kalau bar harus
+mengikuti tema aktif, impor variabel tema **sebelum** definisi token warna, lalu
+petakan ke `$surface`, `$text`, `$muted`, `$accent`, `$on-accent`, `$border`,
+`$warning`, dan `$hover`. Token font/ikon biarkan lokal agar desain tidak
+berubah. Setelah tema berganti, jalankan `barctl reload`; cara tema dihasilkan
+tidak dibahas di dokumen Eww ini.
 
 ## Adapter dan lifecycle
 
@@ -379,7 +365,7 @@ pages dapat terhitung lebih dari sekali). Hasil sesi implementasi ada di
 - [API dispatcher Hyprland](https://wiki.hypr.land/Configuring/Basics/Dispatchers/)
 - [Protokol IPC Niri](https://github.com/YaLTeR/niri/blob/main/niri-ipc/src/lib.rs)
 - [Pemetaan ikon Nerd Fonts](https://github.com/ryanoasis/nerd-fonts/blob/master/css/nerd-fonts-generated.css) — NixOS, volume, dan tingkat baterai
-- [`../monasm-config.example.bak/`](../monasm-config.example.bak/) — pola tray/workspace lokal (di-ignore git, jadi hanya ada di mesin ini)
+- [`../monasm-config.example.bak/`](../../monasm-config.example.bak/) — pola tray/workspace lokal (di-ignore git, jadi hanya ada di mesin ini)
 - [Arin oleh adi1090x](https://github.com/adi1090x/widgets/tree/main/eww/arin) — referensi kelompok visual
 
 Implementasi ini memakai satu window bar, popup kalender/musik opsional, dan adapter event sendiri; referensi
