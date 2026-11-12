@@ -97,6 +97,38 @@ class PipeWireEvents:
                             changed = True
         return changed
 
+    def default_sink_name(self):
+        for key in ("default.audio.sink", "default.configured.audio.sink"):
+            for (_, entry), value in self.defaults.items():
+                if entry != key:
+                    continue
+                if isinstance(value, str):
+                    try:
+                        value = json.loads(value)
+                    except ValueError:
+                        continue
+                if isinstance(value, dict) and value.get("name"):
+                    return value["name"]
+        return None
+
+    def volume(self):
+        """Read the default sink from streamed state instead of spawning wpctl."""
+        name = self.default_sink_name()
+        if name is None:
+            return None
+        for sink in self.sinks.values():
+            if sink.get("name") != name:
+                continue
+            # wpctl reports the per-channel level; the scalar `volume` prop is only
+            # the base value and stays 1.0 while channels carry the real level.
+            channels = [x for x in sink.get("channelVolumes") or () if isinstance(x, (int, float))]
+            level = sum(channels) / len(channels) if channels else sink.get("volume")
+            if not isinstance(level, (int, float)):
+                return None
+            # PipeWire channels are linear; wpctl displays and accepts cubic volume.
+            return round(level ** (1 / 3) * 100), bool(sink.get("mute"))
+        return None
+
 
 def workspace_state(rows, active, base):
     known = {int(x["id"]): x for x in rows if int(x["id"]) > 0}
@@ -200,12 +232,7 @@ def compositor(cfg):
     return Niri() if compositor_name(cfg) == "niri" else Hyprland()
 
 
-def volume_state(output):
-    match = re.search(r"Volume:\s*([0-9.]+)", output or "")
-    if not match:
-        return None
-    percent = round(float(match[1]) * 100)
-    muted = "[MUTED]" in output
+def volume_display(percent, muted):
     if muted:
         icon = "󰝟"
     elif percent == 0:
@@ -219,6 +246,13 @@ def volume_state(output):
     return {"available": True, "muted": muted, "percent": percent,
             "text": f"{percent}%", "icon": icon,
             "tooltip": f"Volume {percent}%{' · Muted' if muted else ''}"}
+
+
+def volume_state(output):
+    match = re.search(r"Volume:\s*([0-9.]+)", output or "")
+    if not match:
+        return None
+    return volume_display(round(float(match[1]) * 100), "[MUTED]" in output)
 
 
 def brightness_state(device="auto", root=Path("/sys/class/backlight")):

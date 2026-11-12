@@ -46,6 +46,7 @@
   :geometry (geometry :x panel-x :y panel-y :width "1px" :height "1px" :anchor "top left")
   :exclusive false
   :focusable false
-  :stacking "overlay"
+  ;; Below the bar so the bar's tooltips stay above this popup.
+  :stacking "fg"
   :namespace "eww-islands-music"
   (music-panel))

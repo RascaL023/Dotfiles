@@ -52,3 +52,18 @@
   border-radius: $button-radius;
 }
 .calendar-cell.today { background: $accent; color: $on-accent; font-weight: $clock-weight; }
+
+.calendar-month.cal-next-a, .calendar-month.cal-next-b {
+  animation: calendar-next $calendar-slide ease-out;
+}
+.calendar-month.cal-prev-a, .calendar-month.cal-prev-b {
+  animation: calendar-previous $calendar-slide ease-out;
+}
+@keyframes calendar-next {
+  from { opacity: 0; margin-left: 18px; }
+  to { opacity: 1; margin-left: 0; }
+}
+@keyframes calendar-previous {
+  from { opacity: 0; margin-left: -18px; }
+  to { opacity: 1; margin-left: 0; }
+}

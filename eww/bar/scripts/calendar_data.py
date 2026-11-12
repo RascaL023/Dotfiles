@@ -16,7 +16,7 @@ def calendar_state(year=None, month=None, *, today=None, opened=False):
     weeks = calendar.Calendar(firstweekday=calendar.MONDAY).monthdayscalendar(year, month)
     weeks += [[0] * 7 for _ in range(6 - len(weeks))]
     return {
-        "open": opened, "year": year, "month": month, "date": today.isoformat(),
+        "open": opened, "motion": "", "year": year, "month": month, "date": today.isoformat(),
         "day": str(today.day), "weekday": WEEKDAYS[today.weekday()],
         "month_year": f"{MONTHS[today.month - 1]} {today.year}",
         "heading": f"{MONTHS[month - 1]} {year}",
