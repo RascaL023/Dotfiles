@@ -41,7 +41,7 @@ local Theme = {
         shadow = {
             enabled = true,
             range   = 20,
-            power   = 10,
+            power   = 4,
             color   = "rgba(0d0c0cee)",
             sharp   = false,
         },
@@ -93,7 +93,8 @@ local limits = {
     { "material.blur.vibrancy",      0.0, 1.0 },
     { "material.blur.vibrancy_darkness", 0.0, 1.0 },
     { "material.shadow.range",       0,   60  },
-    { "material.shadow.power",       1,   10  },
+    -- Hyprland 0.57 menolak render_power > 4 (0.56 masih menerima 10).
+    { "material.shadow.power",       1,   4   },
     { "motion.speed",                0.4, 2.5 },
     { "motion.layers_speed",         0.4, 2.5 },
     { "chrome.groupbar.height",      0,   40  },

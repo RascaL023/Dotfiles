@@ -1,4 +1,4 @@
--- Hyprland 0.56 keybinds. Binds that only exist in the scrolling layout are
+-- Hyprland 0.57 keybinds. Binds that only exist in the scrolling layout are
 -- guarded so a dwindle session falls back to its own dispatcher.
 
 local mod  = "SUPER"

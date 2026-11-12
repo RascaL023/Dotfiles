@@ -283,7 +283,7 @@ Rules:
 | `matugen/docs/NOCTALIA.md` | verified Noctalia v5 facts vs matugen: config layering, template limits, color ownership, integration checklist |
 | `matugen/docs/NVIM_MAPPING.md` | which palette key colors which Neovim highlight group |
 | `matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md` | every key of the Flow B blueprint JSON |
-| `hypr/docs/ROADMAP_V56.md` | unimplemented Hyprland 0.56 features: recipes, verification steps, backlog |
+| `hypr/docs/ROADMAP_V57.md` | Hyprland 0.57 migration (breaking changes), unimplemented features: recipes, verification steps, backlog |
 | `eww/README.md` | Eww index: config map and document list |
 | `eww/docs/bar/README.md` | the Eww bar: `barctl`, settings, adapter, troubleshooting |
 | `eww/docs/depth-clock/README.md` | the wallpaper depth clock: `depth-ctl`, layout knobs, foreground mask |

@@ -33,7 +33,7 @@ a wallpaper or a hand-written palette.
 │   ├── README.md           # entry point, flows, and docs index
 │   └── docs/               # theming docs
 ├── hypr/                   # compositor config (Lua)
-│   └── docs/               #   backlog fitur 0.56 yang belum dipakai
+│   └── docs/               #   migrasi 0.57 + backlog fitur yang belum dipakai
 ├── nvim/ kitty/ foot/ alacritty/ …   # one directory per tool
 └── AGENTS.md               # rules for AI agents working in this repo
 ```

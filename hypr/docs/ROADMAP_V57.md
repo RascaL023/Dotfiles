@@ -1,4 +1,4 @@
-# Rencana: fitur Hyprland 0.56 yang belum dipakai
+# Rencana: fitur Hyprland 0.57 & migrasi dari 0.56
 
 > Index repo: [`../../README.md`](../../README.md) · aturan kerja:
 > [`../../AGENTS.md`](../../AGENTS.md)
@@ -7,8 +7,33 @@
 > aktif di config sekarang. Semuanya opsional, ditulis lengkap supaya bisa
 > dipasang kapan saja tanpa riset ulang.
 
-Diverifikasi terhadap **Hyprland 0.56.2** (branch `v0.56.2-b`, commit `efb50993`,
-build 2026-08-05). Terakhir diverifikasi: **2026-10-16**.
+Diverifikasi terhadap **Hyprland 0.57.1** (branch `v0.57.1-b`, commit `acc1aa0b`,
+build 2026-11-03, NixOS). Terakhir diverifikasi: **2026-11-13**.
+
+---
+
+## 0. Migrasi 0.56 → 0.57 (breaking changes + yang sudah diterapkan)
+
+0.57 menghapus dukungan `hyprland.conf` (PR #15539 *config: remove legacy
+config support*): konfigurasi wajib Lua. Repo ini sudah Lua, jadi tidak ada
+konversi — tapi jangan menambah contoh `.conf` di dokumen atau skrip.
+
+| Perubahan | Bukti di mesin ini (0.57.1) | Status di repo |
+|---|---|---|
+| `hyprland.conf` dihapus | — | aman: `hypr/hyprland.lua` |
+| `decoration:shadow:render_power` dibatasi **1–4** (PR #15682 *fixup shadow limits*); 0.56 menerima 10 | `getoption` → default 3, current 4, min 1, **max 4**; nilai 10 dulu membuat seluruh config ditolak (`maximum of 4`) | sudah: clamp default 4 + limit 1–4 di `config/core/theme/palette.lua` |
+| `misc` → kategori `layers` untuk 2 opsi (#16617) | `layers:layers_hog_keyboard_focus`, `layers:allow_new_top_layers_over_existing_fullscreen` (default `true`) | belum dipakai; jangan tulis lewat `misc:` |
+| event `created` dipisah: `created_early` (sebelum setup) dan `created` (sesudahnya) (#16221) | stub memuat `workspace.created_early` **dan** `workspace.created` | nanti saat memakai event workspace |
+| `misc:special_scale_factor` deprecated (#15832) | — | jangan dipakai |
+| `skip_non_kms_dmabuf_formats` default `true` di 0.57.0, kembali opt-in di 0.57.1 | catatan rilis 0.57.1: *restore opt-in KMS dmabuf filtering* | tidak di-set; kalau klien EGL gagal di GPU lama, set `false` |
+| `hl.bind` menolak key duplikat / argumen berlebih | `hyprctl configerrors` kosong setelah reload | bind tetap unik (sudah) |
+| `hyprctl` shell completion dihapus (#16419) | — | jangan andalkan completion bawaan |
+| `input:scroll_factor` batas atas 100 (default 1) | `getoption` → min 0, max 100 | tidak di-set |
+
+Yang **tidak** berubah walau sering dikira berubah: `hyprctl layerrules` masih
+`unknown request`, `hyprctl getoption animations:layers` masih `no such option`,
+dan `hyprctl dispatch workspace 9` masih gagal (`')' expected near '9'`) —
+dispatcher tetap harus bentuk Lua (`hl.dsp.*`). Semua diuji ulang di 0.57.1.
 
 ---
 
@@ -16,14 +41,15 @@ build 2026-08-05). Terakhir diverifikasi: **2026-10-16**.
 
 | Area | Sudah dipakai | Belum dipakai (isi dokumen ini) |
 |---|---|---|
-| Bind | `hl.bind`, submap, `locked`/`repeating`, layout message scrolling | `non_consuming`, `transparent`, `ignore_mods`, `long_press`, `submap_universal`, `click`/`drag`, `device` |
-| Rule | `window_rule` statis (foot/codium/ttyper/kitty-float), `layer_rule` (animation/blur) | rule **dinamis**, rule **bernama** + handle `set_enabled`, tag, `scrolling_width`, `no_screen_share`, `stay_focused`, `idle_inhibit` |
-| Event | `hl.on("hyprland.start")` untuk autostart | 30 event lain + `hl.timer` |
+| Bind | `hl.bind`, submap, `locked`/`repeating`, layout message scrolling | `non_consuming`, `transparent`, `ignore_mods`, `long_press`, `submap_universal`, `click`/`drag`, `device`, `binds.drag_center_window` |
+| Rule | `window_rule` statis (foot/codium/ttyper/kitty-float), `layer_rule` (animation/blur) | rule **dinamis**, rule **bernama** + handle `set_enabled`, tag, `scrolling_width`, `no_screen_share`, `stay_focused`, `idle_inhibit`, `no_glow`, `no_wobble`, `no_xdg_drags` |
+| Dekorasi | warna/gap/rounding/border/shadow dari palet + feel | `decoration.blur.variant` (0–10), `decoration.blur.proportional`, `decoration.glow.*`, `decoration.wobble.*` |
+| Event | `hl.on("hyprland.start")` untuk autostart | 35 event lain (36 total di stub 0.57.1) + `hl.timer` |
 | Layout | `dwindle` + `scrolling` bawaan | layout **buatan sendiri** via `hl.layout.register` |
 | Gesture | 3 jari horizontal (workspace), 3 jari vertikal (`scroll_move`) | `cursor_zoom` (pinch), swipe `close`/`float`/`fullscreen`/`move`/`resize`/`special`, gesture **live Lua** |
 | Workspace | hanya bind pindah workspace | `hl.workspace_rule` (termasuk `layout_opts.direction` per workspace) |
-| Input | `kb_layout`, `sensitivity`, `follow_mouse` | per-device (`hl.device`), `scroll_method`, `emulate_discrete_scroll`, `natural_scroll`, `accel_profile`, `cursor.*` |
-| Monitor/render | `mode`, `position`, `scale` | `reserved`, `cm`, `icc`, `sdr_eotf`, `render.*`, `misc.*` |
+| Input | `kb_layout`, `sensitivity`, `follow_mouse` | per-device (`hl.device`), `scroll_method`, `emulate_discrete_scroll`, `natural_scroll`, `accel_profile`, `cursor.*`, `cursor.warp_on_monitor_change` |
+| Monitor/render | `mode`, `position`, `scale` | `reserved`, `cm`, `icc`, `sdr_eotf`, `render.*`, `layers.*` |
 
 ## 2. Sumber kebenaran (kalau nanti mengimplementasikan)
 
@@ -34,16 +60,22 @@ build 2026-08-05). Terakhir diverifikasi: **2026-10-16**.
    grep -nE "^---@field \['(scrolling|binds|group)\." "$STUB"
    ```
 
-2. **Wiki v56** (`hyprwm/hyprland-wiki`, folder `content/`) — prosa + contoh:
+   Di NixOS `share/hypr/stubs/` tidak ada di `/run/current-system/sw`, tapi
+   `readlink -f` di atas menyelesaikannya ke
+   `/nix/store/…-hyprland-0.57.1/share/hypr/stubs/hl.meta.lua` (terbukti di mesin ini).
+
+2. **Wiki v57** (`hyprwm/hyprland-wiki`, folder `content/`) — prosa + contoh:
    - `configuring/layouts/scrolling-layout.md`, `.../dwindle-layout.md`
    - `configuring/core/dispatchers.md`, `.../binds/gestures.md`, `.../binds/flags.md`
    - `configuring/core/rules/window-rules.md`, `.../rules/layer-rules.md`, `.../rules/workspace-rules.md`
    - `configuring/core/advanced-configuration/events.md`, `.../notifications.md`, `.../permissions.md`
 
-   ⚠️ Wiki itu branch `main`, jadi bisa **lebih baru** dari 0.56.2. Contoh nyata
-   yang sudah ketahuan tidak ada di 0.56.2: `config.unload`, `window.bell`,
-   `window.minimize` (event) dan `hl.dsp.reload_config` (dispatcher). Selalu cek
-   nama ke stub dulu sebelum dipakai.
+   ⚠️ Wiki itu branch `main`, jadi bisa **lebih baru** dari 0.57.1. Tiga contoh
+   yang dulu absen di 0.56.2 kini **ada** di 0.57.1: `config.unload`,
+   `window.bell`, `window.minimize` (event), begitu juga `hl.dsp.reload_config`
+   (dispatcher) dan `hl.get_devices()`. Sebaliknya `hl.reload_config` (fungsi
+   biasa) **tidak ada** — diuji `hyprctl eval`: `nil`. Selalu cek nama ke stub
+   dulu sebelum dipakai.
 
 3. **Source C++** untuk perilaku layout: `src/layout/algorithm/tiled/scrolling/ScrollingAlgorithm.cpp`
    (di situ daftar pesan `layoutMsg` yang sah untuk layout scrolling).
@@ -54,10 +86,12 @@ build 2026-08-05). Terakhir diverifikasi: **2026-10-16**.
 cd ~/.dotfile
 export HYPRLAND_INSTANCE_SIGNATURE=$(ls -t /run/user/1000/hypr | head -1)
 
-luac -p hypr/hyprland.lua hypr/config/core/keybinding.lua    # 1. syntax Lua
+luac -p hypr/hyprland.lua hypr/config/core/binding.lua    # 1. syntax Lua
 hyprctl reload                                    # 2. terapkan
 hyprctl configerrors                              # 3. harus kosong
 hyprctl binds -j | python3 -c 'import sys,json;print(len(json.load(sys.stdin)))'   # 4. jumlah bind
+hyprctl getoption decoration:shadow:render_power   # 5. 0.57: min 1, maks 4
+hyprctl descriptions | grep -A3 'wobble'           # 6. nama opsi + rentang resmi
 ```
 
 Aturan pengujian yang sudah terbukti penting:
@@ -203,16 +237,19 @@ layer.
 
 ## 7. Event bus + timer
 
-**Apa:** 31 event resmi (stub 0.56.2) + `hl.timer({ timeout, type = "oneshot"|"repeat" })`.
+**Apa:** 36 event resmi (stub 0.57.1) + `hl.timer({ timeout, type = "oneshot"|"repeat" })`.
 Ini pengganti pola "socket2 + skrip polling".
 
 **Event yang paling berguna:** `window.open` / `window.open_early` /
 `window.active` (Window, alasan fokus) / `window.title` / `window.urgent` /
-`window.fullscreen` / `window.close` / `window.destroy` / `window.move_to_workspace`,
-`workspace.active` / `workspace.created` / `workspace.removed` /
-`workspace.move_to_monitor` (Workspace, Monitor) / `workspace.special_active`,
+`window.fullscreen` / `window.close` / `window.destroy` / `window.move_to_workspace` /
+`window.minimize` / `window.update_state` / `window.bell`,
+`workspace.active` / `workspace.created` / `workspace.created_early` /
+`workspace.removed` / `workspace.move_to_monitor` (Workspace, Monitor) /
+`workspace.special_active`,
 `monitor.added` / `monitor.focused` / `monitor.removed` / `monitor.layout_changed`,
-`config.reloaded` / `config.props_refreshed`, `layer.opened` / `layer.closed`,
+`config.reloaded` / `config.props_refreshed` / `config.unload`,
+`layer.opened` / `layer.closed`,
 `screenshare.state` (bool, tipe, nama), `input.keyboard.key` (keycode, timestamp, status),
 `keybinds.submap`, `hyprland.start` / `hyprland.shutdown`.
 
@@ -232,8 +269,10 @@ hl.on("screenshare.state", function(active)
 end)
 ```
 
-**Catatan:** `config.unload`, `window.bell`, `window.minimize` (ada di wiki) belum
-ada di 0.56.2.
+**Catatan:** empat event yang dulu absen kini terdaftar di stub 0.57.1:
+`config.unload`, `window.bell`, `window.minimize`, `window.update_state`.
+`workspace.created` juga dipisah: `created_early` jalan sebelum setup selesai,
+`created` sesudahnya (PR #16221).
 
 ## 8. Workspace rule (termasuk arah scroll per workspace)
 
@@ -330,9 +369,11 @@ local farben = hl.get_windows({ class = "firefox", mapped = true })
   `hl.permission({ binary = …, type = …, mode = … })` +
   `ecosystem.enforce_permissions` (nilai `type`/`mode` lihat halaman Permissions).
   (`hl.env()` sendiri **sudah** dipakai di `hyprland.lua`.)
-- Reload config dari dalam Lua: di 0.56.2 **belum ada** dispatcher
-  `reload_config` (lihat catatan di §7), jadi tetap lewat IPC
-  `hyprctl reload` / `hl.dsp.exec_cmd("hyprctl reload")`.
+- Reload config dari dalam Lua: 0.57 punya dispatcher `hl.dsp.reload_config()`
+  (`---@field reload_config fun(...): HL.Dispatcher` di stub 0.57.1). Nama
+  `hl.reload_config` **tidak ada** (diuji `hyprctl eval` → `nil`), jangan tertukar.
+- `hl.get_devices()` mengembalikan `HL.Device[]` (padanan `hyprctl devices -j`)
+  tanpa parsing JSON.
 
 ## 13. Backlog prioritas
 
@@ -344,13 +385,18 @@ local farben = hl.get_windows({ class = "firefox", mapped = true })
 | 4 | Workspace rule arah scroll per workspace | tinggi | kecil | tidak | `hyprland.lua` |
 | 5 | Rule bernama + tag (opacity per tag, toggle runtime) | sedang | sedang | tidak | `hyprland.lua` |
 | 6 | Event bus: OSD/notifikasi saat fullscreen & screenshare | sedang | sedang | tidak | file baru `hypr/events.lua` |
-| 7 | `group.auto_group` + `group.active({ index })` di `SUPER+1..6` | sedang | sedang | tidak | `keybinding.lua` |
+| 7 | `group.auto_group` + `group.active({ index })` di `SUPER+1..6` | sedang | sedang | tidak | `binding.lua` |
 | 8 | `hl.device` per-device (touchpad natural scroll, keyboard eksternal) | tinggi | kecil | ya (device) | `hyprland.lua` |
 | 9 | Rule mengambang dinamis lewat event `window.title` | sedang | sedang | tidak | `hypr/events.lua` |
 | 10 | Gesture `cursor_zoom` + swipe `close`/`float`/`fullscreen` | sedang | kecil | ya (trackpad) | `hyprland.lua` |
 | 11 | Gesture live untuk volume/brightness (+ notify-send sekali di akhir gesture) | tinggi | sedang | ya (trackpad) | `hyprland.lua` |
 | 12 | `render.cm_*`, tuning monitor (`reserved`, `icc`) | kecil | sedang | tidak | `hyprland.lua` |
 | 13 | Layout sendiri via `hl.layout.register` | tinggi (eksperimen) | besar | tidak | `hypr/layout.lua` |
+| 14 | `decoration.wobble.*` (default `enabled = false`, `intensity` 0–2) | kosmetik | kecil | tidak | template feel |
+| 15 | Blur variant `decoration.blur.variant` (0–10) + `blur.proportional` | sedang | kecil | tidak | template feel |
+| 16 | `no_glow` / `no_xdg_drags` / `no_wobble` per jendela | kecil | kecil | tidak | `hyprland.lua` |
+| 17 | `cursor.warp_on_monitor_change` (default `-1`, rentang -1..2) | kecil | kecil | tidak | `hyprland.lua` |
+| 18 | `hl.get_devices()` + `hl.dsp.reload_config()` (pengganti `hyprctl`) | kecil | kecil | tidak | `hypr/events.lua` |
 
 ## 14. Jebakan yang sudah terbukti (jangan diulang)
 
@@ -360,7 +406,7 @@ local farben = hl.get_windows({ class = "firefox", mapped = true })
 - Pesan layout itu spesifik per layout. Untuk scrolling: `togglesplit`,
   `preselect`, `movetoroot`, `splitratio`, `swapsplit` **tidak ada** (itu milik
   dwindle). Daftar lengkap yang sah ada di komentar kepala
-  [`../config/core/keybinding.lua`](../config/core/keybinding.lua).
+  [`../config/core/binding.lua`](../config/core/binding.lua).
 - `move +col` di 0.56 = **menggulir tape satu kolom**, bukan memindahkan kolom.
   Memindahkan kolom = `swapcol l` / `swapcol r`. Di kolom terakhir `move +col`
   menghilangkan fokus jendela.
@@ -393,10 +439,27 @@ local farben = hl.get_windows({ class = "firefox", mapped = true })
   cukup memakai helper ini; tidak perlu menulis ulang logika rule + event.
 - `hyprctl eval` tidak memvalidasi string style animasi: nama style yang salah
   tetap dijawab `ok` dan diam-diam tidak berefek (jangan andalkan pesan error).
-- `hyprctl dispatch` di 0.56 menerjemahkan argumennya sebagai Lua, jadi
-  `hyprctl dispatch workspace 9` gagal dengan `')' expected near '9'`. Pakai
+- `hyprctl dispatch` menerjemahkan argumennya sebagai Lua (0.56 dan masih di
+  0.57.1 — diuji ulang), jadi `hyprctl dispatch workspace 9` gagal dengan
+  `')' expected near '9'`. Pakai
   `hyprctl eval 'hl.dispatch(hl.dsp.focus({ workspace = 9 }))'` (gagal ini
   sunyi kalau output-nya dibuang ke `/dev/null`, sudah pernah menipu saat uji).
+
+- **0.57 membatasi `decoration:shadow:render_power` 1–4.** 0.56 menerima 10;
+  nilai lama membuat seluruh config ditolak (`error setting … maximum of 4`).
+  Default sekarang 3, dan `config/core/theme/palette.lua` meng-clamp ke 4.
+  Efek baru `decoration.glow.render_power` juga 1–4 (default 3, glow default mati).
+- Rule baru 0.57 diuji lewat `hl.window_rule` di 0.57.1: `no_glow = true`,
+  `no_wobble = true`, `no_xdg_drags = true` → `ok`. Tetapi `active_border` /
+  `inactive_border` **sebagai field rule** ditolak (`unknown field`), meski
+  release note menyebut "rules"; yang ada hanya config `general.col.*` (atau
+  `border_color` + prop seperti §6). `no_wobble` sebagai field
+  `hl.workspace_rule` juga `unknown field`. Cek stub/`eval` sebelum dipakai.
+- `hyprctl descriptions` memberi nama + `min`/`max`/`default` resmi semua opsi
+  (407 entri di mesin ini), tapi **tanpa flag `-j`** — dengan `-j` outputnya kosong.
+- Repo ini dulu menyebut "`animations:layers` tidak bisa di-query"; di 0.57.1
+  tetap begitu, dan `hyprctl layerrules` masih `unknown request`. Bukti animasi
+  layer harus dari perilaku (rekaman frame), bukan introspeksi rule.
 
 ## 15. Batasan pengujian
 
