@@ -2,7 +2,7 @@
 -- "rofi", so a static rule cannot tell the picker apart from rofi apps; a
 -- toggleable override rule is armed before launch instead.
 
-local anim = require("config.core.override.anim")
+local anim = require("config.lib.animation_override")
 
 local home = os.getenv("HOME") or ""
 local rofi = {}

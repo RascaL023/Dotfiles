@@ -4,7 +4,7 @@
 local mod  = "SUPER"
 local home = os.getenv("HOME") or ""
 
-local rofi = require("config.core.override.rofi")
+local rofi = require("config.integration.rofi")
 
 local function exec(cmd)      return hl.dsp.exec_cmd(cmd) end
 local function layout(msg)    return hl.dsp.layout(msg) end
