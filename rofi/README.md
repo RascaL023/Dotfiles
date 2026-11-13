@@ -128,15 +128,17 @@ menu daya tetap dimiliki Eww.
 
 Pemanggil yang sudah memakai wrapper:
 
-- `hypr/config/core/binding.lua` (`SUPER + SPACE`) dan
-  `niri/conf/keybinds/tool.kdl` (`Mod+Space`): `rofi-ctl toggle apps`.
+- `hypr/config/input/keybinding/applications.lua` (`SUPER + SPACE`) lewat
+  `hypr/config/capability/launcher.lua`, dan `niri/conf/keybinds/tool.kdl`
+  (`Mod+Space`): `rofi-ctl toggle apps`.
 - `hypr/sources/scripts/nextwall.sh`: `rofi-ctl wallpaper -d`, lalu memasang
   wallpaper dan menyinkronkan depth clock.
 - `hypr/sources/scripts/wifi-menu.sh`: daftar Wi-Fi dan prompt password.
 - `eww/bar/settings.json`: launcher aplikasi dan menu daya/konfirmasi.
 
-Semua memanggil `rofi-ctl` dari `PATH` (dipasang `install.sh`), jadi tidak ada
-lagi `launch.sh` maupun skrip pembungkus per-shortcut.
+Skrip shell, Eww, dan Niri memanggil `rofi-ctl` langsung dari `PATH` (dipasang
+`install.sh`); binding Hyprland memakai `launcher.lua`, yang tetap menghasilkan
+`rofi-ctl …`. Tidak ada `launch.sh` maupun skrip pembungkus per-shortcut.
 
 ## Layout khusus
 

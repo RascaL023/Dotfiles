@@ -7,7 +7,7 @@ local exec = kb.exec
 local script = kb.script
 local home = kb.home
 
-local rofi = require("config.integration.rofi")
+local launcher = require("config.capability.launcher")
 
 -- ---------------------------------------------------------------------- bar --
 hl.bind(mod .. " + O",        script("waybar-toggle.sh"))
@@ -19,8 +19,8 @@ hl.bind(mod .. " + CTRL + X", exec("pkill eww; eww daemon --force-wayland"))
 hl.bind(mod .. " + N", exec("swaync-client -t"))
 
 -- ---------------------------------------------------- wallpaper and theme ---
--- `rofi.pick_wallpaper` arms a layer-animation override before launching.
-hl.bind(mod .. " + W", function() rofi.pick_wallpaper() end)
+-- `launcher.pick_wallpaper` arms a layer-animation override before launching.
+hl.bind(mod .. " + W", function() launcher.pick_wallpaper() end)
 hl.bind(mod .. " + T", exec(home .. "/.myenv/script/theme/theme-picker.sh"))
 
 -- --------------------------------------------------------------- blue light --

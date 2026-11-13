@@ -18,17 +18,8 @@ hl.layer_rule({
 })
 
 hl.layer_rule({
-    name      = "rofi",
-    match     = { namespace = "rofi" },
-    animation = "slide bottom",
-    blur      = layer_blur,
-    ignore_alpha = 0,
-})
-
-hl.layer_rule({
     name      = "waybar",
     match     = { namespace = "waybar" },
     animation = "slide up",
     blur      = layer_blur,
 })
-

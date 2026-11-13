@@ -1,5 +1,6 @@
 require("config.core")
 require("config.rule")
+require("config.capability") -- surface adapters; their rules append after config.rule
 
 local theme = require("config.appearance").palette -- Tambalan sementara sebelum integrasi theme penuh
 
@@ -52,4 +53,4 @@ end
 
 
 ---------------------------------------------------------- CONFIG IMPORT -----
-require("config.input") -- Must here for rofi override animations
+require("config.input") -- bindings last: they reference the capabilities above

@@ -6,9 +6,10 @@ local mod  = kb.mod
 local exec = kb.exec
 local script = kb.script
 
+local launcher = require("config.capability.launcher")
+
 -- ----------------------------------------------------------------- launcher --
--- Still the concrete launcher; the launcher abstraction is a separate step.
-hl.bind(mod .. " + SPACE",          exec("rofi-ctl toggle apps"))
+hl.bind(mod .. " + SPACE",          launcher.toggle("apps"))
 
 -- ----------------------------------------------------------------- browser --
 hl.bind(mod .. " + B",              exec("firefox"))
