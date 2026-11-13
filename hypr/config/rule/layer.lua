@@ -1,5 +1,5 @@
 ------------------------------------ LAYER RULES --
-local theme = require("config.appearance").palette -- Tambalan sementara sebelum integrasi theme penuh
+local theme = require("config.appearance.palette") -- data tema; tidak memuat look/motion
 local layer_blur = theme.layer_blur
 
 hl.layer_rule({

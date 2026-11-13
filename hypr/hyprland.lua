@@ -1,56 +1,16 @@
+-- Orchestrator only: every hl.* option lives in the package that owns it.
+-- Note: Order matters!
+--
+-- core       identity: environment, monitor, autostart
+-- layout     window management policy (general, dwindle, master, scrolling, binds)
+-- appearance look (hl.config) + motion (curves and animations)
+-- rule       window and layer rules
+-- capability surface adapters (launcher); their layer rules append here
+-- input      device settings, gestures, then the keymap last
+
 require("config.core")
+require("config.layout")
+require("config.appearance")
 require("config.rule")
-require("config.capability") -- surface adapters; their rules append after config.rule
-
-local theme = require("config.appearance").palette -- Tambalan sementara sebelum integrasi theme penuh
-
--------------------------------------------------------------- LOOK & FEEL --
-hl.config(theme.hypr)
-
-hl.config({
-    general = {
-        layout = "dwindle",
-    },
-
-    input = {
-        kb_layout = "us",
-        sensitivity = 0.1,
-        follow_mouse = 1,
-    },
-
-    dwindle = {
-        preserve_split = true,
-    },
-
-    master = {
-        new_status = "master",
-    },
-
-    scrolling = {
-        column_width             = 0.5,
-        fullscreen_on_one_column = true,
-        explicit_column_widths   = "0.333, 0.5, 0.667, 1.0",
-        focus_fit_method         = 1,
-        follow_focus             = true,
-        follow_min_visible       = 0.4,
-        wrap_focus               = false,
-        wrap_swapcol             = false,
-        direction                = "right",
-    },
-
-    binds = {
-        movefocus_cycles_fullscreen = true,
-        window_direction_monitor_fallback = true,
-    },
-})
-
------------------------------------------------------------- ANIMATIONS ----
-hl.curve("theme", theme.curves.theme)
-
-for _, animation in ipairs(theme.animations) do
-    hl.animation(animation)
-end
-
-
----------------------------------------------------------- CONFIG IMPORT -----
+require("config.capability")
 require("config.input") -- bindings last: they reference the capabilities above

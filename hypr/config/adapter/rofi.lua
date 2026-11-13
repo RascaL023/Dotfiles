@@ -8,7 +8,7 @@
 -- intrinsic instead of depending on which consumer loads first.
 
 local anim  = require("config.lib.animation_override")
-local theme = require("config.appearance").palette
+local theme = require("config.appearance.palette")
 
 local home = os.getenv("HOME") or ""
 

@@ -1,5 +1,5 @@
 ------------------------------------ WINDOW RULES --
-local theme = require("config.appearance").palette -- Tambalan sementara sebelum integrasi theme penuh
+local theme = require("config.appearance.palette") -- data tema; tidak memuat look/motion
 hl.window_rule({
     name    = "foot-opacity",
     match   = { class = "^foot$" },
