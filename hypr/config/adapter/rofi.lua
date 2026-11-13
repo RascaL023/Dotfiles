@@ -8,7 +8,7 @@
 -- intrinsic instead of depending on which consumer loads first.
 
 local anim  = require("config.lib.animation_override")
-local theme = require("config.appearance.palette")
+local feel  = require("config.appearance.feel")
 
 local home = os.getenv("HOME") or ""
 
@@ -34,7 +34,7 @@ hl.layer_rule({
     name         = "launcher",
     match        = { namespace = rofi.namespace },
     animation    = "slide bottom",
-    blur         = theme.layer_blur,
+    blur         = feel.chrome.layer_blur,
     ignore_alpha = 0,
 })
 

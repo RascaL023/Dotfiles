@@ -4,14 +4,6 @@
 -- ## Manual edit is not recomended,
 -- ## Except for testing.
 
--- Dibaca oleh hypr/config/core/theme/palette.lua lewat
--- ~/.myenv/theme/feel/current/hypr/feel.lua. Berkas ini murni data: hanya
--- boleh `return { ... }`, tanpa panggilan fungsi.
---
--- Warna tidak ada di sini: itu milik palet
--- (~/.myenv/theme/palette/current/hypr/theme.lua). Yang ditulis hanya angka
--- dan boolean "rasa" milik Hyprland, diambil dari
--- core/feel/profiles/<profil>/hypr.json.
 
 return {
     shape = {

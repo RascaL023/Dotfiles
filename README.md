@@ -249,27 +249,26 @@ lama, dan binding `Mod+T` / on-click waybar yang memanggilnya masih mati.
 
 ### Rasa per tema (look & feel)
 
-Warna saja tidak membuat dua tema terasa berbeda. Selain warna, `hypr/theme.lua`
-juga membawa `shape` (radius, border, gap, sudut gradien), `surface` (opacity,
-dim),`material` (blur, bayangan), `motion` (kecepatan + kurva + gaya animasi), dan
-`chrome` (blur layer, border nogroup, groupbar, font). `chrome.rofi_radius` di
-blueprint tetap dipakai rofi, tapi dibaca langsung oleh `source.rasi`, bukan
-lewat modul Hyprland:
+Warna saja tidak membuat dua tema terasa berbeda. Rasa (`shape`: radius, border,
+gap, sudut gradien; `surface`: opacity, dim; `material`: blur, bayangan;
+`motion`: kecepatan, kurva, gaya animasi; `chrome`: blur layer, font, groupbar)
+adalah data terpisah dari palet dan hidup di profil rasa per WM, dirender ke
+`~/.myenv/theme/feel/current/hypr/feel.lua`. `chrome.rofi_radius` di blueprint
+tetap dipakai rofi, tapi dibaca langsung oleh `source.rasi`, bukan lewat modul
+Hyprland.
 
-- **Flow B** — tulis di objek `feel` pada blueprint; template menyalinnya apa
-  adanya. Referensi key ada di
+- **Rasa** — ubah `matugen/core/feel/profiles/<profil>/hypr.json`; referensi key
+  ada di
   [`blueprint/README.md`](matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md).
-- **Flow A** — template hanya menghasilkan **warna**; rasa tidak ditulis, jadi
-  yang berlaku adalah default di `hypr/config/core/theme.lua`. Sama seperti
-  `nvim`: berkas hasil matugen berisi data yang dipunya saja, sisanya diurus
-  modul config.
+- **Warna** — Flow A dan Flow B hanya menulis warna palet; angka rasa tidak ada
+  di templat palet, jadi render palet lama tidak bisa menimpa feel.
 
-`hypr/config/core/theme.lua` memuat `theme.lua` hasil matugen di atas
-default-nya (merge rekursif, jadi berkas tema boleh hanya berisi sebagian key),
-menjepit nilai di luar rentang aman, lalu memetakan semuanya ke payload
-`hl.config` / `hl.curve` / `hl.animation`. `hypr/hyprland.lua` hanya memanggilnya,
-sehingga tetap terbaca sebagai config dan bukan peta field. Nama + varian tema
-tidak ikut ke berkas tema Hyprland: identitas palet adalah nama direktori di
+Sisi Hyprland ikut terpisah: `hypr/config/appearance/palette.lua` memuat warna
+dan `hypr/config/appearance/feel.lua` memuat rasa (default, clamp rentang aman,
+validasi style animasi). `appearance/look.lua` dan `appearance/motion.lua`
+merender keduanya ke payload `hl.config` / `hl.curve` / `hl.animation`, sedangkan
+`hypr/hyprland.lua` hanya meng-orchestrate. Nama + varian tema tidak ikut ke
+berkas tema Hyprland: identitas palet adalah nama direktori di
 `theme/palette/generated/`, sedangkan nama + varian untuk switcher ada di
 `~/.myenv/theme/current-status.json` (belum diisi otomatis).
 
@@ -286,7 +285,7 @@ tidak ikut ke berkas tema Hyprland: identitas palet adalah nama direktori di
 | `foot/foot.ini` | `~/.myenv/theme/palette/current/foot/theme.ini` |
 | `yazi/flavors/matugen.yazi/flavor.toml` | `~/.myenv/theme/palette/current/yazi/flavor.toml` (symlink) |
 | `yazi/flavors/matugen.yazi/tmtheme.xml` | `~/.myenv/theme/palette/current/yazi/tmtheme.xml` (symlink) |
-| `hypr/config/core/theme.lua` | `~/.myenv/theme/palette/current/hypr/theme.lua` (`load`, modul data) |
+| `hypr/config/appearance/palette.lua` + `feel.lua` | `~/.myenv/theme/palette/current/hypr/theme.lua` (warna) + `~/.myenv/theme/feel/current/hypr/feel.lua` (rasa) |
 
 `swaync/style.css` is GTK 4 but reaches the palette exactly like waybar and
 wlogout do, because GTK 4 does support `@import` (verified with GTK 4.22 +

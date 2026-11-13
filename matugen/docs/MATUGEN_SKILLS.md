@@ -410,9 +410,9 @@ color15 {{ colors.on_surface.default.hex }}
   to point at a generated file. `matugen/core/palette/wallpaper-based/template/hypr.lua` (Flow A)
   and `matugen/core/palette/kanagawa-dragon-lotus/template/hypr.lua` (Flow B)
   render a **Lua data module** (`return { … }`) to `hypr/theme.lua` in the active
-  theme folder; `hypr/config/core/theme.lua` loads it with
+  theme folder; `hypr/config/appearance/palette.lua` loads it with
   `load(source, "@path", "t", {})` (empty env — data only) and merges it over its
-  defaults at every `hyprctl reload`. Field names are the merge keys, so keep
+  colour defaults at every `hyprctl reload`. Field names are the merge keys, so keep
   them stable. Colors are `rgba(<hex_stripped>ee)` strings; `format: rgba` is
   **not** usable here because it prints CSS decimals. Check a render without
   reloading: `luac -p ~/.myenv/theme/palette/current/hypr/theme.lua`. Reload is **not**
@@ -424,16 +424,19 @@ color15 {{ colors.on_surface.default.hex }}
   opacity, blur, shadow, motion, layer blur, groupbar) is owned per WM by the
   feel pipeline: `matugen/core/feel/template/hypr/feel.lua` renders
   `core/feel/profiles/<profile>/hypr.json` to
-  `~/.myenv/theme/feel/current/hypr/feel.lua`. `hypr/config/core/theme/palette.lua`
-  loads the palette first and merges that feel file on top, so feel wins even
-  when an older palette render still carries numbers. Never add feel numbers
-  back to a palette template — one value, one owner.
+  `~/.myenv/theme/feel/current/hypr/feel.lua`. Sisi Hyprland ikut terpisah:
+  `hypr/config/appearance/palette.lua` hanya memuat warna, dan
+  `hypr/config/appearance/feel.lua` memuat rasa. `look.lua`/`motion.lua`
+  merender keduanya; karena masing-masing membaca field miliknya sendiri, feel
+  tidak bergantung pada urutan merge walau render palet lama masih membawa
+  angka. Never add feel numbers back to a palette template — one value, one
+  owner.
 
-  The loader merges nested tables, so a template may emit just the keys it
-  owns. It also clamps out-of-range numbers and rejects unknown animation
-  styles, so a hand-made theme cannot wreck the session. **The template
-  resolver has no array indexing** — `motion.curve` is an object (`x1…y2`),
-  not a list. Validate a feel render with
+  Kedua loader (`store.lua`) menggabungkan tabel bersarang, jadi template boleh
+  hanya mengirim key miliknya. `feel.lua` meng-clamp angka di luar rentang dan
+  menolak style animasi tak dikenal, jadi tema buatan tangan tidak bisa
+  merusak sesi. **Resolver template tidak punya array indexing** —
+  `motion.curve` adalah objek (`x1…y2`), bukan list. Validate a feel render with
   `luac -p ~/.myenv/theme/feel/current/hypr/feel.lua`.
 - **VERIFY first** which config format the user runs (`hyprctl version`, look at `~/.config/hypr/`). The recipe below is for the classic hyprlang `.conf`. If the user is on a newer config format, adapt accordingly.
 - Output: `~/.config/hypr/matugen-colors.conf`

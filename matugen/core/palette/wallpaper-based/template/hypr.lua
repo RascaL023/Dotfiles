@@ -4,17 +4,6 @@
 -- ## Manual edit is not recomended,
 -- ## Except for testing.
 
--- Dibaca oleh hypr/config/core/theme.lua lewat
--- ~/.myenv/theme/palette/current/hypr/theme.lua. Berkas ini murni data: hanya boleh
--- `return { ... }`, tanpa panggilan fungsi.
---
--- Flow A (wallpaper) hanya menghasilkan warna. Bagian "rasa" (shape, surface,
--- material, motion, chrome) tidak ditulis di sini karena gambar tidak membawa
--- metadata desain; default di config/core/theme.lua yang berlaku. Tema
--- blueprint (Flow B) menulis bagian itu dari objek `feel` di blueprint-nya.
---
--- Field yang tidak ada di sini tidak perlu ada: theme.lua menggabungkan
--- berkas ini di atas default-nya, jadi yang kosong otomatis memakai default.
 
 return {
     shape = {

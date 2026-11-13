@@ -1,6 +1,6 @@
 ------------------------------------ LAYER RULES --
-local theme = require("config.appearance.palette") -- data tema; tidak memuat look/motion
-local layer_blur = theme.layer_blur
+local feel = require("config.appearance.feel") -- rasa; tidak memuat look/motion
+local layer_blur = feel.chrome.layer_blur
 
 hl.layer_rule({
     name      = "logout_dialog",

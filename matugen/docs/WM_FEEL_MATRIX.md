@@ -9,8 +9,8 @@
 Sumber verifikasi:
 
 - Hyprland 0.57: stub resmi `share/hypr/stubs/hl.meta.lua` (daftar opsi
-  `decoration.*`, `layer_rule`, `group.*`) + config repo (`hypr/config/core/theme.lua`,
-  `hypr/hyprland.lua`).
+  `decoration.*`, `layer_rule`, `group.*`) + config repo
+  (`hypr/config/appearance/{palette,feel,look,motion}.lua`, `hypr/hyprland.lua`).
 - niri 26.04: docs Configuration (Layout, Window Rules, Layer Rules, Animations,
   Include) + `niri validate` lokal dengan fragmen uji.
 - Noctalia v5: docs resmi (batas template) — dibahas di [`NOCTALIA.md`](NOCTALIA.md).

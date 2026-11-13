@@ -21,7 +21,7 @@ konversi — tapi jangan menambah contoh `.conf` di dokumen atau skrip.
 | Perubahan | Bukti di mesin ini (0.57.1) | Status di repo |
 |---|---|---|
 | `hyprland.conf` dihapus | — | aman: `hypr/hyprland.lua` |
-| `decoration:shadow:render_power` dibatasi **1–4** (PR #15682 *fixup shadow limits*); 0.56 menerima 10 | `getoption` → default 3, current 4, min 1, **max 4**; nilai 10 dulu membuat seluruh config ditolak (`maximum of 4`) | sudah: clamp default 4 + limit 1–4 di `config/core/theme/palette.lua` |
+| `decoration:shadow:render_power` dibatasi **1–4** (PR #15682 *fixup shadow limits*); 0.56 menerima 10 | `getoption` → default 3, current 4, min 1, **max 4**; nilai 10 dulu membuat seluruh config ditolak (`maximum of 4`) | sudah: clamp default 4 + limit 1–4 di `config/appearance/feel.lua` |
 | `misc` → kategori `layers` untuk 2 opsi (#16617) | `layers:layers_hog_keyboard_focus`, `layers:allow_new_top_layers_over_existing_fullscreen` (default `true`) | belum dipakai; jangan tulis lewat `misc:` |
 | event `created` dipisah: `created_early` (sebelum setup) dan `created` (sesudahnya) (#16221) | stub memuat `workspace.created_early` **dan** `workspace.created` | nanti saat memakai event workspace |
 | `misc:special_scale_factor` deprecated (#15832) | — | jangan dipakai |
@@ -447,7 +447,7 @@ local farben = hl.get_windows({ class = "firefox", mapped = true })
 
 - **0.57 membatasi `decoration:shadow:render_power` 1–4.** 0.56 menerima 10;
   nilai lama membuat seluruh config ditolak (`error setting … maximum of 4`).
-  Default sekarang 3, dan `config/core/theme/palette.lua` meng-clamp ke 4.
+  Default sekarang 3, dan `config/appearance/feel.lua` meng-clamp ke 4.
   Efek baru `decoration.glow.render_power` juga 1–4 (default 3, glow default mati).
 - Rule baru 0.57 diuji lewat `hl.window_rule` di 0.57.1: `no_glow = true`,
   `no_wobble = true`, `no_xdg_drags = true` → `ok`. Tetapi `active_border` /

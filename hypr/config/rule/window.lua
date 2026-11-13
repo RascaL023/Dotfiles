@@ -1,9 +1,9 @@
 ------------------------------------ WINDOW RULES --
-local theme = require("config.appearance.palette") -- data tema; tidak memuat look/motion
+local feel = require("config.appearance.feel") -- rasa; tidak memuat look/motion
 hl.window_rule({
     name    = "foot-opacity",
     match   = { class = "^foot$" },
-    opacity = tostring(theme.surface.terminal_opacity),
+    opacity = tostring(feel.surface.terminal_opacity),
 })
 
 hl.window_rule({

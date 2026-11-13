@@ -185,9 +185,11 @@ Contoh nilai (dark): `comment` `#625E5A` (redup), `keyword` `#938AA9` (ungu), `f
 **Sudah dipindah.** Objek `feel` tidak lagi ada di blueprint palet. Angka dan
 boolean look & feel Hyprland kini tinggal di profil rasa per WM:
 `matugen/core/feel/profiles/<profil>/hypr.json`, dirender ke
-`~/.myenv/theme/feel/current/hypr/feel.lua`, lalu digabung
-`hypr/config/core/theme/palette.lua` di atas warna palet. Template palet
-(`template/hypr.lua`) hanya menulis warna. Tabel di bawah tetap menjadi
+`~/.myenv/theme/feel/current/hypr/feel.lua`, lalu dibaca
+`hypr/config/appearance/feel.lua`. `hypr/config/appearance/look.lua` dan
+`motion.lua` yang menggabungkannya dengan warna dari
+`hypr/config/appearance/palette.lua`. Template palet (`template/hypr.lua`)
+hanya menulis warna. Tabel di bawah tetap menjadi
 referensi key `hypr.json`; mengubah palet tidak lagi mengubah rasa.
 
 | Key | Nilai sekarang | Rentang aman | Efek |

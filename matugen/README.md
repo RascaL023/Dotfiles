@@ -133,7 +133,7 @@ benar-benar aktif adalah tujuan symlink `theme/palette/current` dan
 | `eww/eww.scss` | `theme/palette/current/scss/theme` |
 | `nvim/lua/core/theme.lua` | `theme/palette/current/nvim/theme.lua` |
 | `yazi/flavors/matugen.yazi/*` | `theme/palette/current/yazi/` |
-| `hypr/config/core/theme/palette.lua` | `theme/palette/current/hypr/theme.lua` (warna) + `theme/feel/current/hypr/feel.lua` (rasa) |
+| `hypr/config/appearance/palette.lua` + `feel.lua` | `theme/palette/current/hypr/theme.lua` (warna) + `theme/feel/current/hypr/feel.lua` (rasa) |
 | `lazygit`, `herdr` | `theme/palette/current/lazygit/config.yml`, `theme/palette/current/herdr/config.toml` |
 
 ## Pemeriksaan
