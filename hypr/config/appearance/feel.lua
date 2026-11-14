@@ -1,14 +1,9 @@
--- Look & feel numbers and booleans, never colours. The feel store renders
--- ~/.myenv/theme/feel/current/hypr/feel.lua from
--- matugen/core/feel/profiles/<profile>/hypr.json, per WM.
---
--- This module owns defaults, safe ranges and validation so a hand-made or
--- stale render cannot wreck the session. Colours come from
--- config/appearance/palette.lua; look.lua and motion.lua combine the two.
+-- Numbers and booleans only; colours live in config.appearance.palette.
+-- Fallback values, safe ranges and style validation live here.
 
 local store = require("config.appearance.store")
 
-local Feel = {
+local defaults = {
     shape = {
         radius                = 4,
         rounding_power        = 2.0,
@@ -74,7 +69,7 @@ local Feel = {
     },
 }
 
--- Safe ranges: [min, max], numbers only.
+-- [path, min, max], numbers only.
 local limits = {
     { "shape.radius",                0,   24  },
     { "shape.rounding_power",        1.0, 8.0 },
@@ -96,7 +91,6 @@ local limits = {
     { "material.blur.vibrancy",      0.0, 1.0 },
     { "material.blur.vibrancy_darkness", 0.0, 1.0 },
     { "material.shadow.range",       0,   60  },
-    -- Hyprland 0.57 menolak render_power > 4 (0.56 masih menerima 10).
     { "material.shadow.power",       1,   4   },
     { "motion.speed",                0.4, 2.5 },
     { "motion.layers_speed",         0.4, 2.5 },
@@ -104,7 +98,7 @@ local limits = {
     { "chrome.groupbar.radius",      0,   24  },
 }
 
--- Animation styles known to 0.56; anything else is replaced.
+-- Styles known to Hyprland 0.57; anything else is replaced.
 local styles = {
     gnomed = true, popin = true, slide = true, slidefade = true,
     slidevert = true, fade = true, slidefadevert = true,
@@ -137,43 +131,46 @@ local function clamp_field(theme, path, minimum, maximum)
     end
 end
 
+local data
+
 local dir = store.dir("feel")
 if not dir then
     store.warn("HOME dan MYENV kosong; feel memakai default")
 else
     local path = dir .. "/feel.lua"
-    local feel, exists = store.load(path, "feel")
+    local exists
+    data, exists = store.load(path, "feel")
 
-    if not feel then
+    if not data then
         if exists then
             store.warn("memakai default rasa karena feel.lua gagal dimuat")
         else
             store.warn("feel.lua tidak ditemukan di " .. path .. "; memakai default rasa")
         end
-    else
-        store.merge(Feel, feel)
     end
 end
 
+local feel = store.overlay(defaults, data)
+
 for _, limit in ipairs(limits) do
-    clamp_field(Feel, limit[1], limit[2], limit[3])
+    clamp_field(feel, limit[1], limit[2], limit[3])
 end
 
-if type(Feel.shape.border_angle) ~= "number" then
-    Feel.shape.border_angle = 45
+if type(feel.shape.border_angle) ~= "number" then
+    feel.shape.border_angle = 45
 end
 
 for _, field in ipairs({ "style_in", "style_out", "style_ws_in", "style_ws_out" }) do
-    local value = Feel.motion[field]
+    local value = feel.motion[field]
     if not (type(value) == "string" and styles[value]) then
         store.warn("motion." .. field .. " tidak dikenal; memakai 'fade'")
-        Feel.motion[field] = "fade"
+        feel.motion[field] = "fade"
     end
 end
 
-if type(Feel.motion.curve) ~= "table" or #Feel.motion.curve ~= 4 then
+if type(feel.motion.curve) ~= "table" or #feel.motion.curve ~= 4 then
     store.warn("motion.curve harus 4 angka; memakai default")
-    Feel.motion.curve = default_curve
+    feel.motion.curve = default_curve
 end
 
-return Feel
+return feel

@@ -1,16 +1,8 @@
--- Colours only. The palette store renders
--- ~/.myenv/theme/palette/current/hypr/theme.lua from
--- matugen/core/palette/<palette>/template/hypr.lua.
---
--- Numbers and booleans (radius, gaps, opacity, blur, shadow, motion, layer
--- blur) are NOT palette data: they belong to the feel store and are loaded by
--- config/appearance/feel.lua. Never add a feel value here — one value, one
--- owner. A palette render that still carries old feel numbers is harmless:
--- look.lua and motion.lua read geometry from the feel module only.
+-- Colours only; numbers and booleans live in config.appearance.feel.
 
 local store = require("config.appearance.store")
 
-local Palette = {
+local defaults = {
     shape = {
         border_active   = "rgba(8ba4b0ee)",
         border_active2  = "rgba(a292a3ee)",
@@ -31,12 +23,15 @@ local Palette = {
     },
 }
 
+local data
+
 local dir = store.dir("palette")
 if not dir then
     store.warn("HOME dan MYENV kosong; memakai warna default")
 else
     local path = dir .. "/theme.lua"
-    local data, exists = store.load(path, "tema")
+    local exists
+    data, exists = store.load(path, "tema")
 
     if not data then
         if exists then
@@ -44,9 +39,7 @@ else
         else
             store.warn("theme.lua tidak ditemukan di " .. dir .. "; memakai warna default")
         end
-    else
-        store.merge(Palette, data)
     end
 end
 
-return Palette
+return store.overlay(defaults, data)

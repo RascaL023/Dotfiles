@@ -377,7 +377,8 @@ Bukan bug — sebagian kunci sengaja disamakan bentuknya dengan template tool la
   switcher yang berjalan — `~/.myenv/script/theme.bak/` hanya stub basi). Perbedaan ini sudah
   diverifikasi: daftar kunci kedua template identik, general hanya punya
   tambahan `source`.
-- Ringkasnya: ubah **nilai warna** → template di `matugen/templates/`; ubah
-  **tujuan pemakaian** → `nvim/lua/core/theme.lua`.
-- Perubahan alur A berlaku setelah `matugen/script/palette.sh <wallpaper>`; perubahan alur B
-  setelah `matugen json <blueprint>` (atau reload tema yang sedang jalan).
+- Ringkasnya: ubah **nilai warna** → template di
+  `matugen/core/palette/<tema>/template/`; ubah **tujuan pemakaian** →
+  `nvim/lua/core/theme.lua`.
+- Perubahan alur A dan B berlaku setelah `matugen-ctl palette <sumber>` (atau
+  reload tema yang sedang jalan).

@@ -25,9 +25,8 @@ script and the theming pipeline work with any compositor.
 
   | Artifact | Produced by | Ignored? |
   |---|---|---|
-  | `~/.myenv/theme/palette/generated/**` | `matugen` (outside the repo) | n/a |
-  | `matugen/generated.bak/` | `matugen image` test runs | yes (`**.bak`) |
-  | `matugen/templates/test.conf` | scratch test template | yes |
+  | `~/.myenv/theme/palette/generated/**` | `matugen-ctl palette` (outside the repo) | n/a |
+  | `~/.myenv/theme/feel/generated/**` | `matugen-ctl feel` (outside the repo) | n/a |
 
 - **`.private/`** directories (e.g. `matugen/.private/`) are git-ignored scratch
   and session notes — never a source of truth.
@@ -45,11 +44,12 @@ script and the theming pipeline work with any compositor.
 │   ├── matugen-ctl               # entry point: palette | feel | reload | list | status
 │   ├── script/
 │   │   ├── palette.sh            # render palette → generated/<palette>, flip, reload
-│   │   └── feel.sh               # Flow C: render a feel profile, flip feel/current
-│   ├── core/feel/                        # Flow C
-│   │   ├── blueprint/<profile>.json      #   values (one file per profile)
-│   │   ├── template/*                    #   per-consumer templates
-│   │   └── config.toml                   #   render config, shared by all profiles
+│   │   └── feel.sh               # render a feel profile, flip feel/current
+│   ├── core/feel/                        #   numbers/booleans, per WM
+│   │   ├── config.apps.toml              #   shared apps/font config
+│   │   ├── config.hypr.toml              #   Hyprland config
+│   │   ├── profiles/<profile>/{apps,hypr,niri}.json
+│   │   └── template/{apps,hypr}/         #   per-consumer templates
 │   ├── core/palette/                     # color templates, one dir per source
 │   │   ├── wallpaper-based/
 │   │   │   ├── config.toml               #   Flow A render config
@@ -102,7 +102,7 @@ bash ~/.dotfile/.synchronizer/.sync.sh
 # Flow B: fixed palette (pick the variant with the file you pass)
 ~/.dotfile/matugen/matugen-ctl palette ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json
 
-# Flow C: feel (one JSON per profile, same toml and templates)
+# Feel: numbers/booleans, rendered per active WM
 ~/.dotfile/matugen/matugen-ctl feel default
 
 # reload without rendering
@@ -134,7 +134,7 @@ Rules:
 - **Separate config per flow.** Adding a Flow B template to `matugen/core/palette/wallpaper-based/config.toml`
   breaks every `matugen image` run (no `accent.*` in a Material You palette).
 - **`output_path` is relative** in both palette configs (`/kitty/theme.conf`),
-  exactly like the feel config: `matugen/script/palette.sh` supplies
+  exactly like the feel configs: `matugen/script/palette.sh` supplies
   `-p ~/.myenv/theme/palette/generated/<palette>`, validates the result, then flips
   `palette/current`. Rendering one of these configs with bare `matugen` writes to
   `/kitty/theme.conf` at the filesystem root.
@@ -203,10 +203,9 @@ Rules:
 - Templates that produce it:
   - Flow A: `matugen/core/palette/wallpaper-based/template/nvim.lua` → `~/.myenv/theme/palette/generated/wallpaper-based/nvim/theme.lua`
   - Flow B: `matugen/core/palette/kanagawa-dragon-lotus/template/nvim.lua` → `~/.myenv/theme/palette/generated/kanagawa-dragon-lotus/nvim/theme.lua`
-- **Both flows write into their own theme folder, never into `current`.** The
-  loader still reads `current/nvim/theme.lua`, so a palette only goes live after
-  `current` points at that folder; activating Flow A is still manual (nothing in
-  this repo flips it yet).
+- **Both flows write into their own generated folder; activation is the
+  `current` flip** that `matugen-ctl palette` performs after validation. The
+  loader only ever reads `current/nvim/theme.lua`.
 - **Both templates emit exactly the same key set** (verified: `background`,
   `foreground`, `cursor`, `colors[16]`, `extra.{accent,container,text,layer,
   border,status,fg,bg,syntax,ui}`; Flow B just omits `source`). So one mapping
@@ -300,5 +299,6 @@ verified against the repo, so a stale line is a bug.
 1. `git clone <repo-url> ~/.dotfile`
 2. `bash ~/.dotfile/.synchronizer/.sync.sh link`
 3. Ensure `matugen` (4.x) is on `PATH`.
-4. Render a theme (Flow A or Flow B) so `~/.myenv/theme/palette/current/…` exists —
-   otherwise Neovim and the other consumers run without a generated palette.
+4. Render both axes so `~/.myenv/theme/palette/current` and
+   `~/.myenv/theme/feel/current` exist:
+   `matugen-ctl palette <source>` and `matugen-ctl feel default`.

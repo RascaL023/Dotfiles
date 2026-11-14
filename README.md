@@ -51,7 +51,7 @@ each entry is.
 | `foot` | Lightweight Wayland terminal | both flows (`foot/theme.ini`)¹ |
 | `alacritty` | GPU terminal emulator | both flows (`alacritty/theme.toml`); feel (`alacritty/feel.toml`) |
 | `cava` | Audio visualizer | — |
-| `hypr` | Hyprland compositor | — |
+| `hypr` | Hyprland compositor | both flows (`hypr/theme.lua`); feel (`hypr/feel.lua`) |
 | `niri` | Scrollable-tiling Wayland compositor | — |
 | [`waybar`](waybar/README.md) | Status bar | wallpaper flow, GTK CSS (`css/theme.css`), config per sesi via `waybar-ctl` |
 | `eww` | Widget system | wallpaper flow, SCSS (`scss/theme`) |
@@ -240,8 +240,9 @@ lama, dan binding `Mod+T` / on-click waybar yang memanggilnya masih mati.
 > Color templates live in `matugen/core/palette/` — one directory per
 > palette source (`wallpaper-based/`, `kanagawa-dragon-lotus/`). The **feel**
 > flow is the directory `matugen/core/feel/`: profiles in
-> `blueprint/<profile>.json`, per-consumer templates in `template/`, and one
-> shared `config.toml` (see [`matugen/README.md`](matugen/README.md)).
+> `profiles/<profil>/{apps,hypr,niri}.json`, templates in `template/apps/` and
+> `template/hypr/`, rendered by `config.apps.toml` + `config.hypr.toml`
+> (see [`matugen/README.md`](matugen/README.md)).
 >
 > Keep the two flows in **separate config files**. Templates from Flow B fail
 > under `matugen image` (no `accent.*`), and Flow A's `colors.*` does not exist

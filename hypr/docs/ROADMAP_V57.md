@@ -86,7 +86,7 @@ dispatcher tetap harus bentuk Lua (`hl.dsp.*`). Semua diuji ulang di 0.57.1.
 cd ~/.dotfile
 export HYPRLAND_INSTANCE_SIGNATURE=$(ls -t /run/user/1000/hypr | head -1)
 
-luac -p hypr/hyprland.lua hypr/config/core/binding.lua    # 1. syntax Lua
+find hypr -name '*.lua' -exec luac -p {} +              # 1. syntax Lua
 hyprctl reload                                    # 2. terapkan
 hyprctl configerrors                              # 3. harus kosong
 hyprctl binds -j | python3 -c 'import sys,json;print(len(json.load(sys.stdin)))'   # 4. jumlah bind
@@ -405,8 +405,8 @@ local farben = hl.get_windows({ class = "firefox", mapped = true })
   saat diaktifkan, Hyprland akan mencari dispatcher `mouse` ala `bindm` lama.
 - Pesan layout itu spesifik per layout. Untuk scrolling: `togglesplit`,
   `preselect`, `movetoroot`, `splitratio`, `swapsplit` **tidak ada** (itu milik
-  dwindle). Daftar lengkap yang sah ada di komentar kepala
-  [`../config/core/binding.lua`](../config/core/binding.lua).
+  dwindle). Pesan yang dipakai config ini ada di
+  [`../config/input/keybinding/layout.lua`](../config/input/keybinding/layout.lua).
 - `move +col` di 0.56 = **menggulir tape satu kolom**, bukan memindahkan kolom.
   Memindahkan kolom = `swapcol l` / `swapcol r`. Di kolom terakhir `move +col`
   menghilangkan fokus jendela.
@@ -430,7 +430,7 @@ local farben = hl.get_windows({ class = "firefox", mapped = true })
   Konsekuensinya: mematikan rule tepat di `layer.closed` membuat animasi keluar
   kembali memakai rule dasar (rofi: `slide bottom`). Karena itu rule override
   harus tetap aktif selama animasi keluar; helper yang dipakai:
-  [`../config/core/override/anim.lua`](../config/core/override/anim.lua) —
+  [`../config/lib/animation_override.lua`](../config/lib/animation_override.lua) —
   `anim.layer{ namespace, animation, hold_ms }` lalu `handle.launch(cmd)`.
   Helper menunda `set_enabled(false)` selama `hold_ms` (default 700 ms, dihitung
   dari `layers` 4 ds + margin) lewat `hl.timer(callback, { timeout, type =

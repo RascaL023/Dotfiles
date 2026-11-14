@@ -1,5 +1,5 @@
 ------------------------------------ WINDOW RULES --
-local feel = require("config.appearance.feel") -- rasa; tidak memuat look/motion
+local feel = require("config.appearance.feel")
 hl.window_rule({
     name    = "foot-opacity",
     match   = { class = "^foot$" },

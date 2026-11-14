@@ -1,7 +1,4 @@
--- Render layer for look: colours come from config.appearance.palette, every
--- number/boolean from config.appearance.feel. Neither data module knows hl.*.
---
--- Hyprland option name <- theme field mapping lives here only.
+-- Maps palette colours and feel numbers to hl.config.
 
 local palette = require("config.appearance.palette")
 local feel    = require("config.appearance.feel")
@@ -79,7 +76,7 @@ hl.config({
     },
 
     misc = {
-        -- Biarkan string kosong = pakai font default Hyprland.
+        -- An empty string means the Hyprland default font.
         font_family = chrome.font_family ~= "" and chrome.font_family or nil,
     },
 })

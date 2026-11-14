@@ -1,10 +1,4 @@
--- Render layer for motion: the curve is registered first because every
--- animation below references it by name. All inputs are feel data — base speed
--- x motion.speed, layers x motion.layers_speed — so one multiplier shifts the
--- whole motion feel.
---
--- Layer surfaces have their own animation through layer rules; per-namespace
--- runtime overrides live in config/lib/animation_override.lua.
+-- The curve is registered first because every animation references it by name.
 
 local feel   = require("config.appearance.feel")
 local motion = feel.motion
