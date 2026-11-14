@@ -52,8 +52,8 @@
     },
     "style_in": "popin",
     "style_out": "gnomed",
-    "style_ws_in": "slidefade",
-    "style_ws_out": "slidefade",
+    "style_ws_in": "slidevert",
+    "style_ws_out": "slide",
     "layers_speed": 1.0
   },
 
