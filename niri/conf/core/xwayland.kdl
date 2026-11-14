@@ -1,0 +1,3 @@
+xwayland-satellite {
+    path "/nix/store/4xsm6aqa79mrpllrw688y5svxxh12x3j-xwayland-satellite-0.8.3/bin/xwayland-satellite"
+}

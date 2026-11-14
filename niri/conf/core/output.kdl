@@ -1,0 +1,10 @@
+output "LVDS-1" {
+    mode "1366x768@59.996"
+    scale 1
+    transform "normal"
+    variable-refresh-rate
+}
+
+output "HDMI-A-1" {
+    mode "1920x1080@75.000"
+}
