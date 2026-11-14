@@ -1,0 +1,4 @@
+environment {
+    GDK_BACKEND "wayland"
+    XDG_CURRENT_DESKTOP "niri"
+}

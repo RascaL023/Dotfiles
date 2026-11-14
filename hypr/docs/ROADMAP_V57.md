@@ -305,7 +305,6 @@ Config sekarang hanya `group.toggle()`. Yang tersedia:
 ## 10. Input per-device & kursor
 
 ```lua
--- Touchpad sesuai niri/config.kdl: natural-scroll + two-finger + tap
 hl.device({
     name           = "elan*",
     natural_scroll = true,
@@ -338,9 +337,8 @@ hl.device({
   `misc.disable_scale_notification`.
 - **Layout global**: `layout.single_window_aspect_ratio` +
   `_tolerance` — jendela tunggal tidak melar penuh (mis. 4:3).
-- **Binds**: `binds.scroll_event_delay` (padanan `cooldown-ms=180` niri untuk
-  wheel), `binds.movefocus_cycles_groupfirst`, `binds.workspace_back_and_forth`,
-  `binds.allow_workspace_cycles`, `binds.pass_mouse_when_bound`,
+- **Binds**: `binds.scroll_event_delay` , `binds.movefocus_cycles_groupfirst`, 
+  `binds.workspace_back_and_forth`, `binds.allow_workspace_cycles`, `binds.pass_mouse_when_bound`,
   `binds.focus_preferred_method`, `binds.workspace_center_on`.
 - **Group layar penuh (scrolling)**: `hl.dsp.window.fullscreen_state({ internal = 2, client = 0, action = "set" })`
   — tampak fullscreen untuk Hyprland, tapi klien tidak diberi tahu (mencegah
