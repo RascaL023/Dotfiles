@@ -1,3 +1,9 @@
+// Aturan layer-shell (bar, dock, wallpaper, notifikasi, launcher).
+// Dokumentasi: https://niri-wm.github.io/niri/Configuration:-Layer-Rules
+
+// Semua layer (termasuk bar, dock, dan wallpaper Noctalia) ikut masuk ke
+// backdrop saat overview dibuka, sehingga tidak "mengambang" di atas latar
+// yang berbeda. Layer top/overlay lain (launcher, notifikasi) ikut aturan ini.
 layer-rule {
     place-within-backdrop true
 }

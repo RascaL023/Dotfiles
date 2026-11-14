@@ -1,10 +1,28 @@
+// Aturan jendela. Warna tetap milik conf/theme/palette.kdl.
+// Dokumentasi: https://niri-wm.github.io/niri/Configuration:-Window-Rules
+
+// Permukaan global: sudut, klip, blur, dan popup.
 window-rule {
     geometry-corner-radius 12
     clip-to-geometry true
-    opacity 0.9
+
+    // Border hanya cincin di luar jendela, tidak digambar sebagai latar
+    // yang tembus lewat jendela semitransparan.
+    draw-border-with-background false
+
+    opacity 0.94
     background-effect {
         blur true
         xray true
+    }
+
+    // Menu/popup ikut membulat dan ber-blur, bukan kotak tajam.
+    popups {
+        geometry-corner-radius 10
+        background-effect {
+            blur true
+            xray true
+        }
     }
 }
 
@@ -32,29 +50,21 @@ window-rule {
     default-window-height { proportion 0.5; }
 }
 
-window-rule {
-    match app-id="foot"
-    opacity 0.9
-    background-effect {
-        blur true
-        xray true
-    }
-}
-
+// Terminal: kitty sudah punya latar sendiri, jadi jangan dobel transparan.
 window-rule {
     match app-id="kitty"
     opacity 1.0
-    background-effect {
-        blur true
-        xray true
-    }
 }
 
 window-rule {
-    match is-focused=false
-    opacity 0.85
-    background-effect {
-        blur false
-        xray false
-    }
+    match app-id="foot"
+    opacity 0.92
+}
+
+// Jendela di workspace yang tidak aktif diredupkan sedikit, tetapi blur
+// tetap hidup agar tampilan tidak "mati". Memakai is-active, bukan
+// is-focused, supaya membuka launcher tidak meredupkan seluruh layar.
+window-rule {
+    match is-active=false
+    opacity 0.88
 }

@@ -1,0 +1,7 @@
+// Perilaku kursor. Ukuran/tema sengaja tidak diatur agar mengikuti sistem.
+// Dokumentasi: https://niri-wm.github.io/niri/Configuration:-Miscellaneous
+
+cursor {
+    hide-when-typing
+    hide-after-inactive-ms 3000
+}

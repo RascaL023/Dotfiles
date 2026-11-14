@@ -1,11 +1,11 @@
 // Settings that influence how windows are positioned and sized.
-// Find more information on the wiki:
-// https://niri-wm.github.io/niri/Configuration:-Layout
+// Documentation: https://niri-wm.github.io/niri/Configuration:-Layout
+//
+// File ini sengaja tidak menyimpan warna sama sekali. Semua warna border,
+// shadow, background, dan insert-hint ada di conf/theme/palette.kdl.
 
 layout {
-    background-color "00000020"
-    // background-color "transparent"
-    gaps 7
+    gaps 8
 
     center-focused-column "never"
 
@@ -15,44 +15,38 @@ layout {
         proportion 0.66667
     }
 
-    // You can also customize the heights that "switch-preset-window-height" (Mod+Ctrl+Shift+R) toggles between.
     // preset-window-heights { }
 
     default-column-width { proportion 0.5; }
 
+    // Border dipakai sebagai indikator fokus; focus ring dimatikan agar
+    // tidak ada dua garis yang saling menimpa.
     focus-ring {
         off
-        width 4
-
-        active-color "#7fc8ff"
-        inactive-color "#505050"
     }
 
     border {
-        // The settings are the same as for the focus ring.
-        // If you enable the border, you probably want to disable the focus ring.
-        // off
-
-        width 4
-        active-color "#ffc87f"
-        inactive-color "#505050"
-        urgent-color "#9b0000"
+        on
+        width 3
     }
 
     shadow {
         on
-
-        softness 10
-        spread 4
-
-        offset x=0 y=0
-        color "#0007"
+        softness 24
+        spread 2
+        offset x=0 y=4
     }
 
-    struts {
-        // left 64
-        // right 64
-        // top 64
-        // bottom 64
+    // Indikator kolom tabbed. Warnanya mewarisi border aktif/pasif.
+    tab-indicator {
+        hide-when-single-tab
+        place-within-column
+        gap 6
+        width 3
+        length total-proportion=1.0
+        position "right"
+        corner-radius 6
     }
+
+    // struts { }
 }

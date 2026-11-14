@@ -1,3 +1,7 @@
+// Orchestrator: setiap fragmen punya satu pekerjaan.
+// Urutan penting — include bersifat posisional, jadi warna dimuat terakhir
+// agar menimpa nilai tampilan lain tanpa perlu menyentuh fragmen geometri.
+
 include "conf/keybinds/keybind.kdl"
 include "conf/layouts/layout.kdl"
 include "conf/core/autostart.kdl"
@@ -5,7 +9,12 @@ include "conf/core/input.kdl"
 include "conf/core/output.kdl"
 include "conf/core/session.kdl"
 include "conf/core/environment.kdl"
+include "conf/core/cursor.kdl"
 include "conf/rule/layer.kdl"
 include "conf/rule/window.kdl"
+include "conf/overview.kdl"
 include "conf/animations.kdl"
 include "conf/core/xwayland.kdl"
+
+// Satu-satunya pemilik warna. Ganti baris ini dengan hasil matugen nanti.
+include "conf/theme/palette.kdl"
