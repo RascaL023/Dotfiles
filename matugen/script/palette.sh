@@ -251,8 +251,7 @@ reload_herdr() {
 reload_yazi() { skip "yazi: dibaca saat start (flavor menunjuk current)"; }
 reload_foot() { skip "foot: tidak punya sinyal reload"; }
 
-# niri tidak punya aksi reload; menyentuh config memicu watcher membaca ulang
-# include, termasuk symlink palette/current yang baru dibalik.
+# niri tidak punya reload; sentuh config agar watcher membaca ulang.
 reload_niri() {
     if ! running niri; then
         skip "niri: tidak jalan"

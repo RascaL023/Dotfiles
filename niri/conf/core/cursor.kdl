@@ -1,5 +1,4 @@
-// Perilaku kursor. Ukuran/tema sengaja tidak diatur agar mengikuti sistem.
-// Dokumentasi: https://niri-wm.github.io/niri/Configuration:-Miscellaneous
+// Documentation: https://niri-wm.github.io/niri/Configuration:-Miscellaneous
 
 cursor {
     hide-when-typing

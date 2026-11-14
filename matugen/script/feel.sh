@@ -247,10 +247,9 @@ else
     echo "[skip] swaync tidak jalan"
 fi
 
-# Konsumen WM: hanya saat bagian hypr ikut dirender, dan hanya di sesi Hyprland.
+# Reload konsumen WM yang sedang dipakai.
 if [[ $wm == niri ]]; then
-    # niri tidak punya aksi reload; menyentuh config memicu watcher membaca
-    # ulang include (termasuk symlink current yang baru dibalik).
+    # niri tidak punya reload; sentuh config agar watcher membaca ulang.
     if running niri; then
         if touch "${REPO}/niri/config.kdl"; then
             echo "[ok]   niri reload (config disentuh)"

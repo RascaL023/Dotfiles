@@ -1,13 +1,6 @@
-// Settings that influence how windows are positioned and sized.
 // Documentation: https://niri-wm.github.io/niri/Configuration:-Layout
-//
-// File ini hanya struktur: kebiasaan fokus, preset ukuran, dan focus ring.
-// Gap, border, shadow, tab indicator, radius, dan opacity berasal dari
-// ~/.myenv/theme/feel/current/niri/feel.kdl (matugen). Warna dari palette.
 
 layout {
-    // Noctalia menggambar wallpaper di layer background; warna ini digambar
-    // di atasnya, jadi harus transparan agar wallpaper tidak tertutup.
     background-color "transparent"
 
     center-focused-column "never"
@@ -18,15 +11,10 @@ layout {
         proportion 0.66667
     }
 
-    // preset-window-heights { }
-
     default-column-width { proportion 0.5; }
 
-    // Border (dan lebarnya) berasal dari feel; focus ring dimatikan agar
-    // tidak ada dua garis yang saling menimpa.
+    // Border dari feel; focus ring dimatikan agar tidak dobel.
     focus-ring {
         off
     }
-
-    // struts { }
 }

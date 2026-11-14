@@ -4,9 +4,6 @@
 // ## Manual edit is not recomended,
 // ## Except for testing.
 
-// Warna niri. Geometri, radius, dan opacity ada di feel/niri/feel.kdl.
-// File ini dimuat paling akhir oleh niri/config.kdl.
-
 layout {
     border {
         active-gradient from="{{ accent.primary }}" to="{{ accent.secondary }}" angle=45 in="oklch"
