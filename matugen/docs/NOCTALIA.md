@@ -62,8 +62,6 @@ dokumen ini tetap benar untuk versi Noctalia yang terpasang.
 - `noctalia/palettes/*.json` tetap format 1 (`dark`/`light` + `mPrimary`…); v5
   masih menerimanya lewat `[theme] source = "custom"` +
   `custom_palette = "<nama file tanpa .json>"`.
-- `niri/config.kdl` menjalankan `noctalia` saat startup; niri belum memakai tema
-  matugen sama sekali.
 - `matugen/script/palette.sh` sudah melewati gtk/swaync/waybar selama proses
   Noctalia hidup.
 

@@ -189,76 +189,6 @@ dengan latar rata seperti Nyx.
 Kalau wallpaper diganti dengan cara lain, panggil `depth-ctl wallpaper "<path>"`
 atau `depth-ctl stop` sendiri.
 
-## Niri
-
-Di Niri wallpaper digambar Noctalia, bukan awww, jadi `depth-ctl` tidak lagi
-mengandalkan `awww query`:
-
-```text
-current_wallpaper()
-  ├─ awww query                      → Hyprland (surface yang harus ditiru)
-  └─ noctalia msg wallpaper-get <connector>
-       → niri / Noctalia, fallback tanpa connector
-```
-
-Monitor ditanya lebih dulu (`wallpaper-get <connector>`) supaya wallpaper
-per-monitor menang atas default; kalau Noctalia tidak menjawab, dipakai
-`wallpaper-get` tanpa argumen. Path `color:#RRGGBB` (wallpaper warna solid) dan
-path yang tidak bisa dibaca dianggap "tidak ada gambar" — jam tertutup, bukan
-gagal. `file://` dan `~` ikut dinormalkan. `depth-ctl status` menampilkan
-sumbernya: `wallpaper: /path [noctalia]` atau `[awww]`.
-
-Ikutannya: render tema tidak lagi mensyaratkan awww, hanya daemon Eww
-(`refresh` sendiri yang memutuskan menutup atau reposisi), jadi render tema di
-Niri tidak mematikan jam.
-
-Hal lain yang sudah dibereskan untuk Niri:
-
-- **Deteksi output** memakai `niri msg -j focused-output`. `niri msg -j outputs`
-  mengembalikan `HashMap` tanpa field `focused`, jadi dulu output dipilih
-  sembarang dan gagal total bila entri pertama output yang dimatikan
-  (`logical: null`).
-- **Bar Noctalia memesan ruang atas.** Eww mengirim `set_exclusive_zone(0)`
-  untuk `:exclusive false` (lihat `VERIFICATION.md` #13), dan niri menempatkan
-  surface seperti itu di dalam area sisa — jam mendarat di bawah bar, bukan di
-  `y=0`. niri tidak menyediakan query inset ini (`niri msg layers` tanpa
-  bounds), karena itu ada `DEPTH_TOP_RESERVED` di `config/depth-clock.conf`: isi tinggi
-  bar + margin atasnya. Di Hyprland nilai itu tidak dipakai (otomatis dari
-  `reserved`).
-
-### Mengaktifkan di Niri
-
-Belum ada autostart: `niri/config.kdl` hanya menjalankan `noctalia`, dan baris
-`eww daemon`, `awww-daemon`, `barctl start` dikomentari. Sekali per sesi:
-
-```sh
-eww daemon --force-wayland &          # jendela jam butuh daemon ini
-~/.dotfile/eww/script/depth-ctl start # wallpaper dibaca dari Noctalia
-```
-
-Bar Noctalia tidak perlu dimatikan dan tidak perlu awww sama sekali — yang
-dibutuhkan hanya daemon Eww, bukan bar Eww. Setelah mengganti wallpaper lewat
-panel Noctalia, panggil `depth-ctl refresh` (belum ada hook; `nextwall.sh` hanya
-untuk Hyprland).
-
-`DEPTH_TOP_RESERVED` sudah diukur di sesi Niri (LVDS-1, bar Noctalia `framed`
-dengan `marginVertical 4`): **35 px**. Caranya: jendela Eww uji setinggi 8 px
-dengan setelan layer yang sama seperti jam (`:stacking "fg"`, `:exclusive
-false`, anchor `top left`, `pos 0x0`) dibuka sesaat; tangkapan `grim`
-memperlihatkan jendela itu mendarat di `y=35`, jadi 35 px itulah area yang
-dipesan bar. Probe lalu ditutup dan dihapus. Kalau bar Noctalia diubah tingginya
-atau di-set auto-hide, angka ini harus diukur ulang.
-
-Sisa yang belum diverifikasi: kecocokan crop Noctalia (`fillMode "crop"`)
-dengan asumsi crop-tengah `depth-ctl` saat membangun foreground.
-
-Catatan perilaku: `:stacking "bg"` menaruh jam di layer background, dan
-`niri/config.kdl` punya `layer-rule { place-within-backdrop true }` global tanpa
-`match` — surface background yang mengabaikan ruang eksklusif ikut masuk backdrop
-Overview (di-zoom bersama workspace, kena blur/tint). Kosmetik, bukan penghalang.
-Urutan tumpuk terhadap wallpaper Noctalia (sesama layer background) belum
-diverifikasi di sesi nyata.
-
 ## Warna dan tema
 
 Warna serta font jam berasal dari tema Eww yang aktif; tidak ada palet atau
@@ -301,5 +231,3 @@ hyprctl -j monitors | jq '.[] | {name, reserved}'     # harus tetap [0,34,0,0]
 timeout 5 eww --force-wayland -c ~/.dotfile/eww active-windows
 timeout 5 eww --force-wayland -c ~/.dotfile/eww get depth-clock-time
 ```
-
-Hasil pengujian sesi implementasi ada di [`VERIFICATION.md`](VERIFICATION.md).
