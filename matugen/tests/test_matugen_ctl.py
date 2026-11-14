@@ -129,12 +129,13 @@ class MatugenCtlTests(unittest.TestCase):
         self.assertIn("wm: hypr", result.stderr)
         self.assertFalse(self.feel_store.exists())
 
-    def test_feel_niri_skips_the_hypr_part(self):
+    def test_feel_niri_renders_the_niri_part_only(self):
         result = self.call("feel", "default", "--wm", "niri", "--dry-run")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("apps.json", result.stdout)
+        self.assertIn("niri.json", result.stdout)
         self.assertNotIn("hypr.json", result.stdout)
-        self.assertIn("template niri belum ada", result.stdout)
+        self.assertIn("wm: niri", result.stderr)
 
     def test_feel_rejects_unknown_profile(self):
         result = self.call("feel", "absent", "--dry-run")

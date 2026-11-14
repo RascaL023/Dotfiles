@@ -251,6 +251,16 @@ reload_herdr() {
 reload_yazi() { skip "yazi: dibaca saat start (flavor menunjuk current)"; }
 reload_foot() { skip "foot: tidak punya sinyal reload"; }
 
+# niri tidak punya aksi reload; menyentuh config memicu watcher membaca ulang
+# include, termasuk symlink palette/current yang baru dibalik.
+reload_niri() {
+    if ! running niri; then
+        skip "niri: tidak jalan"
+        return 0
+    fi
+    run niri touch "$HOME/.dotfile/niri/config.kdl"
+}
+
 # hyprctl needs HYPRLAND_INSTANCE_SIGNATURE; a niri session must never get here.
 reload_hypr() {
     local sig=${HYPRLAND_INSTANCE_SIGNATURE:-}
@@ -270,7 +280,7 @@ reload_hypr() {
 # --- dispatch --------------------------------------------------------------
 
 # Default order; aliases at the end map template names to the same consumer.
-consumers=(alacritty kitty lazygit css scss rasi nvim herdr yazi foot hypr)
+consumers=(alacritty kitty lazygit css scss rasi nvim herdr yazi foot hypr niri)
 declare -A handler=(
     [alacritty]=reload_alacritty
     [kitty]=reload_kitty
@@ -283,6 +293,7 @@ declare -A handler=(
     [yazi]=reload_yazi
     [foot]=reload_foot
     [hypr]=reload_hypr
+    [niri]=reload_niri
     # aliases: template names from the two configs
     [yazi-tmtheme]=reload_yazi
     [gtk]=reload_css

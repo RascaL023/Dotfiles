@@ -9,7 +9,7 @@
 #
 #   profiles/<profil>/apps.json   # font/terminal/rofi — dipakai WM apa pun
 #   profiles/<profil>/hypr.json   # knob Hyprland (shape, surface, material, motion)
-#   profiles/<profil>/niri.json   # knob niri (placeholder; belum ada template)
+#   profiles/<profil>/niri.json   # knob niri (shape, surface, material, overview)
 #
 # Yang dirender hanya bagian milik WM aktif: sesi Hyprland tidak pernah
 # merender niri.json, dan sebaliknya. Bagian apps selalu ikut karena dibaca
@@ -47,7 +47,7 @@ usage: feel.sh <profil> [options]
   -h, --help            teks ini
 
 Render per bagian: apps.json selalu, hypr.json hanya di sesi Hyprland,
-niri.json hanya bila template niri sudah ada (belum).
+niri.json hanya di sesi niri.
 EOF
 }
 
@@ -116,9 +116,7 @@ out="${STORE}/generated/${profile}"
 tmp="${STORE}/generated/.${profile}.tmp"
 
 echo "[feel] profil=${profile} wm=${wm} bagian=${parts[*]}"
-if [[ $wm == niri ]]; then
-    echo "[note] template niri belum ada; hanya apps.json yang dirender"
-elif [[ $wm == unknown ]]; then
+if [[ $wm == unknown ]]; then
     echo "[note] WM tidak dikenali; hanya apps.json yang dirender"
 fi
 
@@ -191,6 +189,14 @@ if command -v sassc >/dev/null 2>&1 && [[ -f ${tmp}/scss/_feel.scss ]]; then
     fi
 fi
 
+# Fragmen KDL niri harus lolos parser sebelum menggeser current.
+if [[ $wm == niri ]] && command -v niri >/dev/null 2>&1 && [[ -f ${tmp}/niri/feel.kdl ]]; then
+    if ! niri validate -c "${tmp}/niri/feel.kdl" >/dev/null 2>&1; then
+        echo "[ERR] ${tmp}/niri/feel.kdl tidak lolos niri validate" >&2
+        bad=1
+    fi
+fi
+
 if [[ $bad -ne 0 ]]; then
     echo "[ERR] render ditolak; ${STORE}/current tidak diubah" >&2
     rm -rf "$tmp"
@@ -242,6 +248,20 @@ else
 fi
 
 # Konsumen WM: hanya saat bagian hypr ikut dirender, dan hanya di sesi Hyprland.
+if [[ $wm == niri ]]; then
+    # niri tidak punya aksi reload; menyentuh config memicu watcher membaca
+    # ulang include (termasuk symlink current yang baru dibalik).
+    if running niri; then
+        if touch "${REPO}/niri/config.kdl"; then
+            echo "[ok]   niri reload (config disentuh)"
+        else
+            echo "[skip] niri: gagal menyentuh config"
+        fi
+    else
+        echo "[skip] niri tidak jalan"
+    fi
+fi
+
 if [[ $wm == hypr ]]; then
     sig=${HYPRLAND_INSTANCE_SIGNATURE:-}
     runtime=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}

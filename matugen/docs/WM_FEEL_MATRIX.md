@@ -318,6 +318,14 @@ Langkah yang diambil adalah pemisahan langsung per WM.
 Hyprland dan niri punya json sendiri (`hypr.json`, `niri.json`), tidak
 dipaksakan. Feel generik (font, padding terminal, rofi) menjadi `apps.json`
 yang dirender di WM mana pun. `matugen-ctl feel` mendeteksi WM aktif dan hanya
-merender bagian miliknya: `apps.json` + `hypr.json` di Hyprland, sementara
-`niri.json` belum dirender karena template niri belum ada. Palet hanya memiliki
-warna; angka rasa Hyprland dibaca dari `theme/feel/current/hypr/feel.lua`.
+merender bagian miliknya: `apps.json` + `hypr.json` di Hyprland, `apps.json` +
+`niri.json` di niri.
+
+Palet hanya memiliki warna; angka rasa dibaca dari
+`theme/feel/current/<wm>/…`. Untuk niri, template feel menulis
+`niri/feel.kdl` (gap, border width, shadow, tab indicator, radius, opacity,
+blur, overview) dan `niri/config.kdl` menyertakannya **sebelum**
+`conf/rule/window.kdl`, sehingga opacity per-aplikasi dan rule inactive tetap
+menang. Palet niri menulis `niri/palette.kdl` dan disertakan **terakhir**.
+Keduanya memakai `include optional=true` agar sesi tetap valid sebelum render
+pertama.

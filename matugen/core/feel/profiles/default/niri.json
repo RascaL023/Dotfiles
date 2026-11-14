@@ -1,10 +1,41 @@
 {
-  "layout": {
-    "gaps": 4,
-    "border_width": 2
+  "shape": {
+    "radius": 12,
+    "popup_radius": 10,
+    "border": 3,
+    "gaps": 8,
+    "border_part_of_window": false
   },
 
-  "motion": {
-    "slowdown": 1.0
+  "surface": {
+    "active_opacity": 0.94
+  },
+
+  "material": {
+    "blur": {
+      "enabled": true,
+      "xray": true,
+      "popups": true
+    },
+    "shadow": {
+      "enabled": true,
+      "softness": 24,
+      "spread": 2,
+      "offset": { "x": 0, "y": 4 }
+    }
+  },
+
+  "overview": {
+    "zoom": 0.6
+  },
+
+  "chrome": {
+    "tab_indicator": {
+      "width": 3,
+      "gap": 6,
+      "length": "1.0",
+      "position": "right",
+      "radius": 6
+    }
   }
 }

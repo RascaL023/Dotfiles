@@ -479,6 +479,20 @@ Notes:
 
 ### 6.3 niri
 
+- **In this repo:** niri is themed in two files, like Hyprland. Palette:
+  `core/palette/<theme>/template/niri.kdl` (Flow B) and
+  `core/palette/wallpaper-based/template/niri.kdl` (Flow A) render colours to
+  `theme/palette/current/niri/palette.kdl`. Feel:
+  `core/feel/template/niri/feel.kdl` renders
+  `core/feel/profiles/<profile>/niri.json` to
+  `theme/feel/current/niri/feel.kdl`. `niri/config.kdl` includes feel **before**
+  `conf/rule/window.kdl` (so per-app opacity and the inactive rule win) and
+  palette **last**; both use `include optional=true`. Do not put geometry in the
+  palette template or colours in the feel template.
+- The feel fragment may contain `layout`, one global `window-rule`, and
+  `overview`; `tab-indicator` needs `total-proportion` as a float. Because
+  matugen prints JSON number `1.0` as `1`, keep that profile value as a string
+  (`"1.0"`) or niri will reject the integer.
 - **VERIFY** `niri --version`. Config includes (`include "file.kdl"`) are only available in recent niri releases. If the user's version lacks `include`, tell them and offer a fallback (render the entire `config.kdl` from a template, with explicit user consent and a backup).
 - Output: `~/.config/niri/matugen.kdl`
 - Load: add `include "matugen.kdl"` near the **end** of `config.kdl` so it overrides earlier values. **VERIFY** merge/override behavior on the user's version.

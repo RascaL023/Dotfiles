@@ -1,30 +1,7 @@
-// Aturan jendela. Warna tetap milik conf/theme/palette.kdl.
+// Aturan jendela. Warna milik palette generated; sudut, blur, dan opacity
+// global milik feel generated (dimuat sebelum file ini, jadi rule di sini
+// menang). File ini hanya kebijakan per-aplikasi.
 // Dokumentasi: https://niri-wm.github.io/niri/Configuration:-Window-Rules
-
-// Permukaan global: sudut, klip, blur, dan popup.
-window-rule {
-    geometry-corner-radius 12
-    clip-to-geometry true
-
-    // Border hanya cincin di luar jendela, tidak digambar sebagai latar
-    // yang tembus lewat jendela semitransparan.
-    draw-border-with-background false
-
-    opacity 0.94
-    background-effect {
-        blur true
-        xray true
-    }
-
-    // Menu/popup ikut membulat dan ber-blur, bukan kotak tajam.
-    popups {
-        geometry-corner-radius 10
-        background-effect {
-            blur true
-            xray true
-        }
-    }
-}
 
 window-rule {
     match app-id=r#"^org\.wezfurlong\.wezterm$"#

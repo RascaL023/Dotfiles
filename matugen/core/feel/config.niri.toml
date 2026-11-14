@@ -1,0 +1,5 @@
+[config]
+
+[templates.niri]
+input_path  = "~/.config/matugen/core/feel/template/niri/feel.kdl"
+output_path = "/niri/feel.kdl"

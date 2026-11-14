@@ -1,0 +1,29 @@
+// ############################
+// ## Generated with Matugen ##
+// ############################
+// ## Manual edit is not recomended,
+// ## Except for testing.
+
+// Warna niri. Geometri, radius, dan opacity ada di feel/niri/feel.kdl.
+// File ini dimuat paling akhir oleh niri/config.kdl.
+
+layout {
+    border {
+        active-gradient from="{{ accent.primary }}" to="{{ accent.secondary }}" angle=45 in="oklch"
+        inactive-color "{{ surface.lowest }}ee"
+        urgent-color "{{ status.error }}"
+    }
+
+    shadow {
+        color "{{ effect.shadow }}80"
+        inactive-color "{{ effect.shadow }}4d"
+    }
+
+    insert-hint {
+        color "{{ accent.primary }}80"
+    }
+}
+
+overview {
+    backdrop-color "{{ surface.lowest }}"
+}

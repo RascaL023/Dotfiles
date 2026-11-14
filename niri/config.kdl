@@ -4,6 +4,11 @@
 
 include "conf/keybinds/keybind.kdl"
 include "conf/layouts/layout.kdl"
+
+// Rasa (gap, border, shadow, radius, opacity, blur, overview) dari matugen.
+// Dimuat sebelum rule jendela agar opacity per-aplikasi tetap menang.
+include optional=true "~/.myenv/theme/feel/current/niri/feel.kdl"
+
 include "conf/core/autostart.kdl"
 include "conf/core/input.kdl"
 include "conf/core/output.kdl"
@@ -12,9 +17,8 @@ include "conf/core/environment.kdl"
 include "conf/core/cursor.kdl"
 include "conf/rule/layer.kdl"
 include "conf/rule/window.kdl"
-include "conf/overview.kdl"
 include "conf/animations.kdl"
 include "conf/core/xwayland.kdl"
 
-// Satu-satunya pemilik warna. Ganti baris ini dengan hasil matugen nanti.
-include "conf/theme/palette.kdl"
+// Satu-satunya pemilik warna, dari matugen; dimuat terakhir agar menang.
+include optional=true "~/.myenv/theme/palette/current/niri/palette.kdl"

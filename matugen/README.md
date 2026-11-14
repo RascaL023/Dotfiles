@@ -50,7 +50,7 @@ Dua sumbu terpisah; jangan mencampurnya dalam satu config matugen.
 
 | | A — wallpaper | B — palet tetap | C — rasa |
 |---|---|---|---|
-| Config | `core/palette/wallpaper-based/config.toml` | `core/palette/<tema>/config.toml` | `core/feel/config.apps.toml` + `config.hypr.toml` |
+| Config | `core/palette/wallpaper-based/config.toml` | `core/palette/<tema>/config.toml` | `core/feel/config.apps.toml` + `config.hypr.toml` + `config.niri.toml` |
 | Sumber | gambar | `blueprint/<varian>.json` tulis tangan | `profiles/<profil>/{apps,hypr,niri}.json` |
 | Kosakata template | `{{ colors.<role>.<scheme>.<format> }}` | `{{ accent.primary }}`, `{{ syntax.keyword }}`, … | `{{ font.* }}`, `{{ chrome.* }}`, … |
 | Output | `~/.myenv/theme/palette/generated/wallpaper-based/` | `~/.myenv/theme/palette/generated/<tema>/` | `~/.myenv/theme/feel/generated/<profil>/` |
@@ -69,12 +69,13 @@ Satu profil adalah **direktori** dengan tiga pemilik yang terpisah:
 |---|---|---|
 | `apps.json` | kitty, foot, alacritty, rofi, waybar/swaync (font) | WM apa pun |
 | `hypr.json` | Hyprland: shape, surface, material, motion, chrome | hanya sesi Hyprland |
-| `niri.json` | niri (placeholder; template belum ada) | belum dirender |
+| `niri.json` | niri: shape, surface, material, overview, tab indicator | hanya sesi niri |
 
 `matugen-ctl feel` mendeteksi WM dari sesi (`HYPRLAND_INSTANCE_SIGNATURE`,
 `NIRI_SOCKET`, lalu `XDG_CURRENT_DESKTOP`) dan hanya merender bagian WM itu
-plus `apps.json`; WM lain tidak pernah ikut dirender. Di sesi niri saat ini
-hanya `apps.json` yang dirender karena template niri belum dibuat. Menambah
+plus `apps.json`; WM lain tidak pernah ikut dirender. Di sesi niri,
+`niri.json` menghasilkan `niri/feel.kdl`; palette tetap menghasilkan
+`niri/palette.kdl` karena warna dan rasa punya config terpisah. Menambah
 rasa = satu direktori di `core/feel/profiles/`; `template/` dan `config.*.toml`
 tidak disentuh. `--wm auto|hypr|niri` menimpa deteksi (untuk uji/cron).
 
@@ -95,8 +96,8 @@ matugen/
 │   │       ├── blueprint/      # dark.json, light.json (+ README key)
 │   │       └── template/
 │   └── feel/                   # profiles/<profil>/{apps,hypr,niri}.json
-│                               # template/apps + template/hypr
-│                               # config.apps.toml + config.hypr.toml
+│                               # template/apps + template/hypr + template/niri
+│                               # config.apps.toml + config.hypr.toml + config.niri.toml
 ├── docs/                       # dokumen rinci (lihat daftar di bawah)
 └── tests/test_matugen_ctl.py   # kontrak perintah, status, dan passthrough
 ```
@@ -134,6 +135,7 @@ benar-benar aktif adalah tujuan symlink `theme/palette/current` dan
 | `nvim/lua/core/theme.lua` | `theme/palette/current/nvim/theme.lua` |
 | `yazi/flavors/matugen.yazi/*` | `theme/palette/current/yazi/` |
 | `hypr/config/appearance/palette.lua` + `feel.lua` | `theme/palette/current/hypr/theme.lua` (warna) + `theme/feel/current/hypr/feel.lua` (rasa) |
+| `niri/config.kdl` | `theme/palette/current/niri/palette.kdl` (warna) + `theme/feel/current/niri/feel.kdl` (rasa) |
 | `lazygit`, `herdr` | `theme/palette/current/lazygit/config.yml`, `theme/palette/current/herdr/config.toml` |
 
 ## Pemeriksaan

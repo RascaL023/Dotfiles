@@ -1,0 +1,55 @@
+// ############################
+// ## Generated with Matugen ##
+// ############################
+// ## Manual edit is not recomended,
+// ## Except for testing.
+
+layout {
+    gaps {{ shape.gaps }}
+
+    border {
+        on
+        width {{ shape.border }}
+    }
+
+    shadow {
+        on
+        softness {{ material.shadow.softness }}
+        spread {{ material.shadow.spread }}
+        offset x={{ material.shadow.offset.x }} y={{ material.shadow.offset.y }}
+    }
+
+    tab-indicator {
+        hide-when-single-tab
+        place-within-column
+        gap {{ chrome.tab_indicator.gap }}
+        width {{ chrome.tab_indicator.width }}
+        length total-proportion={{ chrome.tab_indicator.length }}
+        position "{{ chrome.tab_indicator.position }}"
+        corner-radius {{ chrome.tab_indicator.radius }}
+    }
+}
+
+window-rule {
+    geometry-corner-radius {{ shape.radius }}
+    clip-to-geometry true
+    draw-border-with-background {{ shape.border_part_of_window }}
+
+    opacity {{ surface.active_opacity }}
+    background-effect {
+        blur {{ material.blur.enabled }}
+        xray {{ material.blur.xray }}
+    }
+
+    popups {
+        geometry-corner-radius {{ shape.popup_radius }}
+        background-effect {
+            blur {{ material.blur.popups }}
+            xray {{ material.blur.xray }}
+        }
+    }
+}
+
+overview {
+    zoom {{ overview.zoom }}
+}

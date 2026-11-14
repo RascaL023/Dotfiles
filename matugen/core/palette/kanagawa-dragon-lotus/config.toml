@@ -47,3 +47,7 @@ output_path = "/foot/theme.ini"
 [templates.hypr]
 input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/hypr.lua"
 output_path = "/hypr/theme.lua"
+
+[templates.niri]
+input_path  = "~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/template/niri.kdl"
+output_path = "/niri/palette.kdl"
