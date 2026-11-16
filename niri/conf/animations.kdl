@@ -1,32 +1,156 @@
 animations {
+
     workspace-switch {
-        spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
+        spring damping-ratio=1.0 stiffness=700 epsilon=0.00001
     }
+
     window-open {
-        duration-ms 200
-        curve "ease-out-quad"
-    }
-    window-close {
-        duration-ms 200
+        duration-ms 1500
         curve "ease-out-cubic"
+        custom-shader r"
+            float is_hash(vec2 p) {
+                return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+            }
+
+            float is_noise(vec2 p) {
+                vec2 i = floor(p);
+                vec2 f = fract(p);
+                f = f * f * (3.0 - 2.0 * f);
+                return mix(mix(is_hash(i), is_hash(i + vec2(1.0, 0.0)), f.x),
+                           mix(is_hash(i + vec2(0.0, 1.0)), is_hash(i + vec2(1.0, 1.0)), f.x), f.y);
+            }
+
+            float is_fbm(vec2 p) {
+                float v = 0.0;
+                float amp = 0.5;
+                for (int i = 0; i < 4; i++) {
+                    v += amp * is_noise(p);
+                    p *= 2.1;
+                    amp *= 0.5;
+                }
+                return v;
+            }
+
+            vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+                float p = niri_clamped_progress;
+                vec2 uv = coords_geo.xy;
+                vec3 tc = niri_geo_to_tex * vec3(uv, 1.0);
+                vec4 win = texture2D(niri_tex, tc.st);
+
+                float blob = is_fbm(uv * 3.5);
+                float fingers = is_fbm(uv * 14.0);
+                float distortion = (blob - 0.5) * 0.5 + (fingers - 0.5) * 0.18;
+                vec2 c = uv - vec2(0.5);
+                c.x *= size_geo.x / max(size_geo.y, 0.0001);
+                float d = length(c);
+                float splash_d = d + distortion;
+                float boundary = p * 1.7 - 0.15;
+                float diff = splash_d - boundary;
+                float reveal = smoothstep(0.04, -0.04, diff);
+
+                return win * reveal;
+            }
+        "
     }
-    horizontal-view-movement {
-        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+
+    window-close {
+        duration-ms 400
+        curve "linear"
+
+        custom-shader r"
+            float hash(vec2 vector) {
+                float d = dot(vector, vec2(127.1, 311.7));
+                float ds = sin(d);
+                float hash_value = fract(ds * 43758.5453);
+
+                return hash_value;
+            }
+
+            float noise(vec2 vector) {
+                vec2 i = floor(vector);
+                vec2 f = fract(vector);
+                f = f * f * (3.0 - 2.0 * f);
+
+                float bottom_left = hash(i);
+                float bottom_right = hash(i + vec2(1.0, 0.0));
+                float top_left = hash(i + vec2(0.0, 1.0));
+                float top_right = hash(i + vec2(1.0, 1.0));
+
+                float bottom = mix(bottom_left, bottom_right, f.x);
+                float top = mix(top_left, top_right, f.x);
+                float blend = mix(bottom,top,f.y);
+
+                return blend;
+            }
+
+            float fbm(vec2 vector, int octaves) {
+                float total_noise = 0.0;
+                float amplitude = 0.5;
+
+                for (int i = 0; i < octaves; i++){
+                    total_noise += noise(vector) * amplitude;
+                    vector *= 2.0;
+                    amplitude *= 0.5;
+                }
+
+                return total_noise;
+            }
+
+            vec4 burn_close(vec3 coords_geo, vec3 size_geo) {
+                float progress = niri_clamped_progress;
+                vec2 coords = coords_geo.xy;
+
+                float small_seed = 3.0 + niri_random_seed * 5.0;
+                float big_seed = 25.0 + niri_random_seed * 100.0;
+
+                int octaves = 5;
+                float fbm_noise = fbm((coords * small_seed + big_seed), octaves);
+                float mask = smoothstep(progress, progress + 0.05, fbm_noise);
+
+                float burn_width = 0.08;
+                float burn_mask = smoothstep(progress - burn_width, progress, fbm_noise) * (1.0 - mask);
+
+                vec3 burn_color = mix(vec3(1.0, 0.4, 0.2), vec3(1.0, 0.2, 0.05), burn_mask);
+                vec4 burn_edge = vec4(burn_color * burn_mask * 2.0, burn_mask);
+
+                vec3 coords_tex = niri_geo_to_tex * vec3(coords, 1.0);
+                vec4 color = texture2D(niri_tex, coords_tex.st);
+
+                color = (color * mask) + (burn_edge * color.a);
+
+                return color;
+            }
+
+            vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+                return burn_close(coords_geo, size_geo);
+            }
+        "
     }
+
     window-movement {
         spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
     }
+
     window-resize {
         spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
     }
+
+
+    horizontal-view-movement {
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+    }
+
     config-notification-open-close {
         spring damping-ratio=0.6 stiffness=1200 epsilon=0.001
     }
+
     screenshot-ui-open {
         duration-ms 300
         curve "ease-out-quad"
     }
+
     overview-open-close {
-        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+        spring damping-ratio=1.5 stiffness=1000 epsilon=0.0001
     }
+
 }
