@@ -14,8 +14,8 @@
   "material": {
     "blur": {
       "enabled": true,
-      "xray": true,
-      "popups": true
+      "xray": false,
+      "popups": false
     },
     "shadow": {
       "enabled": true,
