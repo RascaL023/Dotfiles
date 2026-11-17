@@ -169,7 +169,7 @@ kode adalah bug dokumentasi.
 | [`docs/CHEATSHEETS.md`](docs/CHEATSHEETS.md) | ID | Kosakata *role* Material You → pekerjaan UI |
 | [`docs/VOCABULARY.md`](docs/VOCABULARY.md) | ID | Contoh `matugen --show-colors` dan cara membacanya |
 | [`docs/WM_FEEL_MATRIX.md`](docs/WM_FEEL_MATRIX.md) | ID | Fitur rasa Hyprland 0.57 vs niri 26.04, jebakan include |
-| [`docs/NOCTALIA.md`](docs/NOCTALIA.md) | ID | Fakta Noctalia v5 vs matugen: config, batas template, pemilik warna, checklist integrasi |
+| [`docs/NOCTALIA.md`](docs/NOCTALIA.md) | ID | Fakta Noctalia v5 vs matugen: config, batas template, pemilik warna, checklist integrasi, palette engine + pemetaan token |
 | [`docs/NVIM_MAPPING.md`](docs/NVIM_MAPPING.md) | ID | Key palet → highlight group Neovim |
 | [`core/palette/kanagawa-dragon-lotus/blueprint/README.md`](core/palette/kanagawa-dragon-lotus/blueprint/README.md) | ID | Referensi setiap key JSON blueprint (alur B) |
 

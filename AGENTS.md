@@ -280,7 +280,7 @@ Rules:
 | `matugen/docs/CHEATSHEETS.md` | Material You role vocabulary → UI job mapping |
 | `matugen/docs/VOCABULARY.md` | sample `--show-colors` dump; how to read a role table |
 | `matugen/docs/WM_FEEL_MATRIX.md` | per-feature feel matrix: Hyprland-only, niri-only, differing semantics, app-level fallbacks, niri include gotchas |
-| `matugen/docs/NOCTALIA.md` | verified Noctalia v5 facts vs matugen: config layering, template limits, color ownership, integration checklist |
+| `matugen/docs/NOCTALIA.md` | verified Noctalia v5 facts vs matugen: config layering, template limits, color ownership, integration checklist, palette engine (tokens, CLI, gotchas) + mapping to this repo's template vocabulary |
 | `matugen/docs/NVIM_MAPPING.md` | which palette key colors which Neovim highlight group |
 | `matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md` | every key of the Flow B blueprint JSON |
 | `hypr/docs/ROADMAP_V57.md` | Hyprland 0.57 migration (breaking changes), unimplemented features: recipes, verification steps, backlog |
@@ -302,3 +302,12 @@ verified against the repo, so a stale line is a bug.
 4. Render both axes so `~/.myenv/theme/palette/current` and
    `~/.myenv/theme/feel/current` exist:
    `matugen-ctl palette <source>` and `matugen-ctl feel default`.
+
+--- 
+
+## Testing
+
+If you want to test on `/tmp`, use `/tmp/Dotfiles` directory.
+Don't directly create file on `/tmp`.
+It will better if you create another directory recursively by context.
+For example: use `/tmp/Dotfiles/Noctalia` for testing noctalia feature.
