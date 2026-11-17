@@ -1,0 +1,94 @@
+/* ############################# */
+/* ## Generated with Noctalia ## */
+/* ############################# */
+/* ## Manual edit is not recommended, */
+/* ## Except for testing. */
+
+
+@define-color accent                {{ colors.primary.default.hex }};
+@define-color accent-muted          {{ colors.primary.default.rgba | set_alpha: 0.2 }};
+@define-color accent-muted-strong   {{ colors.primary.default.rgba | set_alpha: 0.3 }};
+@define-color accent-shadow         {{ colors.primary.default.rgba | set_alpha: 0.35 }};
+@define-color accent-hover          {{ colors.primary.default.hex | lighten: 8.0 }};
+@define-color accent-bright         {{ colors.primary.default.hex | lighten: 18.0 }};
+@define-color accent-progress       {{ colors.primary.default.hex | lighten: 12.0 }};
+@define-color accent-backdrop       {{ colors.primary.default.hex | lighten: 10.0 }};
+@define-color accent-focus          {{ colors.on_surface_variant.default.rgba | set_alpha: 0.3 }};
+
+@define-color bg-main               {{ colors.surface.default.hex }};
+@define-color bg-alt                {{ colors.surface_container_highest.default.hex }};
+@define-color bg-surface            {{ colors.surface_container_highest.default.hex }};
+@define-color bg-surface-active     {{ colors.surface_container_highest.default.hex | lighten: 6.0 }};
+@define-color bg-deep               {{ colors.surface_container_lowest.default.hex }};
+@define-color bg-raised             {{ colors.surface_container.default.hex }};
+@define-color bg-dialog             {{ colors.surface_container_high.default.hex }};
+@define-color bg-input              {{ colors.surface_container.default.hex }};
+@define-color bg-input-deep         {{ colors.surface_container.default.hex | lighten: -6.0 }};
+@define-color bg-sidebar-hover      {{ colors.surface_container_high.default.hex | lighten: 6.0 }};
+@define-color bg-menu-selected      {{ colors.surface_container_high.default.hex | lighten: 8.0 }};
+@define-color bg-conflict           {{ colors.secondary_container.default.hex }};
+@define-color disk-usage-bg         {{ colors.surface_variant.default.hex }};
+@define-color surface-disabled      {{ colors.on_surface.default.rgba | set_alpha: 0.04 }};
+
+@define-color fg-main               {{ colors.on_surface.default.hex }};
+@define-color fg-bright             {{ colors.on_surface.default.hex | lighten: 15.0 }};
+@define-color fg-alt                {{ colors.on_surface.default.rgba | set_alpha: 0.7 }};
+@define-color fg-muted              {{ colors.on_surface.default.rgba | set_alpha: 0.55 }};
+@define-color fg-muted-strong       {{ colors.on_surface.default.rgba | set_alpha: 0.35 }};
+@define-color fg-dim                {{ colors.outline_variant.default.hex }};
+@define-color fg-dim-muted          {{ colors.outline_variant.default.rgba | set_alpha: 0.7 }};
+@define-color fg-disabled           {{ colors.outline_variant.default.rgba | set_alpha: 0.5 }};
+@define-color fg-invert             {{ colors.surface_container_lowest.default.rgba | set_alpha: 0.87 }};
+@define-color fg-invert-alt         {{ colors.surface_container_lowest.default.rgba | set_alpha: 0.6 }};
+@define-color fg-invert-muted       {{ colors.surface_container_lowest.default.rgba | set_alpha: 0.38 }};
+@define-color fg-invert-soft        {{ colors.surface_container_lowest.default.rgba | set_alpha: 0.3 }};
+@define-color fg-osd                {{ colors.surface_container_lowest.default.rgba | set_alpha: 0.9 }};
+
+@define-color selection-bg          {{ colors.primary_container.default.hex }};
+@define-color selection-fg          {{ colors.on_primary_container.default.rgba | set_alpha: 0.87 }};
+
+@define-color error                 {{ colors.error.default.hex }};
+@define-color error-strong          {{ colors.error.default.hex | lighten: 18.0 }};
+@define-color error-hover           {{ colors.error.default.hex | lighten: -8.0 }};
+@define-color warning               {{ colors.secondary.default.hex }};
+@define-color warning-hover         {{ colors.secondary.default.hex | lighten: -8.0 }};
+@define-color success               {{ colors.tertiary.default.hex }};
+@define-color info                  {{ colors.tertiary.default.hex }};
+@define-color info-strong           {{ colors.tertiary.default.hex | lighten: 15.0 }};
+@define-color link                  {{ colors.tertiary.default.hex }};
+@define-color link-visited          {{ colors.secondary_fixed_dim.default.hex }};
+
+@define-color border                {{ colors.on_surface_variant.default.rgba | set_alpha: 0.12 }};
+@define-color border-light          {{ colors.on_surface_variant.default.rgba | set_alpha: 0.1 }};
+@define-color border-medium         {{ colors.outline_variant.default.hex }};
+
+@define-color shadow                {{ colors.shadow.default.rgba | set_alpha: 0.2 }};
+@define-color shadow-light          {{ colors.shadow.default.rgba | set_alpha: 0.15 }};
+@define-color shadow-medium         {{ colors.shadow.default.rgba | set_alpha: 0.18 }};
+@define-color shadow-deep           {{ colors.shadow.default.rgba | set_alpha: 0.4 }};
+
+@define-color text-primary          {{ colors.on_surface.default.hex }};
+@define-color text-secondary        {{ colors.on_surface_variant.default.hex }};
+@define-color text-muted            {{ colors.on_surface_variant.default.rgba | set_alpha: 0.7 }};
+@define-color text-link             {{ colors.tertiary.default.hex }};
+@define-color text-visited          {{ colors.secondary_fixed_dim.default.hex }};
+
+@define-color accent-primary        {{ colors.primary.default.hex }};
+@define-color accent-secondary      {{ colors.secondary.default.hex }};
+@define-color accent-on             {{ colors.on_primary.default.hex }};
+@define-color layer-base            {{ colors.surface.default.hex }};
+@define-color layer-mantle          {{ colors.surface_container_low.default.hex }};
+@define-color layer-crust           {{ colors.surface_container_lowest.default.hex }};
+@define-color layer-surface         {{ colors.surface_container.default.hex }};
+@define-color layer-surface-raised  {{ colors.surface_container_high.default.hex }};
+@define-color layer-surface-overlay {{ colors.surface_container_highest.default.hex }};
+@define-color border-default        {{ colors.surface_container_high.default.hex }};
+@define-color border-active         {{ colors.primary.default.hex }};
+@define-color status-success        {{ colors.tertiary.default.hex }};
+@define-color status-warning        {{ colors.secondary.default.hex }};
+@define-color status-error          {{ colors.error.default.hex }};
+@define-color status-critical       {{ colors.error.default.hex | lighten: 6.0 }};
+@define-color status-info           {{ colors.tertiary.default.hex }};
+
+@define-color alpha-crust           {{ colors.surface_container_lowest.default.rgba | set_alpha: 0.7 }};
+@define-color tr-crust              {{ colors.surface_container_lowest.default.rgba | set_alpha: 0.6 }};

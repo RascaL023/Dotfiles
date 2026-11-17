@@ -1,0 +1,57 @@
+#############################
+## Generated with Noctalia ##
+#############################
+## Manual edit is not recommended,
+## Except for testing.
+
+
+gui:
+  theme:
+    activeBorderColor:
+      - "{{ colors.primary.default.hex }}"
+      - bold
+
+    inactiveBorderColor:
+      - "{{ colors.outline_variant.default.hex | lighten: 15 }}"
+
+    # Border color of focused window when searching in that window
+    # searchingActiveBorderColor:
+    #   - "{{ colors.tertiary.default.hex }}"
+    #   - bold
+
+    # Color of keybindings help text in the bottom line (secondary text)
+    optionsTextColor:
+      - "{{ colors.primary.default.hex }}"
+
+    # Background color of selected line (selection highlight)
+    # See https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#highlighting-the-selected-line
+    selectedLineBgColor:
+      - "{{ colors.primary_container.default.hex | lighten: 15 }}"
+
+    # Background color of selected line when view doesn't have focus.
+    # inactiveViewSelectedLineBgColor:
+    #   - "{{ colors.surface_container.default.hex }}"
+
+    # Foreground color of copied commit (text on selection)
+    # cherryPickedCommitFgColor:
+    #   - "{{ colors.on_primary_container.default.hex }}"
+
+    # Background color of copied commit
+    # cherryPickedCommitBgColor:
+    #   - "{{ colors.primary_container.default.hex }}"
+
+    # Foreground color of marked base commit (for rebase)
+    # markedBaseCommitFgColor:
+    #   - "{{ colors.on_secondary_container.default.hex }}"
+
+    # Background color of marked base commit (for rebase)
+    # markedBaseCommitBgColor:
+    #   - "{{ colors.secondary_container.default.hex }}"
+
+    # Color for file with unstaged changes (error/urgent) the indicator M/A
+    unstagedChangesColor:
+      - "{{ colors.error.default.hex }}"
+
+    # Default text color (primary text)
+    defaultFgColor:
+      - "{{ colors.primary.default.hex | lighten: 8.0 }}"
