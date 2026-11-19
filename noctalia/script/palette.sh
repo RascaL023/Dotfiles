@@ -4,8 +4,8 @@ set -u
 
 timeout_s=${RELOAD_TIMEOUT:-5}
 root=${HOME}/.dotfile/noctalia
+engine=noctalia
 palette=wallpaper-based
-store_name=noctalia-wallpaper
 render_cfg=$root/core/palette/$palette/config.toml
 theme_root=${THEME_ROOT:-$HOME/.myenv/theme/palette}
 generated=$theme_root/generated
@@ -124,16 +124,16 @@ render() {
         return 1
     fi
 
-    out=$generated/$store_name
-    tmp=$generated/.$store_name.tmp
+    out=$generated/$engine/$palette
+    tmp=$generated/$engine/.$palette.tmp
     if (( dry_run )); then
         if [[ $src == *.json ]]; then
-            printf '[dry]  render %s: noctalia theme --theme-json %s -c %s (cwd %s)\n' \
-                "$store_name" "$src" "$render_cfg" "$tmp"
+            printf '[dry]  render %s/%s: noctalia theme --theme-json %s -c %s (cwd %s)\n' \
+                "$engine" "$palette" "$src" "$render_cfg" "$tmp"
         else
             render_palette "$src" "$tmp/palette.json"
-            printf '[dry]  render %s: noctalia theme --theme-json %s/palette.json -c %s (cwd %s)\n' \
-                "$store_name" "$tmp" "$render_cfg" "$tmp"
+            printf '[dry]  render %s/%s: noctalia theme --theme-json %s/palette.json -c %s (cwd %s)\n' \
+                "$engine" "$palette" "$tmp" "$render_cfg" "$tmp"
         fi
         return 0
     fi
@@ -166,7 +166,7 @@ render() {
     rm -rf "$out"
     mv "$tmp" "$out"
     ln -sfn "$out" "$current"
-    ok "$store_name: $(find "$out" -type f | wc -l) berkas, current -> generated/$store_name"
+    ok "$engine/$palette: $(find "$out" -type f | wc -l) berkas, current -> generated/$engine/$palette"
 }
 
 # Reload rules live in matugen/script/palette.sh; they read the same `current`

@@ -179,13 +179,13 @@ noctalia-ctl palette --list | --dry-run | --no-reload | --scheme <s> | --pure-bl
 
 `noctalia-ctl` exposes the palette workflow only: every call is
 `noctalia-ctl palette …`. It renders into
-`~/.myenv/theme/palette/generated/.noctalia-wallpaper.tmp`
+`~/.myenv/theme/palette/generated/noctalia/.wallpaper-based.tmp`
 (a copy of the config lives there, so relative outputs land inside it),
-validates, moves the folder to `generated/noctalia-wallpaper`, then flips
-`current`. The store folder is named after the producer, so another theming
-tool's `generated/<its-own-name>` is left untouched and flipping back is a
-symlink change. `THEME_ROOT` overrides the store. The wallpaper scheme and
-`pure_black_dark` are read from `[theme]` in `noctalia/config.toml`.
+validates, moves the folder to `generated/noctalia/wallpaper-based`, then flips
+`current`. One folder per engine: matugen writes `generated/matugen/`, so both
+producers can ship a `wallpaper-based` palette without collision and flipping
+back is a symlink change. `THEME_ROOT` overrides the store. The wallpaper
+scheme and `pure_black_dark` are read from `[theme]` in `noctalia/config.toml`.
 
 Generated output is never edited by hand: change the template, then re-render.
 

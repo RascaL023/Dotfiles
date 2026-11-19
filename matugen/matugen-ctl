@@ -148,7 +148,8 @@ case $command_name in
         palette_now=$(readlink -f -- "$theme_store/current" 2>/dev/null) || palette_now=''
         feel_now=$(readlink -f -- "$feel_store/current" 2>/dev/null) || feel_now=''
         if [[ -n $palette_now && -d $palette_now ]]; then
-            printf 'palette  %s  (%s)\n' "${palette_now##*/}" "$palette_now"
+            palette_engine=${palette_now%/*}
+            printf 'palette  %s/%s  (%s)\n' "${palette_engine##*/}" "${palette_now##*/}" "$palette_now"
         else
             printf 'palette  none\n'
             status=1

@@ -75,8 +75,8 @@ fixed-palette pipeline; see [Theming](#theming).
 ¹ `foot/foot.ini` loads its palette with
 `include=/home/rascal/.myenv/theme/palette/current/foot/theme.ini`, so it follows the
 active theme the same way `kitty/kitty.conf` does. Flow A writes
-`generated/wallpaper-based/foot/theme.ini`, Flow B
-`generated/kanagawa-dragon-lotus/foot/theme.ini`; foot sees whichever one the
+`generated/matugen/wallpaper-based/foot/theme.ini`, Flow B
+`generated/matugen/kanagawa-dragon-lotus/foot/theme.ini`; foot sees whichever one the
 active theme exposes. Foot has no reload signal, so a re-render only shows up in
 the next foot window.
 
@@ -186,7 +186,7 @@ point is `matugen/matugen-ctl` — `palette <source>` (Flow A/B), `feel <profile
 
 ```text
         ┌─ wallpaper ─┐
-color ──┤              ├─ matugen-ctl ─► template ─► ~/.myenv/theme/palette/generated/<palette>/
+color ──┤              ├─ matugen-ctl ─► template ─► ~/.myenv/theme/palette/generated/matugen/<palette>/
         └─ blueprint ──┘                                     │
                                                               ▼
                                               ~/.myenv/theme/palette/current  ◄─ symlink
@@ -199,14 +199,18 @@ color ──┤              ├─ matugen-ctl ─► template ─► ~/.myenv/
 it. Colours and feel are stored side by side and switched independently:
 
 ```text
-~/.myenv/theme/palette/generated/<palette>/   ← colours
-~/.myenv/theme/palette/current                ← symlink, flipped by palette.sh
+~/.myenv/theme/palette/generated/<engine>/<palette>/   ← colours, one folder per engine
+~/.myenv/theme/palette/current                         ← symlink, flipped by palette.sh
 ~/.myenv/theme/feel/generated/<profile>/      ← look & feel
 ~/.myenv/theme/feel/current                   ← symlink, flipped by feel.sh
 ```
 
-`matugen-ctl palette <source>` renders into `generated/<palette>`, validates, then
-flips the palette `current`; `matugen-ctl feel <profile>` does the same for feel.
+Store layout lama yang datar (`palette/generated/<palette>`) tidak dibaca lagi;
+pindahkan ke `palette/generated/matugen/<palette>` atau render ulang.
+
+`matugen-ctl palette <source>` renders into `generated/matugen/<palette>`,
+validates, then flips the palette `current`; `matugen-ctl feel <profile>` does
+the same for feel.
 `~/.myenv/theme/current-status.json` disediakan untuk switcher (nama + varian,
 bentuknya di `.example`), tapi belum ada yang menulisnya — jadi `current` tetap
 jadi acuan. Tidak ada switcher yang jalan: `script/theme.bak/` menyimpan stub
@@ -222,9 +226,9 @@ lama, dan binding `Mod+T` / on-click waybar yang memanggilnya masih mati.
 - Templates: `matugen/core/palette/wallpaper-based/template/*`
 - Vocabulary: `{{ colors.<role>.<scheme>.<format> }}` (MD3 roles: `primary`,
   `surface`, `on_surface`, …)
-- Output: `~/.myenv/theme/palette/generated/wallpaper-based/<tool>/…`
+- Output: `~/.myenv/theme/palette/generated/matugen/wallpaper-based/<tool>/…`
 - Config writes **relative** paths (`/kitty/theme.conf`); `matugen-ctl palette` owns the
-  `-p ~/.myenv/theme/palette/generated/<palette>` prefix and the `current` flip
+  `-p ~/.myenv/theme/palette/generated/matugen/<palette>` prefix and the `current` flip
 
 ### Flow B — fixed palette (a named theme)
 
@@ -239,7 +243,7 @@ lama, dan binding `Mod+T` / on-click waybar yang memanggilnya masih mati.
 - Templates: `matugen/core/palette/kanagawa-dragon-lotus/template/*`
 - Vocabulary: the JSON is exposed at the template root, so templates read
   `{{ accent.primary }}`, `{{ syntax.keyword }}`, … — never `colors.*`
-- Output: `~/.myenv/theme/palette/generated/kanagawa-dragon-lotus/<tool>/…`
+- Output: `~/.myenv/theme/palette/generated/matugen/kanagawa-dragon-lotus/<tool>/…`
 - Full key-by-key reference: [`blueprint/README.md`](matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md)
 
 > Color templates live in `matugen/core/palette/` — one directory per
@@ -256,7 +260,7 @@ lama, dan binding `Mod+T` / on-click waybar yang memanggilnya masih mati.
 ### Engine palet Noctalia
 
 [`noctalia/`](noctalia) merender templatenya sendiri dari token map Noctalia,
-menulis `theme/palette/generated/noctalia-wallpaper/`, dan membalik symlink
+menulis `theme/palette/generated/noctalia/wallpaper-based/`, dan membalik symlink
 `current` yang sama:
 
 ```bash
@@ -291,7 +295,7 @@ dan `hypr/config/appearance/feel.lua` memuat rasa (default, clamp rentang aman,
 validasi style animasi). `appearance/look.lua` dan `appearance/motion.lua`
 merender keduanya ke payload `hl.config` / `hl.curve` / `hl.animation`, sedangkan
 `hypr/hyprland.lua` hanya meng-orchestrate. Nama + varian tema tidak ikut ke
-berkas tema Hyprland: identitas palet adalah nama direktori di
+berkas tema Hyprland: identitas palet adalah engine + nama direktori di
 `theme/palette/generated/`, sedangkan nama + varian untuk switcher ada di
 `~/.myenv/theme/current-status.json` (belum diisi otomatis).
 

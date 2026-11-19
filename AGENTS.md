@@ -43,7 +43,7 @@ script and the theming pipeline work with any compositor.
 ├── matugen/
 │   ├── matugen-ctl               # entry point: palette | feel | reload | list | status
 │   ├── script/
-│   │   ├── palette.sh            # render palette → generated/<palette>, flip, reload
+│   │   ├── palette.sh            # render palette → generated/matugen/<palette>, flip, reload
 │   │   └── feel.sh               # render a feel profile, flip feel/current
 │   ├── core/feel/                        #   numbers/booleans, per WM
 │   │   ├── config.apps.toml              #   shared apps/font config
@@ -63,7 +63,7 @@ script and the theming pipeline work with any compositor.
 │   └── docs/                     # theming docs
 ├── noctalia/
 │   ├── noctalia-ctl              # entry point: `palette …`
-│   ├── script/palette.sh         # render → generated/noctalia-wallpaper, flip, reload
+│   ├── script/palette.sh         # render → generated/noctalia/wallpaper-based, flip, reload
 │   ├── core/palette/wallpaper-based/{config.toml,template/}
 │   └── README.md                 # usage + store layout
 ├── nvim/ kitty/ foot/ …          # one directory per tool, symlinked to ~/.config
@@ -146,7 +146,7 @@ validasi, dan delegasi reload dijelaskan di `noctalia/README.md`.
 | Command | `matugen-ctl palette <wallpaper>` | `matugen-ctl palette <blueprint>.json` |
 | Template vocabulary | `{{ colors.<role>.<scheme>.<format> }}` | root-level keys: `{{ accent.primary }}`, `{{ syntax.keyword }}` |
 | Themes here | `wallpaper-based` | `kanagawa-dragon-lotus` |
-| Output | `~/.myenv/theme/palette/generated/wallpaper-based/<tool>/…` | `~/.myenv/theme/palette/generated/<theme>/<tool>/…` |
+| Output | `~/.myenv/theme/palette/generated/matugen/wallpaper-based/<tool>/…` | `~/.myenv/theme/palette/generated/matugen/<theme>/<tool>/…` |
 
 Rules:
 
@@ -154,7 +154,7 @@ Rules:
   breaks every `matugen image` run (no `accent.*` in a Material You palette).
 - **`output_path` is relative** in both palette configs (`/kitty/theme.conf`),
   exactly like the feel configs: `matugen/script/palette.sh` supplies
-  `-p ~/.myenv/theme/palette/generated/<palette>`, validates the result, then flips
+  `-p ~/.myenv/theme/palette/generated/matugen/<palette>`, validates the result, then flips
   `palette/current`. Rendering one of these configs with bare `matugen` writes to
   `/kitty/theme.conf` at the filesystem root.
 - **Feel is its own flow, not part of a palette.** Colors write
@@ -180,15 +180,19 @@ Rules:
   them automatically.
 - **Noctalia is a separate producer, not a third flow.** It renders its own
   config in `noctalia/core/palette/wallpaper-based/` into
-  `generated/noctalia-wallpaper/` and flips the same `palette/current`; never
-  add its templates to a matugen config.
+  `generated/noctalia/wallpaper-based/` and flips the same `palette/current`;
+  never add its templates to a matugen config. Each producer owns its engine
+  folder (`generated/matugen/`, `generated/noctalia/`), so both can ship a
+  `wallpaper-based` palette without colliding, and `current` names the engine
+  that is live.
 - **Placeholder names are not shared** between flows — the same tool needs its
   own template per flow. Never assume a value exists; grep the template.
 - `~/.myenv` is the theme store **outside** this repo: this repo only renders
   into it. Two independent axes live side by side: `theme/palette/` (colours,
   flipped by `matugen/script/palette.sh`) and `theme/feel/` (look & feel,
   flipped by `matugen/script/feel.sh`). Each has a `current` symlink to its
-  active `generated/<name>` directory, so switching is one symlink flip and
+  active `generated/<engine>/<name>` directory, so switching is one symlink
+  flip and
   never re-renders. There is **no working theme switcher**: the old one in
   `~/.myenv/script/` is parked in `theme.bak/`, its `theme-picker.sh` just execs
   `nextwall.sh`, and the `Mod+T` bindings / waybar on-click still call the
@@ -224,8 +228,8 @@ Rules:
   `nvim/init.lua` starts `core.theme_watch` **before** `core.lazy` so the
   watcher survives a failing plugin spec.
 - Templates that produce it:
-  - Flow A: `matugen/core/palette/wallpaper-based/template/nvim.lua` → `~/.myenv/theme/palette/generated/wallpaper-based/nvim/theme.lua`
-  - Flow B: `matugen/core/palette/kanagawa-dragon-lotus/template/nvim.lua` → `~/.myenv/theme/palette/generated/kanagawa-dragon-lotus/nvim/theme.lua`
+  - Flow A: `matugen/core/palette/wallpaper-based/template/nvim.lua` → `~/.myenv/theme/palette/generated/matugen/wallpaper-based/nvim/theme.lua`
+  - Flow B: `matugen/core/palette/kanagawa-dragon-lotus/template/nvim.lua` → `~/.myenv/theme/palette/generated/matugen/kanagawa-dragon-lotus/nvim/theme.lua`
 - **Both flows write into their own generated folder; activation is the
   `current` flip** that `matugen-ctl palette` performs after validation. The
   loader only ever reads `current/nvim/theme.lua`.

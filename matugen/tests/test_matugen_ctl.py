@@ -92,7 +92,7 @@ class MatugenCtlTests(unittest.TestCase):
         result = self.call("palette", "--dry-run", str(image))
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("wallpaper-based", result.stdout)
-        self.assertIn(f"{self.theme_store}/generated", result.stdout)
+        self.assertIn(f"{self.theme_store}/generated/matugen", result.stdout)
         self.assertFalse(self.theme_store.exists())
 
     def test_palette_dry_run_uses_the_blueprint_theme(self):
@@ -100,7 +100,7 @@ class MatugenCtlTests(unittest.TestCase):
         result = self.call("palette", "--dry-run", str(blueprint))
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("kanagawa-dragon-lotus", result.stdout)
-        self.assertIn(f"-p {self.theme_store}/generated", result.stdout)
+        self.assertIn(f"-p {self.theme_store}/generated/matugen", result.stdout)
         self.assertFalse(self.theme_store.exists())
 
     def test_missing_source_fails_like_the_renderer(self):
@@ -154,7 +154,7 @@ class MatugenCtlTests(unittest.TestCase):
         self.assertIn("feel     none", result.stdout)
 
     def test_status_reads_the_active_links(self):
-        palette_dir = self.theme_store / "generated" / "kanagawa-dragon-lotus"
+        palette_dir = self.theme_store / "generated" / "matugen" / "kanagawa-dragon-lotus"
         feel_dir = self.feel_store / "generated" / "default"
         palette_dir.mkdir(parents=True)
         feel_dir.mkdir(parents=True)
@@ -163,7 +163,7 @@ class MatugenCtlTests(unittest.TestCase):
 
         result = self.call("status")
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn(f"palette  kanagawa-dragon-lotus  ({palette_dir})", result.stdout)
+        self.assertIn(f"palette  matugen/kanagawa-dragon-lotus  ({palette_dir})", result.stdout)
         self.assertIn(f"feel     default  ({feel_dir})", result.stdout)
 
 
