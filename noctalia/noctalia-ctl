@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -u
+
+dir=$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" && pwd -P) || exit 1
+palette=$dir/script/palette.sh
+
+if [[ ! -x $palette ]]; then
+    printf 'noctalia-ctl: no executable script/palette.sh in %s (install a symlink, not a copy)\n' "$dir" >&2
+    exit 2
+fi
+
+case ${1:-help} in
+    palette)
+        shift
+        ;;
+    help|-h|--help)
+        set -- --help
+        ;;
+    *)
+        printf 'noctalia-ctl: unknown command: %s (use --help)\n' "$1" >&2
+        exit 2
+        ;;
+esac
+
+exec "$palette" "$@"

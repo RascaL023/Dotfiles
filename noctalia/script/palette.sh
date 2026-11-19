@@ -1,38 +1,11 @@
 #!/usr/bin/env bash
-# noctalia/script/noctalia-ctl — render the Noctalia palette, activate it, and
-# reload its consumers.
-#
-#   noctalia-ctl <wallpaper>       derive colours from an image, render, flip current
-#   noctalia-ctl <palette>.json    render an existing Noctalia token map
-#   noctalia-ctl [consumer ...]    reload only
-#   noctalia-ctl --list            print known consumers
-#   noctalia-ctl --dry-run ...     print the actions, change nothing
-#   noctalia-ctl --no-reload ...   render only
-#
-# Noctalia splits palette generation (token map) from template rendering, and it
-# has no `-p <store>` flag, so the store is decided here: the render config is
-# copied into `<store>/generated/.<palette>.tmp`, rendered there (`output_path`
-# is relative to the config file), validated, moved into
-# `<store>/generated/<palette>`, then `<store>/current` is flipped. A failed
-# render therefore never replaces the live palette, and the render config
-# carries no store path.
-#
-# Palette sources:
-#   image            `noctalia theme <image> --both -o palette.json` (scheme and
-#                    OLED black follow `[theme]` in noctalia/config.toml)
-#   <palette>.json   an existing token map: a community palette from
-#                    ~/.local/state/noctalia/community-palettes/, a custom
-#                    palette from noctalia/palettes/, or a previous dump
-#
-# Reload is delegated to the shared reload script: consumers read
-# `~/.myenv/theme/palette/current`, so they do not care who rendered it.
 
 set -u
 
 timeout_s=${RELOAD_TIMEOUT:-5}
 root=${HOME}/.dotfile/noctalia
-palette=wallpaper-based           # folder under core/palette/
-store_name=noctalia-wallpaper     # folder under generated/
+palette=wallpaper-based
+store_name=noctalia-wallpaper
 render_cfg=$root/core/palette/$palette/config.toml
 theme_root=${THEME_ROOT:-$HOME/.myenv/theme/palette}
 generated=$theme_root/generated
@@ -46,30 +19,24 @@ pure_black=""
 source_path=""
 wanted=()
 
-# --- helpers ---------------------------------------------------------------
-
 have() { command -v "$1" >/dev/null 2>&1; }
 
 ok() { printf '[ok]   %s\n' "$*"; }
 skip() { printf '[skip] %s\n' "$*"; }
 fail() { printf '[FAIL] %s\n' "$*" >&2; }
 
-# shell_theme_value <key> — read `key = "value"` from [theme] in the shell
-# config, so the rendered palette matches what Noctalia itself uses.
 shell_theme_value() {
     local key=$1
     sed -n "s/^[[:space:]]*$key[[:space:]]*=[[:space:]]*\"\([^\"]*\)\".*/\1/p" \
         "$root/config.toml" 2>/dev/null | head -n1
 }
 
-# wal_scheme — the wallpaper generator, from [theme].wallpaper_scheme.
 wall_scheme() {
     local v
     v=$(shell_theme_value wallpaper_scheme)
     printf '%s' "${scheme:-${v:-m3-tonal-spot}}"
 }
 
-# pure_black_enabled — true when [theme].pure_black_dark = true.
 pure_black_enabled() {
     local v
     if [[ -n $pure_black ]]; then
@@ -80,32 +47,16 @@ pure_black_enabled() {
 }
 
 usage() {
-    cat <<'EOF'
-usage: noctalia-ctl [options] [source] [consumer ...]
-
-  <wallpaper>       derive a palette from an image, then render it
-  <palette>.json    render an existing Noctalia token map
-  (no source)       reload only
-  consumer ...      reload only these tools (see --list)
-  -n, --dry-run     print the actions, change nothing
-  -N, --no-reload   render without reloading consumers
-  -l, --list        print known consumers
-  -s, --scheme <s>  wallpaper generator (default: [theme].wallpaper_scheme)
-  -b, --pure-black  force the OLED surface ramp on
-  -h, --help        this text
-
-A render goes to ~/.myenv/theme/palette/generated/noctalia-wallpaper and, once
-it validates, flips ~/.myenv/theme/palette/current. The folder name is the
-producer's, so it never overwrites a palette rendered by another tool.
-Override the store with THEME_ROOT.
-EOF
+    printf 'usage: noctalia-ctl palette <wallpaper|palette.json> [options] [consumer ...]\n'
+    printf '       noctalia-ctl palette --list\n\n'
+    printf 'options: -n/--dry-run, -N/--no-reload, -s/--scheme <name>, -b/--pure-black,\n'
+    printf '         -l/--list, -h/--help\n'
+    printf 'A palette with no source reloads consumers only.\n\n'
+    printf 'See %s/README.md for palette sources and the store layout.\n' "$root"
 }
 
-# --- palette ---------------------------------------------------------------
-
-# validate <dir> — every rendered file must be non-empty and fully substituted;
 # Noctalia reports a failed template as a warning and writes nothing, so a
-# missing file is a failure too.
+# missing or empty file must fail here.
 validate() {
     local dir=$1 file
     local -a files
@@ -127,7 +78,6 @@ validate() {
     return 0
 }
 
-# render_palette <image> <out.json> — stage one: token map from an image.
 render_palette() {
     local image=$1 out=$2 scheme_name
     local -a cmd
@@ -147,7 +97,9 @@ render_palette() {
     ok "palette: $(basename "${out}") (scheme $scheme_name)"
 }
 
-# render <image|palette.json> — palette, templates, and the store flip.
+# The store is decided here: output_path is relative to the render config, so
+# the config is copied into the staging directory, and the folder is moved into
+# place only after it validates.
 render() {
     local src=$1 palette_json out tmp
     local -a cmd
@@ -217,10 +169,8 @@ render() {
     ok "$store_name: $(find "$out" -type f | wc -l) berkas, current -> generated/$store_name"
 }
 
-# --- consumers -------------------------------------------------------------
-
-# reload <consumer ...> — palette.sh owns the per-app reload rules and reads the
-# same `current` symlink, so it stays the single place for that knowledge.
+# Reload rules live in matugen/script/palette.sh; they read the same `current`
+# symlink, so consumers do not care who rendered the palette.
 reload() {
     if (( ! do_reload )); then
         skip "reload dimatikan (--no-reload)"
@@ -241,8 +191,6 @@ reload() {
         return 1
     fi
 }
-
-# --- dispatch --------------------------------------------------------------
 
 list_consumers() {
     if [[ -x $reload_script ]]; then

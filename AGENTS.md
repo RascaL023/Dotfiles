@@ -61,6 +61,11 @@ script and the theming pipeline work with any compositor.
 │   │       └── blueprint/README.md       #   key-by-key reference
 │   ├── README.md                 # entry point, flows, and docs index
 │   └── docs/                     # theming docs
+├── noctalia/
+│   ├── noctalia-ctl              # entry point: `palette …`
+│   ├── script/palette.sh         # render → generated/noctalia-wallpaper, flip, reload
+│   ├── core/palette/wallpaper-based/{config.toml,template/}
+│   └── README.md                 # usage + store layout
 ├── nvim/ kitty/ foot/ …          # one directory per tool, symlinked to ~/.config
 └── README.md                     # user-facing overview
 ```
@@ -70,7 +75,10 @@ Entry points:
 - Config sync: `.synchronizer/.sync.sh`
 - Theming: `matugen/matugen-ctl` (`palette`, `feel`, `reload`, `list`, `status`);
   scripts in `matugen/script/`, configs in `matugen/core/{palette,feel}/`
-- Agent docs: this file + `matugen/docs/`
+- Noctalia palette: `noctalia/noctalia-ctl palette …` (only `palette`; render
+  config in `noctalia/core/palette/wallpaper-based/`, usage in
+  `noctalia/README.md`)
+- Agent docs: this file + `matugen/docs/` + `noctalia/docs/`
 
 ---
 
@@ -116,6 +124,17 @@ an interactive color picker and hang.
 Test a template into `/tmp` before rendering over a live path — recipe in
 `matugen/docs/MATUGEN_SKILLS.md`, section 0.
 
+### Palette Noctalia (engine kedua)
+
+```bash
+~/.dotfile/noctalia/noctalia-ctl palette <wallpaper>      # token map → render → aktif
+~/.dotfile/noctalia/noctalia-ctl palette <palette>.json   # token map yang sudah ada
+~/.dotfile/noctalia/noctalia-ctl palette --list           # konsumen yang dikenal
+```
+
+Tidak ada subcommand lain: seluruh workflow palette berada di `palette`. Store,
+validasi, dan delegasi reload dijelaskan di `noctalia/README.md`.
+
 ---
 
 ## Theming: two flows, keep them apart
@@ -159,6 +178,10 @@ Rules:
   the theme identity lives in the directory name and `meta.name` inside the
   JSON, never in the file name. The two files are independent — nothing syncs
   them automatically.
+- **Noctalia is a separate producer, not a third flow.** It renders its own
+  config in `noctalia/core/palette/wallpaper-based/` into
+  `generated/noctalia-wallpaper/` and flips the same `palette/current`; never
+  add its templates to a matugen config.
 - **Placeholder names are not shared** between flows — the same tool needs its
   own template per flow. Never assume a value exists; grep the template.
 - `~/.myenv` is the theme store **outside** this repo: this repo only renders
@@ -280,6 +303,7 @@ Rules:
 | `matugen/docs/CHEATSHEETS.md` | Material You role vocabulary → UI job mapping |
 | `matugen/docs/VOCABULARY.md` | sample `--show-colors` dump; how to read a role table |
 | `matugen/docs/WM_FEEL_MATRIX.md` | per-feature feel matrix: Hyprland-only, niri-only, differing semantics, app-level fallbacks, niri include gotchas |
+| `noctalia/README.md` | `noctalia-ctl palette` usage, palette sources, store layout |
 | `noctalia/docs/NOCTALIA_SKILLS.md` | Noctalia agent skill: palette sources, token/formats/filters, render config, verified engine limits, testing recipe, repo wiring |
 | `matugen/docs/NVIM_MAPPING.md` | which palette key colors which Neovim highlight group |
 | `matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md` | every key of the Flow B blueprint JSON |

@@ -167,15 +167,19 @@ TOML/JSON/XML parsers for those formats, the app's own config test otherwise
 |---|---|
 | `noctalia/core/palette/wallpaper-based/config.toml` | render config, one `[templates.*]` per consumer |
 | `noctalia/core/palette/wallpaper-based/template/` | template files |
-| `noctalia/script/noctalia-ctl` | render, validate, flip `current`, reload |
+| `noctalia/noctalia-ctl` | entry point (`palette …`): render, validate, flip `current`, reload |
+| `noctalia/script/palette.sh` | the palette workflow behind that entry point |
+| `noctalia/README.md` | usage, palette sources, and the store layout |
 
 ```bash
-noctalia-ctl "<wallpaper>"        # palette from an image, then render
-noctalia-ctl <palette>.json       # render an existing palette
-noctalia-ctl --list | --dry-run | --no-reload | --scheme <s> | --pure-black
+noctalia-ctl palette "<wallpaper>"      # palette from an image, then render
+noctalia-ctl palette <palette>.json     # render an existing palette
+noctalia-ctl palette --list | --dry-run | --no-reload | --scheme <s> | --pure-black
 ```
 
-The script renders into `~/.myenv/theme/palette/generated/.noctalia-wallpaper.tmp`
+`noctalia-ctl` exposes the palette workflow only: every call is
+`noctalia-ctl palette …`. It renders into
+`~/.myenv/theme/palette/generated/.noctalia-wallpaper.tmp`
 (a copy of the config lives there, so relative outputs land inside it),
 validates, moves the folder to `generated/noctalia-wallpaper`, then flips
 `current`. The store folder is named after the producer, so another theming

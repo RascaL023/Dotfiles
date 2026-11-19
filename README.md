@@ -6,7 +6,9 @@ drift between machines.
 
 The theming layer ([matugen](https://github.com/InioX/matugen)) lives in
 [`matugen/`](matugen) and paints every tool from a single color source — either
-a wallpaper or a hand-written palette.
+a wallpaper or a hand-written palette. A second engine, [`noctalia/`](noctalia),
+renders Noctalia templates from a token map into the same palette store and
+flips the same `current` symlink.
 
 > **No compositor lock-in.** The repo ships a `hypr/` config because that is what
 > is being used right now, but nothing in it, in the sync script, or in the
@@ -34,6 +36,9 @@ a wallpaper or a hand-written palette.
 │   └── docs/               # theming docs
 ├── hypr/                   # compositor config (Lua)
 │   └── docs/               #   migrasi 0.57 + backlog fitur yang belum dipakai
+├── noctalia/               # palette engine: Noctalia templates + noctalia-ctl
+│   ├── noctalia-ctl        #   entry point (`palette …`) + store flip
+│   └── docs/               #   template skill + verified engine limits
 ├── nvim/ kitty/ foot/ alacritty/ …   # one directory per tool
 └── AGENTS.md               # rules for AI agents working in this repo
 ```
@@ -248,6 +253,23 @@ lama, dan binding `Mod+T` / on-click waybar yang memanggilnya masih mati.
 > under `matugen image` (no `accent.*`), and Flow A's `colors.*` does not exist
 > under `matugen json`.
 
+### Engine palet Noctalia
+
+[`noctalia/`](noctalia) merender templatenya sendiri dari token map Noctalia,
+menulis `theme/palette/generated/noctalia-wallpaper/`, dan membalik symlink
+`current` yang sama:
+
+```bash
+noctalia-ctl palette <wallpaper>          # token map dari gambar, render, aktifkan
+noctalia-ctl palette <palette>.json       # render token map yang sudah ada
+noctalia-ctl palette                      # reload konsumen saja
+noctalia-ctl palette --list | --dry-run | --no-reload | --scheme <s> | --pure-black
+```
+
+Layout store, validasi, dan delegasi reload dijelaskan di
+[`noctalia/README.md`](noctalia/README.md); aturan template di
+[`noctalia/docs/NOCTALIA_SKILLS.md`](noctalia/docs/NOCTALIA_SKILLS.md).
+
 ### Rasa per tema (look & feel)
 
 Warna saja tidak membuat dua tema terasa berbeda. Rasa (`shape`: radius, border,
@@ -318,6 +340,8 @@ back to plain TokyoNight and warns. See
 | [`eww/docs/depth-clock/README.md`](eww/docs/depth-clock/README.md) | Jam wallpaper berlapis: kendali, layout, dan masker foreground |
 | [`eww/docs/depth-clock/GUIDE.md`](eww/docs/depth-clock/GUIDE.md) | Langkah konkret membuat depth clock untuk wallpaper baru |
 | [`…/blueprint/README.md`](matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md) | Every key of the fixed-palette JSON |
+| [`noctalia/README.md`](noctalia/README.md) | Noctalia palette engine: `noctalia-ctl palette`, sources, store layout |
+| [`noctalia/docs/NOCTALIA_SKILLS.md`](noctalia/docs/NOCTALIA_SKILLS.md) | writing/testing Noctalia templates + verified engine limits |
 
 ---
 
