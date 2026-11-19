@@ -169,6 +169,8 @@ TOML/JSON/XML parsers for those formats, the app's own config test otherwise
 | `noctalia/core/palette/wallpaper-based/template/` | template files |
 | `noctalia/noctalia-ctl` | entry point (`palette …`): render, validate, flip `current`, reload |
 | `noctalia/script/palette.sh` | the palette workflow behind that entry point |
+| `noctalia/sync.toml` | user template + `post_hook` that sync the GUI palette |
+| `noctalia/core/palette/palette-dump.json` | dumps the resolved palette (dark + light) for that hook |
 | `noctalia/README.md` | usage, palette sources, and the store layout |
 
 ```bash
@@ -185,7 +187,13 @@ validates, moves the folder to `generated/noctalia/wallpaper-based`, then flips
 `current`. One folder per engine: matugen writes `generated/matugen/`, so both
 producers can ship a `wallpaper-based` palette without collision and flipping
 back is a symlink change. `THEME_ROOT` overrides the store. The wallpaper
-scheme and `pure_black_dark` are read from `[theme]` in `noctalia/config.toml`.
+scheme and `pure_black_dark` are read from `[theme]` in
+`~/.local/state/noctalia/settings.toml`, falling back to `noctalia/config.toml`.
+
+GUI changes take the same path: `sync.toml` renders `palette-dump.json` to
+`~/.cache/noctalia/palette.json` and its `post_hook` runs
+`noctalia-ctl palette --from-shell`, which reads the active mode from IPC and
+re-renders the store exactly like a manual run.
 
 Generated output is never edited by hand: change the template, then re-render.
 

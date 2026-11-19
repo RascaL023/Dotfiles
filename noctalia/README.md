@@ -12,6 +12,7 @@ The `noctalia-ctl` entry point covers the palette workflow only; the shell's own
 ```bash
 noctalia-ctl palette ~/Pictures/wall.png      # derive colours, render, activate
 noctalia-ctl palette ~/.config/noctalia/palettes/solarized.json  # token map
+noctalia-ctl palette --from-shell             # palette yang sedang aktif di GUI
 noctalia-ctl palette                          # reload consumers only
 noctalia-ctl palette --list                   # known consumers
 ```
@@ -22,6 +23,7 @@ noctalia-ctl palette --list                   # known consumers
 | `-N`, `--no-reload` | render without reloading consumers |
 | `-s`, `--scheme <name>` | wallpaper generator (default: `[theme].wallpaper_scheme`, else `m3-tonal-spot`) |
 | `-b`, `--pure-black` | force the OLED surface ramp |
+| `--from-shell` | render the palette Noctalia currently resolved (GUI sync) |
 | `-l`, `--list` | print known consumers |
 | `-h`, `--help` | usage |
 
@@ -54,11 +56,26 @@ config's directory, so the config is copied into the staging directory.
 Reload is delegated to `matugen/script/palette.sh`: consumers read `current`, so
 they do not care which palette produced it.
 
+## Sinkron dengan GUI
+
+Perubahan tema di Settings → Theme ikut masuk ke store yang sama. `sync.toml`
+mendaftarkan user template `palette-dump`: Noctalia merender
+`core/palette/palette-dump.json` (token map dark + light) ke
+`${XDG_CACHE_HOME:-~/.cache}/noctalia/palette.json`, lalu `post_hook`-nya
+menjalankan `noctalia-ctl palette --from-shell`.
+
+`--from-shell` membaca mode aktif lewat `noctalia msg theme-mode-get`, merender
+token map itu ke `generated/noctalia/wallpaper-based/`, memvalidasi, membalik
+`current`, dan me-reload consumer — jalur yang sama dengan render manual. Untuk
+memicu ulang tanpa mengganti tema: `noctalia msg templates-apply`.
+
 ## Layout
 
 ```text
 noctalia-ctl                       entry point (`palette …`)
 script/palette.sh                  palette workflow
+sync.toml                          user template + hook for GUI palette sync
+core/palette/palette-dump.json     dumps the resolved palette (dark + light)
 core/palette/wallpaper-based/
   config.toml                      one [templates.*] per consumer
   template/                        templates

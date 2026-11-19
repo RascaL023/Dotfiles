@@ -1,0 +1,14 @@
+{
+  "dark": {
+<* for name, value in colors *>
+<* if not {{ loop.first }} *>,<* endif *>
+    "{{ name }}": "{{ value.dark.hex }}"
+<* endfor *>
+  },
+  "light": {
+<* for name, value in colors *>
+<* if not {{ loop.first }} *>,<* endif *>
+    "{{ name }}": "{{ value.light.hex }}"
+<* endfor *>
+  }
+}

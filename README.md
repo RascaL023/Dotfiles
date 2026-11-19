@@ -270,6 +270,10 @@ noctalia-ctl palette                      # reload konsumen saja
 noctalia-ctl palette --list | --dry-run | --no-reload | --scheme <s> | --pure-black
 ```
 
+Ganti tema lewat GUI juga mengalir ke store yang sama: `sync.toml` mendaftarkan
+user template yang men-dump palet aktif ke `~/.cache/noctalia/palette.json`, dan
+hook-nya memanggil `noctalia-ctl palette --from-shell`.
+
 Layout store, validasi, dan delegasi reload dijelaskan di
 [`noctalia/README.md`](noctalia/README.md); aturan template di
 [`noctalia/docs/NOCTALIA_SKILLS.md`](noctalia/docs/NOCTALIA_SKILLS.md).

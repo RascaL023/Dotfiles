@@ -64,7 +64,8 @@ script and the theming pipeline work with any compositor.
 ├── noctalia/
 │   ├── noctalia-ctl              # entry point: `palette …`
 │   ├── script/palette.sh         # render → generated/noctalia/wallpaper-based, flip, reload
-│   ├── core/palette/wallpaper-based/{config.toml,template/}
+│   ├── sync.toml                 # user template + hook: Noctalia GUI → same store
+│   ├── core/palette/{palette-dump.json,wallpaper-based/}
 │   └── README.md                 # usage + store layout
 ├── nvim/ kitty/ foot/ …          # one directory per tool, symlinked to ~/.config
 └── README.md                     # user-facing overview
@@ -184,7 +185,10 @@ Rules:
   never add its templates to a matugen config. Each producer owns its engine
   folder (`generated/matugen/`, `generated/noctalia/`), so both can ship a
   `wallpaper-based` palette without colliding, and `current` names the engine
-  that is live.
+  that is live. A theme change in Noctalia's GUI re-renders through the same
+  path: `sync.toml` dumps the resolved palette to
+  `~/.cache/noctalia/palette.json`, and its `post_hook` runs
+  `noctalia-ctl palette --from-shell` (mode read over IPC).
 - **Placeholder names are not shared** between flows — the same tool needs its
   own template per flow. Never assume a value exists; grep the template.
 - `~/.myenv` is the theme store **outside** this repo: this repo only renders

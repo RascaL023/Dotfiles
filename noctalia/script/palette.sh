@@ -7,6 +7,8 @@ root=${HOME}/.dotfile/noctalia
 engine=noctalia
 palette=wallpaper-based
 render_cfg=$root/core/palette/$palette/config.toml
+settings=${XDG_STATE_HOME:-$HOME/.local/state}/noctalia/settings.toml
+dump=${XDG_CACHE_HOME:-$HOME/.cache}/noctalia/palette.json
 theme_root=${THEME_ROOT:-$HOME/.myenv/theme/palette}
 generated=$theme_root/generated
 current=$theme_root/current
@@ -14,6 +16,7 @@ reload_script=$HOME/.dotfile/matugen/script/palette.sh
 
 dry_run=0
 do_reload=1
+from_shell=0
 scheme=""
 pure_black=""
 source_path=""
@@ -26,9 +29,29 @@ skip() { printf '[skip] %s\n' "$*"; }
 fail() { printf '[FAIL] %s\n' "$*" >&2; }
 
 shell_theme_value() {
-    local key=$1
-    sed -n "s/^[[:space:]]*$key[[:space:]]*=[[:space:]]*\"\([^\"]*\)\".*/\1/p" \
-        "$root/config.toml" 2>/dev/null | head -n1
+    local key=$1 file value
+    for file in "$settings" "$root/config.toml"; do
+        value=$(sed -n "s/^[[:space:]]*$key[[:space:]]*=[[:space:]]*\"\([^\"]*\)\".*/\1/p" \
+            "$file" 2>/dev/null | head -n1)
+        if [[ -n $value ]]; then
+            printf '%s' "$value"
+            return 0
+        fi
+    done
+}
+
+theme_mode() {
+    local value
+    if have noctalia; then
+        value=$(timeout "$timeout_s" noctalia msg theme-mode-get 2>/dev/null) || value=""
+        case $value in
+            dark|light) printf '%s' "$value"; return 0 ;;
+        esac
+    fi
+    case $(shell_theme_value mode) in
+        light) printf light ;;
+        *) printf dark ;;
+    esac
 }
 
 wall_scheme() {
@@ -50,7 +73,7 @@ usage() {
     printf 'usage: noctalia-ctl palette <wallpaper|palette.json> [options] [consumer ...]\n'
     printf '       noctalia-ctl palette --list\n\n'
     printf 'options: -n/--dry-run, -N/--no-reload, -s/--scheme <name>, -b/--pure-black,\n'
-    printf '         -l/--list, -h/--help\n'
+    printf '         --from-shell, -l/--list, -h/--help\n'
     printf 'A palette with no source reloads consumers only.\n\n'
     printf 'See %s/README.md for palette sources and the store layout.\n' "$root"
 }
@@ -101,10 +124,15 @@ render_palette() {
 # the config is copied into the staging directory, and the folder is moved into
 # place only after it validates.
 render() {
-    local src=$1 palette_json out tmp
+    local src=$1 palette_json out tmp mode
     local -a cmd
     if [[ ! -f $src ]]; then
-        fail "sumber tidak ada: $src"
+        if (( from_shell )) && [[ $src == "$dump" ]]; then
+            fail "palet GUI belum ada: $dump"
+            fail "picu sekali dari Settings → Theme, atau: noctalia msg templates-apply"
+        else
+            fail "sumber tidak ada: $src"
+        fi
         return 1
     fi
     case $src in
@@ -126,14 +154,15 @@ render() {
 
     out=$generated/$engine/$palette
     tmp=$generated/$engine/.$palette.tmp
+    mode=$(theme_mode)
     if (( dry_run )); then
         if [[ $src == *.json ]]; then
-            printf '[dry]  render %s/%s: noctalia theme --theme-json %s -c %s (cwd %s)\n' \
-                "$engine" "$palette" "$src" "$render_cfg" "$tmp"
+            printf '[dry]  render %s/%s: noctalia theme --theme-json %s -c %s (cwd %s, mode %s)\n' \
+                "$engine" "$palette" "$src" "$render_cfg" "$tmp" "$mode"
         else
             render_palette "$src" "$tmp/palette.json"
-            printf '[dry]  render %s/%s: noctalia theme --theme-json %s/palette.json -c %s (cwd %s)\n' \
-                "$engine" "$palette" "$tmp" "$render_cfg" "$tmp"
+            printf '[dry]  render %s/%s: noctalia theme --theme-json %s/palette.json -c %s (cwd %s, mode %s)\n' \
+                "$engine" "$palette" "$tmp" "$render_cfg" "$tmp" "$mode"
         fi
         return 0
     fi
@@ -149,7 +178,7 @@ render() {
         render_palette "$src" "$palette_json" || { rm -rf "$tmp"; return 1; }
     fi
 
-    cmd=(noctalia theme --theme-json "$palette_json" -c ./config.toml)
+    cmd=(noctalia theme --theme-json "$palette_json" -c ./config.toml --default-mode "$mode")
     if ! ( cd "$tmp" && "${cmd[@]}" ); then
         fail "noctalia gagal merender; $out tidak diubah"
         rm -rf "$tmp"
@@ -166,7 +195,7 @@ render() {
     rm -rf "$out"
     mv "$tmp" "$out"
     ln -sfn "$out" "$current"
-    ok "$engine/$palette: $(find "$out" -type f | wc -l) berkas, current -> generated/$engine/$palette"
+    ok "$engine/$palette: $(find "$out" -type f | wc -l) berkas (mode $mode), current -> generated/$engine/$palette"
 }
 
 # Reload rules live in matugen/script/palette.sh; they read the same `current`
@@ -218,6 +247,7 @@ main() {
                 shift
                 ;;
             -b|--pure-black) pure_black=true ;;
+            --from-shell) from_shell=1 ;;
             -h|--help) usage; return 0 ;;
             --) while (( $# )); do wanted+=("$1"); shift; done ;;
             -*)
@@ -235,6 +265,9 @@ main() {
         esac
     done
 
+    if (( from_shell )) && [[ -z $source_path ]]; then
+        source_path=$dump
+    fi
     if [[ -n $source_path ]]; then
         render "$source_path" || return 1
     fi

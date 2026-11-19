@@ -1,0 +1,6 @@
+# Noctalia renders the resolved palette here on every theme change; the hook
+# feeds it back into the repo pipeline, so GUI and CLI land in the same store.
+[theme.templates.user.palette-dump]
+input_path  = "core/palette/palette-dump.json"
+output_path = "$XDG_CACHE_HOME/noctalia/palette.json"
+post_hook   = "$HOME/.config/noctalia/noctalia-ctl palette --from-shell"
