@@ -3,6 +3,7 @@
 **.bak
 **.tmp
 matugen/templates/test.conf
+__pycache__
 
 herdr/**
 !herdr/.gitkeep

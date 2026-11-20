@@ -1,0 +1,27 @@
+// #############################
+// ## Generated with Noctalia ##
+// #############################
+// ## Manual edit is not recommended,
+// ## Except for testing.
+
+
+layout {
+    border {
+        active-gradient from="{{ colors.primary.default.hex }}" to="{{ colors.secondary.default.hex }}" angle=45 in="oklch"
+        inactive-color "{{ colors.surface_container_lowest.default.hex }}ee"
+        urgent-color "{{ colors.error.default.hex }}"
+    }
+
+    shadow {
+        color "{{ colors.shadow.default.hex }}80"
+        inactive-color "{{ colors.shadow.default.hex }}4d"
+    }
+
+    insert-hint {
+        color "{{ colors.primary.default.hex }}80"
+    }
+}
+
+overview {
+    backdrop-color "{{ colors.surface_container_lowest.default.hex }}"
+}

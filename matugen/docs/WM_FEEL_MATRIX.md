@@ -1,6 +1,6 @@
 # Matriks Feel: Hyprland 0.57 vs niri 26.04
 
-> Indeks: [`README.md`](../README.md) · terkait: [`NOCTALIA.md`](NOCTALIA.md)
+> Indeks: [`README.md`](../README.md)
 
 **Status: rancangan + hasil verifikasi.** Dokumen ini memetakan setiap knob
 “rasa” yang relevan ke dua WM yang dipakai repo ini, dengan satu tujuan:
@@ -13,7 +13,7 @@ Sumber verifikasi:
   (`hypr/config/appearance/{palette,feel,look,motion}.lua`, `hypr/hyprland.lua`).
 - niri 26.04: docs Configuration (Layout, Window Rules, Layer Rules, Animations,
   Include) + `niri validate` lokal dengan fragmen uji.
-- Noctalia v5: docs resmi (batas template) — dibahas di [`NOCTALIA.md`](NOCTALIA.md).
+- Noctalia v5: docs resmi (batas template) dan perilaku yang terverifikasi di mesin ini.
 
 Legenda verdict:
 
@@ -284,7 +284,7 @@ Noctalia v5 punya **template compositor bawaan** yang menulis
 `hypr/noctalia.lua` (plus `dofile(...).apply_theme()`). Kalau keduanya aktif
 bersamaan dengan include warna kita, akan ada dua pemilik warna di WM yang sama.
 Aturannya: **satu pemilik warna per WM**, diputuskan sekali saat integrasi —
-bukan dideteksi otomatis (lihat [`NOCTALIA.md`](NOCTALIA.md) §1).
+bukan dideteksi otomatis.
 
 Yang tetap aman: rasa (fragmen niri/`feel.lua`) selalu milik kita, karena
 Noctalia tidak bisa merender angka/string bebas (§2 dokumen itu).

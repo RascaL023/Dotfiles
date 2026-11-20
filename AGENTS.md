@@ -43,7 +43,7 @@ script and the theming pipeline work with any compositor.
 ├── matugen/
 │   ├── matugen-ctl               # entry point: palette | feel | reload | list | status
 │   ├── script/
-│   │   ├── palette.sh            # render palette → generated/<palette>, flip, reload
+│   │   ├── palette.sh            # render palette → generated/matugen/<palette>, flip, reload
 │   │   └── feel.sh               # render a feel profile, flip feel/current
 │   ├── core/feel/                        #   numbers/booleans, per WM
 │   │   ├── config.apps.toml              #   shared apps/font config
@@ -61,6 +61,12 @@ script and the theming pipeline work with any compositor.
 │   │       └── blueprint/README.md       #   key-by-key reference
 │   ├── README.md                 # entry point, flows, and docs index
 │   └── docs/                     # theming docs
+├── noctalia/
+│   ├── noctalia-ctl              # entry point: `palette …`
+│   ├── script/palette.sh         # render → generated/noctalia/wallpaper-based, flip, reload
+│   ├── sync.toml                 # user template + hook: Noctalia GUI → same store
+│   ├── core/palette/{palette-dump.json,wallpaper-based/}
+│   └── README.md                 # usage + store layout
 ├── nvim/ kitty/ foot/ …          # one directory per tool, symlinked to ~/.config
 └── README.md                     # user-facing overview
 ```
@@ -70,7 +76,10 @@ Entry points:
 - Config sync: `.synchronizer/.sync.sh`
 - Theming: `matugen/matugen-ctl` (`palette`, `feel`, `reload`, `list`, `status`);
   scripts in `matugen/script/`, configs in `matugen/core/{palette,feel}/`
-- Agent docs: this file + `matugen/docs/`
+- Noctalia palette: `noctalia/noctalia-ctl palette …` (only `palette`; render
+  config in `noctalia/core/palette/wallpaper-based/`, usage in
+  `noctalia/README.md`)
+- Agent docs: this file + `matugen/docs/` + `noctalia/docs/`
 
 ---
 
@@ -116,6 +125,17 @@ an interactive color picker and hang.
 Test a template into `/tmp` before rendering over a live path — recipe in
 `matugen/docs/MATUGEN_SKILLS.md`, section 0.
 
+### Palette Noctalia (engine kedua)
+
+```bash
+~/.dotfile/noctalia/noctalia-ctl palette <wallpaper>      # token map → render → aktif
+~/.dotfile/noctalia/noctalia-ctl palette <palette>.json   # token map yang sudah ada
+~/.dotfile/noctalia/noctalia-ctl palette --list           # konsumen yang dikenal
+```
+
+Tidak ada subcommand lain: seluruh workflow palette berada di `palette`. Store,
+validasi, dan delegasi reload dijelaskan di `noctalia/README.md`.
+
 ---
 
 ## Theming: two flows, keep them apart
@@ -127,7 +147,7 @@ Test a template into `/tmp` before rendering over a live path — recipe in
 | Command | `matugen-ctl palette <wallpaper>` | `matugen-ctl palette <blueprint>.json` |
 | Template vocabulary | `{{ colors.<role>.<scheme>.<format> }}` | root-level keys: `{{ accent.primary }}`, `{{ syntax.keyword }}` |
 | Themes here | `wallpaper-based` | `kanagawa-dragon-lotus` |
-| Output | `~/.myenv/theme/palette/generated/wallpaper-based/<tool>/…` | `~/.myenv/theme/palette/generated/<theme>/<tool>/…` |
+| Output | `~/.myenv/theme/palette/generated/matugen/wallpaper-based/<tool>/…` | `~/.myenv/theme/palette/generated/matugen/<theme>/<tool>/…` |
 
 Rules:
 
@@ -135,7 +155,7 @@ Rules:
   breaks every `matugen image` run (no `accent.*` in a Material You palette).
 - **`output_path` is relative** in both palette configs (`/kitty/theme.conf`),
   exactly like the feel configs: `matugen/script/palette.sh` supplies
-  `-p ~/.myenv/theme/palette/generated/<palette>`, validates the result, then flips
+  `-p ~/.myenv/theme/palette/generated/matugen/<palette>`, validates the result, then flips
   `palette/current`. Rendering one of these configs with bare `matugen` writes to
   `/kitty/theme.conf` at the filesystem root.
 - **Feel is its own flow, not part of a palette.** Colors write
@@ -159,13 +179,24 @@ Rules:
   the theme identity lives in the directory name and `meta.name` inside the
   JSON, never in the file name. The two files are independent — nothing syncs
   them automatically.
+- **Noctalia is a separate producer, not a third flow.** It renders its own
+  config in `noctalia/core/palette/wallpaper-based/` into
+  `generated/noctalia/wallpaper-based/` and flips the same `palette/current`;
+  never add its templates to a matugen config. Each producer owns its engine
+  folder (`generated/matugen/`, `generated/noctalia/`), so both can ship a
+  `wallpaper-based` palette without colliding, and `current` names the engine
+  that is live. A theme change in Noctalia's GUI re-renders through the same
+  path: `sync.toml` dumps the resolved palette to
+  `~/.cache/noctalia/palette.json`, and its `post_hook` runs
+  `noctalia-ctl palette --from-shell` (mode read over IPC).
 - **Placeholder names are not shared** between flows — the same tool needs its
   own template per flow. Never assume a value exists; grep the template.
 - `~/.myenv` is the theme store **outside** this repo: this repo only renders
   into it. Two independent axes live side by side: `theme/palette/` (colours,
   flipped by `matugen/script/palette.sh`) and `theme/feel/` (look & feel,
   flipped by `matugen/script/feel.sh`). Each has a `current` symlink to its
-  active `generated/<name>` directory, so switching is one symlink flip and
+  active `generated/<engine>/<name>` directory, so switching is one symlink
+  flip and
   never re-renders. There is **no working theme switcher**: the old one in
   `~/.myenv/script/` is parked in `theme.bak/`, its `theme-picker.sh` just execs
   `nextwall.sh`, and the `Mod+T` bindings / waybar on-click still call the
@@ -201,8 +232,8 @@ Rules:
   `nvim/init.lua` starts `core.theme_watch` **before** `core.lazy` so the
   watcher survives a failing plugin spec.
 - Templates that produce it:
-  - Flow A: `matugen/core/palette/wallpaper-based/template/nvim.lua` → `~/.myenv/theme/palette/generated/wallpaper-based/nvim/theme.lua`
-  - Flow B: `matugen/core/palette/kanagawa-dragon-lotus/template/nvim.lua` → `~/.myenv/theme/palette/generated/kanagawa-dragon-lotus/nvim/theme.lua`
+  - Flow A: `matugen/core/palette/wallpaper-based/template/nvim.lua` → `~/.myenv/theme/palette/generated/matugen/wallpaper-based/nvim/theme.lua`
+  - Flow B: `matugen/core/palette/kanagawa-dragon-lotus/template/nvim.lua` → `~/.myenv/theme/palette/generated/matugen/kanagawa-dragon-lotus/nvim/theme.lua`
 - **Both flows write into their own generated folder; activation is the
   `current` flip** that `matugen-ctl palette` performs after validation. The
   loader only ever reads `current/nvim/theme.lua`.
@@ -280,7 +311,8 @@ Rules:
 | `matugen/docs/CHEATSHEETS.md` | Material You role vocabulary → UI job mapping |
 | `matugen/docs/VOCABULARY.md` | sample `--show-colors` dump; how to read a role table |
 | `matugen/docs/WM_FEEL_MATRIX.md` | per-feature feel matrix: Hyprland-only, niri-only, differing semantics, app-level fallbacks, niri include gotchas |
-| `matugen/docs/NOCTALIA.md` | verified Noctalia v5 facts vs matugen: config layering, template limits, color ownership, integration checklist |
+| `noctalia/README.md` | `noctalia-ctl palette` usage, palette sources, store layout |
+| `noctalia/docs/NOCTALIA_SKILLS.md` | Noctalia agent skill: palette sources, token/formats/filters, render config, verified engine limits, testing recipe, repo wiring |
 | `matugen/docs/NVIM_MAPPING.md` | which palette key colors which Neovim highlight group |
 | `matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md` | every key of the Flow B blueprint JSON |
 | `hypr/docs/ROADMAP_V57.md` | Hyprland 0.57 migration (breaking changes), unimplemented features: recipes, verification steps, backlog |
@@ -302,3 +334,12 @@ verified against the repo, so a stale line is a bug.
 4. Render both axes so `~/.myenv/theme/palette/current` and
    `~/.myenv/theme/feel/current` exist:
    `matugen-ctl palette <source>` and `matugen-ctl feel default`.
+
+--- 
+
+## Testing
+
+If you want to test on `/tmp`, use `/tmp/Dotfiles` directory.
+Don't directly create file on `/tmp`.
+It will better if you create another directory recursively by context.
+For example: use `/tmp/Dotfiles/Noctalia` for testing noctalia feature.

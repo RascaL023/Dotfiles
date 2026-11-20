@@ -53,7 +53,7 @@ Dua sumbu terpisah; jangan mencampurnya dalam satu config matugen.
 | Config | `core/palette/wallpaper-based/config.toml` | `core/palette/<tema>/config.toml` | `core/feel/config.apps.toml` + `config.hypr.toml` + `config.niri.toml` |
 | Sumber | gambar | `blueprint/<varian>.json` tulis tangan | `profiles/<profil>/{apps,hypr,niri}.json` |
 | Kosakata template | `{{ colors.<role>.<scheme>.<format> }}` | `{{ accent.primary }}`, `{{ syntax.keyword }}`, … | `{{ font.* }}`, `{{ chrome.* }}`, … |
-| Output | `~/.myenv/theme/palette/generated/wallpaper-based/` | `~/.myenv/theme/palette/generated/<tema>/` | `~/.myenv/theme/feel/generated/<profil>/` |
+| Output | `~/.myenv/theme/palette/generated/matugen/wallpaper-based/` | `~/.myenv/theme/palette/generated/matugen/<tema>/` | `~/.myenv/theme/feel/generated/<profil>/` |
 
 Template alur B gagal di `matugen image` (tidak ada `accent.*`), dan `colors.*`
 tidak ada di `matugen json`. Karena itu config dan templatenya dipisah per alur.
@@ -111,9 +111,16 @@ menunjuk, jadi tidak ikut basi saat blueprint atau konsumen ditambah.
 
 Config palet dan rasa menulis `output_path` **relatif** (`/kitty/theme.conf`).
 `palette.sh`/`feel.sh` yang menyuplai `-p` ke folder store, merender ke
-`generated/.<nama>.tmp`, menolak hasil kosong atau placeholder tersisa, baru
-memindahkannya ke `generated/<nama>` dan membalik `current`. Render gagal tidak
-pernah mengganti tema yang sedang dipakai.
+`generated/<engine>/.<nama>.tmp`, menolak hasil kosong atau placeholder tersisa,
+baru memindahkannya ke `generated/<engine>/<nama>` dan membalik `current`.
+`<engine>` adalah `matugen` atau `noctalia` — satu folder per engine, supaya
+keduanya bisa punya palet `wallpaper-based` tanpa bertabrakan. Render gagal
+tidak pernah mengganti tema yang sedang dipakai.
+
+Store dari layout lama yang datar (`palette/generated/<nama>`) tidak dibaca
+lagi: pindahkan ke `palette/generated/matugen/<nama>` atau render ulang.
+`generated/noctalia-wallpaper/` juga tidak dipakai lagi; nama barunya
+`generated/noctalia/wallpaper-based/`.
 
 Reload berjalan sesudah aktivasi: hanya proses yang benar-benar hidup yang
 disentuh, setiap panggilan dibungkus `timeout`, dan `hyprctl reload` hanya
@@ -169,7 +176,6 @@ kode adalah bug dokumentasi.
 | [`docs/CHEATSHEETS.md`](docs/CHEATSHEETS.md) | ID | Kosakata *role* Material You → pekerjaan UI |
 | [`docs/VOCABULARY.md`](docs/VOCABULARY.md) | ID | Contoh `matugen --show-colors` dan cara membacanya |
 | [`docs/WM_FEEL_MATRIX.md`](docs/WM_FEEL_MATRIX.md) | ID | Fitur rasa Hyprland 0.57 vs niri 26.04, jebakan include |
-| [`docs/NOCTALIA.md`](docs/NOCTALIA.md) | ID | Fakta Noctalia v5 vs matugen: config, batas template, pemilik warna, checklist integrasi |
 | [`docs/NVIM_MAPPING.md`](docs/NVIM_MAPPING.md) | ID | Key palet → highlight group Neovim |
 | [`core/palette/kanagawa-dragon-lotus/blueprint/README.md`](core/palette/kanagawa-dragon-lotus/blueprint/README.md) | ID | Referensi setiap key JSON blueprint (alur B) |
 

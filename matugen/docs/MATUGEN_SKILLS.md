@@ -34,7 +34,7 @@ Repo rules (from `AGENTS.md`):
 - Command: `~/.dotfile/matugen/matugen-ctl palette <wallpaper>` (`matugen image <wallpaper> --source-color-index 0 -c <config> -p <store>` underneath)
 - Config: `matugen/core/palette/wallpaper-based/config.toml` (`alacritty`, `kitty`, `lazygit`, `scss`, `rasi`, …)
 - Templates: `matugen/core/palette/wallpaper-based/template/*`, using Material roles `{{ colors.<role>.default.hex }}`.
-- Outputs: `~/.myenv/theme/palette/generated/wallpaper-based/<tool>/…`
+- Outputs: `~/.myenv/theme/palette/generated/matugen/wallpaper-based/<tool>/…`
 - Only run `matugen image` when the user asks for wallpaper theming. Always pass `--source-color-index 0`.
 
 **B. Fixed palette (named theme: `kanagawa-dragon-lotus`)** — the usual task in this repo
@@ -43,11 +43,11 @@ Repo rules (from `AGENTS.md`):
 - Templates: `matugen/core/palette/<theme>/template/*`.
 - Command: `~/.dotfile/matugen/matugen-ctl palette <theme>/blueprint/<variant>.json` (`matugen json <blueprint.json> -c <theme-config.toml> -p <store>` underneath). The JSON is exposed **at the template root**, so templates read root-level keys (`{{ accent.primary }}`, `{{ syntax.keyword }}`) — never `colors.*`, and there is no `dark.*`/`light.*` wrapper: the variant you pass is the variant you get.
 - Config: use a **separate config per theme** (`core/palette/kanagawa-dragon-lotus/config.toml`). Do NOT add fixed-theme templates to `matugen/core/palette/wallpaper-based/config.toml`, otherwise every `matugen image` run fails because `accent.*` / `syntax.*` only exist in `json` mode.
-- Outputs: `~/.myenv/theme/palette/generated/<theme>/<tool>/…` (here: `generated/kanagawa-dragon-lotus/nvim/`).
+- Outputs: `~/.myenv/theme/palette/generated/matugen/<theme>/<tool>/…` (here: `generated/matugen/kanagawa-dragon-lotus/nvim/`).
 
 ### Engine facts verified on this machine (matugen 4.1.0)
 - `matugen json <file> -c <cfg>` needs no source color. `-m dark|light` is irrelevant here: the variant comes from which blueprint file you pass.
-- **`output_path` is relative** in both palette configs (`/kitty/theme.conf`), like the feel config. `matugen -p <dir>` makes it `<dir>/kitty/theme.conf` (verified on 4.2.0); without `-p` the file lands at `/kitty/theme.conf` on the filesystem root. `matugen-ctl palette` supplies `-p ~/.myenv/theme/palette/generated/<palette>`, validates the result, then flips `theme/palette/current`.
+- **`output_path` is relative** in both palette configs (`/kitty/theme.conf`), like the feel config. `matugen -p <dir>` makes it `<dir>/kitty/theme.conf` (verified on 4.2.0); without `-p` the file lands at `/kitty/theme.conf` on the filesystem root. `matugen-ctl palette` supplies `-p ~/.myenv/theme/palette/generated/matugen/<palette>`, validates the result, then flips `theme/palette/current`.
 - `--import-json <file>` adds the same JSON as render data for `matugen image` / `matugen color` runs.
 - Dotted access works even for keyword-like keys: `{{ syntax.function }}`, `.return`, `.class`, `.import` are all valid.
 - **Arrays cannot be indexed.** `colors[0]` and `colors.0` are parse errors. Loop instead:
@@ -59,8 +59,8 @@ Repo rules (from `AGENTS.md`):
 ### Neovim target (already wired)
 - Templates: `matugen/core/palette/wallpaper-based/template/nvim.lua` (flow A) and
   `matugen/core/palette/kanagawa-dragon-lotus/template/nvim.lua` (flow B, omits `source`).
-- Output: `~/.myenv/theme/palette/generated/<theme>/nvim/theme.lua` — flow A writes to
-  `~/.myenv/theme/palette/generated/wallpaper-based/nvim/theme.lua` and never straight into
+- Output: `~/.myenv/theme/palette/generated/matugen/<theme>/nvim/theme.lua` — flow A writes to
+  `~/.myenv/theme/palette/generated/matugen/wallpaper-based/nvim/theme.lua` and never straight into
   `current`; the palette reaches Neovim once `current` points at that folder.
 - The generated file is a **palette module only** and is consumed by
   `nvim/lua/core/theme.lua`, which adds `~/.myenv/theme/palette/current/nvim/?.lua` to
@@ -848,7 +848,7 @@ theme[cpu_end]="{{ colors.tertiary.default.hex }}"
 
 ### 6.14 Neovim / Lua targets
 
-- Generate a **palette module**, not a full colorscheme. In this repo the generated modules are `~/.myenv/theme/palette/generated/wallpaper-based/nvim/theme.lua` (flow A) and `~/.myenv/theme/palette/generated/kanagawa-dragon-lotus/nvim/theme.lua` (flow B); `nvim/lua/core/theme.lua` loads whichever one `~/.myenv/theme/palette/current` points at, through `require("theme")` (see section 0).
+- Generate a **palette module**, not a full colorscheme. In this repo the generated modules are `~/.myenv/theme/palette/generated/matugen/wallpaper-based/nvim/theme.lua` (flow A) and `~/.myenv/theme/palette/generated/matugen/kanagawa-dragon-lotus/nvim/theme.lua` (flow B); `nvim/lua/core/theme.lua` loads whichever one `~/.myenv/theme/palette/current` points at, through `require("theme")` (see section 0).
 - Beware the Lua `{{` collision: do not write nested table constructors that put two `{` together. Keep one key per line, and quote Lua keyword keys (`["function"]`, `["return"]`).
 
 ```lua
