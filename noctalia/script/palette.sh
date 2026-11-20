@@ -135,6 +135,7 @@ render() {
         fi
         return 1
     fi
+    src=$(readlink -f -- "$src")
     case $src in
         *.json) ;;
         *.png|*.jpg|*.jpeg|*.webp|*.gif|*.bmp) ;;
