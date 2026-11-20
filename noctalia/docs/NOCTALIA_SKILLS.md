@@ -45,7 +45,8 @@ Other keys: `mode` (`dark`/`light`/`auto`), `shell_mode`, `pure_black_dark`,
 `wallpaper_scheme`.
 
 `wallpaper_scheme` values: `m3-tonal-spot`, `m3-content`, `m3-fruit-salad`,
-`m3-rainbow`, `m3-monochrome`, `vibrant`, `faithful`, `dysfunctional`, `muted`.
+`m3-rainbow`, `m3-monochrome`, `vibrant`, `faithful`, `soft`, `dysfunctional`,
+`muted`.
 
 **Palette file format.** `palettes/` is the v5 location (v4 used
 `colorschemes/<Nama>/<Nama>.json`). Two formats are accepted by `--theme-json`

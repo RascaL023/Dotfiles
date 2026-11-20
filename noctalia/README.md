@@ -64,9 +64,10 @@ mendaftarkan user template `palette-dump`: Noctalia merender
 `${XDG_CACHE_HOME:-~/.cache}/noctalia/palette.json`, lalu `post_hook`-nya
 menjalankan `noctalia-ctl palette --from-shell`.
 
-`--from-shell` membaca mode aktif lewat `noctalia msg theme-mode-get`, merender
-token map itu ke `generated/noctalia/wallpaper-based/`, memvalidasi, membalik
-`current`, dan me-reload consumer — jalur yang sama dengan render manual. Untuk
+`--from-shell` membaca mode aktif lewat `noctalia msg theme-mode-get`, dengan
+fallback `[theme].mode` di `settings.toml` → `config.toml` → `dark`. Token map
+itu dirender ke `generated/noctalia/wallpaper-based/`, divalidasi, `current`
+dibalik, dan consumer di-reload — jalur yang sama dengan render manual. Untuk
 memicu ulang tanpa mengganti tema: `noctalia msg templates-apply`.
 
 ## Layout
