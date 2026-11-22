@@ -25,7 +25,10 @@ atlanta help | status | doctor
 | `idle` | `toggle`, `status` | `hypridle` |
 | `nightlight` | `toggle`, `status` | `hyprsunset` |
 | `wallpaper` | `set`, `next`, `prev`, `random`, `pick`, `status` | `awww` |
-| `osd` | `volume`, `mic`, `brightness` | `wpctl`, `brightnessctl`, `notify-send` |
+| `osd` | `volume`, `mic`, `brightness` | `wpctl`, `brightnessctl`, `notify-send` (report only) |
+| `volume` | `up`, `down`, `mute` | `wpctl` + OSD |
+| `mic` | `toggle` | `wpctl` + OSD |
+| `brightness` | `up`, `down` | `brightnessctl` + OSD |
 
 Examples:
 
@@ -35,8 +38,16 @@ atlanta bar toggle
 atlanta screenshot region
 atlanta wallpaper next
 atlanta session menu
+atlanta volume up
+atlanta mic toggle
 atlanta status
 ```
+
+`volume`, `mic`, and `brightness` perform the change and then report through
+the same SwayNC bubble (`x-canonical-private-synchronous:atlanta-osd`), so
+holding a media key replaces one bubble instead of stacking notifications. `osd`
+only reports and never mutates. Steps default to `0.05` for volume
+(`ATLANTA_VOLUME_STEP`) and `5%` for brightness (`ATLANTA_BRIGHTNESS_STEP`).
 
 Exit codes: `0` ok, `1` failed or not running, `2` usage, `3` unsupported in
 this session, `127` a provider is missing.

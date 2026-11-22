@@ -25,7 +25,15 @@ record = os.environ.get("MOCK_RECORD")
 if record:
     with open(record, "a", encoding="utf-8") as handle:
         handle.write(json.dumps({"name": name, "argv": sys.argv[1:]}) + "\n")
-output = os.environ.get("MOCK_" + key + "_OUT")
+suffixes = []
+if len(sys.argv) > 1:
+    suffixes.append("_" + sys.argv[1].upper().replace("-", "_"))
+suffixes.append("")
+output = None
+for suffix in suffixes:
+    output = os.environ.get("MOCK_" + key + suffix + "_OUT")
+    if output is not None:
+        break
 if output:
     print(output)
 if os.environ.get("MOCK_" + key + "_HOLD") == "1":
@@ -273,6 +281,67 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(self.only_call("wpctl"), ["get-volume", "@DEFAULT_AUDIO_SINK@"])
         self.assertIn("x-canonical-private-synchronous:atlanta-osd",
                       " ".join(self.only_call("notify-send")))
+
+    def test_volume_up_sets_then_reports(self):
+        result = self.call("volume", "up",
+                           **{"MOCK_WPCTL_GET_VOLUME_OUT": "Volume: 0.65"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "Volume 65%")
+        self.assertEqual(
+            [row["argv"] for row in self.calls("wpctl")],
+            [["set-volume", "@DEFAULT_AUDIO_SINK@", "0.05+", "-l", "1.0"],
+             ["get-volume", "@DEFAULT_AUDIO_SINK@"]])
+        self.assertIn("x-canonical-private-synchronous:atlanta-osd",
+                      " ".join(self.only_call("notify-send")))
+
+    def test_volume_down_respects_the_step_override(self):
+        result = self.call("volume", "down", ATLANTA_VOLUME_STEP="0.1",
+                           **{"MOCK_WPCTL_GET_VOLUME_OUT": "Volume: 0.40"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "Volume 40%")
+        self.assertEqual(self.calls("wpctl")[0]["argv"],
+                         ["set-volume", "@DEFAULT_AUDIO_SINK@", "0.1-", "-l", "1.0"])
+
+    def test_volume_mute_toggles_and_shows_the_muted_state(self):
+        result = self.call("volume", "mute",
+                           **{"MOCK_WPCTL_GET_VOLUME_OUT": "Volume: 0.65 [MUTED]"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "Volume 65% (muted)")
+        self.assertEqual(self.calls("wpctl")[0]["argv"],
+                         ["set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"])
+
+    def test_mic_toggle_uses_the_default_source(self):
+        result = self.call("mic", "toggle",
+                           **{"MOCK_WPCTL_GET_VOLUME_OUT": "Volume: 0.30 [MUTED]"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "Microphone 30% (muted)")
+        self.assertEqual(self.calls("wpctl")[0]["argv"],
+                         ["set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"])
+
+    def test_brightness_up_sets_then_reports(self):
+        result = self.call("brightness", "up", **{
+            "MOCK_BRIGHTNESSCTL_GET_OUT": "40",
+            "MOCK_BRIGHTNESSCTL_MAX_OUT": "100",
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "Brightness 40%")
+        self.assertEqual([row["argv"] for row in self.calls("brightnessctl")],
+                         [["-q", "set", "+5%"], ["get"], ["max"]])
+        self.assertIn("Brightness", self.only_call("notify-send"))
+
+    def test_brightness_down_uses_the_reverse_step(self):
+        result = self.call("brightness", "down", ATLANTA_BRIGHTNESS_STEP="10%", **{
+            "MOCK_BRIGHTNESSCTL_GET_OUT": "50",
+            "MOCK_BRIGHTNESSCTL_MAX_OUT": "100",
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.calls("brightnessctl")[0]["argv"],
+                         ["-q", "set", "10%-"])
+
+    def test_volume_rejects_an_unknown_verb(self):
+        result = self.call("volume", "louder")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("volume needs a verb", result.stderr)
 
     def test_region_screenshot_passes_the_slurp_geometry(self):
         result = self.call("screenshot", "region", **{"MOCK_SLURP_OUT": "10x10+0+0"})

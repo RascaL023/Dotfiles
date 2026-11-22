@@ -94,16 +94,19 @@ status_wallpaper() {
     row wallpaper awww "$(( index % count ))/$count ${path##*/}"
 }
 
-status_osd() {
+status_feedback() {
     local name
     for name in wpctl brightnessctl notify-send; do
         if ! provider_resolve "$name" >/dev/null; then
-            row osd "$name" missing
+            row feedback "$name" missing
             missing=1
             return
         fi
     done
     row osd wpctl ready
+    row volume wpctl ready
+    row mic wpctl ready
+    row brightness brightnessctl ready
 }
 
 status() {
@@ -125,7 +128,7 @@ status() {
         row nightlight hyprsunset unsupported
     fi
     status_wallpaper
-    status_osd
+    status_feedback
     row theme matugen deferred
     (( check && missing )) && exit 1
     exit 0
@@ -151,6 +154,9 @@ wallpaper depth-ctl
 osd wpctl
 osd brightnessctl
 osd notify-send
+volume wpctl
+mic wpctl
+brightness brightnessctl
 session wlogout
 session hyprlock
 idle hypridle
