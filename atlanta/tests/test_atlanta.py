@@ -40,13 +40,21 @@ if output:
 if os.environ.get("MOCK_" + key + "_HOLD") == "1":
     while True:
         time.sleep(0.2)
-sys.exit(int(os.environ.get("MOCK_" + key + "_EXIT", "0")))
+exit_code = None
+for suffix in suffixes:
+    exit_code = os.environ.get("MOCK_" + key + suffix + "_EXIT")
+    if exit_code is not None:
+        break
+if exit_code is None:
+    exit_code = os.environ.get("MOCK_" + key + "_EXIT", "0")
+sys.exit(int(exit_code))
 '''
 
 PROVIDERS = (
     "rofi-ctl", "waybar-ctl", "swaync-client", "awww", "grim", "slurp",
     "notify-send", "wpctl", "brightnessctl", "wlogout", "hypridle",
     "hyprsunset", "hyprlock", "depth-ctl", "loginctl", "systemctl",
+    "awww-daemon", "swaync", "eww", "busctl",
 )
 
 
@@ -149,6 +157,8 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Usage: atlanta", result.stdout)
         self.assertIn("bar.panel", result.stdout)
+        self.assertIn("start", result.stdout)
+        self.assertIn("stop", result.stdout)
 
     def test_unknown_capability_is_usage(self):
         result = self.call("resize")
@@ -423,6 +433,131 @@ class AtlantaTests(unittest.TestCase):
             ATLANTA_PROVIDER_DIR=str(empty), PATH=str(minimal))
         self.assertEqual(result.returncode, 127)
         self.assertIn("missing", result.stderr)
+
+    def test_start_starts_the_shell_stack(self):
+        eww_calls = self.root / "eww.calls"
+        eww = self.binaries / "eww"
+        eww.write_text(
+            "#!/usr/bin/env bash\n"
+            f"printf '%s\\n' \"$*\" >> \"{eww_calls}\"\n"
+            "case \" $* \" in\n"
+            "    *\" ping \"*) exit 1 ;;\n"
+            "esac\n"
+            "exit 0\n"
+        )
+        eww.chmod(0o755)
+
+        result = self.call(
+            "start",
+            **{
+                "MOCK_AWWW_QUERY_EXIT": "1",
+                "MOCK_SWAYNC_CLIENT_C_EXIT": "1",
+                "MOCK_WAYBAR_CTL_STATUS_EXIT": "1",
+            },
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("started awww", result.stdout)
+        self.assertIn("started eww", result.stdout)
+        self.assertIn("started swaync", result.stdout)
+        self.assertIn("started waybar", result.stdout)
+
+        self.wait_calls("awww-daemon")
+        self.wait_calls("swaync")
+        self.wait_for(eww_calls)
+        self.assertIn("ping", eww_calls.read_text())
+        self.assertIn("daemon", eww_calls.read_text())
+        self.assertEqual(
+            [row["argv"] for row in self.calls("waybar-ctl")],
+            [["status"], ["start"]],
+        )
+
+    def test_start_skips_running_components(self):
+        result = self.call("start")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("already running awww", result.stdout)
+        self.assertIn("already running eww", result.stdout)
+        self.assertIn("already running swaync", result.stdout)
+        self.assertIn("already running waybar", result.stdout)
+        self.assertFalse(self.calls("awww-daemon"))
+        self.assertFalse(self.calls("swaync"))
+        self.assertEqual(
+            [row["argv"] for row in self.calls("waybar-ctl")],
+            [["status"]],
+        )
+        self.assertEqual(
+            [row["argv"][-1] for row in self.calls("eww")],
+            ["ping"],
+        )
+
+    def test_stop_stops_the_shell_stack(self):
+        dummy = self.root / "swaync"
+        dummy.write_text(
+            "#!/usr/bin/env python3\n"
+            "import time\n"
+            "time.sleep(30)\n"
+        )
+        dummy.chmod(0o755)
+        proc = subprocess.Popen([str(dummy)])
+
+        def cleanup():
+            if proc.poll() is None:
+                proc.kill()
+            proc.wait()
+
+        self.addCleanup(cleanup)
+
+        result = self.call(
+            "stop", **{"MOCK_BUSCTL_USER_OUT": f"PID={proc.pid}"}
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("stopped swaync", result.stdout)
+        proc.wait(timeout=2)
+        self.assertIsNotNone(proc.poll())
+
+        self.assertEqual(
+            [row["argv"] for row in self.calls("waybar-ctl")],
+            [["status"], ["stop"]],
+        )
+        self.assertEqual(
+            [row["argv"] for row in self.calls("awww")],
+            [["query"], ["kill"]],
+        )
+        self.assertEqual(
+            [row["argv"][-1] for row in self.calls("eww")],
+            ["ping", "kill"],
+        )
+        self.assertEqual(
+            [row["argv"] for row in self.calls("busctl")],
+            [["--user", "status", "org.erikreider.swaync"]],
+        )
+
+    def test_stop_is_idempotent(self):
+        result = self.call(
+            "stop",
+            **{
+                "MOCK_BUSCTL_USER_EXIT": "1",
+                "MOCK_EWW_CONFIG_EXIT": "1",
+                "MOCK_AWWW_QUERY_EXIT": "1",
+                "MOCK_WAYBAR_CTL_STATUS_EXIT": "1",
+            },
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("not running waybar", result.stdout)
+        self.assertIn("not running swaync", result.stdout)
+        self.assertIn("not running eww", result.stdout)
+        self.assertIn("not running awww", result.stdout)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("waybar-ctl")],
+            [["status"]],
+        )
+        self.assertEqual(
+            [row["argv"] for row in self.calls("awww")],
+            [["query"]],
+        )
+        self.assertEqual(
+            [row["argv"][-1] for row in self.calls("eww")],
+            ["ping"],
+        )
 
     def test_install_dry_run_touches_nothing(self):
         bin_dir = self.root / "bin"

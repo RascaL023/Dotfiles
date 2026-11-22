@@ -14,7 +14,7 @@ source "$dir/lib/state.sh"
 usage() {
     cat <<'EOF'
 Usage: atlanta <capability> <verb> [args...]
-       atlanta help | status | doctor
+       atlanta start | stop | status | doctor
 
   launcher apps|run|window|toggle
                                    Rofi menus
@@ -32,6 +32,8 @@ Usage: atlanta <capability> <verb> [args...]
   mic toggle                       Mute or unmute the default source
   brightness up|down               brightnessctl, then the same OSD report
 
+start     Start the atlanta shell stack
+stop      Stop the atlanta shell stack
 status    One line per capability; changes nothing
 doctor    Where each provider resolves from, plus the session
 help      This text
@@ -62,6 +64,9 @@ case $capability in
     theme)
         printf 'atlanta: theme is not implemented yet; Flow A/B stay in matugen\n' >&2
         exit 3
+        ;;
+    start|stop)
+        exec bash "$dir/verbs/lifecycle.sh" "$capability" "$@"
         ;;
     launcher|bar|bar.panel|notifications|screenshot|session|idle|nightlight|wallpaper|osd|volume|mic|brightness) ;;
     *)

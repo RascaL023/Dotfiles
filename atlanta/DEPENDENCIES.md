@@ -12,6 +12,7 @@ the install checklist.
 | `coreutils` — `readlink`, `dirname`, `date`, `timeout`, `wc`, `mkdir`, `ln`, `rm` | path resolution, screenshot names, bounded `status`, install/remove links | any GNU/coreutils (verified 9.7) |
 | `awk` | parsing `wpctl get-volume` | POSIX awk (verified GNU Awk 5.3.2) |
 | `jq` | `screenshot screen` and `screenshot window` parse `hyprctl -j` / `niri msg -j` | 1.6+ (verified 1.7.1) |
+| `systemd` — `loginctl`, `systemctl`, `busctl` | session power actions and the SwayNC stop path | any systemd |
 | `python3` | tests only, never at runtime | 3.8+ (verified 3.12.12) |
 
 ## Capability → provider
@@ -20,6 +21,7 @@ the install checklist.
 |---|---|---|---|
 | `launcher` | `rofi-ctl` → `rofi` | any Wayland/X11 | `rofi-ctl` resolves from this checkout |
 | `bar` | `waybar-ctl` → `waybar` | any | `waybar-ctl` resolves from this checkout |
+| `start`/`stop` | `awww-daemon`, `awww`, `eww`, `swaync`, `swaync-client`, `waybar-ctl`, `busctl` | any | mirrors Hyprland autostart; SwayNC is stopped through its D-Bus owner |
 | `bar.panel` | `eww` | any | reserved; exits `3` |
 | `notifications` | `swaync-client` + running `swaync` | any | daemon must already be running |
 | `screenshot region` | `grim`, `slurp` | wlroots screencopy | works on Hyprland and Niri |

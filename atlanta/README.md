@@ -53,6 +53,36 @@ only reports and never mutates. Steps default to `0.05` for volume
 Exit codes: `0` ok, `1` failed or not running, `2` usage, `3` unsupported in
 this session, `127` a provider is missing.
 
+## Start and stop
+
+`atlanta start` starts the same stack as the Hyprland autostart, in this order:
+
+| Component | Start | Stop |
+|---|---|---|
+| `awww-daemon` | `awww-daemon` | `awww kill` |
+| Eww root (`profile`, `distro`, `depth-clock`) | `eww --config eww daemon --force-wayland` | `eww --config eww kill` |
+| SwayNC | `swaync` | D-Bus PID from `org.erikreider.swaync`, verified through `/proc`, then `SIGTERM` |
+| Waybar | `waybar-ctl start` | `waybar-ctl stop` |
+
+`atlanta stop` stops them in reverse order and is idempotent. It does not
+start or stop `hypridle`, `hyprsunset`, `hyprlock`, `wlogout`, or `rofi`; those
+remain on demand (`atlanta idle toggle`, `atlanta nightlight toggle`, and the
+session/launcher verbs). The Eww bar in `eww/bar` is not started here; that is
+still the one-server work.
+
+For a Hyprland autostart, the equivalent replacement is:
+
+```lua
+hl.on("hyprland.start", function()
+    hl.exec_cmd("$HOME/.dotfile/atlanta/atlanta start")
+end)
+```
+
+This is documentation only; `hypr/` is not modified by atlanta. `atlanta stop`
+is the atlanta side of a future Noctalia/atlanta shell switch. Noctalia itself
+is not started or stopped yet; `noctalia -d` starts its daemon, but the handoff
+needs a verified stop path.
+
 ## Providers
 
 Resolution order:

@@ -5,6 +5,8 @@
 complete -c atlanta -f
 complete -c atlanta -s h -l help -d 'Show help'
 
+complete -c atlanta -n '__fish_use_subcommand' -a start -d 'Start the atlanta shell stack'
+complete -c atlanta -n '__fish_use_subcommand' -a stop -d 'Stop the atlanta shell stack'
 complete -c atlanta -n '__fish_use_subcommand' -a launcher -d 'Rofi menus'
 complete -c atlanta -n '__fish_use_subcommand' -a bar -d 'Waybar'
 complete -c atlanta -n '__fish_use_subcommand' -a bar.panel -d 'Eww panel (reserved)'
