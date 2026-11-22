@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# One entry point for desktop actions; every capability routes to a native tool.
+set -u
+
+dir=$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" && pwd -P) || exit 1
+
+# shellcheck source=lib/session.sh
+source "$dir/lib/session.sh"
+# shellcheck source=lib/provider.sh
+source "$dir/lib/provider.sh"
+# shellcheck source=lib/state.sh
+source "$dir/lib/state.sh"
+
+usage() {
+    cat <<'EOF'
+Usage: atlanta <capability> <verb> [args...]
+       atlanta help | status | doctor
+
+  launcher apps|run|window|toggle
+                                   Rofi menus
+  bar show|hide|toggle|restart|reload|status [--provider waybar]
+                                   Waybar, session-aware
+  bar.panel toggle <panel>         Eww panel (reserved, not active yet)
+  notifications toggle|dnd         SwayNC panel and Do Not Disturb
+  screenshot region|screen|window  grim + slurp into ~/Pictures/Screenshots
+  session menu|lock|logout|reboot|poweroff
+  idle toggle|status               hypridle, tracked by atlanta
+  nightlight toggle|status         hyprsunset, tracked by atlanta
+  wallpaper set|next|prev|random|pick|status
+  osd volume|mic|brightness        Report the current value
+
+status    One line per capability; changes nothing
+doctor    Where each provider resolves from, plus the session
+help      This text
+
+Exit: 0 ok, 1 failed or not running, 2 usage, 3 unsupported in this session,
+127 a provider is missing.
+EOF
+}
+
+fail() {
+    printf 'atlanta: %s\n' "$*" >&2
+    exit 2
+}
+
+capability=${1:-help}
+if (( $# > 0 )); then
+    shift
+fi
+
+case $capability in
+    -h|--help|help)
+        usage
+        exit 0
+        ;;
+    status|doctor)
+        exec bash "$dir/verbs/report.sh" "$capability" "$@"
+        ;;
+    theme)
+        printf 'atlanta: theme is not implemented yet; Flow A/B stay in matugen\n' >&2
+        exit 3
+        ;;
+    launcher|bar|bar.panel|notifications|screenshot|session|idle|nightlight|wallpaper|osd) ;;
+    *)
+        fail "unknown capability: $capability (use --help)"
+        ;;
+esac
+
+exec bash "$dir/verbs/${capability%%.*}.sh" "$capability" "$@"
