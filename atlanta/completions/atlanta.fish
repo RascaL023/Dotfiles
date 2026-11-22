@@ -26,7 +26,7 @@ complete -c atlanta -n '__fish_seen_subcommand_from launcher' -a 'apps run windo
 complete -c atlanta -n '__fish_seen_subcommand_from bar' -a 'show hide toggle restart reload status'
 complete -c atlanta -n '__fish_seen_subcommand_from bar' -l provider -r -a waybar -d 'Bar provider'
 complete -c atlanta -n '__fish_seen_subcommand_from bar.panel' -a 'toggle'
-complete -c atlanta -n '__fish_seen_subcommand_from notifications' -a 'toggle dnd'
+complete -c atlanta -n '__fish_seen_subcommand_from notifications' -a 'toggle dnd clear'
 complete -c atlanta -n '__fish_seen_subcommand_from screenshot' -a 'region screen window'
 complete -c atlanta -n '__fish_seen_subcommand_from session' -a 'menu lock logout reboot poweroff'
 complete -c atlanta -n '__fish_seen_subcommand_from idle' -a 'toggle status'

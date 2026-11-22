@@ -21,7 +21,7 @@ Usage: atlanta <capability> <verb> [args...]
   bar show|hide|toggle|restart|reload|status [--provider waybar]
                                    Waybar, session-aware
   bar.panel toggle <panel>         Eww panel (reserved, not active yet)
-  notifications toggle|dnd         SwayNC panel and Do Not Disturb
+  notifications toggle|dnd|clear   SwayNC panel, DND, and close all
   screenshot region|screen|window  grim + slurp into ~/Pictures/Screenshots
   session menu|lock|logout|reboot|poweroff
   idle toggle|status               hypridle, tracked by atlanta

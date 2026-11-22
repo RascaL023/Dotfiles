@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SwayNC owns the daemon; -t and -d are the flags this repo already relies on.
+# SwayNC owns the daemon; -t, -d, and -C are the flags this repo uses.
 set -u
 
 dir=$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/.." && pwd -P) || exit 1
@@ -17,14 +17,16 @@ fail() {
     exit 2
 }
 
+case $verb in
+    toggle|dnd|clear) ;;
+    '') fail 'notifications needs a verb (toggle, dnd, clear)' ;;
+    *) fail "unknown notifications verb: $verb (toggle, dnd, clear)" ;;
+esac
+
 ctl=$(require_provider swaync-client) || exit $?
 
 case $verb in
     toggle) exec "$ctl" -t ;;
     dnd) exec "$ctl" -d ;;
-    clear)
-        printf 'atlanta: notifications clear is not wired; swaync-client --help does not answer here\n' >&2
-        exit 3
-        ;;
-    *) fail 'notifications needs a verb (toggle, dnd)' ;;
+    clear) exec "$ctl" -C ;;
 esac

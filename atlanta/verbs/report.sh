@@ -50,17 +50,47 @@ row_tracked() {
     fi
 }
 
-status_session() {
-    if ! provider_resolve wlogout >/dev/null; then
-        row session wlogout missing
+status_notifications() {
+    local ctl count dnd
+    if ! ctl=$(provider_resolve swaync-client); then
+        row notifications swaync-client missing
         missing=1
         return
     fi
-    if tracked_pid wlogout wlogout >/dev/null; then
+    count=$(timeout 1 "$ctl" -c 2>/dev/null) || count=''
+    if [[ $count =~ ^[0-9]+$ ]]; then
+        dnd=$(timeout 1 "$ctl" -D 2>/dev/null) || dnd=unknown
+        case $dnd in
+            true) dnd=on ;;
+            false) dnd=off ;;
+            *) dnd=unknown ;;
+        esac
+        row notifications swaync "running dnd=$dnd count=$count"
+    else
+        row notifications swaync "ready (daemon not confirmed)"
+    fi
+}
+
+status_session() {
+    local name
+    if ! provider_resolve wlogout >/dev/null; then
+        row session wlogout missing
+        missing=1
+    elif tracked_pid wlogout wlogout >/dev/null; then
         row session wlogout open
     else
         row session wlogout idle
     fi
+    if [[ $(session_name) == hyprland ]] && ! provider_resolve hyprlock >/dev/null; then
+        row session hyprlock missing
+        missing=1
+    fi
+    for name in loginctl systemctl; do
+        if ! provider_resolve "$name" >/dev/null; then
+            row session "$name" missing
+            missing=1
+        fi
+    done
 }
 
 status_bar() {
@@ -95,25 +125,32 @@ status_wallpaper() {
 }
 
 status_feedback() {
-    local name
-    for name in wpctl brightnessctl notify-send; do
-        if ! provider_resolve "$name" >/dev/null; then
-            row feedback "$name" missing
-            missing=1
-            return
-        fi
-    done
-    row osd wpctl ready
-    row volume wpctl ready
-    row mic wpctl ready
-    row brightness brightnessctl ready
+    if provider_resolve wpctl >/dev/null; then
+        row osd wpctl ready
+        row volume wpctl ready
+        row mic wpctl ready
+    else
+        row osd wpctl missing
+        row volume wpctl missing
+        row mic wpctl missing
+        missing=1
+    fi
+    if provider_resolve brightnessctl >/dev/null; then
+        row brightness brightnessctl ready
+    else
+        row brightness brightnessctl missing
+        missing=1
+    fi
+    if ! provider_resolve notify-send >/dev/null; then
+        row feedback notify-send "optional (OSD disabled)"
+    fi
 }
 
 status() {
     row_ready launcher rofi-ctl
     status_bar
     row bar.panel eww "reserved"
-    row_ready notifications swaync-client
+    status_notifications
     row_ready screenshot grim
     row_ready screenshot slurp
     status_session
@@ -158,6 +195,8 @@ volume wpctl
 mic wpctl
 brightness brightnessctl
 session wlogout
+session loginctl
+session systemctl
 session hyprlock
 idle hypridle
 nightlight hyprsunset

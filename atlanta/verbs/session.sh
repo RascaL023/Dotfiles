@@ -36,13 +36,13 @@ case $verb in
         run_provider hyprlock
         ;;
     logout)
-        exec loginctl terminate-user "$USER"
+        run_provider loginctl terminate-user "$USER"
         ;;
     reboot)
-        exec systemctl reboot
+        run_provider systemctl reboot
         ;;
     poweroff)
-        exec systemctl poweroff
+        run_provider systemctl poweroff
         ;;
     *)
         fail 'session needs a verb (menu, lock, logout, reboot, poweroff)'

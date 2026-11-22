@@ -19,7 +19,7 @@ atlanta help | status | doctor
 | `launcher` | `apps`, `run`, `window`, `toggle` | `rofi-ctl` |
 | `bar` | `show`, `hide`, `toggle`, `restart`, `reload`, `status` | `waybar-ctl` |
 | `bar.panel` | `toggle <panel>` | Eww — reserved, not active |
-| `notifications` | `toggle`, `dnd` | `swaync-client` |
+| `notifications` | `toggle`, `dnd`, `clear` | `swaync-client` |
 | `screenshot` | `region`, `screen`, `window` | `grim` + `slurp` |
 | `session` | `menu`, `lock`, `logout`, `reboot`, `poweroff` | `wlogout`, `hyprlock`, `loginctl` |
 | `idle` | `toggle`, `status` | `hypridle` |
@@ -35,6 +35,7 @@ Examples:
 ```bash
 atlanta launcher apps
 atlanta bar toggle
+atlanta notifications clear
 atlanta screenshot region
 atlanta wallpaper next
 atlanta session menu
@@ -102,7 +103,8 @@ bash atlanta/install.sh --remove
 ```
 
 Links `atlanta` into `~/.local/bin` and the fish completion into
-`~/.config/fish/completions`. `BIN_DIR` and `FISH_COMPLETION_DIR` override the
+`~/.config/fish/completions`. The full install checklist is in
+[`DEPENDENCIES.md`](DEPENDENCIES.md). `BIN_DIR` and `FISH_COMPLETION_DIR` override the
 destinations. Atlanta has no config directory, so it is not in `tools.list`.
 
 ## Tests

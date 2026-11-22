@@ -39,14 +39,23 @@ window_geometry() {
                else "\(.size[0])x\(.size[1])+\(.at[0])+\(.at[1])" end'
 }
 
+case $verb in
+    region|screen|window) ;;
+    '') fail 'screenshot needs a verb (region, screen, window)' ;;
+    *) fail "unknown screenshot verb: $verb (region, screen, window)" ;;
+esac
+
+grim=$(require_provider grim) || exit $?
+case $verb in
+    region) slurp=$(require_provider slurp) || exit $? ;;
+    window) require_hyprland 'screenshot window' ;;
+esac
+
 mkdir -p -- "$save_dir" || fail "cannot create $save_dir"
 file=$save_dir/screenshot-$(date +%Y%m%d-%H%M%S).png
 
-grim=$(require_provider grim) || exit $?
-
 case $verb in
     region)
-        slurp=$(require_provider slurp) || exit $?
         geometry=$("$slurp") || exit 0
         [[ -n $geometry ]] || exit 0
         "$grim" -g "$geometry" "$file"
@@ -63,9 +72,6 @@ case $verb in
         geometry=$(window_geometry)
         [[ -n $geometry ]] || fail 'no focused window'
         "$grim" -g "$geometry" "$file"
-        ;;
-    *)
-        fail 'screenshot needs a verb (region, screen, window)'
         ;;
 esac || exit 1
 

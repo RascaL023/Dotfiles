@@ -31,6 +31,7 @@ sync_depth() {
 apply_wallpaper() {
     local path=$1 awww index=0 found=-1
     [[ -f $path ]] || fail "wallpaper not found: $path"
+    path=$(readlink -f -- "$path") || fail "cannot resolve wallpaper: $1"
 
     awww=$(require_provider awww) || exit $?
     "$awww" query >/dev/null 2>&1 || "$awww" init >/dev/null 2>&1 || :

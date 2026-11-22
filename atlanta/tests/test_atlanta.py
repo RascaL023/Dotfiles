@@ -27,7 +27,8 @@ if record:
         handle.write(json.dumps({"name": name, "argv": sys.argv[1:]}) + "\n")
 suffixes = []
 if len(sys.argv) > 1:
-    suffixes.append("_" + sys.argv[1].upper().replace("-", "_"))
+    argument = sys.argv[1].upper().replace("-", "_").lstrip("_")
+    suffixes.append("_" + argument)
 suffixes.append("")
 output = None
 for suffix in suffixes:
@@ -45,7 +46,7 @@ sys.exit(int(os.environ.get("MOCK_" + key + "_EXIT", "0")))
 PROVIDERS = (
     "rofi-ctl", "waybar-ctl", "swaync-client", "awww", "grim", "slurp",
     "notify-send", "wpctl", "brightnessctl", "wlogout", "hypridle",
-    "hyprsunset", "hyprlock", "depth-ctl", "loginctl",
+    "hyprsunset", "hyprlock", "depth-ctl", "loginctl", "systemctl",
 )
 
 
@@ -100,10 +101,10 @@ class AtlantaTests(unittest.TestCase):
             except (OSError, ValueError):
                 pass
 
-    def call(self, *args, **overrides):
+    def call(self, *args, cwd="/", **overrides):
         return subprocess.run(
             [str(self.script), *args], capture_output=True, text=True,
-            env={**self.env, **overrides}, timeout=15, cwd="/",
+            env={**self.env, **overrides}, timeout=15, cwd=cwd,
         )
 
     def calls(self, name=None):
@@ -183,6 +184,16 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.only_call("swaync-client"), ["-t"])
 
+    def test_notifications_dnd_uses_the_toggle_flag(self):
+        result = self.call("notifications", "dnd")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.only_call("swaync-client"), ["-d"])
+
+    def test_notifications_clear_uses_close_all(self):
+        result = self.call("notifications", "clear")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.only_call("swaync-client"), ["-C"])
+
     def test_idle_toggles_a_tracked_process(self):
         started = self.call("idle", "toggle", **{"MOCK_HYPRIDLE_HOLD": "1"})
         self.assertEqual(started.returncode, 0, started.stderr)
@@ -228,6 +239,13 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(
             self.only_call("loginctl"), ["terminate-user", os.environ["USER"]])
 
+    def test_session_reboot_and_poweroff_use_systemctl(self):
+        self.assertEqual(self.call("session", "reboot").returncode, 0)
+        self.assertEqual(self.call("session", "poweroff").returncode, 0)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("systemctl")],
+            [["reboot"], ["poweroff"]])
+
     def test_wallpaper_next_advances_the_index(self):
         result = self.call("wallpaper", "next")
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -251,6 +269,14 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(self.img_call()[1], str(target))
         self.only_call("depth-ctl")
 
+    def test_wallpaper_set_with_relative_path_updates_the_index(self):
+        result = self.call("wallpaper", "set", "b.png", cwd=str(self.wallpapers))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), str(self.wallpapers / "b.png"))
+        self.assertEqual(self.img_call()[1], str(self.wallpapers / "b.png"))
+        self.assertEqual(
+            (self.state / "atlanta" / "wallpaper").read_text().strip(), "1")
+
     def test_wallpaper_status_prints_the_index(self):
         (self.state / "atlanta").mkdir(parents=True)
         (self.state / "atlanta" / "wallpaper").write_text("1\n")
@@ -268,11 +294,39 @@ class AtlantaTests(unittest.TestCase):
         self.assertIn("1/2 b.png", result.stdout)
         self.assertEqual(state_file.read_text(), "1\n")
 
+    def test_status_reports_notification_dnd(self):
+        result = self.call("status", **{
+            "MOCK_SWAYNC_CLIENT_C_OUT": "3",
+            "MOCK_SWAYNC_CLIENT_D_OUT": "false",
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("running dnd=off count=3", result.stdout)
+
+    def test_status_check_ignores_missing_optional_notify_send(self):
+        (self.binaries / "notify-send").unlink()
+        minimal = self.root / "minimal"
+        minimal.mkdir()
+        for name in ("bash", "readlink", "dirname", "timeout", "wc", "python3"):
+            target = shutil.which(name)
+            self.assertIsNotNone(target, name)
+            (minimal / name).symlink_to(target)
+        result = self.call(
+            "status", "--check",
+            PATH=f"{minimal}:{self.binaries}",
+            ATLANTA_PROVIDER_DIR=str(self.binaries),
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("osd", result.stdout)
+        self.assertIn("brightness", result.stdout)
+        self.assertIn("optional (OSD disabled)", result.stdout)
+
     def test_doctor_reports_the_resolved_provider_and_session(self):
         result = self.call("doctor")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn(str(self.binaries / "waybar-ctl"), result.stdout)
         self.assertIn("hyprland", result.stdout)
+        self.assertIn("loginctl", result.stdout)
+        self.assertIn("systemctl", result.stdout)
 
     def test_osd_reports_volume_without_changing_it(self):
         result = self.call("osd", "volume", **{"MOCK_WPCTL_OUT": "Volume: 0.45"})
@@ -343,6 +397,12 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("volume needs a verb", result.stderr)
 
+    def test_screenshot_without_verb_does_not_create_the_directory(self):
+        result = self.call("screenshot")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("screenshot needs a verb", result.stderr)
+        self.assertFalse(self.shots.exists())
+
     def test_region_screenshot_passes_the_slurp_geometry(self):
         result = self.call("screenshot", "region", **{"MOCK_SLURP_OUT": "10x10+0+0"})
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -377,6 +437,33 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(result.stdout.count("would link"), 2)
         self.assertFalse(bin_dir.exists())
         self.assertFalse(fish_dir.exists())
+
+    def test_install_remove_only_removes_own_links(self):
+        bin_dir = self.root / "bin"
+        fish_dir = self.root / "fish"
+        env = {**self.env, "BIN_DIR": str(bin_dir),
+               "FISH_COMPLETION_DIR": str(fish_dir)}
+        installed = subprocess.run(
+            ["bash", str(self.app / "install.sh")],
+            capture_output=True, text=True, timeout=15, cwd="/", env=env,
+        )
+        self.assertEqual(installed.returncode, 0, installed.stderr)
+        self.assertTrue((bin_dir / "atlanta").is_symlink())
+        self.assertTrue((fish_dir / "atlanta.fish").is_symlink())
+
+        foreign = self.root / "foreign"
+        foreign.write_text("keep me")
+        (bin_dir / "foreign").symlink_to(foreign)
+
+        removed = subprocess.run(
+            ["bash", str(self.app / "install.sh"), "--remove"],
+            capture_output=True, text=True, timeout=15, cwd="/", env=env,
+        )
+        self.assertEqual(removed.returncode, 0, removed.stderr)
+        self.assertFalse((bin_dir / "atlanta").exists())
+        self.assertFalse((fish_dir / "atlanta.fish").exists())
+        self.assertTrue((bin_dir / "foreign").is_symlink())
+        self.assertEqual(os.readlink(bin_dir / "foreign"), str(foreign))
 
 
 if __name__ == "__main__":
