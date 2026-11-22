@@ -28,7 +28,7 @@ the install checklist.
 | `screenshot screen` | `grim`, `jq` + `hyprctl`/`niri` | any | focused output via compositor |
 | `screenshot window` | `grim`, `jq`, `hyprctl` | Hyprland only | exits `3` elsewhere |
 | `session menu` | `wlogout` | any | tracked by PID file |
-| `session lock` | `hyprlock` | Hyprland only | exits `3` elsewhere |
+| `session lock` | `hyprlock` | Hyprland, Niri | exits `3` elsewhere |
 | `session logout` | `loginctl` | systemd-logind | `terminate-user` |
 | `session reboot/poweroff` | `systemctl` | systemd | |
 | `idle` | `hypridle` | Hyprland only | exits `3` elsewhere |
@@ -60,7 +60,7 @@ so on a machine without SwayNC the OSD is silently skipped (the notify call is
 | screenshot region / screen | yes | yes |
 | screenshot window | yes | no (`3`) |
 | session menu, logout, reboot, poweroff | yes | yes |
-| session lock | yes | no (`3`) |
+| session lock | yes | yes |
 | idle | yes | no (`3`) |
 | nightlight | yes | no (`3`) |
 

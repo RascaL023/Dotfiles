@@ -28,3 +28,15 @@ require_hyprland() {
     printf 'atlanta: %s is Hyprland-only (session: %s)\n' "$1" "$session" >&2
     exit 3
 }
+
+require_session() {
+    local label=$1 session allowed list=
+    shift
+    session=$(session_name)
+    for allowed in "$@"; do
+        [[ $session == "$allowed" ]] && return 0
+        list+=${list:+, }$allowed
+    done
+    printf 'atlanta: %s needs %s (session: %s)\n' "$label" "$list" "$session" >&2
+    exit 3
+}

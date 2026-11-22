@@ -237,11 +237,17 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(closed.returncode, 0, closed.stderr)
         self.assertFalse(self.tracked("wlogout").exists())
 
-    def test_session_lock_is_hyprland_only(self):
-        blocked = self.call("session", "lock", ATLANTA_SESSION="niri")
+    def test_session_lock_works_on_hyprland_and_niri(self):
+        for session in ("hyprland", "niri"):
+            with self.subTest(session=session):
+                result = self.call("session", "lock", ATLANTA_SESSION=session)
+                self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("hyprlock")], [[], []])
+
+        blocked = self.call("session", "lock", ATLANTA_SESSION="unknown")
         self.assertEqual(blocked.returncode, 3)
-        self.assertEqual(self.call("session", "lock").returncode, 0)
-        self.only_call("hyprlock")
+        self.assertIn("needs hyprland, niri", blocked.stderr)
 
     def test_session_logout_uses_loginctl(self):
         result = self.call("session", "logout")

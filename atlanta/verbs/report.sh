@@ -81,10 +81,14 @@ status_session() {
     else
         row session wlogout idle
     fi
-    if [[ $(session_name) == hyprland ]] && ! provider_resolve hyprlock >/dev/null; then
-        row session hyprlock missing
-        missing=1
-    fi
+    case $(session_name) in
+        hyprland|niri)
+            if ! provider_resolve hyprlock >/dev/null; then
+                row session hyprlock missing
+                missing=1
+            fi
+            ;;
+    esac
     for name in loginctl systemctl; do
         if ! provider_resolve "$name" >/dev/null; then
             row session "$name" missing

@@ -32,7 +32,7 @@ case $verb in
         start_tracked wlogout "$wlogout" -b 4 -n -m 100
         ;;
     lock)
-        require_hyprland 'session lock'
+        require_session 'session lock' hyprland niri
         run_provider hyprlock
         ;;
     logout)

@@ -121,8 +121,9 @@ in `$XDG_RUNTIME_DIR/atlanta-<name>-<uid>.pid` with an ownership and argv check
 in `/proc`. No `pgrep`, no `pkill`, no killing by process name.
 
 `idle` and `nightlight` are Hyprland-only; on Niri they exit `3` instead of
-launching a tool that cannot work. `session lock` is Hyprland-only for the same
-reason.
+launching a tool that cannot work. `session lock` works on both Hyprland and
+Niri because `hyprlock` only needs `ext-session-lock-v1` and
+`wlr-screencopy`, which both compositors provide.
 
 ## Install
 
