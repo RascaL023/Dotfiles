@@ -5,6 +5,10 @@ set -u
 dir=$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/.." && pwd -P) || exit 1
 # shellcheck source=../lib/provider.sh
 source "$dir/lib/provider.sh"
+# shellcheck source=../lib/state.sh
+source "$dir/lib/state.sh"
+# shellcheck source=../lib/bar.sh
+source "$dir/lib/bar.sh"
 
 action=${1:-}
 if (( $# > 0 )); then
@@ -40,16 +44,6 @@ require_all() {
 
 awww_running() {
     timeout 2 "$awww" query >/dev/null 2>&1
-}
-
-eww_daemon_state() {
-    local output
-    output=$(timeout 3 "$eww_ctl" daemon status 2>/dev/null) || :
-    case $output in
-        'running pid '*) printf 'running\n' ;;
-        'running (not managed)') printf 'unmanaged\n' ;;
-        *) printf 'stopped\n' ;;
-    esac
 }
 
 swaync_running() {
@@ -98,7 +92,7 @@ start_awww() {
 
 start_eww() {
     local state
-    state=$(eww_daemon_state)
+    state=$(bar_eww_daemon_state)
     case $state in
         running)
             note 'already running' eww
@@ -140,6 +134,29 @@ start_waybar() {
     note started waybar
 }
 
+start_island() {
+    if [[ $(bar_eww_daemon_state) == unmanaged ]]; then
+        printf 'island not started (unmanaged eww daemon)\n'
+        return 0
+    fi
+    if bar_island_running "$eww_ctl"; then
+        note 'already running' island
+        return 0
+    fi
+    "$eww_ctl" bar island start || {
+        note 'failed to start' island
+        return 1
+    }
+    note started island
+}
+
+start_bar() {
+    case $(bar_provider) in
+        waybar) start_waybar ;;
+        eww) start_island ;;
+    esac
+}
+
 stop_waybar() {
     if ! waybar_running; then
         note 'not running' waybar
@@ -150,6 +167,16 @@ stop_waybar() {
         return 1
     }
     note stopped waybar
+}
+
+stop_bar() {
+    case $(bar_provider) in
+        waybar) stop_waybar ;;
+        eww)
+            # The daemon stop below closes the island and its collector.
+            return 0
+            ;;
+    esac
 }
 
 stop_swaync() {
@@ -171,7 +198,7 @@ stop_swaync() {
 }
 
 stop_eww() {
-    if [[ $(eww_daemon_state) == stopped ]]; then
+    if [[ $(bar_eww_daemon_state) == stopped ]]; then
         note 'not running' eww
         return 0
     fi
@@ -197,7 +224,9 @@ stop_awww() {
 
 case $action in
     start)
-        require_all awww-daemon awww eww-ctl eww swaync swaync-client waybar-ctl
+        start_requires=(awww-daemon awww eww-ctl eww swaync swaync-client)
+        [[ $(bar_provider) == waybar ]] && start_requires+=(waybar-ctl)
+        require_all "${start_requires[@]}"
         awww_daemon=$(provider_resolve awww-daemon)
         awww=$(provider_resolve awww)
         eww_ctl=$(provider_resolve eww-ctl)
@@ -209,18 +238,20 @@ case $action in
         start_awww || status=1
         start_eww || status=1
         start_swaync || status=1
-        start_waybar || status=1
+        start_bar || status=1
         exit "$status"
         ;;
     stop)
-        require_all awww eww-ctl eww busctl waybar-ctl
+        stop_requires=(awww eww-ctl eww busctl)
+        [[ $(bar_provider) == waybar ]] && stop_requires+=(waybar-ctl)
+        require_all "${stop_requires[@]}"
         awww=$(provider_resolve awww)
         eww_ctl=$(provider_resolve eww-ctl)
         busctl=$(provider_resolve busctl)
         waybar_ctl=$(provider_resolve waybar-ctl)
 
         status=0
-        stop_waybar || status=1
+        stop_bar || status=1
         stop_swaync || status=1
         stop_eww || status=1
         stop_awww || status=1

@@ -98,16 +98,33 @@ status_session() {
 }
 
 status_bar() {
-    local ctl state
-    if ! ctl=$(provider_resolve waybar-ctl); then
-        row bar waybar missing
-        missing=1
-        return
-    fi
-    state=$(timeout 2 "$ctl" status 2>/dev/null) || :
-    case $state in
-        running*) row bar waybar "$state" ;;
-        *) row bar waybar stopped ;;
+    local ctl state provider
+    provider=$(bar_provider)
+    case $provider in
+        waybar)
+            if ! ctl=$(provider_resolve waybar-ctl); then
+                row bar waybar missing
+                missing=1
+                return
+            fi
+            state=$(timeout 2 "$ctl" status 2>/dev/null) || :
+            case $state in
+                running*) row bar waybar "$state" ;;
+                *) row bar waybar stopped ;;
+            esac
+            ;;
+        eww)
+            if ! ctl=$(provider_resolve eww-ctl); then
+                row bar eww missing
+                missing=1
+                return
+            fi
+            state=$(timeout 2 "$ctl" bar island status 2>/dev/null) || :
+            case $state in
+                *islands*) row bar eww "running $state" ;;
+                *) row bar eww stopped ;;
+            esac
+            ;;
     esac
 }
 
@@ -175,7 +192,16 @@ status_feedback() {
     fi
 }
 
+bar_state_warning() {
+    local value=''
+    [[ -r $bar_state ]] && IFS= read -r value < "$bar_state"
+    [[ -z $value ]] && return 0
+    bar_provider_valid "$value" && return 0
+    printf "atlanta: unknown bar provider '%s'; using waybar\n" "$value" >&2
+}
+
 status() {
+    bar_state_warning
     row_ready launcher rofi-ctl
     status_bar
     status_panel
@@ -201,7 +227,16 @@ status() {
 }
 
 doctor() {
-    local capability provider path
+    local capability provider path name selected marker
+    selected=$(bar_provider)
+    bar_state_warning
+    for name in waybar-ctl eww-ctl; do
+        provider=${name%-ctl}
+        if path=$(provider_resolve "$name"); then :; else path=MISSING; fi
+        marker=''
+        [[ $provider == "$selected" ]] && marker=' selected'
+        printf '%-14s %-15s %s%s\n' bar "$name" "$path" "$marker"
+    done
     while read -r capability provider; do
         if path=$(provider_resolve "$provider"); then
             printf '%-14s %-15s %s\n' "$capability" "$provider" "$path"
@@ -210,7 +245,6 @@ doctor() {
         fi
     done <<'EOF'
 launcher rofi-ctl
-bar waybar-ctl
 bar.panel eww-ctl
 notifications swaync-client
 screenshot grim
