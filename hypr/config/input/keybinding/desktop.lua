@@ -11,9 +11,9 @@ local launcher = require("config.capability.launcher")
 
 -- ---------------------------------------------------------------------- bar --
 hl.bind(mod .. " + O",        script("waybar-toggle.sh"))
-hl.bind(mod .. " + X",        exec("eww open --toggle profile"))
-hl.bind(mod .. " + D",        exec("eww open --toggle distro"))
-hl.bind(mod .. " + CTRL + X", exec("pkill eww; eww daemon --force-wayland"))
+hl.bind(mod .. " + X",        exec("eww-ctl toggle profile"))
+hl.bind(mod .. " + D",        exec("eww-ctl toggle distro"))
+hl.bind(mod .. " + CTRL + X", exec("eww-ctl daemon restart"))
 
 -- ------------------------------------------------------------ notifications --
 hl.bind(mod .. " + N", exec("swaync-client -t"))

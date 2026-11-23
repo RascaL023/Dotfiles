@@ -42,14 +42,18 @@ Setelah mengganti monitor default di pengaturan, gunakan
 menyentuh proses lain. Ini mencegah Eww 0.6.0 membuat daemon kedua ketika
 respons IPC melebihi timeout internal 100 ms. Setelah `open`, launcher
 memeriksa jendela yang benar-benar terbuka, termasuk bila klien lebih dulu
-timeout. Daemon yang lahir dari keybind/autostart lama tidak membawa variabel
-itu; `eww-ctl daemon restart` mengambil alih.
+timeout. Daemon yang lahir di luar `eww-ctl` tidak membawa variabel itu;
+`eww-ctl daemon restart` mengambil alih.
 
 `island stop` hanya menutup `islands`, `calendar-popup`, dan `music-popup` lalu
 menghentikan collector; jendela root `profile`, `distro`, dan `depth-clock`
-tetap hidup. Hanya `eww-ctl daemon stop` yang mematikan daemon. Tahap
-restrukturisasi ini belum mengubah keybind/autostart di luar `eww/`, jadi
-`pkill eww` lama masih mematikan semuanya sampai pemanggil itu dipindahkan.
+tetap hidup. Hanya `eww-ctl daemon stop` yang mematikan daemon. Autostart
+Hyprland, keybind Hypr/Niri, dan on-click Waybar sudah memanggil `eww-ctl`
+(`daemon start|restart`, `toggle <window>`, `bar island toggle`), sehingga
+daemon selalu membawa `EWW_ISLAND_EVENTS`. Pemanggilan `eww` mentah yang
+tersisa disengaja: `power-ctl` menutup jendela saat logout tanpa menghidupkan
+daemon, `depth-ctl` membuka/menutup dengan `--size`/`--pos` hasil pengukuran,
+dan widget memakai `eww update` agar tidak menjalankan Python tiap hover.
 Bila bar lain aktif, compositor dapat menjumlahkan area eksklusif keduanya.
 Tidak ada perubahan konfigurasi widget lama, Waybar, folder referensi, atau
 konfigurasi Matugen.

@@ -40,7 +40,7 @@
 	"custom/distro": {
 		"format": "",
 		"tooltip": false,
-		"on-click": "eww open --toggle distro"
+		"on-click": "eww-ctl toggle distro"
         // "on-click-right": "eww update distro_open=false"
 	},
 	"custom/power_menu": {
@@ -409,7 +409,7 @@
 	
 		"custom/user": {
 			"exec": "whoami",
-			"on-click": "eww open --toggle profile",
+			"on-click": "eww-ctl toggle profile",
 			// "exec-if":
 			// "exec-on-event":
 			// "hide-empty-text":

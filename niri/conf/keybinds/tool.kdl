@@ -13,7 +13,7 @@ binds {
 
     // script calls
     Mod+C           { spawn "~/.config/hypr/sources/scripts/wifi-menu.sh"; }
-    Mod+O           { spawn-sh "~/.dotfile/eww/bar/barctl toggle"; }
+    Mod+O           { spawn "eww-ctl" "bar" "island" "toggle"; }
     Mod+Escape      { spawn "~/.config/hypr/sources/scripts/wlogout-toggle.sh"; }
     Mod+Space       { spawn "rofi-ctl" "toggle" "apps"; }
     Mod+I           { spawn "~/.config/hypr/sources/scripts/idle-toggle.sh"; }
@@ -21,9 +21,9 @@ binds {
     Mod+T           { spawn "~/.myenv/script/theme/theme-picker.sh"; }
 
     // tool calls
-    Mod+X           { spawn "eww" "open" "--toggle" "profile"; }
-    Mod+D           { spawn "eww" "open" "--toggle" "distro"; }
-    Mod+Ctrl+X      { spawn "sh" "-c" "pkill eww; eww daemon --force-wayland"; }
+    Mod+X           { spawn "eww-ctl" "toggle" "profile"; }
+    Mod+D           { spawn "eww-ctl" "toggle" "distro"; }
+    Mod+Ctrl+X      { spawn "eww-ctl" "daemon" "restart"; }
     Mod+Ctrl+P      { spawn "sh" "-c" "hyprpicker -a | wl-copy && notify-send \"Color picked!\" \"$(wl-paste)\""; }
     // Mod+Ctrl+L      { spawn "hyprlock"; }
     Mod+Alt+Print   { spawn "sh" "-c" "grim -o LVDS-1 ~/Pictures/Screenshots/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png && notify-send -t 2000 'Screenshot' 'Successfully take fullscreen screenshot!'" ; }
