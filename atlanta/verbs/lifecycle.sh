@@ -21,9 +21,8 @@ case $action in
     *) printf 'atlanta: unknown lifecycle action: %s (start, stop)\n' "$action" >&2; exit 2 ;;
 esac
 
-# The root Eww config owns profile/distro/depth-clock. The
-# has its own daemon and is still blocked by the one-server work.
-eww_config=$atlanta_repo/eww
+# Eww runs behind eww-ctl: it owns the daemon and the island collector, so
+# atlanta never calls `eww --config … daemon|kill` directly.
 
 note() {
     printf '%s %s\n' "$1" "$2"
@@ -43,8 +42,14 @@ awww_running() {
     timeout 2 "$awww" query >/dev/null 2>&1
 }
 
-eww_running() {
-    timeout 2 "$eww" --config "$eww_config" --force-wayland ping >/dev/null 2>&1
+eww_daemon_state() {
+    local output
+    output=$(timeout 3 "$eww_ctl" daemon status 2>/dev/null) || :
+    case $output in
+        'running pid '*) printf 'running\n' ;;
+        'running (not managed)') printf 'unmanaged\n' ;;
+        *) printf 'stopped\n' ;;
+    esac
 }
 
 swaync_running() {
@@ -92,11 +97,25 @@ start_awww() {
 }
 
 start_eww() {
-    if eww_running; then
-        note 'already running' eww
-        return 0
-    fi
-    nohup "$eww" --config "$eww_config" --force-wayland daemon >/dev/null 2>&1 &
+    local state
+    state=$(eww_daemon_state)
+    case $state in
+        running)
+            note 'already running' eww
+            return 0
+            ;;
+        unmanaged)
+            # A daemon started outside eww-ctl has no island event FIFO; adopting
+            # it is a deliberate action, not something `start` should do silently.
+            note 'already running (not managed)' eww
+            printf 'hint: run eww-ctl daemon restart to adopt it\n'
+            return 0
+            ;;
+    esac
+    "$eww_ctl" daemon start || {
+        note 'failed to start' eww
+        return 1
+    }
     note started eww
 }
 
@@ -152,11 +171,12 @@ stop_swaync() {
 }
 
 stop_eww() {
-    if ! eww_running; then
+    if [[ $(eww_daemon_state) == stopped ]]; then
         note 'not running' eww
         return 0
     fi
-    "$eww" --config "$eww_config" --force-wayland kill >/dev/null 2>&1 || {
+    # daemon stop also closes every Eww window and stops the island collector.
+    "$eww_ctl" daemon stop || {
         note 'failed to stop' eww
         return 1
     }
@@ -177,10 +197,10 @@ stop_awww() {
 
 case $action in
     start)
-        require_all awww-daemon awww eww swaync swaync-client waybar-ctl
+        require_all awww-daemon awww eww-ctl eww swaync swaync-client waybar-ctl
         awww_daemon=$(provider_resolve awww-daemon)
         awww=$(provider_resolve awww)
-        eww=$(provider_resolve eww)
+        eww_ctl=$(provider_resolve eww-ctl)
         swaync=$(provider_resolve swaync)
         swaync_client=$(provider_resolve swaync-client)
         waybar_ctl=$(provider_resolve waybar-ctl)
@@ -193,9 +213,9 @@ case $action in
         exit "$status"
         ;;
     stop)
-        require_all awww eww busctl waybar-ctl
+        require_all awww eww-ctl eww busctl waybar-ctl
         awww=$(provider_resolve awww)
-        eww=$(provider_resolve eww)
+        eww_ctl=$(provider_resolve eww-ctl)
         busctl=$(provider_resolve busctl)
         waybar_ctl=$(provider_resolve waybar-ctl)
 

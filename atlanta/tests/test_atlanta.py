@@ -581,18 +581,6 @@ class AtlantaTests(unittest.TestCase):
         self.assertIn("missing", result.stderr)
 
     def test_start_starts_the_shell_stack(self):
-        eww_calls = self.root / "eww.calls"
-        eww = self.binaries / "eww"
-        eww.write_text(
-            "#!/usr/bin/env bash\n"
-            f"printf '%s\\n' \"$*\" >> \"{eww_calls}\"\n"
-            "case \" $* \" in\n"
-            "    *\" ping \"*) exit 1 ;;\n"
-            "esac\n"
-            "exit 0\n"
-        )
-        eww.chmod(0o755)
-
         result = self.call(
             "start",
             **{
@@ -609,16 +597,19 @@ class AtlantaTests(unittest.TestCase):
 
         self.wait_calls("awww-daemon")
         self.wait_calls("swaync")
-        self.wait_for(eww_calls)
-        self.assertIn("ping", eww_calls.read_text())
-        self.assertIn("daemon", eww_calls.read_text())
+        self.assertEqual(
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["daemon", "status"], ["daemon", "start"]],
+        )
         self.assertEqual(
             [row["argv"] for row in self.calls("waybar-ctl")],
             [["status"], ["start"]],
         )
 
     def test_start_skips_running_components(self):
-        result = self.call("start")
+        result = self.call("start", **{
+            "MOCK_EWW_CTL_DAEMON_OUT": "running pid 4242",
+        })
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("already running awww", result.stdout)
         self.assertIn("already running eww", result.stdout)
@@ -631,8 +622,19 @@ class AtlantaTests(unittest.TestCase):
             [["status"]],
         )
         self.assertEqual(
-            [row["argv"][-1] for row in self.calls("eww")],
-            ["ping"],
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["daemon", "status"]],
+        )
+
+    def test_start_does_not_adopt_an_unmanaged_eww_daemon(self):
+        result = self.call(
+            "start", **{"MOCK_EWW_CTL_DAEMON_OUT": "running (not managed)"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("already running (not managed) eww", result.stdout)
+        self.assertIn("eww-ctl daemon restart", result.stdout)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["daemon", "status"]],
         )
 
     def test_stop_stops_the_shell_stack(self):
@@ -653,7 +655,10 @@ class AtlantaTests(unittest.TestCase):
         self.addCleanup(cleanup)
 
         result = self.call(
-            "stop", **{"MOCK_BUSCTL_USER_OUT": f"PID={proc.pid}"}
+            "stop", **{
+                "MOCK_BUSCTL_USER_OUT": f"PID={proc.pid}",
+                "MOCK_EWW_CTL_DAEMON_OUT": "running pid 4242",
+            }
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("stopped swaync", result.stdout)
@@ -669,8 +674,8 @@ class AtlantaTests(unittest.TestCase):
             [["query"], ["kill"]],
         )
         self.assertEqual(
-            [row["argv"][-1] for row in self.calls("eww")],
-            ["ping", "kill"],
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["daemon", "status"], ["daemon", "stop"]],
         )
         self.assertEqual(
             [row["argv"] for row in self.calls("busctl")],
@@ -682,7 +687,6 @@ class AtlantaTests(unittest.TestCase):
             "stop",
             **{
                 "MOCK_BUSCTL_USER_EXIT": "1",
-                "MOCK_EWW_CONFIG_EXIT": "1",
                 "MOCK_AWWW_QUERY_EXIT": "1",
                 "MOCK_WAYBAR_CTL_STATUS_EXIT": "1",
             },
@@ -701,8 +705,8 @@ class AtlantaTests(unittest.TestCase):
             [["query"]],
         )
         self.assertEqual(
-            [row["argv"][-1] for row in self.calls("eww")],
-            ["ping"],
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["daemon", "status"]],
         )
 
     def test_install_dry_run_touches_nothing(self):

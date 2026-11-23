@@ -58,7 +58,7 @@ this session, `127` a provider is missing.
 | Component | Start | Stop |
 |---|---|---|
 | `awww-daemon` | `awww-daemon` | `awww kill` |
-| Eww root (`profile`, `distro`, `depth-clock`) | `eww --config eww daemon --force-wayland` | `eww --config eww kill` |
+| Eww daemon | `eww-ctl daemon start` | `eww-ctl daemon stop` |
 | SwayNC | `swaync` | D-Bus PID from `org.erikreider.swaync`, verified through `/proc`, then `SIGTERM` |
 | Waybar | `waybar-ctl start` | `waybar-ctl stop` |
 
@@ -66,7 +66,9 @@ this session, `127` a provider is missing.
 start or stop `swayidle`, `wlsunset`, `hyprlock`, `wlogout`, or `rofi`; those
 remain on demand (`atlanta idle toggle`, `atlanta nightlight toggle`, and the
 session/launcher verbs). The Eww bar in `eww/bar` is not started here;
-`eww-ctl bar island start` owns it.
+`eww-ctl bar island start` owns it. `eww-ctl daemon stop` also closes every
+Eww window and stops the island collector, so `atlanta stop` leaves no Eww
+window behind.
 
 For a Hyprland autostart, the equivalent replacement is:
 
