@@ -149,7 +149,8 @@ class Parser(unittest.TestCase):
         self.assertEqual(ctl.main(["daemon"]), 2)
 
     def test_monitor_forms_reach_the_handler(self):
-        with patch.object(ctl, "island_start") as start:
+        # Patch windows so toggle never depends on the live daemon.
+        with patch.object(ctl, "island_start") as start, patch.object(ctl, "windows", return_value=[]):
             self.assertEqual(ctl.main(["bar", "island", "start", "--monitor", "LVDS-1"]), 0)
             self.assertEqual(start.call_args.args[1], "LVDS-1")
             self.assertEqual(ctl.main(["bar", "island", "toggle", "--monitor=DP-1"]), 0)

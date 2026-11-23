@@ -53,17 +53,26 @@
 }
 .calendar-cell.today { background: $accent; color: $on-accent; font-weight: $clock-weight; }
 
-.calendar-month.cal-next-a, .calendar-month.cal-next-b {
-  animation: calendar-next $calendar-slide ease-out;
-}
-.calendar-month.cal-prev-a, .calendar-month.cal-prev-b {
-  animation: calendar-previous $calendar-slide ease-out;
-}
-@keyframes calendar-next {
+/* GTK restarts keyframes only when the computed animation-name changes, so each
+   direction/phase pair needs its own name; sharing one name makes a repeat of
+   the same direction a no-op. Month parity picks the phase on every step. */
+.calendar-month.cal-next-a { animation: calendar-next-a $calendar-slide ease-out; }
+.calendar-month.cal-next-b { animation: calendar-next-b $calendar-slide ease-out; }
+.calendar-month.cal-prev-a { animation: calendar-previous-a $calendar-slide ease-out; }
+.calendar-month.cal-prev-b { animation: calendar-previous-b $calendar-slide ease-out; }
+@keyframes calendar-next-a {
   from { opacity: 0; margin-left: 18px; }
   to { opacity: 1; margin-left: 0; }
 }
-@keyframes calendar-previous {
+@keyframes calendar-next-b {
+  from { opacity: 0; margin-left: 18px; }
+  to { opacity: 1; margin-left: 0; }
+}
+@keyframes calendar-previous-a {
+  from { opacity: 0; margin-left: -18px; }
+  to { opacity: 1; margin-left: 0; }
+}
+@keyframes calendar-previous-b {
   from { opacity: 0; margin-left: -18px; }
   to { opacity: 1; margin-left: 0; }
 }

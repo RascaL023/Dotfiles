@@ -98,10 +98,11 @@ class Collector:
                 step = -1 if name == "calendar-previous" else 1
                 year, month = shift_month(state["year"], state["month"], step)
                 next_state = calendar_state(year, month, opened=True)
-                # Two class names per direction: GTK only restarts keyframes when the
-                # animation name itself changes, and the month parity flips each step.
+                # GTK only restarts keyframes when the animation name itself changes,
+                # so each direction/phase pair has its own name. Month parity picks the
+                # phase and flips on every step, December → January included.
                 next_state["motion"] = "%s-%s" % ("prev" if step < 0 else "next",
-                                                  "a" if (year + month) % 2 else "b")
+                                                  "a" if month % 2 else "b")
                 self.state["calendar"] = next_state
         else:
             raise ValueError("unknown calendar action")

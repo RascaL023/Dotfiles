@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 from pathlib import Path
+import re
 import sys
 import unittest
 from unittest.mock import AsyncMock, patch
@@ -85,6 +86,21 @@ class CalendarLifecycle(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(ValueError):
             await dispatch(collector, "calendar-toggle")
 
+    async def test_motion_phase_changes_on_every_step(self):
+        collector = self.collector
+        await dispatch(collector, "calendar-toggle")
+        motions = []
+        for _ in range(4):
+            await dispatch(collector, "calendar-next")
+            motions.append(collector.state["calendar"]["motion"])
+        self.assertTrue(all(motion.startswith("next-") for motion in motions))
+        self.assertTrue(all(first != second for first, second in zip(motions, motions[1:])))
+        collector.state["calendar"] = calendar_state(2026, 12, opened=True)
+        await dispatch(collector, "calendar-next")
+        december = collector.state["calendar"]["motion"]
+        await dispatch(collector, "calendar-next")
+        self.assertNotEqual(december, collector.state["calendar"]["motion"])
+
     async def test_midnight_follows_current_month_but_preserves_browsing(self):
         collector = self.collector
         collector.state["calendar"] = calendar_state(today=datetime.date(2026, 12, 31), opened=True)
@@ -101,6 +117,18 @@ class CalendarLifecycle(unittest.IsolatedAsyncioTestCase):
             collector.refresh_calendar_date()
         self.assertEqual(collector.state["calendar"]["heading"], "June 2026")
         self.assertEqual(collector.state["calendar"]["day"], "1")
+
+
+class CalendarStyles(unittest.TestCase):
+    def test_each_motion_class_has_its_own_keyframes(self):
+        # A shared animation-name makes GTK skip the restart on a repeated direction.
+        styles = (Path(__file__).resolve().parents[1] / "styles" / "_calendar.scss").read_text()
+        pairs = re.findall(r"\.calendar-month\.cal-([a-z]+)-([ab])\s*\{\s*animation:\s*([\w-]+)", styles)
+        self.assertEqual(len(pairs), 4)
+        names = [name for _, _, name in pairs]
+        self.assertEqual(len(set(names)), 4)
+        for name in names:
+            self.assertIn(f"@keyframes {name}", styles)
 
 
 if __name__ == "__main__":
