@@ -1,6 +1,8 @@
 """Contract tests for eww-ctl: one launcher, island stop, paths and environment."""
+import contextlib
 import importlib.machinery
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -111,7 +113,7 @@ class DaemonStart(RuntimeIsolation):
 
         with patch.object(ctl, "alive", side_effect=[False, True]), \
                 patch.object(ctl, "identity", return_value=99), \
-                patch.object(ctl.subprocess, "Popen", popen):
+                patch("subprocess.Popen", popen):
             ctl.spawn_daemon()
         self.assertEqual(captured["env"]["EWW_ISLAND_EVENTS"], str(runtime_dir() / "events.fifo"))
         self.assertIn("daemon", captured["argv"])
@@ -121,6 +123,44 @@ class DaemonStart(RuntimeIsolation):
     def test_daemon_env_is_the_single_source_of_the_fifo(self):
         self.assertEqual(ctl.daemon_env()["EWW_ISLAND_EVENTS"],
                          str(runtime_dir() / "events.fifo"))
+
+
+class Parser(unittest.TestCase):
+    def setUp(self):
+        self.stdout = io.StringIO()
+        self.stderr = io.StringIO()
+        self.redirects = contextlib.ExitStack()
+        self.redirects.enter_context(contextlib.redirect_stdout(self.stdout))
+        self.redirects.enter_context(contextlib.redirect_stderr(self.stderr))
+
+    def tearDown(self):
+        self.redirects.close()
+
+    def test_help_and_usage_errors(self):
+        self.assertEqual(ctl.main(["--help"]), 0)
+        self.assertIn("bar island", self.stdout.getvalue())
+        self.assertEqual(ctl.main([]), 2)
+        self.assertEqual(ctl.main(["island", "status"]), 2)
+        self.assertEqual(ctl.main(["open"]), 2)
+        self.assertEqual(ctl.main(["bar"]), 2)
+        self.assertEqual(ctl.main(["bar", "island"]), 2)
+        self.assertEqual(ctl.main(["bar", "island", "bogus"]), 2)
+        self.assertEqual(ctl.main(["bar", "island", "start", "--monitor"]), 2)
+        self.assertEqual(ctl.main(["daemon"]), 2)
+
+    def test_monitor_forms_reach_the_handler(self):
+        with patch.object(ctl, "island_start") as start:
+            self.assertEqual(ctl.main(["bar", "island", "start", "--monitor", "LVDS-1"]), 0)
+            self.assertEqual(start.call_args.args[1], "LVDS-1")
+            self.assertEqual(ctl.main(["bar", "island", "toggle", "--monitor=DP-1"]), 0)
+            self.assertEqual(start.call_args.args[1], "DP-1")
+
+    def test_action_keeps_name_and_argument(self):
+        with patch("actions.local_action") as local:
+            local.return_value = True
+            self.assertEqual(ctl.main(["bar", "island", "action", "workspace", "3"]), 0)
+            local.assert_called_once()
+            self.assertEqual(local.call_args.args[0], "workspace")
 
 
 if __name__ == "__main__":

@@ -17,4 +17,3 @@
     :class "island clock" :tooltip {island.clock.tooltip}
     :onclick "printf 'calendar-toggle\\n' > \"$EWW_ISLAND_EVENTS\"" :timeout "5s"
     (label :text {island.clock.time})))
-

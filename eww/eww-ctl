@@ -5,37 +5,90 @@ A daemon started anywhere else (a keybind, autostart, `eww open`) has no
 EWW_ISLAND_EVENTS, so its island callbacks would fail silently. Every path here
 goes through this launcher; `daemon restart` adopts a daemon started elsewhere.
 """
-import argparse
-import fcntl
-import json
 import os
-import re
-from pathlib import Path
-import shutil
-import signal
-import subprocess
 import sys
 import time
 
-ROOT = Path(__file__).resolve().parent
-ISLAND = ROOT / "bar" / "island"
-sys.path.insert(0, str(ISLAND / "scripts"))
-# Heavy imports (asyncio and the action module) stay inside the commands that
-# need them: asyncio alone costs ~0.4 s on a cold interpreter, and this script
-# runs on every click.
+ROOT = os.path.dirname(os.path.realpath(__file__))
+ISLAND = os.path.join(ROOT, "bar", "island")
+sys.path.insert(0, os.path.join(ISLAND, "scripts"))
+# Startup budget: only os/sys/time are imported here. Everything else (json,
+# subprocess, fcntl, re, shutil, signal, and pathlib via common) is imported by
+# the command that needs it, so `--help` and `status` stay fast.
 
 MODULE_WINDOWS = ("islands", "calendar-popup", "music-popup")
 ROOT_WINDOWS = ("profile", "distro")
+
+USAGE = """\
+usage: eww-ctl <command> [args...]
+
+One entry point for Eww: the daemon, the island module, root windows and reloads.
+
+commands:
+  daemon start|stop|restart|status        daemon lifecycle (the one start path)
+  bar island start|stop|toggle|reload|status|doctor|action
+                                          island bar: windows, collector and settings
+  open|close|toggle <window>              window control (depth-clock via depth-ctl)
+  reload                                  reload Yuck/SCSS without restarting the daemon
+  status                                  daemon state and open windows
+  validate                                compile SCSS/Python, validate settings and includes
+
+options:
+  -h, --help                              show this help and exit
+  --monitor <connector|index>             monitor for `bar island start|toggle`
+
+A daemon started anywhere else (a keybind, autostart, `eww open`) has no
+EWW_ISLAND_EVENTS, so its island callbacks would fail silently. Every path here
+goes through this launcher; `daemon restart` adopts a daemon started elsewhere.
+Exit: 0 ok, 1 failed, 2 usage.
+"""
+
+DAEMON_USAGE = """\
+usage: eww-ctl daemon start|stop|restart|status
+
+  start     Start the daemon through this launcher (the only start path)
+  stop      Close every window, stop the collector, kill the daemon
+  restart   Adopt a foreign daemon and reopen the windows that were open
+  status    Print the daemon pid, or stopped / running (not managed)
+"""
+
+BAR_USAGE = """\
+usage: eww-ctl bar island <action> [name] [argument] [--monitor M]
+
+  start     Open the island window, then wait for its collector
+  stop      Close island windows and the collector; the daemon keeps running
+  toggle    Stop when the island is open, start when it is closed
+  reload    Close and reopen the island, keeping the last monitor
+  status    Island windows, or "stopped"
+  doctor    Settings, dependencies, fonts, daemon and module availability
+  action    Send one allowlisted action through the collector socket
+"""
+
+WINDOW_USAGE = """\
+usage: eww-ctl open|close|toggle <window>
+
+  windows   islands, calendar-popup, music-popup, profile, distro, depth-clock
+  depth-clock is delegated to script/depth-ctl so its geometry is measured.
+"""
 
 
 class CtlError(RuntimeError):
     pass
 
 
+def fail(message):
+    print(f"eww-ctl: {message} (use --help)", file=sys.stderr)
+    return 2
+
+
 def eww(*args, check=True):
+    import subprocess
     # Eww 0.6.0 otherwise forks a second daemon on a 100 ms IPC read timeout.
-    argv = ["eww", "--config", str(ROOT), "--force-wayland", "--no-daemonize", *args]
-    result = subprocess.run(argv, text=True, capture_output=True, timeout=10)
+    argv = ["eww", "--config", ROOT, "--force-wayland", "--no-daemonize", *args]
+    try:
+        result = subprocess.run(argv, text=True, capture_output=True, timeout=10)
+    except subprocess.TimeoutExpired:
+        raise CtlError("Eww command timed out; inspect daemon.log") from None
     if check and result.returncode:
         raise CtlError((result.stderr or "").strip() or (result.stdout or "").strip() or "Eww command failed")
     return result
@@ -45,27 +98,32 @@ def alive():
     return eww("ping", check=False).returncode == 0
 
 
-def windows():
-    result = eww("active-windows", check=False)
+def parse_windows(result):
     if result.returncode:
         return []
     return [line.split(":", 1)[0].strip() for line in result.stdout.splitlines() if ":" in line]
 
 
+def windows():
+    return parse_windows(eww("active-windows", check=False))
+
+
 def identity(pid):
     """Start time of a pid that is really our daemon, or None."""
     try:
-        path = Path("/proc") / str(pid)
-        argv = (path / "cmdline").read_bytes().split(b"\0")
-        stat = (path / "stat").read_text().rsplit(")", 1)[1].split()
+        with open(f"/proc/{pid}/cmdline", "rb") as handle:
+            argv = handle.read().split(b"\0")
+        with open(f"/proc/{pid}/stat") as handle:
+            stat = handle.read().rsplit(")", 1)[1].split()
         if os.fsencode(ROOT) in argv and argv[0].split(b"/")[-1] == b"eww" and stat[0] != "Z":
             return int(stat[19])
-    except (OSError, ValueError):
+    except (OSError, ValueError, IndexError):
         pass
     return None
 
 
 def managed_pid():
+    import json
     from common import runtime_dir
     try:
         info = json.loads((runtime_dir() / "daemon.pid").read_text())
@@ -84,6 +142,8 @@ def daemon_env():
 
 def spawn_daemon():
     """Start the daemon through this launcher; False when one is already up."""
+    import json
+    import subprocess
     from common import runtime_dir
     if alive():
         return False
@@ -91,7 +151,7 @@ def spawn_daemon():
     if managed_pid() is not None:
         pid_file.unlink(missing_ok=True)
     with (runtime_dir() / "daemon.log").open("a") as log:
-        proc = subprocess.Popen(["eww", "--config", str(ROOT), "--force-wayland",
+        proc = subprocess.Popen(["eww", "--config", ROOT, "--force-wayland",
                                  "--no-daemonize", "daemon"], stdin=subprocess.DEVNULL,
                                 stdout=log, stderr=log, start_new_session=True, env=daemon_env())
     # Wait until the exec has replaced the child before recording its identity.
@@ -132,6 +192,7 @@ def wait_collector():
 
 def stop_collector():
     import asyncio
+    import fcntl
     from actions import request
     from common import runtime_dir
     try:
@@ -191,6 +252,7 @@ def island_start(cfg, monitor=None):
 
 
 def daemon_stop():
+    import signal
     from common import runtime_dir
     pid = managed_pid()
     requested = False
@@ -216,10 +278,14 @@ def running_windows():
 
 
 def depth(mode):
-    script = ROOT / "script" / "depth-ctl"
-    if not script.is_file():
+    import subprocess
+    script = os.path.join(ROOT, "script", "depth-ctl")
+    if not os.path.isfile(script):
         raise CtlError("script/depth-ctl is missing")
-    return subprocess.run([str(script), mode], check=False).returncode
+    try:
+        return subprocess.run([script, mode], check=False).returncode
+    except subprocess.TimeoutExpired:
+        raise CtlError("depth-ctl timed out") from None
 
 
 def daemon_restart(cfg):
@@ -267,32 +333,54 @@ def reload_daemon():
 
 def validate():
     """Static checks only: no daemon, no window, no session side effects."""
-    scss = ROOT / "eww.scss"
-    result = subprocess.run(["sassc", str(scss)], capture_output=True, text=True, timeout=30)
+    import re
+    import subprocess
+    scss = os.path.join(ROOT, "eww.scss")
+    try:
+        result = subprocess.run(["sassc", scss], capture_output=True, text=True, timeout=30)
+    except subprocess.TimeoutExpired:
+        raise CtlError("sassc timed out") from None
     if result.returncode:
         raise CtlError("sassc: " + (result.stderr or "").strip())
-    for target in re.findall(r'@import "([^"]+)"', scss.read_text()):
+    with open(scss) as handle:
+        stylesheet = handle.read()
+    for target in re.findall(r'@import "([^"]+)"', stylesheet):
         if target.startswith("/"):
             continue
-        base = ROOT / target
-        candidates = (base.with_suffix(".scss"), base.parent / ("_" + base.name + ".scss"))
-        if not any(path.is_file() for path in candidates):
+        base = os.path.join(ROOT, target)
+        candidates = (base + ".scss", os.path.join(os.path.dirname(base), "_" + os.path.basename(base) + ".scss"))
+        if not any(os.path.isfile(path) for path in candidates):
             raise CtlError(f"missing SCSS import: {target}")
-    for path in sorted((ISLAND / "scripts").glob("*.py")):
-        compile(path.read_text(), str(path), "exec")
+    scripts = os.path.join(ISLAND, "scripts")
+    for name in sorted(os.listdir(scripts)):
+        if not name.endswith(".py"):
+            continue
+        path = os.path.join(scripts, name)
+        with open(path) as handle:
+            compile(handle.read(), path, "exec")
     from common import settings
     settings()
-    for path in sorted(ROOT.glob("**/*.yuck")):
-        if re.search(r"\bbar\.", path.read_text()):
-            raise CtlError(f"legacy `bar.` variable in {path.relative_to(ROOT)}")
-    for include in re.findall(r'\(include "([^"]+)"\)', (ROOT / "eww.yuck").read_text()):
-        if not (ROOT / include).is_file():
+    for directory, subdirectories, files in os.walk(ROOT):
+        subdirectories[:] = [name for name in subdirectories if name not in (".git", "__pycache__")]
+        for name in files:
+            if not name.endswith(".yuck"):
+                continue
+            path = os.path.join(directory, name)
+            with open(path) as handle:
+                if re.search(r"\bbar\.", handle.read()):
+                    raise CtlError(f"legacy `bar.` variable in {os.path.relpath(path, ROOT)}")
+    with open(os.path.join(ROOT, "eww.yuck")) as handle:
+        root_yuck = handle.read()
+    for include in re.findall(r'\(include "([^"]+)"\)', root_yuck):
+        if not os.path.isfile(os.path.join(ROOT, include)):
             raise CtlError(f"missing include: {include}")
     print("validate: OK")
 
 
 def doctor(cfg):
     import asyncio
+    import re
+    import shutil
     from actions import request
     from common import compositor_name, initial_state, runtime_dir
     initial_state(cfg)
@@ -319,11 +407,15 @@ def doctor(cfg):
                  "DBUS_SESSION_BUS_ADDRESS"):
         print(f"{'OK' if os.environ.get(name) else 'MISSING'}  {name}")
     print(eww("--version").stdout.strip())
-    families = re.findall(r'^\$(?:font|icon-font):\s*"([^"]+)"',
-                          (ISLAND / "styles/_tokens.scss").read_text(), re.M)
+    with open(os.path.join(ISLAND, "styles", "_tokens.scss")) as handle:
+        families = re.findall(r'^\$(?:font|icon-font):\s*"([^"]+)"', handle.read(), re.M)
     for family in dict.fromkeys(families):
         if shutil.which("fc-match"):
-            result = subprocess.run(["fc-match", family], capture_output=True, text=True, timeout=3)
+            try:
+                result = subprocess.run(["fc-match", family], capture_output=True, text=True, timeout=3)
+            except subprocess.TimeoutExpired:
+                print(f"Font {family}: fc-match timed out")
+                continue
             print(f"Font {family}: {result.stdout.strip()}")
     pid = managed_pid()
     print("Daemon: " + ("running" if alive() else "stopped") + (f" (pid {pid})" if pid else ""))
@@ -337,97 +429,151 @@ def doctor(cfg):
             print("Collector unavailable")
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        prog="eww-ctl", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=("The daemon is only started here: autostart, keybinds and theme hooks call\n"
-                "eww-ctl, because a daemon started any other way has no island FIFO.\n"
-                "Exit: 0 ok, 1 failed, 2 usage."))
-    sub = parser.add_subparsers(dest="command", required=True)
-    daemon = sub.add_parser("daemon", help="daemon lifecycle (the one start path)")
-    daemon.add_argument("action", choices=("start", "stop", "restart", "status"))
-    bar = sub.add_parser("bar", help="bar modules; the island bar lives here")
-    bar_modules = bar.add_subparsers(dest="module", required=True)
-    island = bar_modules.add_parser("island", help="island bar: windows, collector and settings")
-    island.add_argument("action", choices=("start", "stop", "toggle", "reload", "status",
-                                           "doctor", "action"))
-    island.add_argument("name", nargs="?")
-    island.add_argument("argument", nargs="?")
-    island.add_argument("--monitor", help="connector name or Eww monitor index (start/toggle)")
-    for name, text in (("open", "open a window"), ("close", "close a window"),
-                       ("toggle", "toggle a window")):
-        window_parser = sub.add_parser(name, help=text)
-        window_parser.add_argument("window")
-    sub.add_parser("reload", help="reload Yuck/SCSS without restarting the daemon")
-    sub.add_parser("status", help="daemon state and open windows")
-    sub.add_parser("validate", help="compile SCSS/Python, validate settings and includes")
-    args = parser.parse_args()
+def island_command(action, name, argument, monitor):
+    if action == "status":
+        print(" ".join(window for window in windows() if window in MODULE_WINDOWS) or "stopped")
+        return 0
+    from common import runtime_dir, settings
+    cfg = settings()
+    if action == "action":
+        import asyncio
+        from actions import local_action, request
+        if not name:
+            raise CtlError("action needs a name")
+        if not local_action(name, cfg):
+            try:
+                asyncio.run(request(name, argument))
+            except OSError as exc:
+                raise CtlError(f"island collector is not running ({exc})") from None
+    elif action == "start":
+        island_start(cfg, monitor)
+    elif action == "stop":
+        island_stop()
+    elif action == "toggle":
+        if "islands" in windows():
+            island_stop()
+        else:
+            island_start(cfg, monitor)
+    elif action == "reload":
+        if "islands" not in windows():
+            print("island: stopped")
+            return 0
+        selected = runtime_dir() / "monitor"
+        monitor = selected.read_text().strip() if selected.exists() else str(cfg["monitor"])
+        island_stop()
+        island_start(cfg, monitor)
+    else:
+        doctor(cfg)
+    return 0
 
-    if args.command == "daemon":
-        if args.action == "status":
+
+def main(argv=None):
+    args = list(sys.argv[1:] if argv is None else argv)
+    if not args:
+        print(USAGE, file=sys.stderr)
+        return 2
+    command, rest = args[0], args[1:]
+    if command in ("-h", "--help", "help"):
+        print(USAGE)
+        return 0
+    if command == "daemon":
+        if rest and rest[0] in ("-h", "--help"):
+            print(DAEMON_USAGE)
+            return 0
+        if not rest:
+            return fail("daemon needs an action (start|stop|restart|status)")
+        action = rest[0]
+        if action not in ("start", "stop", "restart", "status"):
+            return fail(f"unknown daemon action: {action}")
+        if len(rest) > 1:
+            return fail(f"unexpected argument: {rest[1]}")
+        if action == "status":
             pid = managed_pid()
             print(f"running pid {pid}" if pid else
                   ("running (not managed)" if alive() else "stopped"))
-        elif args.action == "start":
+        elif action == "start":
             ensure_daemon()
-        elif args.action == "stop":
+        elif action == "stop":
             daemon_stop()
         else:
             from common import settings
             daemon_restart(settings())
         return 0
-    if args.command == "bar":
-        from common import runtime_dir, settings
-        cfg = settings()
-        if args.action == "action":
-            import asyncio
-            from actions import local_action, request
-            if not args.name:
-                raise CtlError("action needs a name")
-            if not local_action(args.name, cfg):
-                try:
-                    asyncio.run(request(args.name, args.argument))
-                except OSError as exc:
-                    raise CtlError(f"island collector is not running ({exc})") from None
-        elif args.action == "start":
-            island_start(cfg, args.monitor)
-        elif args.action == "stop":
-            island_stop()
-        elif args.action == "toggle":
-            if "islands" in windows():
-                island_stop()
-            else:
-                island_start(cfg, args.monitor)
-        elif args.action == "reload":
-            if "islands" not in windows():
-                print("island: stopped")
+    if command == "bar":
+        if rest and rest[0] in ("-h", "--help"):
+            print(BAR_USAGE)
+            return 0
+        if not rest:
+            return fail("bar needs a module (island)")
+        if rest[0] != "island":
+            return fail(f"unknown bar module: {rest[0]}")
+        rest = rest[1:]
+        if rest and rest[0] in ("-h", "--help"):
+            print(BAR_USAGE)
+            return 0
+        if not rest:
+            return fail("bar island needs an action (start|stop|toggle|reload|status|doctor|action)")
+        action = rest[0]
+        if action not in ("start", "stop", "toggle", "reload", "status", "doctor", "action"):
+            return fail(f"unknown island action: {action}")
+        values, monitor, index = [], None, 1
+        while index < len(rest):
+            value = rest[index]
+            if value in ("-h", "--help"):
+                print(BAR_USAGE)
                 return 0
-            selected = runtime_dir() / "monitor"
-            monitor = selected.read_text().strip() if selected.exists() else str(cfg["monitor"])
-            island_stop()
-            island_start(cfg, monitor)
-        elif args.action == "status":
-            print(" ".join(name for name in windows() if name in MODULE_WINDOWS) or "stopped")
-        else:
-            doctor(cfg)
-        return 0
-    if args.command in ("open", "close", "toggle"):
-        return window(args.command, args.window)
-    if args.command == "reload":
+            if value == "--monitor":
+                if index + 1 >= len(rest):
+                    return fail("--monitor needs a connector name or index")
+                monitor = rest[index + 1]
+                index += 2
+                continue
+            if value.startswith("--monitor="):
+                monitor = value.split("=", 1)[1]
+                index += 1
+                continue
+            values.append(value)
+            index += 1
+        if len(values) > 2:
+            return fail(f"unexpected argument: {values[2]}")
+        return island_command(action, values[0] if values else None,
+                              values[1] if len(values) > 1 else None, monitor)
+    if command in ("open", "close", "toggle"):
+        if rest and rest[0] in ("-h", "--help"):
+            print(WINDOW_USAGE)
+            return 0
+        if not rest:
+            return fail(f"{command} needs a window")
+        if len(rest) > 1:
+            return fail(f"unexpected argument: {rest[1]}")
+        return window(command, rest[0])
+    if command == "reload":
+        if rest:
+            return fail(f"unexpected argument: {rest[0]}")
         reload_daemon()
         return 0
-    if args.command == "status":
+    if command == "status":
+        if rest:
+            return fail(f"unexpected argument: {rest[0]}")
         pid = managed_pid()
-        print(f"daemon   {'running pid ' + str(pid) if pid else ('running (not managed)' if alive() else 'stopped')}")
-        print(f"windows  {' '.join(windows()) or 'none'}")
+        # One IPC call answers both questions: a failed query means no daemon.
+        result = eww("active-windows", check=False)
+        state = (f"running pid {pid}" if pid else
+                 ("running (not managed)" if result.returncode == 0 else "stopped"))
+        print(f"daemon   {state}")
+        print(f"windows  {' '.join(parse_windows(result)) or 'none'}")
         return 0
-    validate()
-    return 0
+    if command == "validate":
+        if rest:
+            return fail(f"unexpected argument: {rest[0]}")
+        validate()
+        return 0
+    return fail(f"unknown command: {command}")
 
 
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except (OSError, ValueError, KeyError, CtlError, subprocess.TimeoutExpired) as exc:
+    except (OSError, ValueError, KeyError, CtlError) as exc:
         print(f"eww-ctl: {exc}", file=sys.stderr)
         sys.exit(1)
