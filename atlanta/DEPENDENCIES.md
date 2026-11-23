@@ -21,7 +21,7 @@ the install checklist.
 |---|---|---|---|
 | `launcher` | `rofi-ctl` → `rofi` | any Wayland/X11 | `rofi-ctl` resolves from this checkout |
 | `bar` | `waybar-ctl` → `waybar`; `eww-ctl` → `eww` with `--provider eww` | any | both ctls resolve from this checkout |
-| `start`/`stop` | `awww-daemon`, `awww`, `eww`, `swaync`, `swaync-client`, `waybar-ctl`, `busctl` | any | mirrors Hyprland autostart; SwayNC is stopped through its D-Bus owner |
+| `start`/`stop` | `awww-daemon`, `awww`, `eww-ctl` → `eww`, `swaync`, `swaync-client`, `waybar-ctl`, `busctl` | any | Eww daemon runs through `eww-ctl`; SwayNC is stopped through its D-Bus owner |
 | `bar.panel` | `eww-ctl` → `eww` | any | `toggle` one allowlisted window; the island belongs to `bar` |
 | `notifications` | `swaync-client` + running `swaync` | any | daemon must already be running |
 | `screenshot region` | `grim`, `slurp` | wlroots screencopy | works on Hyprland and Niri |
@@ -138,7 +138,7 @@ for the implemented verbs.
 - **Noctalia** — never called. atlanta is its own shell.
 - **hyprpicker** — installed (0.4.7) but no `picker` verb exists yet.
 - **matugen** — `atlanta theme` is deferred; theming stays outside.
-- **eww** — `bar.panel` (through `eww-ctl`) and the optional depth-clock sync use it.
+- **eww** — `bar.panel` and `start`/`stop` (through `eww-ctl`) plus the optional depth-clock sync use it.
 - **light**, **swaylock**, **wl-copy** — not used.
 - **hypridle**, **hyprsunset** — replaced by `swayidle` and `wlsunset`; the old
   Hyprland autostart scripts outside atlanta are not managed here.
