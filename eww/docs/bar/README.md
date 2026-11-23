@@ -8,7 +8,7 @@ Island mandiri untuk **Eww 0.6.0 + Wayland**, dengan adapter **Hyprland dan Niri
 target awal 1366×768. Satu jendela transparan menampung kelompok kiri, jam,
 dan tiga pulau kanan, masing-masing setinggi 30 px. Padding atas 4 px dan bawah
 0 px membuat area eksklusif **34 px**. Margin horizontal 4 px, radius 10 px,
-border 1 px; teks Monocraft 11 px dan ikon 13 px. Launcher memakai ikon
+border 1 px; teks mengikuti font UI feel pada 11 px dan ikon 13 px. Launcher memakai ikon
 NixOS. Jam `HH:MM` tetap di tengah layar; klik membuka kalender. Bagian kiri
 memiliki indikator musik yang membuka panel kontrol tersendiri. Workspace berupa
 pil tanpa angka: 6 px ketika tidak aktif, memanjang menjadi 20 px ketika aktif,
@@ -88,7 +88,8 @@ Niri. Konfirmasi tetap dilakukan terlebih dahulu oleh menu Rofi. Untuk
 Hyprland dengan konfigurasi lama, override dengan `["hyprctl", "dispatch", "exit"]`.
 
 Wajib: Eww dengan dukungan Wayland, Python **3.10+** (standard library saja),
-Hyprland atau Niri. Font: Monocraft Nerd Font dan JetBrainsMono Nerd Font.
+Hyprland atau Niri. Font: font UI dan ikon dari feel aktif (profil saat ini
+MapleMono NF dan JetBrainsMono Nerd Font); ukuran teks/ikon tetap 11/13 px.
 Dependensi modul:
 
 | Modul | Perintah / sumber |
@@ -189,7 +190,7 @@ sinyal atau melakukan scan berkala.
 
 ## Tema
 
-Semua warna, font, ukuran, spacing, dan radius ada di
+Warna, font, ukuran, spacing, dan radius dikendalikan dari
 **`styles/_tokens.scss`**. Komponen di `_island.scss` hanya memakai token semantik.
 Ukuran memakai px dan durasi memakai ms. Token `$right-*`, `$slider-*`
 dan `$control-transition` mengatur kelompok kanan.
@@ -204,12 +205,32 @@ Lebar area pil mengikuti jumlah workspace hingga batas `$workspace-area`;
 lebih dari batas itu dapat digulir. Area klik tetap 24 px tinggi meskipun pil
 hanya setinggi 6 px. Transisi hanya berjalan ketika status workspace berubah.
 
-Palet lokal gelap hangat langsung bekerja tanpa theme store. Kalau bar harus
-mengikuti tema aktif, impor variabel tema **sebelum** definisi token warna, lalu
-petakan ke `$surface`, `$text`, `$muted`, `$accent`, `$on-accent`, `$border`,
-`$warning`, dan `$hover`. Token font/ikon biarkan lokal agar desain tidak
-berubah. Setelah tema berganti, jalankan `eww-ctl bar island reload`; cara tema dihasilkan
-tidak dibahas di dokumen Eww ini.
+Warna dan font mengikuti tema aktif tanpa salinan lokal: `eww.scss` mengimpor
+`theme/palette/current/scss/theme` dan `theme/feel/current/scss/feel` sebelum
+partial island, lalu `_tokens.scss` memetakan token semantik ke variabelnya.
+
+| Token island | Sumber |
+|---|---|
+| `$surface` | `$layer-medium` |
+| `$text` | `$text-primary` |
+| `$muted` | `$text-muted` |
+| `$accent` | `$primary-accent` |
+| `$on-accent` | `$on-primary` |
+| `$border` | `$border-default` |
+| `$warning` | `$status-warning` |
+| `$hover` | `$layer-high` (palet tidak punya token hover khusus) |
+| `$font` | `$font-ui-text` |
+| `$icon-font` | `$font-icon` |
+| `$clock-weight` | `$font-weight-strong` |
+
+Bobot teks biasa memakai `$font-weight` dari feel. Ukuran, spacing, dan radius
+tetap lokal karena feel hanya membawa font dan bobot. Jangan menulis warna
+literal di partial island; tambahkan token semantik di `_tokens.scss` agar satu
+berkas tetap menjadi sumbernya.
+
+Setelah palet atau feel dirender, jalankan `eww-ctl bar island reload` (atau
+`eww-ctl reload`) supaya CSS dimuat ulang. Cara tema dihasilkan tidak dibahas di
+dokumen Eww ini; lihat `matugen/README.md`.
 
 ## Adapter dan lifecycle
 

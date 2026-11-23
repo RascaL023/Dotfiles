@@ -1,21 +1,22 @@
-// Local palette; see README.md for the optional Matugen mapping.
-$surface: #1d1c19;
-$text: #dcd7ba;
-$muted: #a6a69c;
-$accent: #8ba4b0;
-$on-accent: #181616;
-$border: #393832;
-$warning: #c4b28a;
-$hover: #30302b;
+// Theme mapping: `eww.scss` imports the generated palette and feel before this
+// file, so colors and fonts follow the active theme. Keep sizes and geometry
+// local; never hardcode a color in the island partials.
+$surface: $layer-medium;
+$text: $text-primary;
+$muted: $text-muted;
+$accent: $primary-accent;
+$on-accent: $on-primary;
+$border: $border-default;
+$warning: $status-warning;
+$hover: $layer-high;
 $clear: transparent;
 
-$font: "Monocraft Nerd Font";
-$icon-font: "JetBrainsMono Nerd Font";
+$font: $font-ui-text;
+$icon-font: $font-icon;
 $font-size: 11px;
 $icon-size: 13px;
-$font-weight: 500;
 
-$clock-weight: 600;
+$clock-weight: $font-weight-strong;
 $island-height: 30px;
 $outer-top: 4px;
 $outer-bottom: 0px;
