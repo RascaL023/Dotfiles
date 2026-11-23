@@ -31,8 +31,8 @@ the install checklist.
 | `session lock` | `hyprlock` | Hyprland, Niri | exits `3` elsewhere |
 | `session logout` | `loginctl` | systemd-logind | `terminate-user` |
 | `session reboot/poweroff` | `systemctl` | systemd | |
-| `idle` | `swayidle` | Hyprland, Niri | exits `3` elsewhere |
-| `nightlight` | `wlsunset` | Hyprland, Niri | static `-t`, no coordinates |
+| `idle` | `swayidle` | Hyprland, Niri | exits `3` elsewhere; toggle posts a state bubble |
+| `nightlight` | `wlsunset` | Hyprland, Niri | static `-t`, no coordinates; toggle posts a state bubble |
 | `wallpaper` | `awww` + running daemon | any | `awww init` starts it when missing |
 | `wallpaper` depth sync | `depth-ctl` (optional) | any | best-effort, from this checkout |
 | `osd`, `volume`, `mic` | `wpctl` (WirePlumber) | any | parses `Volume: 0.65 [MUTED]` |
@@ -48,8 +48,8 @@ links `atlanta` itself and its fish completion.
 
 `notify-send` needs a running implementation of
 `org.freedesktop.Notifications`; here that is SwayNC. atlanta never starts it,
-so on a machine without SwayNC the OSD is silently skipped (the notify call is
-`2>/dev/null || :`). `notifications toggle`, `notifications dnd`, and `notifications clear` also need
+so on a machine without SwayNC the OSD and the `idle`/`nightlight` state
+bubbles are silently skipped (the notify call is `2>/dev/null || :`). `notifications toggle`, `notifications dnd`, and `notifications clear` also need
 `swaync-client`.
 
 ## Session support

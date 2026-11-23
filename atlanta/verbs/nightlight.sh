@@ -9,6 +9,8 @@ source "$dir/lib/session.sh"
 source "$dir/lib/provider.sh"
 # shellcheck source=../lib/proc.sh
 source "$dir/lib/proc.sh"
+# shellcheck source=../lib/feedback.sh
+source "$dir/lib/feedback.sh"
 
 capability=${1:-nightlight}
 if (( $# > 0 )); then
@@ -31,8 +33,12 @@ case $verb in
     toggle)
         if tracked_pid nightlight wlsunset >/dev/null; then
             stop_tracked nightlight wlsunset
+            notify_state nightlight 'Night light' 'Disabled'
         else
             start_tracked nightlight "$program" -t "$temperature"
+            # No space before K: SwayNC's 2FA detector turns a standalone
+            # 4-8 digit token into a COPY button.
+            notify_state nightlight 'Night light' "${temperature}K"
         fi
         ;;
     status)

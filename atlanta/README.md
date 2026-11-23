@@ -123,6 +123,12 @@ at 10 minutes, and lock before sleep. `nightlight` runs `wlsunset -t 4000`;
 without coordinates it resolves to polar night and holds that static
 temperature, which matches the old `hyprsunset -t` filter.
 
+Both toggles post one short state bubble (`Idle`, `Night light`) under their
+own sync id, so repeated presses replace that capability's message instead of
+stacking new ones. `idle resumed` posts the wake message through the same
+helper. `notify-send` stays optional: without a notification daemon the toggles
+still change state.
+
 DPMS is the only compositor-specific action in that list, so the events call
 `atlanta session dpms off|on`; that verb maps to
 `hyprctl dispatch 'hl.dsp.dpms({ action = … })'` on Hyprland 0.57+ and

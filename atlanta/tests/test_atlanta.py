@@ -211,6 +211,11 @@ class AtlantaTests(unittest.TestCase):
         argv = self.wait_calls("swayidle")[0]["argv"]
         self.assertIn("timeout", argv)
         self.assertIn("session dpms off", " ".join(argv))
+        self.assertIn("idle resumed", " ".join(argv))
+        notify = self.only_call("notify-send")
+        self.assertIn("x-canonical-private-synchronous:atlanta-idle",
+                      " ".join(notify))
+        self.assertEqual(notify[-1], "Timers enabled")
         status = self.call("idle", "status")
         self.assertEqual(status.returncode, 0)
         self.assertIn("running", status.stdout)
@@ -218,7 +223,19 @@ class AtlantaTests(unittest.TestCase):
         stopped = self.call("idle", "toggle")
         self.assertEqual(stopped.returncode, 0, stopped.stderr)
         self.assertFalse(self.tracked("idle").exists())
+        self.assertEqual(
+            [row["argv"][-1] for row in self.calls("notify-send")],
+            ["Timers enabled", "Timers disabled"])
         self.assertEqual(self.call("idle", "status").returncode, 1)
+
+    def test_idle_resumed_posts_the_wake_notification(self):
+        result = self.call("idle", "resumed", ATLANTA_SESSION="unknown")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        argv = self.only_call("notify-send")
+        self.assertIn("x-canonical-private-synchronous:atlanta-idle",
+                      " ".join(argv))
+        self.assertEqual(argv[-1], "Welcome back")
+        self.assertFalse(self.calls("swayidle"))
 
     def test_idle_runs_on_niri(self):
         started = self.call("idle", "toggle", ATLANTA_SESSION="niri",
@@ -233,6 +250,7 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(result.returncode, 3)
         self.assertIn("needs hyprland, niri", result.stderr)
         self.assertFalse(self.calls("swayidle"))
+        self.assertFalse(self.calls("notify-send"))
 
     def test_nightlight_toggles_a_tracked_process(self):
         started = self.call("nightlight", "toggle",
@@ -240,12 +258,28 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(started.returncode, 0, started.stderr)
         self.wait_for(self.tracked("nightlight"))
         self.assertEqual(self.wait_calls("wlsunset")[0]["argv"], ["-t", "4000"])
+        notify = self.only_call("notify-send")
+        self.assertIn("x-canonical-private-synchronous:atlanta-nightlight",
+                      " ".join(notify))
+        self.assertEqual(notify[-1], "4000K")
         self.assertIn("running", self.call("nightlight", "status").stdout)
 
         stopped = self.call("nightlight", "toggle")
         self.assertEqual(stopped.returncode, 0, stopped.stderr)
         self.assertFalse(self.tracked("nightlight").exists())
+        self.assertEqual(
+            [row["argv"][-1] for row in self.calls("notify-send")],
+            ["4000K", "Disabled"])
         self.assertEqual(self.call("nightlight", "status").returncode, 1)
+
+    def test_toggle_survives_a_missing_notify_send(self):
+        (self.binaries / "notify-send").unlink()
+        started = self.call("idle", "toggle", **{"MOCK_SWAYIDLE_HOLD": "1"})
+        self.assertEqual(started.returncode, 0, started.stderr)
+        self.wait_for(self.tracked("idle"))
+        stopped = self.call("idle", "toggle")
+        self.assertEqual(stopped.returncode, 0, stopped.stderr)
+        self.assertFalse(self.tracked("idle").exists())
 
     def test_nightlight_runs_on_niri_with_a_temp_override(self):
         started = self.call("nightlight", "toggle", ATLANTA_SESSION="niri",

@@ -9,6 +9,8 @@ source "$dir/lib/session.sh"
 source "$dir/lib/provider.sh"
 # shellcheck source=../lib/proc.sh
 source "$dir/lib/proc.sh"
+# shellcheck source=../lib/feedback.sh
+source "$dir/lib/feedback.sh"
 
 capability=${1:-idle}
 if (( $# > 0 )); then
@@ -21,6 +23,13 @@ fail() {
     exit 2
 }
 
+# swayidle calls this from its resume event. It is presentation only, so it
+# must not depend on the session gate or the provider still being installed.
+if [[ $verb == resumed ]]; then
+    notify_state idle Idle 'Welcome back'
+    exit 0
+fi
+
 require_session 'idle' hyprland niri
 program=$(require_provider swayidle) || exit $?
 
@@ -29,11 +38,12 @@ program=$(require_provider swayidle) || exit $?
 printf -v dpms_off '%q session dpms off' "$dir/atlanta"
 printf -v dpms_on '%q session dpms on' "$dir/atlanta"
 printf -v lock_screen '%q session lock' "$dir/atlanta"
+printf -v idle_resumed '%q idle resumed' "$dir/atlanta"
 
 idle_events=(
     timeout 300 'loginctl lock-session'
     timeout 330 "$dpms_off"
-    resume "$dpms_on && notify-send -t 3000 Idle 'Welcome back' 2>/dev/null || :"
+    resume "$dpms_on && $idle_resumed"
     timeout 600 'systemctl suspend'
     before-sleep 'loginctl lock-session'
     after-resume "$dpms_on"
@@ -45,8 +55,10 @@ case $verb in
     toggle)
         if tracked_pid idle swayidle >/dev/null; then
             stop_tracked idle swayidle
+            notify_state idle Idle 'Timers disabled'
         else
             start_tracked idle "$program" "${idle_events[@]}"
+            notify_state idle Idle 'Timers enabled'
         fi
         ;;
     status)
