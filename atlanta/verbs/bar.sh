@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
-# `bar` drives Waybar. `bar.panel` drives one Eww window through eww-ctl; they
-# are separate providers with separate jobs, so one never starts the other.
+# `bar` drives the selected bar provider. `bar.panel` drives one Eww window
+# through eww-ctl; the panel stays independent of the selected bar.
 set -u
 
 dir=$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/.." && pwd -P) || exit 1
 # shellcheck source=../lib/provider.sh
 source "$dir/lib/provider.sh"
+# shellcheck source=../lib/state.sh
+source "$dir/lib/state.sh"
+# shellcheck source=../lib/bar.sh
+source "$dir/lib/bar.sh"
 
 capability=${1:-bar}
 if (( $# > 0 )); then
@@ -46,56 +50,68 @@ case $capability in
         ;;
 esac
 
-provider=waybar
+provider_override=''
 verb=''
+arguments=()
 while (( $# )); do
     case $1 in
         --provider)
             (( $# > 1 )) || fail '--provider needs a name (waybar, eww)'
-            provider=$2
+            provider_override=$2
             shift 2
             ;;
         --provider=*)
-            provider=${1#*=}
+            provider_override=${1#*=}
             shift
             ;;
         *)
-            [[ -z $verb ]] || fail "unexpected argument: $1"
-            verb=$1
+            arguments+=("$1")
             shift
             ;;
     esac
 done
 
-case $provider in
-    waybar)
-        ctl=$(require_provider waybar-ctl) || exit $?
-        case $verb in
-            show) exec "$ctl" start ;;
-            hide) exec "$ctl" stop ;;
-            toggle|restart|reload|status) exec "$ctl" "$verb" ;;
-            '') fail 'bar needs a verb (show, hide, toggle, restart, reload, status)' ;;
-            *) fail "unknown bar verb: $verb" ;;
-        esac
-        ;;
-    eww)
-        # The island lives on the shared Eww daemon; eww-ctl owns both.
-        ctl=$(require_provider eww-ctl) || exit $?
-        case $verb in
-            show) exec "$ctl" bar island start ;;
-            hide) exec "$ctl" bar island stop ;;
-            toggle) exec "$ctl" bar island toggle ;;
-            reload) exec "$ctl" bar island reload ;;
-            status) exec "$ctl" bar island status ;;
-            restart)
-                printf 'atlanta: bar has no Eww island restart; use bar reload or eww-ctl daemon restart\n' >&2
-                exit 3
-                ;;
-            '') fail 'bar needs a verb (show, hide, toggle, reload, status)' ;;
-            *) fail "unknown bar verb: $verb" ;;
-        esac
-        ;;
-    *)
-        fail "unknown bar provider: $provider (waybar, eww)"
+(( ${#arguments[@]} <= 2 )) || fail "unexpected argument: ${arguments[2]}"
+verb=${arguments[0]:-}
+provider_argument=${arguments[1]:-}
+
+# `use` stores the preference and leaves every bar alone. `switch` stops the
+# provider recorded in state, then starts the new one; neither scans for a
+# second running bar, so drift can leave both visible. See README.
+case $verb in
+    use|switch)
+        [[ -z $provider_override ]] || fail "bar $verb takes the provider as its argument, not --provider"
+        [[ -n $provider_argument ]] || fail "bar $verb needs a provider (waybar, eww)"
+        bar_provider_valid "$provider_argument" || \
+            fail "unknown bar provider: $provider_argument (waybar, eww)"
+        if [[ $verb == switch ]]; then
+            previous=$(bar_provider)
+            if [[ $previous != "$provider_argument" ]]; then
+                if ! bar_stop "$previous" >/dev/null 2>&1; then
+                    printf 'atlanta: could not stop the %s bar\n' "$previous" >&2
+                fi
+            fi
+        fi
+        bar_provider_save "$provider_argument" || {
+            printf 'atlanta: could not save the bar provider\n' >&2
+            exit 1
+        }
+        printf 'bar provider: %s\n' "$provider_argument"
+        [[ $verb == switch ]] || exit 0
+        bar_start "$provider_argument"
+        exit $?
         ;;
 esac
+
+provider=${provider_override:-$(bar_provider)}
+bar_provider_valid "$provider" || \
+    fail "unknown bar provider: $provider (waybar, eww)"
+[[ -z $provider_argument ]] || fail "unexpected argument: $provider_argument"
+[[ -n $verb ]] || fail 'bar needs a verb (show, hide, toggle, restart, reload, status)'
+case $verb in
+    show|hide|toggle|restart|reload|status) ;;
+    *) fail "unknown bar verb: $verb" ;;
+esac
+
+bar_dispatch "$provider" "$verb"
+exit $?

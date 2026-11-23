@@ -179,7 +179,7 @@ class AtlantaTests(unittest.TestCase):
             [["toggle"], ["start"], ["stop"]])
 
     def test_bar_eww_provider_maps_verbs_to_eww_ctl(self):
-        verbs = {"show": "start", "hide": "stop", "toggle": "toggle",
+        verbs = {"hide": "stop", "toggle": "toggle",
                  "reload": "reload", "status": "status"}
         for verb in verbs:
             result = self.call("bar", verb, "--provider", "eww")
@@ -189,10 +189,93 @@ class AtlantaTests(unittest.TestCase):
             [["bar", "island", action] for action in verbs.values()])
         self.assertFalse(self.calls("waybar-ctl"))
 
-    def test_bar_eww_restart_has_no_equivalent(self):
-        result = self.call("bar", "restart", "--provider", "eww")
+    def test_bar_eww_show_starts_the_daemon_then_the_island(self):
+        result = self.call("bar", "show", "--provider", "eww")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["daemon", "status"], ["daemon", "start"],
+             ["bar", "island", "start"]])
+
+        self.record.unlink()
+        result = self.call("bar", "show", "--provider", "eww", **{
+            "MOCK_EWW_CTL_DAEMON_OUT": "running pid 4242",
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["daemon", "status"], ["bar", "island", "start"]])
+
+    def test_bar_eww_show_refuses_an_unmanaged_daemon(self):
+        result = self.call("bar", "show", "--provider", "eww", **{
+            "MOCK_EWW_CTL_DAEMON_OUT": "running (not managed)",
+        })
         self.assertEqual(result.returncode, 3)
-        self.assertIn("bar reload", result.stderr)
+        self.assertIn("eww-ctl daemon restart", result.stderr)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["daemon", "status"]])
+
+    def test_bar_eww_restart_reloads_the_island(self):
+        result = self.call("bar", "restart", "--provider", "eww")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["bar", "island", "reload"]])
+
+    def test_bar_use_saves_the_provider_without_calling_a_bar(self):
+        result = self.call("bar", "use", "eww")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.bar_state().read_text().strip(), "eww")
+        self.assertEqual(result.stdout.strip(), "bar provider: eww")
+        self.assertFalse(self.calls("waybar-ctl"))
+        self.assertFalse(self.calls("eww-ctl"))
+
+    def test_bar_verbs_follow_the_saved_provider(self):
+        self.call("bar", "use", "eww")
+        result = self.call("bar", "toggle")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.only_call("eww-ctl"), ["bar", "island", "toggle"])
+        self.assertFalse(self.calls("waybar-ctl"))
+
+    def test_bar_switch_stops_the_old_bar_then_starts_the_new_one(self):
+        result = self.call("bar", "switch", "eww", **{
+            "MOCK_EWW_CTL_DAEMON_OUT": "running pid 4242",
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.bar_state().read_text().strip(), "eww")
+        self.assertEqual(
+            [(row["name"], row["argv"]) for row in self.calls()],
+            [("waybar-ctl", ["stop"]),
+             ("eww-ctl", ["daemon", "status"]),
+             ("eww-ctl", ["bar", "island", "start"])])
+
+    def test_bar_use_rejects_an_unknown_provider(self):
+        result = self.call("bar", "use", "sway")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("unknown bar provider", result.stderr)
+        self.assertFalse(self.bar_state().exists())
+        self.assertFalse(self.calls())
+
+    def test_bar_use_requires_exactly_one_provider(self):
+        self.assertEqual(self.call("bar", "use").returncode, 2)
+        self.assertEqual(self.call("bar", "use", "eww", "extra").returncode, 2)
+        self.assertFalse(self.bar_state().exists())
+
+    def test_bar_invalid_state_falls_back_to_waybar(self):
+        self.bar_state().parent.mkdir(parents=True)
+        self.bar_state().write_text("sway\n")
+        result = self.call("status")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("unknown bar provider", result.stderr)
+        self.assertRegex(result.stdout, r"bar\s+waybar\s+stopped")
+
+    def test_bar_provider_override_does_not_change_the_selection(self):
+        self.call("bar", "use", "eww")
+        result = self.call("bar", "toggle", "--provider", "waybar")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.bar_state().read_text().strip(), "eww")
+        self.assertEqual(self.only_call("waybar-ctl"), ["toggle"])
         self.assertFalse(self.calls("eww-ctl"))
 
     def test_bar_eww_unknown_verb_is_usage(self):
@@ -441,6 +524,19 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("running dnd=off count=3", result.stdout)
 
+    def bar_state(self):
+        return self.state / "atlanta" / "bar"
+
+    def test_status_reports_the_selected_eww_bar(self):
+        self.call("bar", "use", "eww")
+        result = self.call("status", **{"MOCK_EWW_CTL_BAR_OUT": "islands"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertRegex(result.stdout, r"bar\s+eww\s+running islands")
+
+        stopped = self.call("status")
+        self.assertEqual(stopped.returncode, 0, stopped.stderr)
+        self.assertRegex(stopped.stdout, r"bar\s+eww\s+stopped")
+
     def test_status_reports_the_eww_daemon(self):
         running = self.call("status", **{
             "MOCK_EWW_CTL_STATUS_OUT":
@@ -625,6 +721,35 @@ class AtlantaTests(unittest.TestCase):
             [row["argv"] for row in self.calls("eww-ctl")],
             [["daemon", "status"]],
         )
+
+    def test_start_boots_only_the_selected_eww_bar(self):
+        self.call("bar", "use", "eww")
+        (self.binaries / "waybar-ctl").unlink()
+        result = self.call("start", **{
+            "MOCK_EWW_CTL_DAEMON_OUT": "running pid 4242",
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("already running eww", result.stdout)
+        self.assertIn("started island", result.stdout)
+        self.assertFalse(self.calls("waybar-ctl"))
+        self.assertEqual(
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["daemon", "status"], ["daemon", "status"],
+             ["bar", "island", "status"], ["bar", "island", "start"]])
+
+    def test_stop_uses_the_selected_eww_bar_only(self):
+        self.call("bar", "use", "eww")
+        (self.binaries / "waybar-ctl").unlink()
+        result = self.call("stop", **{
+            "MOCK_AWWW_QUERY_EXIT": "1",
+            "MOCK_BUSCTL_USER_EXIT": "1",
+            "MOCK_EWW_CTL_DAEMON_OUT": "running pid 4242",
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(self.calls("waybar-ctl"))
+        self.assertEqual(
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["daemon", "status"], ["daemon", "stop"]])
 
     def test_start_does_not_adopt_an_unmanaged_eww_daemon(self):
         result = self.call(

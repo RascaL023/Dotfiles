@@ -20,8 +20,8 @@ the install checklist.
 | Capability | Binaries | Session | Notes |
 |---|---|---|---|
 | `launcher` | `rofi-ctl` → `rofi` | any Wayland/X11 | `rofi-ctl` resolves from this checkout |
-| `bar` | `waybar-ctl` → `waybar`; `eww-ctl` → `eww` with `--provider eww` | any | both ctls resolve from this checkout |
-| `start`/`stop` | `awww-daemon`, `awww`, `eww-ctl` → `eww`, `swaync`, `swaync-client`, `waybar-ctl`, `busctl` | any | Eww daemon runs through `eww-ctl`; SwayNC is stopped through its D-Bus owner |
+| `bar` | `waybar-ctl` → `waybar`; `eww-ctl` → `eww` for the island | any | selected with `bar use`/`bar switch`; both ctls resolve from this checkout |
+| `start`/`stop` | `awww-daemon`, `awww`, `eww-ctl` → `eww`, `swaync`, `swaync-client`, `busctl`, plus the selected bar's ctl | any | Eww daemon runs through `eww-ctl`; start opens only the selected bar; SwayNC is stopped through its D-Bus owner |
 | `bar.panel` | `eww-ctl` → `eww` | any | `toggle` one allowlisted window; the island belongs to `bar` |
 | `notifications` | `swaync-client` + running `swaync` | any | daemon must already be running |
 | `screenshot region` | `grim`, `slurp` | wlroots screencopy | works on Hyprland and Niri |
@@ -79,7 +79,7 @@ Session detection: `ATLANTA_SESSION` → `NIRI_SOCKET` → `HYPRLAND_INSTANCE_SI
 | `ATLANTA_BRIGHTNESS_STEP` | `5%` | backlight step |
 | `ATLANTA_NIGHTLIGHT_TEMP` | `4000` | `wlsunset -t` (static low temperature) |
 | `XDG_RUNTIME_DIR` | — | PID files for tracked processes |
-| `XDG_STATE_HOME` | `~/.local/state` | wallpaper index |
+| `XDG_STATE_HOME` | `~/.local/state` | wallpaper index and selected bar provider |
 
 ## NixOS install
 
@@ -93,7 +93,7 @@ environment.systemPackages = with pkgs; [
   niri awww
   swayidle wlsunset
   # optional
-  eww  # bar.panel
+  eww  # bar.panel and the eww bar provider
   matugen
   python3  # tests only
 ];
@@ -138,7 +138,7 @@ for the implemented verbs.
 - **Noctalia** — never called. atlanta is its own shell.
 - **hyprpicker** — installed (0.4.7) but no `picker` verb exists yet.
 - **matugen** — `atlanta theme` is deferred; theming stays outside.
-- **eww** — `bar.panel` and `start`/`stop` (through `eww-ctl`) plus the optional depth-clock sync use it.
+- **eww** — the `eww` bar provider, `bar.panel`, and `start`/`stop` (through `eww-ctl`) plus the optional depth-clock sync use it.
 - **light**, **swaylock**, **wl-copy** — not used.
 - **hypridle**, **hyprsunset** — replaced by `swayidle` and `wlsunset`; the old
   Hyprland autostart scripts outside atlanta are not managed here.

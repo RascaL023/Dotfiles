@@ -2,7 +2,7 @@
 
 One entry point for desktop actions. It is not a shell, a daemon, or a theme engine.
 Atlanta routes each capability to the native tool that already owns it 
-and keeps only one piece of state itself: the wallpaper index.
+and keeps only two pieces of state: the wallpaper index and the selected bar provider.
 
 ## Usage
 
@@ -14,7 +14,7 @@ atlanta help | status | doctor
 | Capability | Verbs | Provider |
 |---|---|---|
 | `launcher` | `apps`, `run`, `window`, `toggle` | `rofi-ctl` |
-| `bar` | `show`, `hide`, `toggle`, `restart`, `reload`, `status` | `waybar-ctl` (default), `eww-ctl` with `--provider eww` |
+| `bar` | `show`, `hide`, `toggle`, `restart`, `reload`, `status`, `use`, `switch` | selected provider: `waybar` (default) or `eww` |
 | `bar.panel` | `toggle <panel>` | `eww-ctl` → `eww` |
 | `notifications` | `toggle`, `dnd`, `clear` | `swaync-client` |
 | `screenshot` | `region`, `screen`, `window` | `grim` + `slurp` |
@@ -32,6 +32,8 @@ Examples:
 ```bash
 atlanta launcher apps
 atlanta bar toggle
+atlanta bar use eww
+atlanta bar switch waybar
 atlanta bar toggle --provider eww
 atlanta notifications clear
 atlanta screenshot region
@@ -60,15 +62,16 @@ this session, `127` a provider is missing.
 | `awww-daemon` | `awww-daemon` | `awww kill` |
 | Eww daemon | `eww-ctl daemon start` | `eww-ctl daemon stop` |
 | SwayNC | `swaync` | D-Bus PID from `org.erikreider.swaync`, verified through `/proc`, then `SIGTERM` |
-| Waybar | `waybar-ctl start` | `waybar-ctl stop` |
+| Selected bar | `waybar-ctl start` or `eww-ctl bar island start` | selected provider; Eww's daemon stop also closes the island |
 
 `atlanta stop` stops them in reverse order and is idempotent. It does not
 start or stop `swayidle`, `wlsunset`, `hyprlock`, `wlogout`, or `rofi`; those
 remain on demand (`atlanta idle toggle`, `atlanta nightlight toggle`, and the
-session/launcher verbs). The Eww bar in `eww/bar` is not started here;
-`eww-ctl bar island start` owns it. `eww-ctl daemon stop` also closes every
-Eww window and stops the island collector, so `atlanta stop` leaves no Eww
-window behind.
+session/launcher verbs). `atlanta start` starts only the selected bar: Waybar by default, or the Eww
+island when `bar use eww` is set. The Eww daemon still starts either way because
+`bar.panel` and depth-clock use it. `eww-ctl daemon stop` also closes every Eww
+window and stops the island collector, so `atlanta stop` leaves no Eww window
+behind without a separate island stop.
 
 For a Hyprland autostart, the equivalent replacement is:
 
@@ -99,27 +102,60 @@ session. `atlanta status --check` exits `1` when a provider is missing.
 Session detection: `ATLANTA_SESSION`, then `NIRI_SOCKET`, then
 `HYPRLAND_INSTANCE_SIGNATURE`, then `XDG_CURRENT_DESKTOP`.
 
-## Waybar first
+## Choosing the bar
 
-`bar` routes to Waybar by default. `--provider eww` switches the same verbs to
-the Eww island through `eww-ctl bar island …`: `show` starts it, `hide` stops
-it, `toggle` flips it, `reload` reloads it, and `status` prints the island
-windows or `stopped`. There is no island-level `restart`; that verb exits `3`
-and points at `bar reload` or `eww-ctl daemon restart`. The provider branch is
-one `case` in `verbs/bar.sh` plus a slot in `lib/provider.sh`, so adding another
-bar means filling that branch — no reshaping of the dispatcher or the keybinds.
+`bar` means the selected status bar, not a provider name. The choice lives in
+`$XDG_STATE_HOME/atlanta/bar`; with no state file atlanta uses Waybar.
 
-`bar.panel` routes to `eww-ctl` and toggles exactly one Eww window: `profile`,
-`distro`, `calendar-popup`, or `music-popup`. Any other name is a usage error
-(`2`). `islands` is rejected on purpose — the island needs its collector, so it
-belongs to `bar show|hide|toggle`. `depth-clock` is rejected too: its geometry
-is measured by `depth-ctl` and synced with the wallpaper.
+The two selection verbs do different amounts of work:
+
+- `bar use <waybar|eww>` changes the preference only. It starts and stops
+  nothing, so a bar that is already running keeps running.
+- `bar switch <provider>` stops the provider recorded in the state file if it
+  differs from the new one, saves the choice, then starts the new provider. It
+  does not look for any other running bar.
+
+**There is no exclusivity.** `show`, `hide`, `toggle`, `reload`, `restart`, and
+`status` also act only on the selected provider. If the choice and the running
+bars drift apart, two bars can stay visible: `bar use waybar` while the Eww
+island is running leaves the island alone, and a later `bar toggle` adds Waybar.
+`atlanta start` and `stop` follow the same rule — they reconcile the selected
+bar and the Eww daemon, not a second running bar. `atlanta status` reports only
+the selected bar, so check the other provider directly:
+
+```bash
+eww-ctl bar island status      # islands, or stopped
+waybar-ctl status              # running <pid> <session>, or stopped
+```
+
+To move between bars, prefer `bar switch`, which stops the recorded provider
+before starting the new one. After drift, stop the unwanted bar explicitly
+(`eww-ctl bar island stop` or `waybar-ctl stop`); `bar switch` will not find it
+if the state file points at the other provider.
+
+Both providers answer the same verbs through `lib/bar.sh`: `show`, `hide`,
+`toggle`, `reload`, `status`, and `restart`. Waybar restarts its process; Eww
+reloads the island in place because the island lives on the shared daemon.
+`bar show` for Eww starts the daemon when needed and opens the `islands`
+window; `bar hide` closes only the island and leaves the daemon and `bar.panel`
+windows alone. An unmanaged Eww daemon is never adopted silently: `bar show`
+exits `3` with the `eww-ctl daemon restart` hint.
+
+`--provider waybar|eww` overrides the selection for one call without saving it.
+`bar.panel` stays independent of the selected bar and still toggles exactly one
+Eww window: `profile`, `distro`, `calendar-popup`, or `music-popup`. Any other
+name is a usage error (`2`). `islands` is rejected on purpose — the island needs
+its collector, so it belongs to `bar show|hide|toggle`. `depth-clock` is
+rejected too: its geometry is measured by `depth-ctl` and synced with the
+wallpaper.
 
 ## State
 
-The only state is `$XDG_STATE_HOME/atlanta/wallpaper`, an index into the image
-list of `ATLANTA_WALLPAPER_DIR` (default `~/Pictures/Wallpaper`). It is written
-by `set`, `next`, `prev`, and `random`, and read by `status`.
+Atlanta keeps two files under `$XDG_STATE_HOME/atlanta`. `wallpaper` is an index
+into the image list of `ATLANTA_WALLPAPER_DIR` (default `~/Pictures/Wallpaper`),
+written by `set`, `next`, `prev`, and `random`, and read by `status`. `bar` is
+the selected bar provider, written only by `bar use` and `bar switch`. An
+unknown value falls back to Waybar with a warning from `status` and `doctor`.
 
 `awww` has no `next`/`prev`, which is why atlanta keeps this index.
 

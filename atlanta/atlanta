@@ -19,7 +19,8 @@ Usage: atlanta <capability> <verb> [args...]
   launcher apps|run|window|toggle
                                    Rofi menus
   bar show|hide|toggle|restart|reload|status [--provider waybar|eww]
-                                   Waybar by default; eww island
+                                   The selected bar (default waybar)
+  bar use|switch waybar|eww        Select the bar provider
   bar.panel toggle <panel>         Eww window: profile, distro, popups
   notifications toggle|dnd|clear   SwayNC panel, DND, and close all
   screenshot region|screen|window  grim + slurp into ~/Pictures/Screenshots
