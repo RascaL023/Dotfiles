@@ -23,9 +23,9 @@ Usage: atlanta <capability> <verb> [args...]
   bar.panel toggle <panel>         Eww panel (reserved, not active yet)
   notifications toggle|dnd|clear   SwayNC panel, DND, and close all
   screenshot region|screen|window  grim + slurp into ~/Pictures/Screenshots
-  session menu|lock|logout|reboot|poweroff
-  idle toggle|status               hypridle, tracked by atlanta
-  nightlight toggle|status         hyprsunset, tracked by atlanta
+  session menu|lock|dpms off|on|logout|reboot|poweroff
+  idle toggle|status               swayidle, tracked by atlanta
+  nightlight toggle|status         wlsunset, tracked by atlanta
   wallpaper set|next|prev|random|pick|status
   osd volume|mic|brightness        Report the current value only
   volume up|down|mute              wpctl, then the same OSD report

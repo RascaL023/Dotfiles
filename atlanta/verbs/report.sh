@@ -158,16 +158,16 @@ status() {
     row_ready screenshot grim
     row_ready screenshot slurp
     status_session
-    if [[ $(session_name) == hyprland ]]; then
-        row_tracked idle hypridle
-    else
-        row idle hypridle unsupported
-    fi
-    if [[ $(session_name) == hyprland ]]; then
-        row_tracked nightlight hyprsunset
-    else
-        row nightlight hyprsunset unsupported
-    fi
+    case $(session_name) in
+        hyprland|niri)
+            row_tracked idle swayidle
+            row_tracked nightlight wlsunset
+            ;;
+        *)
+            row idle swayidle unsupported
+            row nightlight wlsunset unsupported
+            ;;
+    esac
     status_wallpaper
     status_feedback
     row theme matugen deferred
@@ -202,8 +202,8 @@ session wlogout
 session loginctl
 session systemctl
 session hyprlock
-idle hypridle
-nightlight hyprsunset
+idle swayidle
+nightlight wlsunset
 EOF
     printf '%-14s %-15s %s\n' session "$(session_name)" current
 }

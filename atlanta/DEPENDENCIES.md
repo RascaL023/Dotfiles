@@ -31,8 +31,8 @@ the install checklist.
 | `session lock` | `hyprlock` | Hyprland, Niri | exits `3` elsewhere |
 | `session logout` | `loginctl` | systemd-logind | `terminate-user` |
 | `session reboot/poweroff` | `systemctl` | systemd | |
-| `idle` | `hypridle` | Hyprland only | exits `3` elsewhere |
-| `nightlight` | `hyprsunset` | Hyprland only | exits `3` elsewhere |
+| `idle` | `swayidle` | Hyprland, Niri | exits `3` elsewhere |
+| `nightlight` | `wlsunset` | Hyprland, Niri | static `-t`, no coordinates |
 | `wallpaper` | `awww` + running daemon | any | `awww init` starts it when missing |
 | `wallpaper` depth sync | `depth-ctl` (optional) | any | best-effort, from this checkout |
 | `osd`, `volume`, `mic` | `wpctl` (WirePlumber) | any | parses `Volume: 0.65 [MUTED]` |
@@ -60,9 +60,9 @@ so on a machine without SwayNC the OSD is silently skipped (the notify call is
 | screenshot region / screen | yes | yes |
 | screenshot window | yes | no (`3`) |
 | session menu, logout, reboot, poweroff | yes | yes |
-| session lock | yes | yes |
-| idle | yes | no (`3`) |
-| nightlight | yes | no (`3`) |
+| session lock, session dpms | yes | yes |
+| idle | yes | yes |
+| nightlight | yes | yes |
 
 Session detection: `ATLANTA_SESSION` → `NIRI_SOCKET` → `HYPRLAND_INSTANCE_SIGNATURE`
 → `XDG_CURRENT_DESKTOP`.
@@ -77,7 +77,7 @@ Session detection: `ATLANTA_SESSION` → `NIRI_SOCKET` → `HYPRLAND_INSTANCE_SI
 | `ATLANTA_SCREENSHOT_DIR` | `~/Pictures/Screenshots` | screenshot output |
 | `ATLANTA_VOLUME_STEP` | `0.05` | volume step |
 | `ATLANTA_BRIGHTNESS_STEP` | `5%` | backlight step |
-| `ATLANTA_NIGHTLIGHT_TEMP` | `4000` | `hyprsunset -t` |
+| `ATLANTA_NIGHTLIGHT_TEMP` | `4000` | `wlsunset -t` (static low temperature) |
 | `XDG_RUNTIME_DIR` | — | PID files for tracked processes |
 | `XDG_STATE_HOME` | `~/.local/state` | wallpaper index |
 
@@ -89,8 +89,9 @@ environment.systemPackages = with pkgs; [
   wireplumber brightnessctl libnotify
   grim slurp
   rofi waybar swaynotificationcenter wlogout
-  hyprland hyprlock hypridle hyprsunset
+  hyprland hyprlock
   niri awww
+  swayidle wlsunset
   # optional
   eww matugen
   python3  # tests only
@@ -102,8 +103,8 @@ with `libnotify`.
 
 Other distributions: the same names are packaged as `bash`, `coreutils`,
 `gawk`, `jq`, `wireplumber`, `brightnessctl`, `libnotify`, `grim`, `slurp`,
-`rofi`, `waybar`, `swaync`, `wlogout`, `hyprland`, `hyprlock`, `hypridle`,
-`hyprsunset`, `niri`, `awww`; `eww` and `matugen` are optional.
+`rofi`, `waybar`, `swaync`, `wlogout`, `hyprland`, `hyprlock`, `swayidle`,
+`wlsunset`, `niri`, `awww`; `eww` and `matugen` are optional.
 
 ## Verified on this machine
 
@@ -120,7 +121,8 @@ Other distributions: the same names are packaged as `bash`, `coreutils`,
 | `swaync-client` | `/run/current-system/sw/bin/swaync-client` | 0.12.6 |
 | `wlogout` | `/run/current-system/sw/bin/wlogout` | installed |
 | `hyprctl` | `/run/current-system/sw/bin/hyprctl` | installed |
-| `hyprlock` / `hypridle` / `hyprsunset` | `/run/current-system/sw/bin/…` | 0.9.7 / 0.1.8 / 0.4.0 |
+| `hyprlock` | `/run/current-system/sw/bin/hyprlock` | 0.9.7 |
+| `swayidle` / `wlsunset` | `/home/rascal/.nix-profile/bin/…` | 1.9.1 / 0.4.0 |
 | `niri` | `/run/current-system/sw/bin/niri` | 26.04 |
 | `awww` | `/home/rascal/.nix-profile/bin/awww` | 0.12.1 |
 | `rofi` / `waybar` | `/run/current-system/sw/bin/…` | installed |
@@ -137,6 +139,8 @@ for the implemented verbs.
 - **matugen** — `atlanta theme` is deferred; theming stays outside.
 - **eww** — only `bar.panel` (reserved) and the optional depth-clock sync use it.
 - **light**, **swaylock**, **wl-copy** — not used.
+- **hypridle**, **hyprsunset** — replaced by `swayidle` and `wlsunset`; the old
+  Hyprland autostart scripts outside atlanta are not managed here.
 
 ## Checks
 

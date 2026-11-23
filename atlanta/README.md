@@ -1,11 +1,8 @@
 # atlanta
 
-One entry point for desktop actions. Atlanta routes each capability to the
-native tool that already owns it (Rofi, Waybar, SwayNC, grim, hypridle,
-hyprsunset, awww) and keeps only one piece of state itself: the wallpaper index.
-
-It is not a shell, a daemon, or a theme engine. Noctalia and matugen stay where
-they are; `atlanta theme` is deliberately unimplemented.
+One entry point for desktop actions. It is not a shell, a daemon, or a theme engine.
+Atlanta routes each capability to the native tool that already owns it 
+and keeps only one piece of state itself: the wallpaper index.
 
 ## Usage
 
@@ -21,9 +18,9 @@ atlanta help | status | doctor
 | `bar.panel` | `toggle <panel>` | Eww — reserved, not active |
 | `notifications` | `toggle`, `dnd`, `clear` | `swaync-client` |
 | `screenshot` | `region`, `screen`, `window` | `grim` + `slurp` |
-| `session` | `menu`, `lock`, `logout`, `reboot`, `poweroff` | `wlogout`, `hyprlock`, `loginctl` |
-| `idle` | `toggle`, `status` | `hypridle` |
-| `nightlight` | `toggle`, `status` | `hyprsunset` |
+| `session` | `menu`, `lock`, `dpms off`, `dpms on`, `logout`, `reboot`, `poweroff` | `wlogout`, `hyprlock`, `hyprctl`/`niri`, `loginctl` |
+| `idle` | `toggle`, `status` | `swayidle` |
+| `nightlight` | `toggle`, `status` | `wlsunset` |
 | `wallpaper` | `set`, `next`, `prev`, `random`, `pick`, `status` | `awww` |
 | `osd` | `volume`, `mic`, `brightness` | `wpctl`, `brightnessctl`, `notify-send` (report only) |
 | `volume` | `up`, `down`, `mute` | `wpctl` + OSD |
@@ -65,7 +62,7 @@ this session, `127` a provider is missing.
 | Waybar | `waybar-ctl start` | `waybar-ctl stop` |
 
 `atlanta stop` stops them in reverse order and is idempotent. It does not
-start or stop `hypridle`, `hyprsunset`, `hyprlock`, `wlogout`, or `rofi`; those
+start or stop `swayidle`, `wlsunset`, `hyprlock`, `wlogout`, or `rofi`; those
 remain on demand (`atlanta idle toggle`, `atlanta nightlight toggle`, and the
 session/launcher verbs). The Eww bar in `eww/bar` is not started here; that is
 still the one-server work.
@@ -116,14 +113,22 @@ by `set`, `next`, `prev`, and `random`, and read by `status`.
 
 `awww` has no `next`/`prev`, which is why atlanta keeps this index.
 
-Processes atlanta starts (hypridle, hyprsunset, wlogout) are tracked by PID file
+Processes atlanta starts (swayidle, wlsunset, wlogout) are tracked by PID file
 in `$XDG_RUNTIME_DIR/atlanta-<name>-<uid>.pid` with an ownership and argv check
 in `/proc`. No `pgrep`, no `pkill`, no killing by process name.
 
-`idle` and `nightlight` are Hyprland-only; on Niri they exit `3` instead of
-launching a tool that cannot work. `session lock` works on both Hyprland and
-Niri because `hyprlock` only needs `ext-session-lock-v1` and
-`wlr-screencopy`, which both compositors provide.
+`idle` and `nightlight` work on both Hyprland and Niri. `idle` runs `swayidle`
+with a fixed event list: lock at 5 minutes, display off at 5.5 minutes, suspend
+at 10 minutes, and lock before sleep. `nightlight` runs `wlsunset -t 4000`;
+without coordinates it resolves to polar night and holds that static
+temperature, which matches the old `hyprsunset -t` filter.
+
+DPMS is the only compositor-specific action in that list, so the events call
+`atlanta session dpms off|on`; that verb maps to
+`hyprctl dispatch 'hl.dsp.dpms({ action = … })'` on Hyprland 0.57+ and
+`niri msg action power-off-monitors` / `power-on-monitors` on Niri.
+`session lock` works on both because `hyprlock` only needs
+`ext-session-lock-v1` and `wlr-screencopy`, which both compositors provide.
 
 ## Install
 

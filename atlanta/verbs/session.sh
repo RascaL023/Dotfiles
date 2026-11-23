@@ -35,6 +35,17 @@ case $verb in
         require_session 'session lock' hyprland niri
         run_provider hyprlock
         ;;
+    dpms)
+        require_session 'session dpms' hyprland niri
+        direction=${2:-}
+        case "$(session_name):$direction" in
+            hyprland:off) run_provider hyprctl dispatch 'hl.dsp.dpms({ action = "off" })' ;;
+            hyprland:on) run_provider hyprctl dispatch 'hl.dsp.dpms({ action = "on" })' ;;
+            niri:off) run_provider niri msg action power-off-monitors ;;
+            niri:on) run_provider niri msg action power-on-monitors ;;
+            *) fail 'session dpms needs off or on' ;;
+        esac
+        ;;
     logout)
         run_provider loginctl terminate-user "$USER"
         ;;
@@ -45,6 +56,6 @@ case $verb in
         run_provider systemctl poweroff
         ;;
     *)
-        fail 'session needs a verb (menu, lock, logout, reboot, poweroff)'
+        fail 'session needs a verb (menu, lock, dpms, logout, reboot, poweroff)'
         ;;
 esac

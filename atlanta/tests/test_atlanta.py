@@ -52,9 +52,9 @@ sys.exit(int(exit_code))
 
 PROVIDERS = (
     "rofi-ctl", "waybar-ctl", "swaync-client", "awww", "grim", "slurp",
-    "notify-send", "wpctl", "brightnessctl", "wlogout", "hypridle",
-    "hyprsunset", "hyprlock", "depth-ctl", "loginctl", "systemctl",
-    "awww-daemon", "swaync", "eww", "busctl",
+    "notify-send", "wpctl", "brightnessctl", "wlogout", "swayidle",
+    "wlsunset", "hyprlock", "hyprctl", "niri", "depth-ctl", "loginctl",
+    "systemctl", "awww-daemon", "swaync", "eww", "busctl",
 )
 
 
@@ -205,26 +205,56 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(self.only_call("swaync-client"), ["-C"])
 
     def test_idle_toggles_a_tracked_process(self):
-        started = self.call("idle", "toggle", **{"MOCK_HYPRIDLE_HOLD": "1"})
+        started = self.call("idle", "toggle", **{"MOCK_SWAYIDLE_HOLD": "1"})
         self.assertEqual(started.returncode, 0, started.stderr)
-        self.wait_for(self.tracked("hypridle"))
+        self.wait_for(self.tracked("idle"))
+        argv = self.wait_calls("swayidle")[0]["argv"]
+        self.assertIn("timeout", argv)
+        self.assertIn("session dpms off", " ".join(argv))
         status = self.call("idle", "status")
         self.assertEqual(status.returncode, 0)
         self.assertIn("running", status.stdout)
 
         stopped = self.call("idle", "toggle")
         self.assertEqual(stopped.returncode, 0, stopped.stderr)
-        self.assertFalse(self.tracked("hypridle").exists())
+        self.assertFalse(self.tracked("idle").exists())
         self.assertEqual(self.call("idle", "status").returncode, 1)
 
-    def test_idle_is_unsupported_on_niri(self):
-        result = self.call("idle", "toggle", ATLANTA_SESSION="niri")
-        self.assertEqual(result.returncode, 3)
-        self.assertIn("Hyprland-only", result.stderr)
+    def test_idle_runs_on_niri(self):
+        started = self.call("idle", "toggle", ATLANTA_SESSION="niri",
+                           **{"MOCK_SWAYIDLE_HOLD": "1"})
+        self.assertEqual(started.returncode, 0, started.stderr)
+        self.wait_for(self.tracked("idle"))
+        self.assertEqual(self.call("idle", "toggle", ATLANTA_SESSION="niri").returncode, 0)
+        self.assertFalse(self.tracked("idle").exists())
 
-    def test_nightlight_is_unsupported_on_niri(self):
-        result = self.call("nightlight", "toggle", ATLANTA_SESSION="niri")
+    def test_idle_rejects_an_unknown_session(self):
+        result = self.call("idle", "toggle", ATLANTA_SESSION="unknown")
         self.assertEqual(result.returncode, 3)
+        self.assertIn("needs hyprland, niri", result.stderr)
+        self.assertFalse(self.calls("swayidle"))
+
+    def test_nightlight_toggles_a_tracked_process(self):
+        started = self.call("nightlight", "toggle",
+                            **{"MOCK_WLSUNSET_HOLD": "1"})
+        self.assertEqual(started.returncode, 0, started.stderr)
+        self.wait_for(self.tracked("nightlight"))
+        self.assertEqual(self.wait_calls("wlsunset")[0]["argv"], ["-t", "4000"])
+        self.assertIn("running", self.call("nightlight", "status").stdout)
+
+        stopped = self.call("nightlight", "toggle")
+        self.assertEqual(stopped.returncode, 0, stopped.stderr)
+        self.assertFalse(self.tracked("nightlight").exists())
+        self.assertEqual(self.call("nightlight", "status").returncode, 1)
+
+    def test_nightlight_runs_on_niri_with_a_temp_override(self):
+        started = self.call("nightlight", "toggle", ATLANTA_SESSION="niri",
+                            ATLANTA_NIGHTLIGHT_TEMP="3500",
+                            **{"MOCK_WLSUNSET_HOLD": "1"})
+        self.assertEqual(started.returncode, 0, started.stderr)
+        self.wait_for(self.tracked("nightlight"))
+        self.assertEqual(self.wait_calls("wlsunset")[0]["argv"], ["-t", "3500"])
+        self.call("nightlight", "toggle", ATLANTA_SESSION="niri")
 
     def test_session_menu_opens_and_closes_wlogout(self):
         opened = self.call("session", "menu", **{"MOCK_WLOGOUT_HOLD": "1"})
@@ -248,6 +278,24 @@ class AtlantaTests(unittest.TestCase):
         blocked = self.call("session", "lock", ATLANTA_SESSION="unknown")
         self.assertEqual(blocked.returncode, 3)
         self.assertIn("needs hyprland, niri", blocked.stderr)
+
+    def test_session_dpms_uses_the_compositor_command(self):
+        self.assertEqual(self.call("session", "dpms", "off").returncode, 0)
+        self.assertEqual(self.call("session", "dpms", "on",
+                                 ATLANTA_SESSION="niri").returncode, 0)
+        self.assertEqual(self.only_call("hyprctl"),
+                         ["dispatch", 'hl.dsp.dpms({ action = "off" })'])
+        self.assertEqual(self.only_call("niri"),
+                         ["msg", "action", "power-on-monitors"])
+
+        blocked = self.call("session", "dpms", "off", ATLANTA_SESSION="unknown")
+        self.assertEqual(blocked.returncode, 3)
+        self.assertIn("needs hyprland, niri", blocked.stderr)
+
+    def test_session_dpms_rejects_an_unknown_direction(self):
+        result = self.call("session", "dpms", "sideways")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("session dpms needs off or on", result.stderr)
 
     def test_session_logout_uses_loginctl(self):
         result = self.call("session", "logout")
@@ -343,6 +391,8 @@ class AtlantaTests(unittest.TestCase):
         self.assertIn("hyprland", result.stdout)
         self.assertIn("loginctl", result.stdout)
         self.assertIn("systemctl", result.stdout)
+        self.assertIn(str(self.binaries / "swayidle"), result.stdout)
+        self.assertIn(str(self.binaries / "wlsunset"), result.stdout)
 
     def test_osd_reports_volume_without_changing_it(self):
         result = self.call("osd", "volume", **{"MOCK_WPCTL_OUT": "Volume: 0.45"})
