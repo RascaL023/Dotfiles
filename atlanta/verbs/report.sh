@@ -111,6 +111,31 @@ status_bar() {
     esac
 }
 
+status_panel() {
+    local ctl out line key value daemon='' windows=''
+    if ! ctl=$(provider_resolve eww-ctl); then
+        row bar.panel eww-ctl missing
+        missing=1
+        return
+    fi
+    # eww-ctl status exits 0 even when the daemon is down, so read its output.
+    out=$(timeout 2 "$ctl" status 2>/dev/null) || :
+    while IFS= read -r line; do
+        read -r key value <<< "$line"
+        case $key in
+            daemon) daemon=$value ;;
+            windows) windows=$value ;;
+        esac
+    done <<< "$out"
+    if [[ -z $daemon ]]; then
+        row bar.panel eww 'ready (daemon not confirmed)'
+    elif [[ $daemon == stopped ]]; then
+        row bar.panel eww stopped
+    else
+        row bar.panel eww "$daemon windows=${windows:-none}"
+    fi
+}
+
 status_wallpaper() {
     local count index path
     if ! provider_resolve awww >/dev/null; then
@@ -153,7 +178,7 @@ status_feedback() {
 status() {
     row_ready launcher rofi-ctl
     status_bar
-    row bar.panel eww "reserved"
+    status_panel
     status_notifications
     row_ready screenshot grim
     row_ready screenshot slurp
@@ -186,7 +211,7 @@ doctor() {
     done <<'EOF'
 launcher rofi-ctl
 bar waybar-ctl
-bar.panel eww
+bar.panel eww-ctl
 notifications swaync-client
 screenshot grim
 screenshot slurp

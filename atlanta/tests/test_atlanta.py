@@ -54,7 +54,7 @@ PROVIDERS = (
     "rofi-ctl", "waybar-ctl", "swaync-client", "awww", "grim", "slurp",
     "notify-send", "wpctl", "brightnessctl", "wlogout", "swayidle",
     "wlsunset", "hyprlock", "hyprctl", "niri", "depth-ctl", "loginctl",
-    "systemctl", "awww-daemon", "swaync", "eww", "busctl",
+    "systemctl", "awww-daemon", "swaync", "eww", "eww-ctl", "busctl",
 )
 
 
@@ -178,16 +178,57 @@ class AtlantaTests(unittest.TestCase):
             [row["argv"] for row in self.calls("waybar-ctl")],
             [["toggle"], ["start"], ["stop"]])
 
-    def test_bar_rejects_the_inactive_provider(self):
-        result = self.call("bar", "toggle", "--provider", "eww")
-        self.assertEqual(result.returncode, 3)
-        self.assertIn("not active", result.stderr)
-        self.assertFalse(self.record.exists())
+    def test_bar_eww_provider_maps_verbs_to_eww_ctl(self):
+        verbs = {"show": "start", "hide": "stop", "toggle": "toggle",
+                 "reload": "reload", "status": "status"}
+        for verb in verbs:
+            result = self.call("bar", verb, "--provider", "eww")
+            self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["bar", "island", action] for action in verbs.values()])
+        self.assertFalse(self.calls("waybar-ctl"))
 
-    def test_bar_panel_is_reserved(self):
-        result = self.call("bar.panel", "toggle", "profile")
+    def test_bar_eww_restart_has_no_equivalent(self):
+        result = self.call("bar", "restart", "--provider", "eww")
         self.assertEqual(result.returncode, 3)
-        self.assertIn("reserved", result.stderr)
+        self.assertIn("bar reload", result.stderr)
+        self.assertFalse(self.calls("eww-ctl"))
+
+    def test_bar_eww_unknown_verb_is_usage(self):
+        result = self.call("bar", "nope", "--provider", "eww")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("unknown bar verb", result.stderr)
+        self.assertFalse(self.calls("eww-ctl"))
+
+    def test_bar_panel_toggles_an_allowed_window(self):
+        for panel in ("profile", "distro", "calendar-popup", "music-popup"):
+            result = self.call("bar.panel", "toggle", panel)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["toggle", "profile"], ["toggle", "distro"],
+             ["toggle", "calendar-popup"], ["toggle", "music-popup"]])
+
+    def test_bar_panel_rejects_an_unknown_window(self):
+        result = self.call("bar.panel", "toggle", "nope")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("unknown panel", result.stderr)
+        self.assertFalse(self.calls("eww-ctl"))
+
+    def test_bar_panel_refuses_islands(self):
+        result = self.call("bar.panel", "toggle", "islands")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("bar show", result.stderr)
+        self.assertFalse(self.calls("eww-ctl"))
+
+    def test_bar_panel_requires_toggle_and_one_window(self):
+        self.assertEqual(self.call("bar.panel").returncode, 2)
+        self.assertEqual(self.call("bar.panel", "toggle").returncode, 2)
+        self.assertEqual(self.call("bar.panel", "open", "profile").returncode, 2)
+        self.assertEqual(
+            self.call("bar.panel", "toggle", "profile", "extra").returncode, 2)
+        self.assertFalse(self.calls("eww-ctl"))
 
     def test_notifications_toggle_uses_the_panel_flag(self):
         result = self.call("notifications", "toggle")
@@ -400,6 +441,20 @@ class AtlantaTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("running dnd=off count=3", result.stdout)
 
+    def test_status_reports_the_eww_daemon(self):
+        running = self.call("status", **{
+            "MOCK_EWW_CTL_STATUS_OUT":
+                "daemon   running pid 4242\nwindows  islands profile",
+        })
+        self.assertEqual(running.returncode, 0, running.stderr)
+        self.assertIn("running pid 4242 windows=islands profile", running.stdout)
+
+        stopped = self.call("status", **{
+            "MOCK_EWW_CTL_STATUS_OUT": "daemon   stopped\nwindows  none",
+        })
+        self.assertEqual(stopped.returncode, 0, stopped.stderr)
+        self.assertRegex(stopped.stdout, r"bar\.panel\s+eww\s+stopped")
+
     def test_status_check_ignores_missing_optional_notify_send(self):
         (self.binaries / "notify-send").unlink()
         minimal = self.root / "minimal"
@@ -427,6 +482,7 @@ class AtlantaTests(unittest.TestCase):
         self.assertIn("systemctl", result.stdout)
         self.assertIn(str(self.binaries / "swayidle"), result.stdout)
         self.assertIn(str(self.binaries / "wlsunset"), result.stdout)
+        self.assertIn(str(self.binaries / "eww-ctl"), result.stdout)
 
     def test_osd_reports_volume_without_changing_it(self):
         result = self.call("osd", "volume", **{"MOCK_WPCTL_OUT": "Volume: 0.45"})

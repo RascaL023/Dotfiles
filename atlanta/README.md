@@ -14,8 +14,8 @@ atlanta help | status | doctor
 | Capability | Verbs | Provider |
 |---|---|---|
 | `launcher` | `apps`, `run`, `window`, `toggle` | `rofi-ctl` |
-| `bar` | `show`, `hide`, `toggle`, `restart`, `reload`, `status` | `waybar-ctl` |
-| `bar.panel` | `toggle <panel>` | Eww — reserved, not active |
+| `bar` | `show`, `hide`, `toggle`, `restart`, `reload`, `status` | `waybar-ctl` (default), `eww-ctl` with `--provider eww` |
+| `bar.panel` | `toggle <panel>` | `eww-ctl` → `eww` |
 | `notifications` | `toggle`, `dnd`, `clear` | `swaync-client` |
 | `screenshot` | `region`, `screen`, `window` | `grim` + `slurp` |
 | `session` | `menu`, `lock`, `dpms off`, `dpms on`, `logout`, `reboot`, `poweroff` | `wlogout`, `hyprlock`, `hyprctl`/`niri`, `loginctl` |
@@ -32,6 +32,7 @@ Examples:
 ```bash
 atlanta launcher apps
 atlanta bar toggle
+atlanta bar toggle --provider eww
 atlanta notifications clear
 atlanta screenshot region
 atlanta wallpaper next
@@ -64,8 +65,8 @@ this session, `127` a provider is missing.
 `atlanta stop` stops them in reverse order and is idempotent. It does not
 start or stop `swayidle`, `wlsunset`, `hyprlock`, `wlogout`, or `rofi`; those
 remain on demand (`atlanta idle toggle`, `atlanta nightlight toggle`, and the
-session/launcher verbs). The Eww bar in `eww/bar` is not started here; that is
-still the one-server work.
+session/launcher verbs). The Eww bar in `eww/bar` is not started here;
+`eww-ctl bar island start` owns it.
 
 For a Hyprland autostart, the equivalent replacement is:
 
@@ -85,7 +86,7 @@ needs a verified stop path.
 Resolution order:
 
 1. `$ATLANTA_PROVIDER_DIR/<name>` — tests and out-of-tree overrides.
-2. This checkout: `rofi/rofi-ctl`, `waybar/waybar-ctl`, `eww/bar/barctl`,
+2. This checkout: `rofi/rofi-ctl`, `waybar/waybar-ctl`, `eww/eww-ctl`,
    `matugen/matugen-ctl`, `eww/script/depth-ctl`. Waybar and Eww ctls are not
    necessarily on `PATH`, so the repo path wins.
 3. `PATH`.
@@ -98,12 +99,19 @@ Session detection: `ATLANTA_SESSION`, then `NIRI_SOCKET`, then
 
 ## Waybar first
 
-`bar` routes to Waybar only. The provider branch is one `case` in
-`verbs/bar.sh` plus a slot in `lib/provider.sh`, so adding another bar later
-means filling that branch — no reshaping of the dispatcher or the keybinds.
+`bar` routes to Waybar by default. `--provider eww` switches the same verbs to
+the Eww island through `eww-ctl bar island …`: `show` starts it, `hide` stops
+it, `toggle` flips it, `reload` reloads it, and `status` prints the island
+windows or `stopped`. There is no island-level `restart`; that verb exits `3`
+and points at `bar reload` or `eww-ctl daemon restart`. The provider branch is
+one `case` in `verbs/bar.sh` plus a slot in `lib/provider.sh`, so adding another
+bar means filling that branch — no reshaping of the dispatcher or the keybinds.
 
-`bar.panel` is reserved for that second provider and exits `3` today. Eww's
-depth clock still works through `eww/script/depth-ctl`.
+`bar.panel` routes to `eww-ctl` and toggles exactly one Eww window: `profile`,
+`distro`, `calendar-popup`, or `music-popup`. Any other name is a usage error
+(`2`). `islands` is rejected on purpose — the island needs its collector, so it
+belongs to `bar show|hide|toggle`. `depth-clock` is rejected too: its geometry
+is measured by `depth-ctl` and synced with the wallpaper.
 
 ## State
 
