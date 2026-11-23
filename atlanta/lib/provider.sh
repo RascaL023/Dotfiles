@@ -8,7 +8,7 @@ provider_repo_subdir() {
     case $1 in
         rofi-ctl) printf 'rofi\n' ;;
         waybar-ctl) printf 'waybar\n' ;;
-        barctl) printf 'eww/bar\n' ;;
+        eww-ctl) printf 'eww\n' ;;
         matugen-ctl) printf 'matugen\n' ;;
         depth-ctl) printf 'eww/script\n' ;;
         *) return 1 ;;

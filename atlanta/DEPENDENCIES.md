@@ -20,9 +20,9 @@ the install checklist.
 | Capability | Binaries | Session | Notes |
 |---|---|---|---|
 | `launcher` | `rofi-ctl` → `rofi` | any Wayland/X11 | `rofi-ctl` resolves from this checkout |
-| `bar` | `waybar-ctl` → `waybar` | any | `waybar-ctl` resolves from this checkout |
+| `bar` | `waybar-ctl` → `waybar`; `eww-ctl` → `eww` with `--provider eww` | any | both ctls resolve from this checkout |
 | `start`/`stop` | `awww-daemon`, `awww`, `eww`, `swaync`, `swaync-client`, `waybar-ctl`, `busctl` | any | mirrors Hyprland autostart; SwayNC is stopped through its D-Bus owner |
-| `bar.panel` | `eww` | any | reserved; exits `3` |
+| `bar.panel` | `eww-ctl` → `eww` | any | `toggle` one allowlisted window; the island belongs to `bar` |
 | `notifications` | `swaync-client` + running `swaync` | any | daemon must already be running |
 | `screenshot region` | `grim`, `slurp` | wlroots screencopy | works on Hyprland and Niri |
 | `screenshot screen` | `grim`, `jq` + `hyprctl`/`niri` | any | focused output via compositor |
@@ -40,7 +40,7 @@ the install checklist.
 | OSD feedback | `notify-send` + running notification daemon | any | SwayNC owns the bubble |
 | `theme` | none | — | deferred; matugen stays outside |
 
-Providers resolved from this checkout — `rofi-ctl`, `waybar-ctl`, `barctl`,
+Providers resolved from this checkout — `rofi-ctl`, `waybar-ctl`, `eww-ctl`,
 `matugen-ctl`, `depth-ctl` — do **not** need to be on `PATH`. `install.sh` only
 links `atlanta` itself and its fish completion.
 
@@ -93,7 +93,8 @@ environment.systemPackages = with pkgs; [
   niri awww
   swayidle wlsunset
   # optional
-  eww matugen
+  eww  # bar.panel
+  matugen
   python3  # tests only
 ];
 ```
@@ -137,7 +138,7 @@ for the implemented verbs.
 - **Noctalia** — never called. atlanta is its own shell.
 - **hyprpicker** — installed (0.4.7) but no `picker` verb exists yet.
 - **matugen** — `atlanta theme` is deferred; theming stays outside.
-- **eww** — only `bar.panel` (reserved) and the optional depth-clock sync use it.
+- **eww** — `bar.panel` (through `eww-ctl`) and the optional depth-clock sync use it.
 - **light**, **swaylock**, **wl-copy** — not used.
 - **hypridle**, **hyprsunset** — replaced by `swayidle` and `wlsunset`; the old
   Hyprland autostart scripts outside atlanta are not managed here.
@@ -155,4 +156,5 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s atlanta/tests
 - `wpctl get-volume` prints `Volume: 0.65` or `Volume: 0.65 [MUTED]`
 - `brightnessctl get` / `max` print integers
 - `waybar-ctl status` prints `running <pid> <session>` or nothing
+- `eww-ctl status` prints `daemon   running pid <n>` (or `stopped`) and `windows  …`
 - `awww` accepts `query`, `init`, and `img` with `--transition-*` flags
