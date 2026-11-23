@@ -25,7 +25,11 @@ def command(*argv):
 
 
 def ctl(*args):
-    return command(str(ROOT / "barctl"), *args)
+    return command(str(ROOT / "eww-ctl"), "bar", "island", *args)
+
+
+def daemon(*args):
+    return command(str(ROOT / "eww-ctl"), "daemon", *args)
 
 
 def state():
@@ -60,7 +64,7 @@ def processes():
     return result
 
 
-def bar_processes():
+def island_processes():
     all_procs = processes()
     roots = {pid for pid, p in all_procs.items() if str(ROOT) in p["argv"] and
              p["argv"] and Path(p["argv"][0]).name == "eww" and "daemon" in p["argv"]}
@@ -72,7 +76,8 @@ def bar_processes():
             break
         included = expanded
     result = {pid: all_procs[pid] for pid in included}
-    collectors = [p for p in result.values() if "./scripts/adapter.py" in p["argv"]]
+    collectors = [p for p in result.values()
+                  if any(part.endswith("bar/island/scripts/adapter.py") for part in p["argv"])]
     assert len(collectors) == 1, f"expected one collector, found {len(collectors)}"
     return result
 
@@ -89,16 +94,19 @@ def cycles(count):
     for index in range(count):
         ctl("start")
         eventually(lambda s: s["workspaces"]["available"])
-        before = bar_processes()
+        daemon_state = daemon("status")
+        before = island_processes()
         ctl("reload")
         eventually(lambda s: s["workspaces"]["available"])
         assert_gone(before)
-        before = bar_processes()
+        assert daemon("status") == daemon_state, "island reload must keep the daemon"
+        before = island_processes()
         ctl("stop")
         assert_gone(before)
         assert not (runtime_dir() / "collector.pid").exists()
         assert ctl("status") == "stopped"
-        print(f"cycle {index + 1}/{count}: start, reload, stop; no surviving processes", flush=True)
+        assert daemon("status") == daemon_state, "island stop must keep the daemon"
+        print(f"cycle {index + 1}/{count}: island start, reload, stop; daemon kept", flush=True)
     ctl("start")
 
 
@@ -166,12 +174,12 @@ def controls():
 
 
 def measure(seconds, label):
-    before = bar_processes()
+    before = island_processes()
     start = time.monotonic()
     samples = []
     for index in range(seconds // 5):
         time.sleep(5)
-        samples.append(bar_processes())
+        samples.append(island_processes())
         if (index + 1) % 6 == 0:
             print(f"{label}: {index * 5 + 5}/{seconds}s sampled", flush=True)
     elapsed = time.monotonic() - start

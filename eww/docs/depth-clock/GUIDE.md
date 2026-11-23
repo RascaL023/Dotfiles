@@ -315,7 +315,7 @@ tertutup. Detail pipeline tema tidak dibahas di dokumen ini.
 | Foreground memotong rambut | toleransi terlalu tinggi | turunkan angka toleransi, `depth-ctl generate` lagi |
 | Ada rim/kotak krem di tepi subjek | tidak ada erode / masker mentah dipakai | pastikan langkah `-morphology Erode Disk:1 -blur 0x0.8` dipakai |
 | `[ERR] mask coverage ...` | warna latar salah atau latar tidak rata | ambil warna dari histogram; kalau latar bergradasi, wallpaper ini tidak cocok untuk keying otomatis |
-| Bar hilang setelah utak-atik | bar punya daemon sendiri | `~/.dotfile/eww/bar/barctl start` |
+| Bar hilang setelah utak-atik | modul island tidak berjalan | `~/.dotfile/eww/eww-ctl bar island start` |
 
 ---
 

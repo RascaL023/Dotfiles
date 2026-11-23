@@ -1,0 +1,73 @@
+(defwidget volume-control []
+  (eventbox :visible {island.modules.volume} :class "slider-control"
+    :onhover "eww --config . --force-wayland --no-daemonize update volume-open=true brightness-open=false"
+    :onhoverlost "eww --config . --force-wayland --no-daemonize update volume-open=false"
+    :onscroll "printf 'volume-scroll %s\\n' '{}' > \"$EWW_ISLAND_EVENTS\"" :timeout "5s"
+    (box :space-evenly false
+      (revealer :reveal {volume-open && island.volume.available} :transition "slideright"
+        :duration {island.ui.reveal_duration}
+        (box :class "inline-slider" :space-evenly false
+          (label :class "slider-percent" :text {island.volume.text})
+          (scale :class "control-slider" :orientation "h" :valign "center"
+            :min 0 :max 100 :round-digits 0 :draw-value false
+            :value {island.volume.percent > 100 ? 100 : island.volume.percent}
+            :active {volume-open && island.volume.available}
+            :onchange "printf 'volume-set %s\\n' '{}' > \"$EWW_ISLAND_EVENTS\"" :timeout "5s")))
+      (button :class "right-button ${island.volume.muted ? 'muted' : ''}"
+        :active {island.volume.available} :tooltip {island.volume.tooltip}
+        :onclick "printf 'volume-mute\\n' > \"$EWW_ISLAND_EVENTS\"" :timeout "5s"
+        (label :class "icon level-icon" :text {island.volume.icon}
+          :width {island.ui.icon_box} :height {island.ui.icon_box})))))
+
+(defwidget brightness-control []
+  (eventbox :visible {island.modules.brightness && island.brightness.available} :class "slider-control"
+    :onhover "eww --config . --force-wayland --no-daemonize update brightness-open=true volume-open=false"
+    :onhoverlost "eww --config . --force-wayland --no-daemonize update brightness-open=false"
+    :onscroll "printf 'brightness-scroll %s\\n' '{}' > \"$EWW_ISLAND_EVENTS\"" :timeout "5s"
+    (box :space-evenly false
+      (revealer :reveal {brightness-open && island.brightness.available} :transition "slideright"
+        :duration {island.ui.reveal_duration}
+        (box :class "inline-slider" :space-evenly false
+          (label :class "slider-percent" :text {island.brightness.text})
+          (scale :class "control-slider" :orientation "h" :valign "center"
+            :min 0 :max 100 :round-digits 0 :draw-value false :value {island.brightness.percent}
+            :active {brightness-open && island.brightness.available}
+            :onchange "printf 'brightness-set %s\\n' '{}' > \"$EWW_ISLAND_EVENTS\"" :timeout "5s")))
+      (box :class "right-button" :tooltip {island.brightness.tooltip}
+        (label :class "icon level-icon" :text {island.brightness.icon}
+          :width {island.ui.icon_box} :height {island.ui.icon_box})))))
+
+(defwidget controls-island []
+  (box :visible {island.modules.volume || (island.modules.brightness && island.brightness.available)}
+    :class "island" :space-evenly false
+    (volume-control)
+    (brightness-control)))
+
+(defwidget status-island []
+  (box :visible {island.modules.network || (island.modules.battery && island.battery.available)}
+    :class "island" :space-evenly false
+    (button :visible {island.modules.network} :class "right-button"
+      :tooltip {island.network.tooltip} :onclick "./eww-ctl bar island action network" :timeout "5s"
+      (label :class "icon" :text {island.network.icon}
+        :width {island.ui.icon_box} :height {island.ui.icon_box}))
+    (box :visible {island.modules.battery && island.battery.available}
+      :class "right-button ${island.battery.warning ? 'warning' : ''}" :tooltip {island.battery.tooltip}
+      (label :class "icon" :text {island.battery.icon}
+        :width {island.ui.icon_box} :height {island.ui.icon_box}))))
+
+(defwidget actions-island []
+  (box :visible {island.modules.notifications || island.modules.power} :class "island" :space-evenly false
+    (button :visible {island.modules.notifications} :class "right-button"
+      :active {island.notifications.available} :tooltip {island.notifications.tooltip}
+      :onclick "printf 'notifications\\n' > \"$EWW_ISLAND_EVENTS\"" :onrightclick "printf 'dnd\\n' > \"$EWW_ISLAND_EVENTS\"" :timeout "5s"
+      (label :class "icon" :text {island.notifications.icon}
+        :width {island.ui.icon_box} :height {island.ui.icon_box}))
+    (button :visible {island.modules.power} :class "right-button muted"
+      :tooltip "Power" :onclick "./eww-ctl bar island action power" :timeout "5s"
+      (label :class "icon" :text "⏻" :width {island.ui.icon_box} :height {island.ui.icon_box}))))
+
+(defwidget right-island []
+  (box :halign "end" :valign "center" :spacing {island.ui.island_gap} :space-evenly false
+    (controls-island)
+    (status-island)
+    (actions-island)))

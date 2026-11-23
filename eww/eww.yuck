@@ -21,7 +21,7 @@
 (deflisten music-cover "script/music-ctl 'cover'")
 (deflisten music-progress 
   :initial "0:00|0:00|0"
-  "while true; do ~/.config/eww/script/music-ctl 'stream'; sleep 1; done")
+  "while true; do ./script/music-ctl 'stream'; sleep 1; done")
 
 
 ;;##################
@@ -40,3 +40,17 @@
 (include "window/distro.yuck")
 (include "window/depth-clock.yuck")
 
+
+;;#########################
+;;##### Island module #####
+;;#########################
+
+;; One daemon, one config: this file is the only place that includes the island
+;; module. Keeping every (include) here means each path is relative to this
+;; directory, so nested-include resolution never matters.
+(include "bar/island/island.yuck")
+(include "bar/island/widgets/music.yuck")
+(include "bar/island/widgets/right.yuck")
+(include "bar/island/widgets/islands.yuck")
+(include "bar/island/widgets/calendar.yuck")
+(include "bar/island/window.yuck")

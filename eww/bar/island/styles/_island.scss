@@ -1,5 +1,3 @@
-* { all: unset; }
-
 .islands-window, .calendar-window, .music-window {
   background: $clear;
   color: $text;
@@ -7,7 +5,7 @@
   font-size: $font-size;
   font-weight: $font-weight;
 }
-.bar-frame { padding: $outer-top $outer-x $outer-bottom; }
+.island-frame { padding: $outer-top $outer-x $outer-bottom; }
 .island {
   background: $surface;
   border: $border-width solid $border;

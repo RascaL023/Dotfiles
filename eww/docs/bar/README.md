@@ -1,10 +1,10 @@
-# Bar Eww — pulau minimalis
+# Island Eww — pulau minimalis
 
-> Dokumen ini menjelaskan bar di `eww/bar/` dan konfigurasinya (`eww.yuck`,
-> `eww.scss`, `widgets/`, `styles/`, `scripts/`). Berkas runtime ada di folder
-> tersebut, bukan di `eww/docs/`.
+> Dokumen ini menjelaskan modul island di `eww/bar/island/` dan konfigurasinya
+> (`island.yuck`, `window.yuck`, `widgets/`, `styles/`, `scripts/`). Berkas
+> runtime ada di folder tersebut, bukan di `eww/docs/`.
 
-Bar mandiri untuk **Eww 0.6.0 + Wayland**, dengan adapter **Hyprland dan Niri**,
+Island mandiri untuk **Eww 0.6.0 + Wayland**, dengan adapter **Hyprland dan Niri**,
 target awal 1366×768. Satu jendela transparan menampung kelompok kiri, jam,
 dan tiga pulau kanan, masing-masing setinggi 30 px. Padding atas 4 px dan bawah
 0 px membuat area eksklusif **34 px**. Margin horizontal 4 px, radius 10 px,
@@ -19,35 +19,44 @@ tetap mengikuti konfigurasi Niri/Hyprland Anda.
 ## Menjalankan
 
 ```sh
-~/.dotfile/eww/bar/barctl doctor
-~/.dotfile/eww/bar/barctl start
-~/.dotfile/eww/bar/barctl start --monitor LVDS-1
-~/.dotfile/eww/bar/barctl toggle
-~/.dotfile/eww/bar/barctl reload
-~/.dotfile/eww/bar/barctl status
-~/.dotfile/eww/bar/barctl stop
+~/.dotfile/eww/eww-ctl bar island doctor
+~/.dotfile/eww/eww-ctl bar island start
+~/.dotfile/eww/eww-ctl bar island start --monitor LVDS-1
+~/.dotfile/eww/eww-ctl bar island toggle
+~/.dotfile/eww/eww-ctl bar island reload
+~/.dotfile/eww/eww-ctl bar island status
+~/.dotfile/eww/eww-ctl bar island stop
+~/.dotfile/eww/eww-ctl daemon restart
 ```
 
 `--monitor` menerima nama konektor atau indeks Eww dan berlaku untuk
-`start`/`toggle`. Dukungan awal satu monitor pilihan. `reload` melakukan
-stop/start yang bersih, mempertahankan monitor terakhir, serta menutup slider
-dan seluruh popup.
+`start`/`toggle`. Dukungan awal satu monitor pilihan. `reload` menutup lalu
+membuka kembali jendela island dan collector-nya, mempertahankan monitor
+terakhir; daemon tetap hidup.
 Setelah mengganti monitor default di pengaturan, gunakan
-`stop` lalu `start`. Reload ketika bar berhenti tidak membuka bar.
+`stop` lalu `start`. Reload ketika island berhenti tidak membuka island.
 
-Semua perintah menggunakan `eww --config <path absolut bar/> --force-wayland
---no-daemonize`. `barctl` memulai daemon secara eksplisit dan menyimpan identitas
-PID. Ini mencegah Eww 0.6.0 membuat daemon kedua ketika respons IPC melebihi
-timeout internal 100 ms. Setelah `open`, controller memeriksa jendela yang
-benar-benar terbuka, termasuk bila klien lebih dulu timeout.
-Tidak ada `pkill eww`, perubahan autostart, konfigurasi widget lama, Waybar,
-folder referensi, atau konfigurasi Matugen. Bila bar lain aktif, compositor
-dapat menjumlahkan area eksklusif keduanya. Keybinding lama yang menjalankan
-`pkill eww` tetap dapat menutup semua instance; gunakan `barctl` untuk bar ini.
+`eww-ctl` adalah satu-satunya jalur start daemon. Daemon dijalankan dengan
+`eww --config <path absolut eww/> --force-wayland --no-daemonize`, membawa
+`EWW_ISLAND_EVENTS`, dan identitas PID-nya disimpan supaya `stop` tidak pernah
+menyentuh proses lain. Ini mencegah Eww 0.6.0 membuat daemon kedua ketika
+respons IPC melebihi timeout internal 100 ms. Setelah `open`, launcher
+memeriksa jendela yang benar-benar terbuka, termasuk bila klien lebih dulu
+timeout. Daemon yang lahir dari keybind/autostart lama tidak membawa variabel
+itu; `eww-ctl daemon restart` mengambil alih.
+
+`island stop` hanya menutup `islands`, `calendar-popup`, dan `music-popup` lalu
+menghentikan collector; jendela root `profile`, `distro`, dan `depth-clock`
+tetap hidup. Hanya `eww-ctl daemon stop` yang mematikan daemon. Tahap
+restrukturisasi ini belum mengubah keybind/autostart di luar `eww/`, jadi
+`pkill eww` lama masih mematikan semuanya sampai pemanggil itu dipindahkan.
+Bila bar lain aktif, compositor dapat menjumlahkan area eksklusif keduanya.
+Tidak ada perubahan konfigurasi widget lama, Waybar, folder referensi, atau
+konfigurasi Matugen.
 
 ## Pengaturan dan dependensi
 
-Edit **`settings.json`**, lalu jalankan `barctl reload`:
+Edit **`settings.json`**, lalu jalankan `eww-ctl bar island reload`:
 
 - `monitor`: konektor awal (`LVDS-1`) atau indeks.
 - `compositor`: `auto` (default), `hyprland`, atau `niri`. Deteksi otomatis
@@ -93,7 +102,7 @@ Dependensi modul:
 | Notifikasi | `swaync-client`, SwayNC |
 | Launcher / daya | `rofi-ctl` (dari `PATH`), `hyprlock`, `systemctl`, perintah logout compositor aktif |
 
-`barctl doctor` memeriksa pengaturan, executable, lingkungan sesi, resolusi font,
+`eww-ctl bar island doctor` memeriksa pengaturan, executable, lingkungan sesi, resolusi font,
 dan ketersediaan modul pada instance berjalan. Modul yang kehilangan layanan
 tetap memiliki state lengkap: musik menampilkan ikon dan keadaan kosong,
 baterai tersembunyi, workspace tidak aktif,
@@ -181,7 +190,7 @@ sinyal atau melakukan scan berkala.
 ## Tema
 
 Semua warna, font, ukuran, spacing, dan radius ada di
-**`styles/_tokens.scss`**. Komponen di `_bar.scss` hanya memakai token semantik.
+**`styles/_tokens.scss`**. Komponen di `_island.scss` hanya memakai token semantik.
 Ukuran memakai px dan durasi memakai ms. Token `$right-*`, `$slider-*`
 dan `$control-transition` mengatur kelompok kanan.
 Token `$calendar-*` mengatur ukuran, jarak, dan durasi panel kalender;
@@ -199,7 +208,7 @@ Palet lokal gelap hangat langsung bekerja tanpa theme store. Kalau bar harus
 mengikuti tema aktif, impor variabel tema **sebelum** definisi token warna, lalu
 petakan ke `$surface`, `$text`, `$muted`, `$accent`, `$on-accent`, `$border`,
 `$warning`, dan `$hover`. Token font/ikon biarkan lokal agar desain tidak
-berubah. Setelah tema berganti, jalankan `barctl reload`; cara tema dihasilkan
+berubah. Setelah tema berganti, jalankan `eww-ctl bar island reload`; cara tema dihasilkan
 tidak dibahas di dokumen Eww ini.
 
 ## Adapter dan lifecycle
@@ -207,17 +216,17 @@ tidak dibahas di dokumen Eww ini.
 `eww.yuck` hanya memiliki **satu `deflisten`**:
 
 ```sh
-cd ~/.dotfile/eww/bar
-python3 scripts/adapter.py listen      # satu objek JSON lengkap per baris
+cd ~/.dotfile/eww
+python3 bar/island/scripts/adapter.py listen   # satu objek JSON lengkap per baris
 python3 scripts/adapter.py snapshot    # baca state instance berjalan
-./barctl action volume-mute
-./barctl action volume-set 50
-./barctl action brightness-set 50
-./barctl action music-scroll down
-./barctl action music-panel-toggle
-./barctl action music-previous
-./barctl action music-next
-./barctl action calendar-toggle
+./eww-ctl bar island action volume-mute
+./eww-ctl bar island action volume-set 50
+./eww-ctl bar island action brightness-set 50
+./eww-ctl bar island action music-scroll down
+./eww-ctl bar island action music-panel-toggle
+./eww-ctl bar island action music-previous
+./eww-ctl bar island action music-next
+./eww-ctl bar island action calendar-toggle
 ```
 
 `scripts/common.py` mendefinisikan pengaturan dan schema state.
@@ -237,20 +246,20 @@ dan persentase slider. Adapter memvalidasi allowlist,
 rentang 0–100 dan angka finite; metadata tidak masuk ke command.
 
 Callback perubahan nilai, scroll, mute, notifikasi, kalender, dan musik menulis pesan pendek melalui builtin shell `printf` ke
-`$EWW_BAR_EVENTS`, FIFO privat yang disiapkan `barctl` dan dibaca collector.
+`$EWW_ISLAND_EVENTS`, FIFO privat yang disiapkan `eww-ctl` dan dibaca collector.
 Ini menghindari startup interpreter pada setiap pergeseran slider. Callback
 hover langsung menjalankan `eww --config . --no-daemonize update` pada instance
 bar yang sama; setiap kontrol memiliki variabel buka/tutupnya sendiri.
 Eww 0.6.0 memakai timeout 200 ms pada callback hover/scroll yang diperiksa;
 `timeout "5s"` pada eventbox tidak diterapkan ke handler tersebut di binary
 ini. Perintah perangkat dikerjakan collector, sementara callback segera selesai.
-`barctl action` tetap memakai socket JSON dengan respons untuk CLI.
+`eww-ctl bar island action` tetap memakai socket JSON dengan respons untuk CLI.
 
 Untuk compositor lain, implementasikan `snapshot`, `socket_path`, `subscribe`,
 `relevant`, dan `focus` sebagai adapter baru; perbarui pemilihan adapter dan validasi
 `compositor`. Widget serta schema JSON tidak perlu diganti. Untuk mengganti
 pengumpul secara keseluruhan, pertahankan schema lengkap dan kontrak aksi IPC,
-atau ubah pemanggilan `barctl action` secara bersamaan.
+atau ubah pemanggilan `eww-ctl bar island action` secara bersamaan.
 
 Alur data:
 
@@ -299,19 +308,19 @@ koneksi stabil selama 30 detik mengembalikan backoff ke awal. Penggabungan event
 memakai jendela waktu tetap agar stream ramai tidak menunda refresh selamanya.
 State hanya dicetak ketika isinya berubah.
 
-File runtime berada di `$XDG_RUNTIME_DIR/eww-islands-<hash path>/`, mode 0700.
+File runtime berada di `$XDG_RUNTIME_DIR/eww-island-<hash direktori config eww>/`, mode 0700.
 Lock mencegah collector dan operasi lifecycle ganda. SIGTERM/SIGINT/SIGHUP
-membatalkan tugas dan menghentikan serta me-reap child process. `stop` menutup
-daemon bar dan menunggu lock collector bebas. Aplikasi yang sengaja dibuka
+membatalkan tugas dan menghentikan serta me-reap child process. `island stop` menutup jendela island dan menunggu lock collector
+bebas; `daemon stop` mematikan daemon dan seluruh child-nya. Aplikasi yang sengaja dibuka
 pengguna (Kitty/Rofi/layar kunci) boleh hidup setelah bar berhenti.
 
 ## Pemeriksaan dan troubleshooting
 
 ```sh
-python3 -m unittest discover -s ~/.dotfile/eww/bar/tests -v
-tail -f "$XDG_RUNTIME_DIR"/eww-islands-*/daemon.log
-eww -c ~/.dotfile/eww/bar active-windows
-python3 ~/.dotfile/eww/bar/scripts/adapter.py snapshot
+python3 -m unittest discover -s ~/.dotfile/eww/bar/island/tests -v
+tail -f "$XDG_RUNTIME_DIR"/eww-island-*/daemon.log
+~/.dotfile/eww/eww-ctl status
+python3 ~/.dotfile/eww/bar/island/scripts/adapter.py snapshot
 ```
 
 Tes unit mencakup kutip/backslash/Unicode/newline, layanan kosong, deduplikasi
@@ -328,11 +337,11 @@ Tes socket membutuhkan izin socket Unix lokal.
 Pemeriksaan desktop yang **secara eksplisit mengubah keadaan sementara**:
 
 ```sh
-python3 bar/tests/live_checks.py cycles --count 20
-python3 bar/tests/live_checks.py workspaces
-python3 bar/tests/live_checks.py controls
-python3 bar/tests/live_checks.py measure --seconds 60 --label idle
-python3 bar/tests/live_checks.py music-measure --seconds 60
+python3 bar/island/tests/live_checks.py cycles --count 20
+python3 bar/island/tests/live_checks.py workspaces
+python3 bar/island/tests/live_checks.py controls
+python3 bar/island/tests/live_checks.py measure --seconds 60 --label idle
+python3 bar/island/tests/live_checks.py music-measure --seconds 60
 ```
 
 Jalankan dari direktori `eww/`. `cycles` meninggalkan bar berjalan. `controls`
@@ -347,7 +356,7 @@ pages dapat terhitung lebih dari sekali). Hasil sesi implementasi ada di
 [`VERIFICATION.md`](VERIFICATION.md).
 
 - Bar tidak muncul: jalankan dari lingkungan sesi Wayland, cek monitor dengan
-  `hyprctl -j monitors` atau `niri msg -j outputs`, lalu `barctl doctor` dan log Eww.
+  `hyprctl -j monitors` atau `niri msg -j outputs`, lalu `eww-ctl bar island doctor` dan log Eww.
 - Ikon kotak: cek `fc-match 'JetBrainsMono Nerd Font'`.
 - Musik **No active player**: cek `playerctl -l` dan `mpc status`; periksa lingkungan MPD
   pada proses yang menjalankan bar.
@@ -356,10 +365,10 @@ pages dapat terhitung lebih dari sekali). Hasil sesi implementasi ada di
 - Brightness tersembunyi: periksa `/sys/class/backlight`, `brightnessctl -l`,
   `modules.brightness`, dan `brightness.device`. Jika slider gagal menulis,
   periksa izin perangkat dan log collector; adapter tidak memakai sudo.
-- Setelah edit Yuck/SCSS/settings: gunakan `barctl reload`, terutama setelah
+- Setelah edit Yuck/SCSS/settings: gunakan `eww-ctl bar island reload`, terutama setelah
   mengganti schema atau token UI. Eww juga dapat reload otomatis saat file
   berubah; lock collector mencegah duplikasi.
-- Log utama: `$XDG_RUNTIME_DIR/eww-islands-<hash>/daemon.log`. Karena daemon
+- Log utama: `$XDG_RUNTIME_DIR/eww-island-<hash direktori config>/daemon.log`. Karena daemon
   dimulai tanpa terminal, Eww 0.6.0 tidak mengalihkan stderr sendiri ke
   `eww logs`; controller mengarahkannya ke berkas ini. Pesan IPC `channel closed`
   sesekali dapat muncul jika `open` melebihi timeout klien 100 ms; controller

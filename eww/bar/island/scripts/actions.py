@@ -6,7 +6,7 @@ import os
 import subprocess
 import sys
 
-from common import ROOT, runtime_dir
+from common import MODULE, runtime_dir
 
 MENU = {"Kunci layar": "lock", "Suspend": "suspend", "Logout": "logout",
         "Restart": "reboot", "Shutdown": "shutdown"}
@@ -40,7 +40,7 @@ def local_action(name, cfg):
         detach(cfg["commands"][name])
         return True
     if name == "power":
-        detach([sys.executable, str(ROOT / "scripts/adapter.py"), "power-menu"])
+        detach([sys.executable, str(MODULE / "scripts/adapter.py"), "power-menu"])
         return True
     return False
 

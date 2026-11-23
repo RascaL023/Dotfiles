@@ -1,0 +1,13 @@
+;; The island window: one transparent strip holding the three groups.
+;; Widgets come from bar/island/widgets/*.yuck; the includes live in eww/eww.yuck.
+(defwindow islands
+  :monitor 0
+  :geometry (geometry :x "0px" :y "0px" :width "100%" :height "1px" :anchor "top center")
+  :exclusive true
+  :focusable false
+  :stacking "overlay"
+  :namespace "eww-islands"
+  (centerbox :class "island-frame islands-window" :orientation "h"
+    (left-island)
+    (clock-island)
+    (right-island)))

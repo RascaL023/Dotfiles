@@ -82,7 +82,7 @@ class Collector:
                 result = await self.calendar_eww("open", "calendar-popup", "--screen", str(self.cfg["monitor"]),
                                                  "--arg", "panel-y=" + self.state["ui"]["calendar_offset"])
                 if result is None:
-                    # Like barctl, tolerate Eww's short IPC timeout only if the window exists.
+                    # Like eww-ctl, tolerate Eww's short IPC timeout only if the window exists.
                     windows = await self.calendar_eww("active-windows")
                     if "calendar-popup: calendar-popup" not in (windows or ""):
                         raise RuntimeError("calendar failed to open; inspect daemon.log")
@@ -150,7 +150,7 @@ class Collector:
                                              "--device=" + state["device"], "--min-value=0",
                                              "set", f"{percent}%")
         if result is None:
-            print(f"bar: {module}: setting value failed", file=sys.stderr)
+            print(f"island: {module}: setting value failed", file=sys.stderr)
         if module == "volume":
             # Show the requested level at once; the next PipeWire event corrects it.
             self.state["volume"] = volume_display(percent, self.state["volume"]["muted"])
@@ -208,7 +208,7 @@ class Collector:
         try:
             await dispatch(self, name, argument)
         except (ValueError, RuntimeError, OSError, asyncio.TimeoutError) as exc:
-            print(f"bar: event {name}: {exc}", file=sys.stderr)
+            print(f"island: event {name}: {exc}", file=sys.stderr)
 
     async def event_actions(self):
         while True:
@@ -244,7 +244,7 @@ class Collector:
                 value = clock_state()
                 self.refresh_calendar_date()
         except (ValueError, TypeError, KeyError, OSError) as exc:
-            print(f"bar: {module}: {exc}", file=sys.stderr)
+            print(f"island: {module}: {exc}", file=sys.stderr)
             if module == "music":
                 self.next_selected = None
         if module == "workspaces" and value is not None:
@@ -394,7 +394,7 @@ class Collector:
                 except BlockingIOError:
                     await asyncio.sleep(.1)
             else:
-                raise RuntimeError("another bar collector is already running")
+                raise RuntimeError("another island collector is already running")
             path = directory / "actions.sock"
             path.unlink(missing_ok=True)
             server = await asyncio.start_unix_server(self.client, path=path, limit=8192)

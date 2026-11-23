@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import AsyncMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from common import ROOT, compositor_name, initial_state, settings
+from common import MODULE, compositor_name, initial_state, settings
 from sources import (Commands, Hyprland, Niri, PipeWireEvents, battery_state, brightness_state, choose_player, music_players,
                      music_state, network_state, nm_fields, notification_state,
                      volume_state, workspace_state, niri_workspace_state)
@@ -28,7 +28,8 @@ class Parsers(unittest.TestCase):
         self.cfg = settings()
 
     def test_complete_initial_schema(self):
-        line = (ROOT / "eww.yuck").read_text().splitlines()[1]
+        text = (MODULE / "island.yuck").read_text()
+        line = next(line for line in text.splitlines() if line.startswith("(deflisten island"))
         initial = json.loads(json.loads(line.split(":initial ", 1)[1]))
         def schema(value):
             if isinstance(value, dict):
@@ -261,12 +262,12 @@ class AsyncTests(unittest.IsolatedAsyncioTestCase):
             self.collector.open_event_pipe(Path(folder))
             worker = asyncio.create_task(self.collector.control_updates())
             try:
-                yuck = (ROOT / "widgets/right.yuck").read_text()
+                yuck = (MODULE / "widgets/right.yuck").read_text()
                 callback, _ = json.JSONDecoder().raw_decode(yuck.split(":onchange ", 1)[1])
                 callback = callback.replace("{}", "50")
                 child = await asyncio.create_subprocess_exec(
                     "/bin/sh", "-c", callback,
-                    env={**os.environ, "EWW_BAR_EVENTS": str(self.collector.event_pipe)})
+                    env={**os.environ, "EWW_ISLAND_EVENTS": str(self.collector.event_pipe)})
                 await asyncio.wait_for(child.wait(), 2)
                 self.assertEqual(child.returncode, 0)
                 await asyncio.sleep(.1)

@@ -1,4 +1,4 @@
-"""On-demand music popup on the bar's existing Eww daemon and collector."""
+"""On-demand music popup on the island's existing Eww daemon and collector."""
 import asyncio
 
 from common import ROOT

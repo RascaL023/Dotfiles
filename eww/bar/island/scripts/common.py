@@ -1,4 +1,4 @@
-"""Paths, validated settings and complete public state for this bar only."""
+"""Paths and validated settings for the island module inside the Eww config."""
 import hashlib
 import json
 import os
@@ -6,8 +6,11 @@ import re
 from pathlib import Path
 from calendar_data import calendar_state
 
-ROOT = Path(__file__).resolve().parents[1]
-SETTINGS = ROOT / "settings.json"
+# ROOT is the Eww config directory (`eww/`), the one a daemon and its runtime
+# directory belong to. MODULE is this module's own directory (`eww/bar/island/`).
+ROOT = Path(__file__).resolve().parents[3]
+MODULE = Path(__file__).resolve().parents[1]
+SETTINGS = MODULE / "settings.json"
 MODULES = ("launcher", "workspaces", "music", "clock", "volume", "brightness",
            "network", "battery", "notifications", "power")
 
@@ -65,7 +68,7 @@ def settings(path=SETTINGS):
 def runtime_dir():
     base = Path(os.environ.get("XDG_RUNTIME_DIR", f"/tmp/eww-{os.getuid()}"))
     digest = hashlib.sha256(os.fsencode(ROOT)).hexdigest()[:12]
-    path = base / f"eww-islands-{digest}"
+    path = base / f"eww-island-{digest}"
     path.mkdir(mode=0o700, parents=True, exist_ok=True)
     if path.is_symlink() or path.stat().st_uid != os.getuid():
         raise RuntimeError(f"unsafe runtime directory: {path}")
@@ -83,7 +86,7 @@ def label_text(value):
 
 
 def workspace_layout(value):
-    tokens = (ROOT / "styles/_tokens.scss").read_text()
+    tokens = (MODULE / "styles/_tokens.scss").read_text()
     def px(name):
         match = re.search(r"^\$" + name + r":\s*(\d+)px\s*;", tokens, re.M)
         if not match:
@@ -98,7 +101,7 @@ def workspace_layout(value):
 
 
 def initial_state(cfg):
-    tokens = (ROOT / "styles/_tokens.scss").read_text()
+    tokens = (MODULE / "styles/_tokens.scss").read_text()
     def token(name, unit):
         match = re.search(r"^\$" + name + r":\s*(\d+)" + unit + r"\s*;", tokens, re.M)
         if not match:

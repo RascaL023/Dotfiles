@@ -36,8 +36,8 @@ literal di stylesheet jam.
 | [`script/depth-ctl`](../../script/depth-ctl) | generate foreground dan kendali jendela |
 | `~/.cache/eww-depth-clock/foreground.png` | artefak hasil (di luar repo, git-ignored by nature) |
 
-Jam memakai daemon Eww utama (`eww daemon --force-wayland`) — tidak ada daemon
-kedua dan tidak ada konflik dengan [`bar/barctl`](../../bar/barctl).
+Jam memakai daemon Eww utama yang dikelola `eww-ctl` — tidak ada daemon kedua
+dan tidak ada konflik dengan modul island di [`bar/island/`](../../bar/island/).
 
 `depth-clock.yuck` menulis path PNG sebagai `/home/rascal/.cache/...`, sama
 seperti `eww.scss` yang menulis path tema absolut; sesuaikan keduanya pada

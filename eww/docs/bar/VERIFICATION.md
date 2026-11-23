@@ -147,13 +147,13 @@ berulang setelah snapshot awal. Tidak ada polling posisi lagu tiap detik.
 Dari direktori `eww/`:
 
 ```sh
-python3 -m unittest discover -s bar/tests -v
-./bar/barctl doctor
-python3 bar/tests/live_checks.py cycles --count 20
-python3 bar/tests/live_checks.py workspaces
-python3 bar/tests/live_checks.py controls
-python3 bar/tests/live_checks.py measure --seconds 60 --label idle
-python3 bar/tests/live_checks.py music-measure --seconds 60
+python3 -m unittest discover -s bar/island/tests -v
+./eww-ctl bar island doctor
+python3 bar/island/tests/live_checks.py cycles --count 20
+python3 bar/island/tests/live_checks.py workspaces
+python3 bar/island/tests/live_checks.py controls
+python3 bar/island/tests/live_checks.py measure --seconds 60 --label idle
+python3 bar/island/tests/live_checks.py music-measure --seconds 60
 ```
 
 `controls` dan `music-measure` memerlukan MPD paused; `controls` juga memerlukan
