@@ -221,7 +221,6 @@ status() {
     esac
     status_wallpaper
     status_feedback
-    row theme matugen deferred
     (( check && missing )) && exit 1
     exit 0
 }

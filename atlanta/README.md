@@ -1,6 +1,6 @@
 # atlanta
 
-One entry point for desktop actions. It is not a shell, a daemon, or a theme engine.
+One entry point for desktop actions. It is not a shell or a daemon.
 Atlanta routes each capability to the native tool that already owns it 
 and keeps only two pieces of state: the wallpaper index and the selected bar provider.
 
@@ -92,8 +92,8 @@ Resolution order:
 
 1. `$ATLANTA_PROVIDER_DIR/<name>` — tests and out-of-tree overrides.
 2. This checkout: `rofi/rofi-ctl`, `waybar/waybar-ctl`, `eww/eww-ctl`,
-   `matugen/matugen-ctl`, `eww/script/depth-ctl`. Waybar and Eww ctls are not
-   necessarily on `PATH`, so the repo path wins.
+   `eww/script/depth-ctl`. Waybar and Eww ctls are not necessarily on `PATH`,
+   so the repo path wins.
 3. `PATH`.
 
 `atlanta doctor` prints the path each name actually resolved to, plus the

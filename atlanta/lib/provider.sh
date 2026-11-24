@@ -9,7 +9,6 @@ provider_repo_subdir() {
         rofi-ctl) printf 'rofi\n' ;;
         waybar-ctl) printf 'waybar\n' ;;
         eww-ctl) printf 'eww\n' ;;
-        matugen-ctl) printf 'matugen\n' ;;
         depth-ctl) printf 'eww/script\n' ;;
         *) return 1 ;;
     esac
