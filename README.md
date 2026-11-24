@@ -10,6 +10,11 @@ a wallpaper or a hand-written palette. A second engine, [`noctalia/`](noctalia),
 renders Noctalia templates from a token map into the same palette store and
 flips the same `current` symlink.
 
+Desktop actions go through [`atlanta/`](atlanta): one CLI that routes the
+launcher, bar, notifications, screenshots, session, idle, nightlight, and
+wallpaper to the native tool that already owns them. It is a router, not a
+shell — no daemon, no config, no duplicated state.
+
 > **No compositor lock-in.** The repo ships a `hypr/` config because that is what
 > is being used right now, but nothing in it, in the sync script, or in the
 > theming pipeline depends on Hyprland. Any Wayland/X11 setup works.
@@ -39,6 +44,7 @@ flips the same `current` symlink.
 ├── noctalia/               # palette engine: Noctalia templates + noctalia-ctl
 │   ├── noctalia-ctl        #   entry point (`palette …`) + store flip
 │   └── docs/               #   template skill + verified engine limits
+├── atlanta/                # desktop CLI: launcher, bar, session, wallpaper
 ├── nvim/ kitty/ foot/ alacritty/ …   # one directory per tool
 └── AGENTS.md               # rules for AI agents working in this repo
 ```

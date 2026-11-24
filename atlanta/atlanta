@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# One entry point for desktop actions; every capability routes to a native tool.
+set -u
+
+dir=$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" && pwd -P) || exit 1
+
+# shellcheck source=lib/session.sh
+source "$dir/lib/session.sh"
+# shellcheck source=lib/provider.sh
+source "$dir/lib/provider.sh"
+# shellcheck source=lib/state.sh
+source "$dir/lib/state.sh"
+
+usage() {
+    cat <<'EOF'
+Usage: atlanta <capability> <verb> [args...]
+       atlanta start | stop | status | doctor
+
+  launcher apps|run|window|toggle
+                                   Rofi menus
+  bar show|hide|toggle|restart|reload|status [--provider waybar|eww]
+                                   The selected bar (default waybar)
+  bar use|switch waybar|eww        Select the bar provider
+  bar.panel toggle <panel>         Eww window: profile, distro, popups
+  notifications toggle|dnd|clear   SwayNC panel, DND, and close all
+  screenshot region|screen|window  grim + slurp into ~/Pictures/Screenshots
+  session menu|lock|dpms off|on|logout|reboot|poweroff
+  idle toggle|status               swayidle, tracked by atlanta
+  nightlight toggle|status         wlsunset, tracked by atlanta
+  wallpaper set|next|prev|random|pick|status
+  osd volume|mic|brightness        Report the current value only
+  volume up|down|mute              wpctl, then the same OSD report
+  mic toggle                       Mute or unmute the default source
+  brightness up|down               brightnessctl, then the same OSD report
+
+start     Start the atlanta shell stack
+stop      Stop the atlanta shell stack
+status    One line per capability; changes nothing
+doctor    Where each provider resolves from, plus the session
+help      This text
+
+Exit: 0 ok, 1 failed or not running, 2 usage, 3 unsupported in this session,
+127 a provider is missing.
+EOF
+}
+
+fail() {
+    printf 'atlanta: %s\n' "$*" >&2
+    exit 2
+}
+
+capability=${1:-help}
+if (( $# > 0 )); then
+    shift
+fi
+
+case $capability in
+    -h|--help|help)
+        usage
+        exit 0
+        ;;
+    status|doctor)
+        exec bash "$dir/verbs/report.sh" "$capability" "$@"
+        ;;
+    start|stop)
+        exec bash "$dir/verbs/lifecycle.sh" "$capability" "$@"
+        ;;
+    launcher|bar|bar.panel|notifications|screenshot|session|idle|nightlight|wallpaper|osd|volume|mic|brightness) ;;
+    *)
+        fail "unknown capability: $capability (use --help)"
+        ;;
+esac
+
+exec bash "$dir/verbs/${capability%%.*}.sh" "$capability" "$@"
