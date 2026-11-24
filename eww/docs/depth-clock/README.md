@@ -38,6 +38,8 @@ literal di stylesheet jam.
 
 Jam memakai daemon Eww utama yang dikelola `eww-ctl` — tidak ada daemon kedua
 dan tidak ada konflik dengan modul island di [`bar/island/`](../../bar/island/).
+`depth-ctl` menegakkan itu sebelum membuka jendela, bukan hanya mengandalkan
+daemon yang kebetulan sudah hidup.
 
 `depth-clock.yuck` menulis path PNG sebagai `/home/rascal/.cache/...`, sama
 seperti `eww.scss` yang menulis path tema absolut; sesuaikan keduanya pada
@@ -61,8 +63,11 @@ mesin lain. `depth-ctl` sendiri selalu memakai `$XDG_CACHE_HOME` atau
 `noctalia msg wallpaper-get` bila awww tidak memegang wallpaper), mengukur
 output yang fokus (`hyprctl -j monitors` atau `niri msg -j focused-output`),
 membangun foreground bila cache-nya basi, lalu membuka jendela dengan ukuran
-yang tepat untuk output itu. `stop` hanya menutup jendela; daemon, widget profil, dan bar
-tetap hidup.
+yang tepat untuk output itu. Sebelum membuka, `start`, `reload`, `refresh`, dan
+`wallpaper` memastikan daemon lewat `eww-ctl daemon start`; daemon yang lahir di
+luar `eww-ctl` tidak punya `EWW_ISLAND_EVENTS` maupun pid file, jadi ditolak dan
+harus diadopsi dengan `eww-ctl daemon restart`. `stop` hanya menutup jendela;
+daemon, widget profil, dan bar tetap hidup.
 
 Jangan memakai `eww open depth-clock` langsung untuk pemakaian normal: geometri
 di Yuck adalah fallback (1366×768) dan tidak membawa ukuran band dari

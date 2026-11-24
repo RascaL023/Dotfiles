@@ -210,7 +210,8 @@ Lalu bangun ulang aset dan muat ulang:
 ## 5. Buka jendela dan cek posisinya
 
 `depth-ctl` yang membuka jendela (bukan `eww open` polos), karena ia mengukur
-output dan mengompensasi ruang yang dipesan bar:
+output, mengompensasi ruang yang dipesan bar, dan memastikan daemon sudah
+dikelola `eww-ctl` lewat `eww-ctl daemon start`:
 
 ```sh
 ~/.dotfile/eww/script/depth-ctl start

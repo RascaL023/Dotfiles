@@ -246,6 +246,15 @@ ensure_asset() {
 
 # ------------------------------------------------------------------ window --
 
+# A bare `eww open` can create a daemon without EWW_ISLAND_EVENTS and without
+# the pid file. `daemon start` is a no-op for a managed daemon and refuses a
+# foreign one instead of letting the clock adopt it.
+ensure_managed_daemon() {
+  local ctl=$EWW_DIR/eww-ctl
+  [[ -x $ctl ]] || die "missing eww-ctl: $ctl"
+  "$ctl" daemon start
+}
+
 window_open() {
   "${EWW[@]}" active-windows 2>/dev/null | grep -qx "$WINDOW: $WINDOW"
 }
@@ -259,6 +268,7 @@ open_window() {
   read -r connector _ _ top <<<"$out"
   if (( top > 0 )); then pos="0x-${top}"; fi
 
+  ensure_managed_daemon
   "${EWW[@]}" close "$WINDOW" >/dev/null 2>&1 || true
   # eww 0.6.0 can time out on the client side while still opening the window,
   # so verify the result instead of trusting the exit status alone.
@@ -295,6 +305,7 @@ cmd_toggle() {
 
 cmd_reload() {
   load_settings
+  ensure_managed_daemon
   "${EWW[@]}" close "$WINDOW" >/dev/null 2>&1 || true
   local wallpaper=${1:-}
   [[ -n $wallpaper ]] || wallpaper=$(current_wallpaper)

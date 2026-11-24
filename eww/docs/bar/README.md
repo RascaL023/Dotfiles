@@ -52,8 +52,9 @@ Hyprland, keybind Hypr/Niri, dan on-click Waybar sudah memanggil `eww-ctl`
 (`daemon start|restart`, `toggle <window>`, `bar island toggle`), sehingga
 daemon selalu membawa `EWW_ISLAND_EVENTS`. Pemanggilan `eww` mentah yang
 tersisa disengaja: `power-ctl` menutup jendela saat logout tanpa menghidupkan
-daemon, `depth-ctl` membuka/menutup dengan `--size`/`--pos` hasil pengukuran,
-dan widget memakai `eww update` agar tidak menjalankan Python tiap hover.
+daemon, `depth-ctl` membuka/menutup dengan `--size`/`--pos` hasil pengukuran
+(setelah memastikan daemon lewat `eww-ctl daemon start`), dan widget memakai
+`eww update` agar tidak menjalankan Python tiap hover.
 Bila bar lain aktif, compositor dapat menjumlahkan area eksklusif keduanya.
 Tidak ada perubahan konfigurasi widget lama, Waybar, folder referensi, atau
 konfigurasi Matugen.
