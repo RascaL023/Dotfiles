@@ -67,7 +67,7 @@ tetap hidup.
 Jangan memakai `eww open depth-clock` langsung untuk pemakaian normal: geometri
 di Yuck adalah fallback (1366×768) dan tidak membawa ukuran band dari
 `config/depth-clock.conf` maupun offset bar. `refresh` dipakai setelah
-`eww reload` (reload Eww membuka ulang jendela dari geometri Yuck), dan render
+`eww-ctl reload` (reload Eww membuka ulang jendela dari geometri Yuck), dan render
 ulang tema memanggilnya otomatis.
 
 ## Bagaimana jam dan foreground bekerja bersama
@@ -194,7 +194,7 @@ atau `depth-ctl stop` sendiri.
 Warna serta font jam berasal dari tema Eww yang aktif; tidak ada palet atau
 stylesheet kedua untuk jam. Konsekuensinya:
 
-- Tema baru terbaca setelah `eww reload`, karena CSS hanya dimuat ulang saat
+- Tema baru terbaca setelah `eww-ctl reload`, karena CSS hanya dimuat ulang saat
   reload. `depth-ctl refresh` kemudian memulihkan ukuran dan offset jendela.
 - Mengganti wallpaper **tidak** memicu render ulang tema; keduanya independen.
 

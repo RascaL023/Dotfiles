@@ -384,7 +384,7 @@ usage: depth-ctl <command> [wallpaper]
   reload             rebuild assets and reopen
   status             report state, assets and layout
   generate [img]     rebuild the foreground PNG only
-  refresh            reposition/resize an open clock (also after `eww reload`)
+  refresh            reposition/resize an open clock (also after `eww-ctl reload`)
   wallpaper <img>    show for a masked wallpaper, hide otherwise
 EOF
 }

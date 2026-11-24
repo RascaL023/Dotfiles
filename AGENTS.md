@@ -317,7 +317,7 @@ Rules:
 | `matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md` | every key of the Flow B blueprint JSON |
 | `hypr/docs/ROADMAP_V57.md` | Hyprland 0.57 migration (breaking changes), unimplemented features: recipes, verification steps, backlog |
 | `eww/README.md` | Eww index: config map and document list |
-| `eww/docs/bar/README.md` | the Eww bar: `barctl`, settings, adapter, troubleshooting |
+| `eww/docs/bar/README.md` | the Eww bar: `eww-ctl bar island`, settings, adapter, troubleshooting |
 | `eww/docs/depth-clock/README.md` | the wallpaper depth clock: `depth-ctl`, layout knobs, foreground mask |
 | `eww/docs/depth-clock/GUIDE.md` | step-by-step build recipe for a new wallpaper |
 

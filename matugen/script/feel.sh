@@ -226,10 +226,10 @@ running() {
 
 # Konsumen generik (apps.json): hanya yang benar-benar hidup disentuh.
 if running eww; then
-    if eww reload >/dev/null 2>&1; then
-        echo "[ok]   eww reload"
+    if eww-ctl reload >/dev/null 2>&1; then
+        echo "[ok]   eww-ctl reload"
     else
-        echo "[skip] eww reload gagal (daemon jalan?)"
+        echo "[skip] eww-ctl reload gagal (daemon jalan?)"
     fi
 else
     echo "[skip] eww tidak jalan"
