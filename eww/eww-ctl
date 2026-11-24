@@ -69,6 +69,7 @@ usage: eww-ctl open|close|toggle <window>
 
   windows   islands, calendar-popup, music-popup, profile, distro, depth-clock
   depth-clock is delegated to script/depth-ctl so its geometry is measured.
+  close never starts a stopped daemon; open and toggle do.
 """
 
 
@@ -303,9 +304,18 @@ def daemon_restart(cfg):
         depth("start")
 
 
+def close_window(name):
+    # Closing must never resurrect a daemon that is already gone.
+    if not alive():
+        return 0
+    return eww("close", name, check=False).returncode
+
+
 def window(action, name):
     if name == "depth-clock":
         return depth({"open": "start", "close": "stop", "toggle": "toggle"}[action])
+    if action == "close":
+        return close_window(name)
     ensure_daemon()
     if action == "toggle":
         action = "close" if name in windows() else "open"
