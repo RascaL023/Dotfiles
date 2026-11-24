@@ -134,7 +134,7 @@ Pemanggil yang sudah memakai wrapper:
 - `hypr/sources/scripts/nextwall.sh`: `rofi-ctl wallpaper -d`, lalu memasang
   wallpaper dan menyinkronkan depth clock.
 - `hypr/sources/scripts/wifi-menu.sh`: daftar Wi-Fi dan prompt password.
-- `eww/bar/settings.json`: launcher aplikasi dan menu daya/konfirmasi.
+- `eww/bar/island/settings.json`: launcher aplikasi dan menu daya/konfirmasi.
 
 Skrip shell, Eww, dan Niri memanggil `rofi-ctl` langsung dari `PATH` (dipasang
 `install.sh`); binding Hyprland memakai `launcher.lua`, yang tetap menghasilkan

@@ -210,7 +210,8 @@ Lalu bangun ulang aset dan muat ulang:
 ## 5. Buka jendela dan cek posisinya
 
 `depth-ctl` yang membuka jendela (bukan `eww open` polos), karena ia mengukur
-output dan mengompensasi ruang yang dipesan bar:
+output, mengompensasi ruang yang dipesan bar, dan memastikan daemon sudah
+dikelola `eww-ctl` lewat `eww-ctl daemon start`:
 
 ```sh
 ~/.dotfile/eww/script/depth-ctl start
@@ -282,11 +283,11 @@ depth_sync "$CHOSEN"
 Perilakunya: wallpaper punya masker → jam tampil; tidak punya → jam ditutup,
 jadi foreground lama tidak pernah tertinggal di atas wallpaper lain.
 
-Tema: setelah tema dirender, `eww reload` lalu `depth-ctl refresh`. Keduanya
+Tema: setelah tema dirender, `eww-ctl reload` lalu `depth-ctl refresh`. Keduanya
 biasanya sudah dirangkai oleh skrip render tema; jalankan manual kalau tema
 diganti dengan cara lain.
 
-`eww reload` wajib karena CSS hanya dibaca ulang saat reload (stylesheet tema
+`eww-ctl reload` wajib karena CSS hanya dibaca ulang saat reload (stylesheet tema
 berada di luar config Eww). `depth-ctl refresh` memulihkan ukuran dan offset
 jendela yang hilang setelah reload, dan tidak melakukan apa-apa kalau jam sedang
 tertutup. Detail pipeline tema tidak dibahas di dokumen ini.
@@ -298,7 +299,7 @@ tertutup. Detail pipeline tema tidak dibahas di dokumen ini.
 ```sh
 ~/.dotfile/eww/script/depth-ctl start|stop|toggle|reload|status
 ~/.dotfile/eww/script/depth-ctl generate     # bangun ulang foreground saja
-~/.dotfile/eww/script/depth-ctl refresh      # reposisi setelah `eww reload`
+~/.dotfile/eww/script/depth-ctl refresh      # reposisi setelah `eww-ctl reload`
 ~/.dotfile/eww/script/depth-ctl wallpaper "<gambar>"
 ```
 
@@ -309,7 +310,7 @@ tertutup. Detail pipeline tema tidak dibahas di dokumen ini.
 | Gejala | Penyebab | Perbaikan |
 |---|---|---|
 | Jam tidak muncul | wallpaper tanpa masker / salah nama berkas | cek `depth-ctl status`, samakan `basename` di `config/depth-clock.conf` |
-| Jam bergeser turun ±34 px dari subjek | offset bar tidak dipakai | pastikan dibuka lewat `depth-ctl start`, bukan `eww open` |
+| Jam bergeser turun ±34 px dari subjek | offset bar tidak dipakai | pastikan dibuka lewat `depth-ctl start`, bukan `eww open`; `eww-ctl open depth-clock` aman karena mendelegasikan |
 | Angka putih dan latar hitam | stylesheet ditolak GTK | cari non-ASCII di `.scss`; cek log `~/.cache/eww/eww_<hash>.log` |
 | Angka tetap jam lama | listener tidak mencetak baris baru | uji perintahnya: `bash -c 'while :; do date +%H:%M; sleep 5; done'` |
 | Foreground memotong rambut | toleransi terlalu tinggi | turunkan angka toleransi, `depth-ctl generate` lagi |

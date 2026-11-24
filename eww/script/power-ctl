@@ -1,6 +1,7 @@
 action=$1
 
-eww close profile
+# close is lazy: eww-ctl does not start the daemon just to close profile
+eww-ctl close profile 2>/dev/null || true
 
 case $action in
     "shutdown")

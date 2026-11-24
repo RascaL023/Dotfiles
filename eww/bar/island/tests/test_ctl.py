@@ -125,6 +125,62 @@ class DaemonStart(RuntimeIsolation):
                          str(runtime_dir() / "events.fifo"))
 
 
+class WindowClose(unittest.TestCase):
+    def test_close_does_not_start_a_stopped_daemon(self):
+        with patch.object(ctl, "alive", return_value=False), \
+                patch.object(ctl, "ensure_daemon") as ensure, \
+                patch.object(ctl, "eww") as eww:
+            self.assertEqual(ctl.window("close", "profile"), 0)
+        ensure.assert_not_called()
+        eww.assert_not_called()
+
+    def test_close_does_not_ensure_a_running_daemon(self):
+        result = subprocess.CompletedProcess(["close", "profile"], 0, "", "")
+        with patch.object(ctl, "alive", return_value=True), \
+                patch.object(ctl, "ensure_daemon") as ensure, \
+                patch.object(ctl, "eww", return_value=result) as eww:
+            self.assertEqual(ctl.window("close", "profile"), 0)
+        ensure.assert_not_called()
+        eww.assert_called_once_with("close", "profile", check=False)
+
+    def test_open_still_ensures_the_daemon(self):
+        result = subprocess.CompletedProcess(["open", "profile"], 0, "", "")
+        with patch.object(ctl, "ensure_daemon") as ensure, \
+                patch.object(ctl, "windows", return_value=["profile"]), \
+                patch.object(ctl, "eww", return_value=result):
+            self.assertEqual(ctl.window("open", "profile"), 0)
+        ensure.assert_called_once()
+
+
+class PowerCtl(unittest.TestCase):
+    def test_close_goes_through_eww_ctl_not_raw_eww(self):
+        with tempfile.TemporaryDirectory() as temp:
+            bin_dir = Path(temp)
+            ctl_log = bin_dir / "eww-ctl.log"
+            eww_log = bin_dir / "eww.log"
+            (bin_dir / "eww-ctl").write_text(
+                "#!/usr/bin/env bash\nprintf '%s\\n' \"$*\" >\"$POWER_CTL_LOG\"\n"
+            )
+            (bin_dir / "eww").write_text(
+                "#!/usr/bin/env bash\nprintf '%s\\n' \"$*\" >\"$EWW_LOG\"\nexit 0\n"
+            )
+            os.chmod(bin_dir / "eww-ctl", 0o755)
+            os.chmod(bin_dir / "eww", 0o755)
+            env = {
+                **os.environ,
+                "PATH": f"{bin_dir}:{os.environ.get('PATH', '')}",
+                "POWER_CTL_LOG": str(ctl_log),
+                "EWW_LOG": str(eww_log),
+            }
+            result = subprocess.run(
+                ["bash", str(EWW / "script" / "power-ctl"), "noop"],
+                env=env, text=True, capture_output=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(ctl_log.read_text().strip(), "close profile")
+            self.assertFalse(eww_log.exists(), "power-ctl fell back to raw eww")
+
+
 class Parser(unittest.TestCase):
     def setUp(self):
         self.stdout = io.StringIO()

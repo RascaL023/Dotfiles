@@ -224,7 +224,7 @@ reload_css() {
 # eww reads scss/_theme.scss through @import; the depth clock also repositions.
 reload_scss() {
     if running eww; then
-        run eww eww reload
+        run eww eww-ctl reload
     else
         skip "eww: tidak jalan"
     fi
