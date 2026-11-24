@@ -38,10 +38,9 @@ the install checklist.
 | `osd`, `volume`, `mic` | `wpctl` (WirePlumber) | any | parses `Volume: 0.65 [MUTED]` |
 | `brightness` | `brightnessctl` | any | `get` and `max` |
 | OSD feedback | `notify-send` + running notification daemon | any | SwayNC owns the bubble |
-| `theme` | none | — | deferred; matugen stays outside |
 
 Providers resolved from this checkout — `rofi-ctl`, `waybar-ctl`, `eww-ctl`,
-`matugen-ctl`, `depth-ctl` — do **not** need to be on `PATH`. `install.sh` only
+`depth-ctl` — do **not** need to be on `PATH`. `install.sh` only
 links `atlanta` itself and its fish completion.
 
 ## Notification and OSD chain
@@ -94,7 +93,6 @@ environment.systemPackages = with pkgs; [
   swayidle wlsunset
   # optional
   eww  # bar.panel and the eww bar provider
-  matugen
   python3  # tests only
 ];
 ```
@@ -105,7 +103,7 @@ with `libnotify`.
 Other distributions: the same names are packaged as `bash`, `coreutils`,
 `gawk`, `jq`, `wireplumber`, `brightnessctl`, `libnotify`, `grim`, `slurp`,
 `rofi`, `waybar`, `swaync`, `wlogout`, `hyprland`, `hyprlock`, `swayidle`,
-`wlsunset`, `niri`, `awww`; `eww` and `matugen` are optional.
+`wlsunset`, `niri`, `awww`; `eww` is optional.
 
 ## Verified on this machine
 
@@ -128,7 +126,6 @@ Other distributions: the same names are packaged as `bash`, `coreutils`,
 | `awww` | `/home/rascal/.nix-profile/bin/awww` | 0.12.1 |
 | `rofi` / `waybar` | `/run/current-system/sw/bin/…` | installed |
 | `eww` | `/run/current-system/sw/bin/eww` | 0.6.0 |
-| `matugen` | `/run/current-system/sw/bin/matugen` | 4.2.0 |
 
 All currently used dependencies are present on this machine; nothing is missing
 for the implemented verbs.
@@ -137,7 +134,6 @@ for the implemented verbs.
 
 - **Noctalia** — never called. atlanta is its own shell.
 - **hyprpicker** — installed (0.4.7) but no `picker` verb exists yet.
-- **matugen** — `atlanta theme` is deferred; theming stays outside.
 - **eww** — the `eww` bar provider, `bar.panel`, and `start`/`stop` (through `eww-ctl`) plus the optional depth-clock sync use it.
 - **light**, **swaylock**, **wl-copy** — not used.
 - **hypridle**, **hyprsunset** — replaced by `swayidle` and `wlsunset`; the old
