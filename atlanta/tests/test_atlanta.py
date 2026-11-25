@@ -749,7 +749,8 @@ class AtlantaTests(unittest.TestCase):
         self.assertFalse(self.calls("waybar-ctl"))
         self.assertEqual(
             [row["argv"] for row in self.calls("eww-ctl")],
-            [["daemon", "status"], ["daemon", "stop"]])
+            [["daemon", "status"], ["daemon", "stop"],
+             ["close", "depth-clock"]])
 
     def test_start_does_not_adopt_an_unmanaged_eww_daemon(self):
         result = self.call(
@@ -800,7 +801,8 @@ class AtlantaTests(unittest.TestCase):
         )
         self.assertEqual(
             [row["argv"] for row in self.calls("eww-ctl")],
-            [["daemon", "status"], ["daemon", "stop"]],
+            [["daemon", "status"], ["daemon", "stop"],
+             ["close", "depth-clock"]],
         )
         self.assertEqual(
             [row["argv"] for row in self.calls("busctl")],
@@ -814,6 +816,7 @@ class AtlantaTests(unittest.TestCase):
                 "MOCK_BUSCTL_USER_EXIT": "1",
                 "MOCK_AWWW_QUERY_EXIT": "1",
                 "MOCK_WAYBAR_CTL_STATUS_EXIT": "1",
+                "MOCK_EWW_CTL_DAEMON_OUT": "stopped",
             },
         )
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -833,6 +836,33 @@ class AtlantaTests(unittest.TestCase):
             [row["argv"] for row in self.calls("eww-ctl")],
             [["daemon", "status"]],
         )
+
+    def test_stop_closes_depth_clock_when_the_daemon_state_is_unreadable(self):
+        result = self.call("stop", **{
+            "MOCK_BUSCTL_USER_EXIT": "1",
+            "MOCK_AWWW_QUERY_EXIT": "1",
+            "MOCK_WAYBAR_CTL_STATUS_EXIT": "1",
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("stopped eww", result.stdout)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["daemon", "status"], ["daemon", "stop"],
+             ["close", "depth-clock"]])
+
+    def test_stop_closes_depth_clock_when_the_daemon_refuses_to_stop(self):
+        result = self.call("stop", **{
+            "MOCK_BUSCTL_USER_EXIT": "1",
+            "MOCK_AWWW_QUERY_EXIT": "1",
+            "MOCK_WAYBAR_CTL_STATUS_EXIT": "1",
+            "MOCK_EWW_CTL_DAEMON_EXIT": "1",
+        })
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("failed to stop eww", result.stdout)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("eww-ctl")],
+            [["daemon", "status"], ["daemon", "stop"],
+             ["close", "depth-clock"]])
 
     def test_install_dry_run_touches_nothing(self):
         bin_dir = self.root / "bin"

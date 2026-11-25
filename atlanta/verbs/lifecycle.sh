@@ -198,16 +198,22 @@ stop_swaync() {
 }
 
 stop_eww() {
+    local status=0
     if [[ $(bar_eww_daemon_state) == stopped ]]; then
         note 'not running' eww
         return 0
     fi
     # daemon stop also closes every Eww window and stops the island collector.
-    "$eww_ctl" daemon stop || {
+    if "$eww_ctl" daemon stop; then
+        note stopped eww
+    else
         note 'failed to stop' eww
-        return 1
-    }
-    note stopped eww
+        status=1
+    fi
+    # Belt and braces: a daemon that answered `unknown` or survived a failed
+    # stop still loses the measured window. `close` never starts a daemon.
+    timeout 15 "$eww_ctl" close depth-clock >/dev/null 2>&1 || :
+    return "$status"
 }
 
 stop_awww() {

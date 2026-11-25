@@ -71,7 +71,10 @@ session/launcher verbs). `atlanta start` starts only the selected bar: Waybar by
 island when `bar use eww` is set. The Eww daemon still starts either way because
 `bar.panel` and depth-clock use it. `eww-ctl daemon stop` also closes every Eww
 window and stops the island collector, so `atlanta stop` leaves no Eww window
-behind without a separate island stop.
+behind without a separate island stop. The daemon state comes from `eww-ctl
+daemon status`; a timeout or an unreadable answer is `unknown`, so the stop is
+still attempted, and `depth-clock` is closed explicitly afterwards in case a
+window outlived a failed stop.
 
 For a Hyprland autostart, the equivalent replacement is:
 

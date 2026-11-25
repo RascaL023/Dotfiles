@@ -9,11 +9,17 @@ bar_eww_daemon_state() {
             return 1
         }
     fi
-    output=$(timeout 3 "$ctl" daemon status 2>/dev/null) || :
+    # A timeout or a garbled answer is `unknown`, never `stopped`: a live
+    # daemon reported as stopped makes `atlanta stop` skip `daemon stop`.
+    if ! output=$(timeout 10 "$ctl" daemon status 2>/dev/null); then
+        printf 'unknown\n'
+        return 1
+    fi
     case $output in
         'running pid '*) printf 'running\n' ;;
         'running (not managed)') printf 'unmanaged\n' ;;
-        *) printf 'stopped\n' ;;
+        'stopped') printf 'stopped\n' ;;
+        *) printf 'unknown\n' ;;
     esac
 }
 
@@ -37,7 +43,7 @@ bar_start() {
                     printf 'atlanta: the Eww daemon is unmanaged; run eww-ctl daemon restart to adopt it\n' >&2
                     return 3
                     ;;
-                stopped)
+                stopped|unknown)
                     "$ctl" daemon start || return 1
                     ;;
             esac
