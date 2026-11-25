@@ -33,6 +33,7 @@ complete -c matugen-ctl -n '__fish_use_subcommand' -a help -d 'Show help'
 
 complete -c matugen-ctl -n '__fish_seen_subcommand_from palette' -F
 complete -c matugen-ctl -n '__fish_seen_subcommand_from palette' -s n -l dry-run -d 'Render without activating'
+complete -c matugen-ctl -n '__fish_seen_subcommand_from palette' -s s -l scheme -r -d 'Skema matugen untuk sumber gambar'
 complete -c matugen-ctl -n '__fish_seen_subcommand_from palette' -l list -d 'List consumers and exit'
 
 complete -c matugen-ctl -n '__fish_seen_subcommand_from feel' -a '(__matugen_feel_profiles)' -d 'Feel profile'

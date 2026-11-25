@@ -8,6 +8,7 @@ konsumen diurus di folder ini.
 
 ```bash
 ~/.config/matugen/matugen-ctl palette ~/Pictures/Wallpaper/nyx.png
+~/.config/matugen/matugen-ctl palette ~/Pictures/Wallpaper/nyx.png --scheme scheme-vibrant
 ~/.config/matugen/matugen-ctl palette ~/.dotfile/matugen/core/palette/kanagawa-dragon-lotus/blueprint/dark.json
 ~/.config/matugen/matugen-ctl feel default
 ~/.config/matugen/matugen-ctl reload css
@@ -26,6 +27,13 @@ konsumen diurus di folder ini.
 
 `palette` meneruskan opsi ke `script/palette.sh`, jadi `--dry-run` dan `--list`
 tetap sah. `THEME_ROOT` dan `FEEL_ROOT` mengarahkan kedua store ke tempat lain.
+
+`--scheme <nama>` (atau `-s`) hanya berlaku untuk sumber gambar: nilainya
+diteruskan sebagai `matugen image --type`, mis. `scheme-vibrant`. Tanpa opsi
+itu, matugen memakai skema yang sekarang (`scheme-tonal-spot`), jadi perilaku
+lama tidak berubah. Blueprint `.json` menolak `--scheme` (exit `2`) karena
+warnanya sudah tertulis di berkas; daftar nama yang sah ada di
+`matugen image --help`.
 
 Exit: `0` berhasil, `1` render/reload gagal, `2` salah pakai, `127` matugen tidak
 ada di `PATH`.

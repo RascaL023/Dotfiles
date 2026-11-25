@@ -103,6 +103,46 @@ class MatugenCtlTests(unittest.TestCase):
         self.assertIn(f"-p {self.theme_store}/generated/matugen", result.stdout)
         self.assertFalse(self.theme_store.exists())
 
+    def test_palette_dry_run_forwards_a_scheme_for_images(self):
+        image = self.root / "wall.png"
+        image.write_bytes(b"")
+        result = self.call("palette", "--dry-run", str(image),
+                           "--scheme", "scheme-vibrant")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("--type scheme-vibrant", result.stdout)
+
+    def test_palette_scheme_accepts_the_equals_form(self):
+        image = self.root / "wall.png"
+        image.write_bytes(b"")
+        result = self.call("palette", "--dry-run", str(image),
+                           "--scheme=scheme-content")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("--type scheme-content", result.stdout)
+
+    def test_palette_without_scheme_keeps_the_matugen_default(self):
+        image = self.root / "wall.png"
+        image.write_bytes(b"")
+        result = self.call("palette", "--dry-run", str(image))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("--type", result.stdout)
+
+    def test_palette_scheme_needs_a_value(self):
+        result = self.call("palette", "--scheme")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("--scheme butuh nama", result.stderr)
+
+    def test_palette_scheme_needs_an_image_source(self):
+        result = self.call("palette", "--scheme", "scheme-vibrant")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("--scheme butuh sumber gambar", result.stderr)
+
+    def test_palette_scheme_rejects_blueprints(self):
+        blueprint = MATUGEN_ROOT / "core/palette/kanagawa-dragon-lotus/blueprint/light.json"
+        result = self.call("palette", str(blueprint),
+                           "--scheme", "scheme-vibrant")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("hanya untuk sumber gambar", result.stderr)
+
     def test_missing_source_fails_like_the_renderer(self):
         result = self.call("palette", str(self.root / "absent.png"))
         self.assertEqual(result.returncode, 1)

@@ -8,6 +8,7 @@ Usage: matugen-ctl <command> [args...]
 
   palette <wallpaper|blueprint.json> [options]
                      Render a palette, activate it, then reload consumers
+                     --scheme <nama> memilih skema matugen untuk sumber gambar
   feel <profile> [--wm auto|hypr|niri] [options]
                      Render the profile part owned by the active WM, then reload
                      auto (default) detects the session; --wm overrides it
@@ -17,7 +18,9 @@ Usage: matugen-ctl <command> [args...]
   status             Show the active palette and feel profile
   help               This text
 
-`palette` passes its options through to script/palette.sh (-n/--dry-run, --list).
+`palette` passes its options through to script/palette.sh (-n/--dry-run, --list,
+-s/--scheme). Tanpa --scheme, matugen memakai skema yang sekarang
+(scheme-tonal-spot); blueprint menolak --scheme karena warnanya sudah tetap.
 `feel` passes its options through to script/feel.sh (-n/--dry-run, --no-reload).
 THEME_ROOT overrides the palette store (~/.myenv/theme/palette) and FEEL_ROOT
 the feel store (~/.myenv/theme/feel).

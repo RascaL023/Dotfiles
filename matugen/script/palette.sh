@@ -16,6 +16,7 @@ current=$theme_root/current
 depth_ctl=$repo/eww/script/depth-ctl
 
 dry_run=0
+scheme=""
 source_path=""
 wanted=()
 
@@ -41,7 +42,7 @@ run() {
 
 # render <image|blueprint.json> — one palette, from source to active theme.
 render() {
-    local src=$1 name cfg out tmp count
+    local src=$1 name cfg out tmp count suffix=''
     local -a cmd
 
     if [[ ! -f $src ]]; then
@@ -66,6 +67,7 @@ render() {
             name=wallpaper-based
             cfg=$root/core/palette/wallpaper-based/config.toml
             cmd=(matugen image "$src" --source-color-index 0 -c "$cfg")
+            [[ -n $scheme ]] && cmd+=(--type "$scheme")
             ;;
         *)
             fail "sumber harus gambar (png/jpg/webp) atau blueprint .json: $src"
@@ -104,7 +106,8 @@ render() {
         fail "$out tidak diubah"
         return 1
     fi
-    ok "matugen/$name: $count berkas, current -> generated/matugen/$name"
+    [[ -n $scheme ]] && suffix=" (scheme $scheme)"
+    ok "matugen/$name: $count berkas, current -> generated/matugen/$name$suffix"
 }
 
 # --- consumers -------------------------------------------------------------
@@ -267,6 +270,8 @@ usage: palette.sh [options] [source] [consumer ...]
   (no source)       reload only
   consumer ...      reload only these tools (see --list)
   -n, --dry-run     print the actions, change nothing
+  -s, --scheme <nama>  skema matugen untuk sumber gambar, mis. scheme-vibrant
+                    (default: skema yang sekarang, scheme-tonal-spot)
   -l, --list        print known consumers
   -h, --help        this text
 
@@ -296,11 +301,30 @@ dispatch() {
 }
 
 main() {
-    local arg
-    for arg in "$@"; do
+    local arg ext
+    while (( $# )); do
+        arg=$1
+        shift
         case $arg in
             -n|--dry-run) dry_run=1 ;;
             -l|--list) printf '%s\n' "${consumers[@]}"; return 0 ;;
+            -s|--scheme)
+                if (( ! $# )) || [[ -z $1 ]]; then
+                    fail "--scheme butuh nama (lihat matugen image --help)"
+                    usage >&2
+                    return 2
+                fi
+                scheme=$1
+                shift
+                ;;
+            --scheme=*)
+                scheme=${arg#*=}
+                if [[ -z $scheme ]]; then
+                    fail "--scheme butuh nama (lihat matugen image --help)"
+                    usage >&2
+                    return 2
+                fi
+                ;;
             -h|--help) usage; return 0 ;;
             -*) fail "opsi tidak dikenal: $arg"; usage >&2; return 2 ;;
             *)
@@ -312,6 +336,24 @@ main() {
                 ;;
         esac
     done
+
+    # --scheme is a matugen image option; a blueprint already carries its colours.
+    if [[ -n $scheme ]]; then
+        if [[ -z $source_path ]]; then
+            fail "--scheme butuh sumber gambar"
+            usage >&2
+            return 2
+        fi
+        ext=${source_path##*.}
+        ext=${ext,,}
+        case $ext in
+            png|jpg|jpeg|webp|gif|bmp) ;;
+            *)
+                fail "--scheme hanya untuk sumber gambar (blueprint sudah membawa warna)"
+                return 2
+                ;;
+        esac
+    fi
 
     if [[ -n $source_path ]]; then
         render "$source_path" || return 1
