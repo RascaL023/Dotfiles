@@ -83,12 +83,14 @@ tidak disentuh. `--wm auto|hypr|niri` menimpa deteksi (untuk uji/cron).
 
 ```text
 matugen/
-├── matugen-ctl                 # palette | feel | reload | list | status
-├── install.sh                  # symlink matugen-ctl + completion ke PATH dan fish
+├── matugen-ctl                 # titik masuk palet, rasa, dan reload
+├── install.sh                  # pasang symlink matugen-ctl + completion fish
 ├── completions/matugen-ctl.fish # completion fish (profil & konsumen dinamis)
 ├── script/
 │   ├── palette.sh              # render palet, validasi, flip palette/current, reload
-│   └── feel.sh                 # render profil rasa, flip feel/current, reload CSS
+│   ├── feel.sh                 # render profil rasa, flip feel/current, reload CSS
+│   ├── lib.sh                  # helper bersama: running, stage, validate, activate
+│   └── wm.sh                   # deteksi WM (hypr/niri/unknown)
 ├── core/
 │   ├── palette/
 │   │   ├── wallpaper-based/    # alur A: config.toml + template/
@@ -124,7 +126,9 @@ lagi: pindahkan ke `palette/generated/matugen/<nama>` atau render ulang.
 
 Reload berjalan sesudah aktivasi: hanya proses yang benar-benar hidup yang
 disentuh, setiap panggilan dibungkus `timeout`, dan `hyprctl reload` hanya
-dijalankan di sesi Hyprland. `~/.myenv/theme/current-status.json` bukan milik
+dijalankan di sesi Hyprland. herdr memakai satu server per sesi, jadi reload
+disebut per sesi yang `running` (`--session <nama>`), bukan lewat socket
+`default` yang biasanya mati di luar pane herdr. `~/.myenv/theme/current-status.json` bukan milik
 folder ini: itu state untuk switcher (belum ada yang menulisnya), sementara yang
 benar-benar aktif adalah tujuan symlink `theme/palette/current` dan
 `theme/feel/current`.

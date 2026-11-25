@@ -1,9 +1,7 @@
-# Completion for matugen-ctl. Fish loads it lazily from
-# ~/.config/fish/completions/matugen-ctl.fish, so this file only drives the menu.
-# Keep it in sync with the usage() block in matugen/matugen-ctl.
+# Completion for matugen-ctl, loaded lazily from
+# ~/.config/fish/completions/matugen-ctl.fish.
 
-# Resolve the wrapper (possibly a symlink in ~/.local/bin) so the lists below
-# follow the checkout instead of hardcoding ~/.dotfile.
+# Resolve the wrapper (possibly a symlink) so the lists follow the checkout.
 function __matugen_ctl_root --description 'Directory of the installed matugen-ctl'
     set -l bin (command -v matugen-ctl)
     test -n "$bin"; or return 1

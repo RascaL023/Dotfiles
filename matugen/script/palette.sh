@@ -1,38 +1,19 @@
 #!/usr/bin/env bash
-# matugen/palette.sh — render a palette, activate it, reload its consumers.
-#
-#   palette.sh <wallpaper>        Flow A: derive colours from an image
-#   palette.sh <blueprint.json>   Flow B: render <theme>/blueprint/<variant>.json
-#   palette.sh [consumer ...]     reload only
-#   palette.sh --list             print known consumers
-#   palette.sh --dry-run ...      print what would run, change nothing
-#
-# Both palette configs write relative output_paths (`/kitty/theme.conf`), so the
-# store folder is decided here: render into `generated/matugen/.<palette>.tmp`,
-# validate, move it to `generated/matugen/<palette>`, then flip `current`. A
-# failed render therefore never replaces the live palette, and config.toml
-# carries no store path (the same contract as core/feel/config.*.toml). Reload is
-# process-gated and wrapped in `timeout`; a Hyprland palette that fails
-# `luac -p` is reported instead of applied.
-#
-# Store layout: one folder per engine, so each producer can ship a
-# `wallpaper-based` palette without colliding. feel.sh uses the sibling
-# directory.
-#
-#   ~/.myenv/theme/palette/generated/matugen/<palette>/    colour output
-#   ~/.myenv/theme/palette/current -> generated/matugen/<palette>
-#   ~/.myenv/theme/feel/generated/<profil>/                look & feel output
-#   ~/.myenv/theme/feel/current    -> generated/<profil>
 
 set -u
 
+script_dir=$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" && pwd -P)
+# shellcheck source=lib.sh
+source "$script_dir/lib.sh"
+
 timeout_s=${RELOAD_TIMEOUT:-5}
-root=${HOME}/.dotfile/matugen
+root=$(dirname -- "$script_dir")
+repo=$(dirname -- "$root")
 theme_root=${THEME_ROOT:-$HOME/.myenv/theme/palette}
 generated=$theme_root/generated
 store=$generated/matugen
 current=$theme_root/current
-depth_ctl=$HOME/.dotfile/eww/script/depth-ctl
+depth_ctl=$repo/eww/script/depth-ctl
 
 dry_run=0
 source_path=""
@@ -40,34 +21,7 @@ wanted=()
 
 # --- helpers ---------------------------------------------------------------
 
-have() { command -v "$1" >/dev/null 2>&1; }
-
-# clean_name <path-or-comm> — Nix wraps binaries (`.kitty-wrapped`), so neither
-# `pgrep -x` nor a plain substring match is reliable here.
-clean_name() {
-    local n=${1##*/}
-    n=${n#.}
-    printf '%s' "${n%-wrapped}"
-}
-
-# running <name> — true when the application is actually alive.
-running() {
-    local want=$1 pid comm argv0
-    while read -r pid; do
-        [[ $pid == "$$" ]] && continue
-        comm=$(clean_name "$(cat "/proc/$pid/comm" 2>/dev/null)")
-        argv0=$(clean_name "$(tr '\0' '\n' < "/proc/$pid/cmdline" 2>/dev/null | head -n1)")
-        [[ $comm == "$want" || $argv0 == "$want" ]] && return 0
-        [[ $comm == "$want"* || $argv0 == "$want"* ]] && return 0
-    done < <(pgrep -f -- "$want" 2>/dev/null)
-    return 1
-}
-
-ok() { printf '[ok]   %s\n' "$*"; }
-skip() { printf '[skip] %s\n' "$*"; }
-fail() { printf '[FAIL] %s\n' "$*" >&2; }
-
-# run <label> <command...>
+# run <label> <command...> — dry-run aware, timeout-wrapped, one report line.
 run() {
     local label=$1
     shift
@@ -87,21 +41,23 @@ run() {
 
 # render <image|blueprint.json> — one palette, from source to active theme.
 render() {
-    local src=$1 name cfg out tmp
-    local -a cmd files
+    local src=$1 name cfg out tmp count
+    local -a cmd
+
     if [[ ! -f $src ]]; then
         fail "sumber tidak ada: $src"
         return 1
     fi
+
     case $src in
         *.json)
-            local dir
-            dir=$(cd "$(dirname "$src")" && pwd) || return 1
-            if [[ ${dir##*/} != blueprint ]]; then
+            local blueprint_dir
+            blueprint_dir=$(cd -- "$(dirname -- "$src")" && pwd) || return 1
+            if [[ ${blueprint_dir##*/} != blueprint ]]; then
                 fail "blueprint harus <theme>/blueprint/<variant>.json: $src"
                 return 1
             fi
-            name=${dir%/*}
+            name=${blueprint_dir%/*}
             name=${name##*/}
             cfg=$root/core/palette/$name/config.toml
             cmd=(matugen json "$src" -c "$cfg")
@@ -116,6 +72,7 @@ render() {
             return 1
             ;;
     esac
+
     if [[ ! -f $cfg ]]; then
         fail "config tidak ada: $cfg"
         return 1
@@ -132,46 +89,29 @@ render() {
         return 0
     fi
 
-    rm -rf "$tmp"
-    mkdir -p "$tmp"
+    stage "$tmp"
     if ! "${cmd[@]}" -p "$tmp"; then
         fail "matugen gagal; $out tidak diubah"
-        rm -rf "$tmp"
+        rm -rf -- "$tmp"
         return 1
     fi
-
-    mapfile -t files < <(find "$tmp" -type f | sort)
-    if [[ ${#files[@]} -eq 0 ]]; then
-        fail "tidak ada berkas yang dirender; $out tidak diubah"
-        rm -rf "$tmp"
+    if ! count=$(validate_stage "$tmp"); then
+        fail "$out tidak diubah"
+        rm -rf -- "$tmp"
         return 1
     fi
-    local f
-    for f in "${files[@]}"; do
-        if [[ ! -s $f ]]; then
-            fail "berkas kosong: ${f#"$tmp"/}; $out tidak diubah"
-            rm -rf "$tmp"
-            return 1
-        fi
-        if grep -qE '\{\{|\}\}|<\*|\*>' "$f"; then
-            fail "placeholder tersisa di ${f#"$tmp"/}; $out tidak diubah"
-            rm -rf "$tmp"
-            return 1
-        fi
-    done
-
-    rm -rf "$out"
-    mv "$tmp" "$out"
-    ln -sfn "$out" "$current"
-    ok "matugen/$name: ${#files[@]} berkas, current -> generated/matugen/$name"
+    if ! activate "$tmp" "$out" "$current"; then
+        fail "$out tidak diubah"
+        return 1
+    fi
+    ok "matugen/$name: $count berkas, current -> generated/matugen/$name"
 }
 
 # --- consumers -------------------------------------------------------------
 
-# Alacritty 0.17 watches the theme's alacritty *directory*, not the file, so the
-# trigger is an entry changing inside it: create the dir, then touch the import.
-# Flipping `current` replaces the watched inode, so a theme flip still needs
-# alacritty restarted.
+# alacritty watches the theme's alacritty *directory*, so the trigger is an entry
+# changing inside it. Flipping `current` replaces the watched inode, hence a theme
+# flip still needs alacritty restarted.
 reload_alacritty() {
     local dir=$current/alacritty
     run "alacritty dir" mkdir -p "$dir" || return 1
@@ -239,16 +179,32 @@ reload_scss() {
 reload_rasi() { skip "rofi: dibaca saat dibuka"; }
 reload_nvim() { skip "nvim: watcher core.theme_watch yang memuat ulang"; }
 
+# herdr runs one server per session and the CLI picks the socket the pane
+# exported (HERDR_SOCKET_PATH); outside a pane that default points at the stopped
+# `default` session. Every running session reads the same
+# ~/.config/herdr/config.toml, so each one must be named explicitly.
 reload_herdr() {
+    local name rc=0
+    local -a sessions
     if ! have herdr; then
         skip "herdr: tidak terpasang"
         return 0
     fi
-    if ! running herdr; then
-        skip "herdr: server tidak jalan"
+    if have jq; then
+        mapfile -t sessions < <(herdr session list --json 2>/dev/null |
+            jq -r '.sessions[] | select(.running) | .name')
+    else
+        mapfile -t sessions < <(herdr session list 2>/dev/null |
+            awk 'NR > 1 && $2 == "running" { print $1 }')
+    fi
+    if (( ! ${#sessions[@]} )); then
+        skip "herdr: tidak ada sesi yang jalan"
         return 0
     fi
-    run herdr herdr server reload-config
+    for name in "${sessions[@]}"; do
+        run "herdr: $name" herdr --session "$name" server reload-config || rc=1
+    done
+    return "$rc"
 }
 
 reload_yazi() { skip "yazi: dibaca saat start (flavor menunjuk current)"; }
@@ -260,7 +216,7 @@ reload_niri() {
         skip "niri: tidak jalan"
         return 0
     fi
-    run niri touch "$HOME/.dotfile/niri/config.kdl"
+    run niri touch "$repo/niri/config.kdl"
 }
 
 # hyprctl needs HYPRLAND_INSTANCE_SIGNATURE; a niri session must never get here.

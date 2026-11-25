@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Install this tool's wrapper and fish completion for the current user.
-# Matugen only: no other tool is touched, and nothing outside the two links changes.
-# Same contract as rofi/install.sh and waybar/install.sh.
+# install.sh — link matugen-ctl and its fish completion for the current user.
 set -u
 
 usage() {
