@@ -27,6 +27,20 @@ noctalia-ctl palette --list                   # known consumers
 | `-l`, `--list` | print known consumers |
 | `-h`, `--help` | usage |
 
+## Install
+
+```bash
+~/.dotfile/noctalia/install.sh --dry-run   # lihat rencana, tidak mengubah apa pun
+~/.dotfile/noctalia/install.sh             # pasang symlink, aman diulang
+~/.dotfile/noctalia/install.sh --remove    # cabut, hanya symlink milik checkout ini
+```
+
+Installer hanya mengurus `noctalia-ctl` dan membuat dua symlink:
+`~/.local/bin/noctalia-ctl` dan `~/.config/fish/completions/noctalia-ctl.fish`.
+Tidak ada render, store, atau `config.toml` yang disentuh. Ia idempoten, menolak
+menimpa berkas biasa atau symlink milik pihak lain (exit `1`), dan menerima
+`BIN_DIR` / `FISH_COMPLETION_DIR` untuk mengarahkan tujuan saat menguji.
+
 Palette sources:
 
 - an image (`png`, `jpg`, `jpeg`, `webp`, `gif`, `bmp`) becomes
