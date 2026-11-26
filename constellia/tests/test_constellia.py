@@ -109,7 +109,8 @@ if "status" in args:
 sys.exit(0)
 '''
 
-PROVIDERS = ("atlanta", "rofi-ctl", "swaync-client", "noctalia")
+PROVIDERS = ("atlanta", "rofi-ctl", "swaync-client", "noctalia",
+             "matugen-ctl", "noctalia-ctl")
 
 A_ROUTES = (
     (("screenshot", "region"), ["screenshot", "region"]),
@@ -229,6 +230,10 @@ class ConstelliaTests(unittest.TestCase):
         self.procs = self.root / "procs"
         self.procs.mkdir()
         self.state = self.root / "state"
+        self.theme_root = self.root / "theme-store"
+        self.feel_root = self.root / "feel-store"
+        self.theme_root.mkdir()
+        self.feel_root.mkdir()
 
         base = {
             key: value for key, value in os.environ.items()
@@ -247,6 +252,8 @@ class ConstelliaTests(unittest.TestCase):
             "CONSTELLIA_NOCTALIA_TIMEOUT_MS": "200",
             "CONSTELLIA_STOP_TIMEOUT_MS": "200",
             "XDG_STATE_HOME": str(self.state),
+            "THEME_ROOT": str(self.theme_root),
+            "FEEL_ROOT": str(self.feel_root),
             "MOCK_RECORD": str(self.record),
             "MOCK_PROC_DIR": str(self.procs),
         }
@@ -280,6 +287,22 @@ class ConstelliaTests(unittest.TestCase):
     def dead(self, name):
         (self.procs / name.upper().replace("-", "_")).unlink(missing_ok=True)
 
+    def link_store(self, engine="matugen", name="kanagawa-dragon-lotus",
+                   profile="default"):
+        palette = self.theme_root / "generated" / engine / name
+        palette.mkdir(parents=True)
+        (self.theme_root / "current").symlink_to(palette)
+        feel = self.feel_root / "generated" / profile
+        feel.mkdir(parents=True)
+        (self.feel_root / "current").symlink_to(feel)
+
+    def theme_state(self):
+        return self.state / "constellia" / "theme"
+
+    def write_theme_state(self, variant):
+        self.theme_state().parent.mkdir(parents=True, exist_ok=True)
+        self.theme_state().write_text(f"variant={variant}\nupdated=1\n")
+
     def assert_route(self, shell, backend, argv, *args, **env):
         self.set_shell(shell)
         self.reset()
@@ -305,6 +328,8 @@ class ConstelliaTests(unittest.TestCase):
         self.assertIn("Usage: constellia", result.stdout)
         self.assertIn("bar.panel", result.stdout)
         self.assertIn("shell switch", result.stdout)
+        self.assertIn("theme palette", result.stdout)
+        self.assertIn("feel <profile>", result.stdout)
         self.assertIn("Exit: 0 ok", result.stdout)
 
     def test_unknown_capability_is_usage(self):
@@ -708,6 +733,126 @@ class ConstelliaTests(unittest.TestCase):
         self.assertEqual(payload["wm"], "hypr")
         self.assertEqual(payload["backends"]["atlanta"],
                          str(self.binaries / "atlanta"))
+
+    # --- Theme and feel -----------------------------------------------------
+
+    def test_theme_status_without_a_store_is_null(self):
+        result = self.call("theme", "status", "--json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout), {
+            "engine": None, "palette": None, "variant": None, "feel": None,
+            "wm": "hypr", "shell": "atlanta",
+        })
+
+    def test_theme_status_derives_the_store_and_reads_the_variant(self):
+        self.set_shell("noctalia")
+        self.link_store(engine="noctalia", name="wallpaper-based")
+        self.write_theme_state("dark")
+        result = self.call("theme", "status", "--json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["engine"], "noctalia")
+        self.assertEqual(payload["palette"], "wallpaper-based")
+        self.assertEqual(payload["variant"], "dark")
+        self.assertEqual(payload["feel"], "default")
+        self.assertEqual(payload["wm"], "hypr")
+        self.assertEqual(payload["shell"], "noctalia")
+
+    def test_theme_status_text_marks_an_unknown_variant(self):
+        self.link_store()
+        result = self.call("theme", "status")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertRegex(result.stdout, r"engine\s+matugen")
+        self.assertRegex(result.stdout, r"palette\s+kanagawa-dragon-lotus")
+        self.assertRegex(result.stdout, r"variant\s+unknown")
+        self.assertRegex(result.stdout, r"feel\s+default")
+
+    def test_theme_status_is_read_only(self):
+        self.link_store()
+        result = self.call("theme", "status", "--json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(self.theme_state().exists())
+
+    def test_theme_palette_routes_to_matugen_on_atlanta(self):
+        self.set_shell("atlanta")
+        self.reset()
+        result = self.call("theme", "palette", "/tmp/wall.png")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual([row["argv"] for row in self.calls("matugen-ctl")],
+                         [["palette", "/tmp/wall.png"]])
+        self.assertFalse(self.calls("noctalia-ctl"))
+        self.assertIn("variant=dark", self.theme_state().read_text())
+
+    def test_theme_palette_routes_to_noctalia_and_passes_options(self):
+        self.set_shell("noctalia")
+        self.reset()
+        result = self.call("theme", "palette", "--from-shell", "-N")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            [row["argv"] for row in self.calls("noctalia-ctl")],
+            [["palette", "--from-shell", "-N"]])
+        self.assertFalse(self.calls("matugen-ctl"))
+        self.assertFalse(self.theme_state().exists())
+
+    def test_theme_palette_writes_the_light_variant_from_a_blueprint(self):
+        self.set_shell("atlanta")
+        result = self.call("theme", "palette", "/tmp/kanagawa-light.json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("variant=light", self.theme_state().read_text())
+
+    def test_theme_palette_reload_writes_nothing(self):
+        self.set_shell("atlanta")
+        self.reset()
+        result = self.call("theme", "palette")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(self.theme_state().exists())
+        self.assertEqual(self.calls("matugen-ctl")[0]["argv"], ["palette"])
+
+    def test_theme_palette_list_writes_nothing(self):
+        self.set_shell("noctalia")
+        result = self.call("theme", "palette", "--list")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(self.theme_state().exists())
+
+    def test_theme_palette_local_dry_run_writes_nothing(self):
+        self.set_shell("atlanta")
+        result = self.call("theme", "palette", "-n", "/tmp/wall.png")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(self.theme_state().exists())
+
+    def test_theme_palette_failure_keeps_the_recorded_variant(self):
+        self.set_shell("atlanta")
+        self.write_theme_state("light")
+        result = self.call("theme", "palette", "/tmp/wall.png",
+                           MOCK_MATUGEN_CTL_PALETTE_EXIT="1")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("variant=light", self.theme_state().read_text())
+
+    def test_theme_palette_global_dry_run_runs_nothing(self):
+        self.set_shell("atlanta")
+        self.reset()
+        result = self.call("--dry-run", "theme", "palette", "/tmp/wall.png")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("[dry] matugen-ctl palette /tmp/wall.png", result.stdout)
+        self.assertEqual(self.calls(), [])
+        self.assertFalse(self.theme_state().exists())
+
+    def test_feel_always_routes_to_matugen(self):
+        for shell in ("atlanta", "noctalia"):
+            with self.subTest(shell=shell):
+                self.set_shell(shell)
+                self.reset()
+                result = self.call("feel", "default")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(
+                    [row["argv"] for row in self.calls("matugen-ctl")],
+                    [["feel", "default", "--wm", "hypr"]])
+
+    def test_feel_without_a_profile_is_usage(self):
+        result = self.call("feel")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("feel needs a profile", result.stderr)
+        self.assertEqual(self.calls(), [])
 
     def test_missing_backend_exits_127(self):
         empty = self.root / "empty"
