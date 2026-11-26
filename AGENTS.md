@@ -255,13 +255,13 @@ Rules:
   - `tool` → auto-locate a file/dir/symlink under the config root
   - `tool:explicit_path` → explicit source path (e.g. `lazygit:~/.config/lazygit`)
   - blank lines and `#` comments are ignored
-- **Theme status:** `~/.myenv/theme/current-status.json` holds
-  `{version, theme:{name, type}, waybar}` — theme name + variant for the
-  switcher; its shape is the tracked `.example`. It is machine state (ignored),
-  nothing writes it today (the switcher is parked in
-  `~/.myenv/script/theme.bak/`), so the authoritative palette is still the
-  directory `theme/palette/current` resolves to. `theme/path.txt` was removed
-  in the store migration.
+- **Theme status:** `~/.myenv/theme/current-status.json` is legacy machine state
+  for the parked switcher (`~/.myenv/script/theme.bak/`); nothing in this repo
+  writes or reads it. The authoritative palette and feel are the directories
+  `theme/palette/current` and `theme/feel/current` resolve to, and
+  `constellia theme status [--json]` derives engine, palette, variant and feel
+  from those links plus `~/.local/state/constellia/theme`. `theme/path.txt` was
+  removed in the store migration.
 
 ---
 

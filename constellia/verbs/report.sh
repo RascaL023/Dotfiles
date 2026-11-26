@@ -40,22 +40,6 @@ live_shell() {
     printf 'none'
 }
 
-json_quote() {
-    local value=$1
-    value=${value//\\/\\\\}
-    value=${value//\"/\\\"}
-    printf '"%s"' "$value"
-}
-
-json_raw_or_null() {
-    local value=$1
-    [[ -z $value ]] && {
-        printf 'null'
-        return 0
-    }
-    json_quote "$value"
-}
-
 shell_line() {
     local wm=$1 raw value suffix=''
     raw=$(shell_raw "$wm")
@@ -97,8 +81,8 @@ status_json() {
     printf '{"wm":%s,"shell":%s,"live":%s,"drift":%s,"shells":{"hypr":%s,"niri":%s},"invalid":{"hypr":%s,"niri":%s}}\n' \
         "$wm_json" "$shell_json" "$live_json" "$drift" \
         "$(json_quote "$hypr")" "$(json_quote "$niri")" \
-        "$(json_raw_or_null "$(shell_invalid hypr)")" \
-        "$(json_raw_or_null "$(shell_invalid niri)")"
+        "$(json_or_null "$(shell_invalid hypr)")" \
+        "$(json_or_null "$(shell_invalid niri)")"
 }
 
 shell_invalid() {

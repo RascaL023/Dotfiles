@@ -137,9 +137,10 @@ disentuh, setiap panggilan dibungkus `timeout`, dan `hyprctl reload` hanya
 dijalankan di sesi Hyprland. herdr memakai satu server per sesi, jadi reload
 disebut per sesi yang `running` (`--session <nama>`), bukan lewat socket
 `default` yang biasanya mati di luar pane herdr. `~/.myenv/theme/current-status.json` bukan milik
-folder ini: itu state untuk switcher (belum ada yang menulisnya), sementara yang
+folder ini: itu state lama untuk switcher dan tidak ditulis lagi, sementara yang
 benar-benar aktif adalah tujuan symlink `theme/palette/current` dan
-`theme/feel/current`.
+`theme/feel/current`. `constellia theme status [--json]` melaporkan engine,
+nama palet, varian, dan profil feel dari kedua symlink itu.
 
 ## Konsumen
 

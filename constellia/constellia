@@ -35,6 +35,9 @@ Usage: constellia <capability> <verb> [args...]
   bar show|hide|toggle|status|use|switch [...]
   bar.panel toggle <panel>         Eww window (atlanta only)
   osd volume|mic|brightness        Report the value only (atlanta only)
+  theme palette [source] [options] Active engine: matugen-ctl or noctalia-ctl
+  theme status [--json]            Engine, palette, variant and feel
+  feel <profile>                   matugen feel profile on both shells
 
   shell use <noctalia|atlanta>     Choose the shell for this WM, next session
   shell switch <noctalia|atlanta>  Stop the other stack, start this one, save it
@@ -119,6 +122,12 @@ case $capability in
         ;;
     bar|bar.panel)
         exec bash "$dir/verbs/bar.sh" "$capability" "$@"
+        ;;
+    theme)
+        exec bash "$dir/verbs/theme.sh" "$capability" "$@"
+        ;;
+    feel)
+        exec bash "$dir/verbs/feel.sh" "$capability" "$@"
         ;;
     launcher|notifications|screenshot|wallpaper|session|idle|caffeine|nightlight|osd)
         exec bash "$dir/verbs/$capability.sh" "$capability" "$@"

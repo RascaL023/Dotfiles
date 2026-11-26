@@ -227,9 +227,9 @@ referensi key `hypr.json`; mengubah palet tidak lagi mengubah rasa.
 `meta.name` + `meta.variant` **tidak** ikut ditulis ke `hypr/theme.lua`: berkas
 tema Hyprland hanya berisi warna; rasa dibaca dari `feel/current/hypr/feel.lua`.
 Identitas palet adalah nama direktori
-di `~/.myenv/theme/palette/generated/matugen/`; pasangan nama + varian disimpan switcher
-di `~/.myenv/theme/current-status.json` (bentuknya di `.example`), yang sekarang
-belum diisi otomatis.
+di `~/.myenv/theme/palette/generated/matugen/`. Varian dark/light dilaporkan
+`constellia theme status` dari state `~/.local/state/constellia/theme`; berkas
+`current-status.json` lama tidak dipakai lagi.
 
 ---
 

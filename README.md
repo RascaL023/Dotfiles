@@ -217,10 +217,13 @@ pindahkan ke `palette/generated/matugen/<palette>` atau render ulang.
 `matugen-ctl palette <source>` renders into `generated/matugen/<palette>`,
 validates, then flips the palette `current`; `matugen-ctl feel <profile>` does
 the same for feel.
-`~/.myenv/theme/current-status.json` disediakan untuk switcher (nama + varian,
-bentuknya di `.example`), tapi belum ada yang menulisnya — jadi `current` tetap
-jadi acuan. Tidak ada switcher yang jalan: `script/theme.bak/` menyimpan stub
-lama, dan binding `Mod+T` / on-click waybar yang memanggilnya masih mati.
+Nama engine, nama palet, dan profil feel diturunkan dari symlink `current`.
+Varian (dark/light) tidak bisa diturunkan dari path, jadi `constellia theme
+palette` menyimpannya di `~/.local/state/constellia/theme`; `constellia theme
+status [--json]` melaporkan keduanya saat diminta. `current-status.json` adalah
+state lama untuk switcher: tidak ditulis lagi, dan `current` tetap jadi acuan.
+Tidak ada switcher yang jalan: `script/theme.bak/` menyimpan stub lama, dan
+binding `Mod+T` / on-click waybar yang memanggilnya masih mati.
 
 ### Flow A — wallpaper-derived (Material You)
 
@@ -306,8 +309,8 @@ validasi style animasi). `appearance/look.lua` dan `appearance/motion.lua`
 merender keduanya ke payload `hl.config` / `hl.curve` / `hl.animation`, sedangkan
 `hypr/hyprland.lua` hanya meng-orchestrate. Nama + varian tema tidak ikut ke
 berkas tema Hyprland: identitas palet adalah engine + nama direktori di
-`theme/palette/generated/`, sedangkan nama + varian untuk switcher ada di
-`~/.myenv/theme/current-status.json` (belum diisi otomatis).
+`theme/palette/generated/`. Varian tema dilaporkan oleh `constellia theme
+status` (state di `~/.local/state/constellia/theme`), bukan oleh berkas tema.
 
 ### Who reads the generated files
 

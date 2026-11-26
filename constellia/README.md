@@ -15,11 +15,12 @@ Design and contract: `docs/DESIGN.md`.
 ## Status
 
 Implemented: per-WM shell state, `shell use|switch|start|stop|status`, the
-capability matrix, `status`, `doctor`, `--dry-run`, install and completions.
+capability matrix, `theme palette`/`theme status`/`feel`, `status`, `doctor`,
+`--dry-run`, install and completions.
 
-Not implemented yet (gated in the design): `theme palette` / `theme status` /
-`feel` (phase 5, including the `current-status.json` replacement) and the
-autostart/keybind migration in `hypr/` and `niri/` (phase 6).
+Not implemented yet (gated in the design): the autostart/keybind migration in
+`hypr/` and `niri/` (phase 6). `current-status.json` is no longer written;
+`constellia theme status [--json]` reports on demand instead.
 
 ## Install
 
@@ -55,6 +56,8 @@ constellia status | doctor | help
 | `bar` | `show`, `hide`, `toggle`, `status`, `use`, `switch` | `atlanta bar` | `bar-*`, `status`; `use`/`switch` unsupported |
 | `bar.panel` | `toggle <panel>` | `atlanta bar.panel` | unsupported |
 | `osd` | `volume`, `mic`, `brightness` | `atlanta osd` | unsupported |
+| `theme` | `palette [source] [options]`, `status [--json]` | `matugen-ctl palette` | `noctalia-ctl palette` |
+| `feel` | `<profile>` | `matugen-ctl feel --wm` | same: feel always belongs to matugen |
 
 Examples:
 
@@ -63,6 +66,9 @@ constellia notifications toggle
 constellia launcher apps
 constellia volume up
 constellia wallpaper next
+constellia theme palette ~/Pictures/Wallpaper/moon.png
+constellia theme status --json
+constellia feel default
 constellia shell switch noctalia
 constellia --dry-run screenshot region
 constellia status --json
@@ -95,9 +101,10 @@ verb (`constellia bar status --provider eww`).
 
 ```text
 ${XDG_STATE_HOME:-$HOME/.local/state}/constellia/
-└── shell/
-    ├── hypr        # "noctalia" or "atlanta"
-    └── niri        # independent
+├── shell/
+│   ├── hypr      # "noctalia" or "atlanta"
+│   └── niri      # independent
+└── theme         # variant=dark, updated=<epoch>
 ```
 
 One word plus newline, written atomically with one rename. A missing file means
@@ -123,6 +130,31 @@ then starts atlanta.
 
 Timing knobs, mainly for tests: `CONSTELLIA_BUS_TIMEOUT_MS` (3000),
 `CONSTELLIA_NOCTALIA_TIMEOUT_MS` (10000), `CONSTELLIA_STOP_TIMEOUT_MS` (5000).
+
+## Theme and feel
+
+`constellia theme palette <source>` picks the engine from the shell:
+`matugen-ctl palette` on atlanta, `noctalia-ctl palette` on noctalia. Both write
+the same `theme/palette/current`, so switching shells does not require a
+re-render. Options (`--list`, `-n`, `-s`, `--from-shell`, consumer names) pass
+through unchanged.
+
+`theme status` derives everything it can instead of storing it:
+
+| Fact | Source |
+|---|---|
+| engine, palette | `readlink theme/palette/current` → `generated/<engine>/<name>` |
+| feel | `readlink theme/feel/current` → `generated/<profile>` |
+| variant | `constellia/theme` (`variant=dark`), written only after a successful render with a source |
+
+`theme status --json` prints `{engine, palette, variant, feel, wm, shell}`;
+fields are `null` when the store is missing. A blueprint name ending in
+`-dark`/`-light` sets the variant; an image defaults to `dark`. A reload
+(`theme palette` with no source), `--list`, or `-n` writes nothing.
+
+`constellia feel <profile>` always calls `matugen-ctl feel <profile> --wm <wm>`.
+Feel is not mapped onto Noctalia: its own radius/font/shadow settings stay in
+Noctalia's `settings.toml`.
 
 ## Delegation
 
@@ -154,4 +186,4 @@ python3 -m unittest discover -s constellia/tests -p 'test_*.py'
 Every backend is a fake in a temporary directory, so no compositor, Noctalia,
 atlanta, or D-Bus is required. The suite covers the capability matrix, state
 per WM, switch ordering and failure paths, idempotency, dry-run, JSON output,
-and the installer.
+theme derivation and palette routing, and the installer.
