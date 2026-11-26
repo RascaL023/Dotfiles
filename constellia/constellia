@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+# One question — which shell is active on this WM? — then route the capability
+# to the tool that owns it. No daemon, no polling, no config parsing.
+set -u
+
+# One readlink resolves the ~/.local/bin symlink; the verbs reuse the result,
+# so a routed capability starts no extra process before it execs the backend.
+self_path=$(readlink -f -- "${BASH_SOURCE[0]}") || exit 1
+dir=${self_path%/*}
+export CONSTELLIA_DIR=$dir
+
+# shellcheck source=lib/session.sh
+source "$dir/lib/session.sh"
+
+usage() {
+    cat <<'EOF'
+Usage: constellia <capability> <verb> [args...]
+       constellia shell use|switch|start|stop|status
+       constellia status | doctor | help
+
+  launcher apps|run|window|toggle
+                                   Rofi menus, or the Noctalia launcher
+  notifications toggle|dnd [on|off]|clear
+                                   Notification panel, DND, close all
+  screenshot region|screen|window|annotate
+                                   Capture with the active shell
+  wallpaper set <path>|next|prev|random|pick|status
+  session lock|menu|logout|reboot|poweroff|dpms off|on
+  idle toggle|status               swayidle (atlanta only)
+  caffeine toggle|status           Idle inhibitor (noctalia only)
+  nightlight toggle|status
+  volume up|down|mute
+  mic toggle
+  brightness up|down
+  bar show|hide|toggle|status|use|switch [...]
+  bar.panel toggle <panel>         Eww window (atlanta only)
+  osd volume|mic|brightness        Report the value only (atlanta only)
+
+  shell use <noctalia|atlanta>     Choose the shell for this WM, next session
+  shell switch <noctalia|atlanta>  Stop the other stack, start this one, save it
+  shell start|stop                 Act on the shell already recorded
+  shell status                     Shell per WM
+  status                           Shell per WM, with drift
+  doctor                           Backend resolution and the session
+
+Options:
+  --dry-run, CONSTELLIA_DRY_RUN=1  Print the backend argv, run nothing
+  --wm hypr|niri                   Override WM detection
+  --json                           JSON output for status and doctor
+  -h, --help                       This text
+
+Exit: 0 ok, 1 failed or not running, 2 usage, 3 unsupported on this shell,
+4 switch refused before changing anything, 127 a backend is missing.
+EOF
+}
+
+fail() {
+    printf 'constellia: %s\n' "$*" >&2
+    exit 2
+}
+
+dry_run=${CONSTELLIA_DRY_RUN:-0}
+json=${CONSTELLIA_JSON:-0}
+wm_override=${CONSTELLIA_WM:-${CONSTELLIA_SESSION:-}}
+args=()
+seen_capability=0
+
+while (( $# )); do
+    case $1 in
+        --dry-run) dry_run=1 ; shift ;;
+        --wm)
+            (( $# >= 2 )) || fail '--wm needs hypr or niri'
+            wm_override=$2
+            shift 2
+            ;;
+        --wm=*) wm_override=${1#*=} ; shift ;;
+        --json) json=1 ; shift ;;
+        --) shift; while (( $# )); do args+=("$1"); shift; done ;;
+        -h|--help|help) usage; exit 0 ;;
+        -*)
+            # Global options end at the capability; everything after it belongs
+            # to the verb (`bar status --provider eww`).
+            (( seen_capability )) || fail "unknown option: $1 (use --help)"
+            args+=("$1")
+            shift
+            ;;
+        *) args+=("$1"); seen_capability=1 ; shift ;;
+    esac
+done
+
+if ! wm=$(wm_resolve "$wm_override"); then
+    fail "unknown wm: $wm_override (hypr, niri)"
+fi
+
+export CONSTELLIA_DRY_RUN=$dry_run
+export CONSTELLIA_JSON=$json
+export CONSTELLIA_WM=$wm
+
+capability=help
+if (( ${#args[@]} )); then
+    capability=${args[0]}
+    args=("${args[@]:1}")
+fi
+if (( ${#args[@]} )); then
+    set -- "${args[@]}"
+else
+    set --
+fi
+
+case $capability in
+    status|doctor)
+        exec bash "$dir/verbs/report.sh" "$capability" "$@"
+        ;;
+    shell)
+        exec bash "$dir/verbs/shell.sh" "$capability" "$@"
+        ;;
+    volume|mic|brightness)
+        exec bash "$dir/verbs/volume.sh" "$capability" "$@"
+        ;;
+    bar|bar.panel)
+        exec bash "$dir/verbs/bar.sh" "$capability" "$@"
+        ;;
+    launcher|notifications|screenshot|wallpaper|session|idle|caffeine|nightlight|osd)
+        exec bash "$dir/verbs/$capability.sh" "$capability" "$@"
+        ;;
+    *)
+        fail "unknown capability: $capability (use --help)"
+        ;;
+esac
