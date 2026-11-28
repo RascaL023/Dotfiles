@@ -184,9 +184,9 @@ class LaunchTests(unittest.TestCase):
         self.assertIn("-no-custom", self.recorded()["argv"])
 
     def test_shell_provides_exactly_two_choices_and_only_returns_text(self):
-        result = self.call("shell", data=b"ignored\n", MOCK_STDOUT="Native\n")
-        self.assertEqual(result.stdout, b"Native\n")
-        self.assertEqual(bytes.fromhex(self.recorded()["stdin"]), b"Noctalia\nNative\n")
+        result = self.call("shell", data=b"ignored\n", MOCK_STDOUT="Atlanta\n")
+        self.assertEqual(result.stdout, b"Atlanta\n")
+        self.assertEqual(bytes.fromhex(self.recorded()["stdin"]), b"Noctalia\nAtlanta\n")
         self.assertIn("-no-custom", self.recorded()["argv"])
         self.assertEqual(Path(self.option("-theme")).stem, "shell-select")
 

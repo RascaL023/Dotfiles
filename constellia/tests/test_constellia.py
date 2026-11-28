@@ -637,6 +637,92 @@ class ConstelliaTests(unittest.TestCase):
         self.assertEqual(self.shell_state("hypr").read_text().strip(), "noctalia")
         self.assertEqual(self.shell_state("niri").read_text().strip(), "atlanta")
 
+    # --- Select -------------------------------------------------------------
+
+    def test_shell_select_switches_to_the_chosen_noctalia(self):
+        self.set_shell("atlanta")
+        self.reset()
+        result = self.call("shell", "select",
+                           MOCK_ROFI_CTL_SHELL_OUT="Noctalia")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.shell_state().read_text().strip(), "noctalia")
+        # The card for the recorded shell is the one highlighted.
+        self.assertEqual([row["argv"] for row in self.calls("rofi-ctl")],
+                         [["shell", "-selected-row", "1"]])
+        self.assertEqual([row["argv"] for row in self.calls("atlanta")],
+                         [["stop"]])
+        self.assertIn("shell hypr: noctalia", result.stdout)
+
+    def test_shell_select_switches_to_the_chosen_native_atlanta(self):
+        self.set_shell("noctalia")
+        self.live("noctalia")
+        self.reset()
+        result = self.call("shell", "select",
+                           MOCK_ROFI_CTL_SHELL_OUT="Native")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.shell_state().read_text().strip(), "atlanta")
+        self.assertEqual([row["argv"] for row in self.calls("rofi-ctl")],
+                         [["shell", "-selected-row", "0"]])
+        self.assertEqual([row["argv"] for row in self.calls("atlanta")],
+                         [["start"]])
+
+    def test_shell_select_accepts_a_renamed_atlanta_card(self):
+        self.set_shell("noctalia")
+        self.dead("noctalia")
+        self.reset()
+        result = self.call("shell", "select",
+                           MOCK_ROFI_CTL_SHELL_OUT="Atlanta")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.shell_state().read_text().strip(), "atlanta")
+
+    def test_shell_select_cancel_changes_nothing(self):
+        self.set_shell("atlanta")
+        self.reset()
+        result = self.call("shell", "select", MOCK_ROFI_CTL_SHELL_EXIT="1")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(self.shell_state().read_text().strip(), "atlanta")
+        self.assertEqual([row["name"] for row in self.calls()], ["rofi-ctl"])
+
+    def test_shell_select_rejects_an_unknown_label(self):
+        self.set_shell("atlanta")
+        self.reset()
+        result = self.call("shell", "select", MOCK_ROFI_CTL_SHELL_OUT="Sway")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("unknown shell choice", result.stderr)
+        self.assertEqual(self.shell_state().read_text().strip(), "atlanta")
+        self.assertEqual([row["name"] for row in self.calls()], ["rofi-ctl"])
+
+    def test_shell_select_on_the_active_shell_is_a_noop(self):
+        self.set_shell("noctalia")
+        self.live("noctalia")
+        self.reset()
+        result = self.call("shell", "select",
+                           MOCK_ROFI_CTL_SHELL_OUT="Noctalia")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("already noctalia", result.stdout)
+        self.assertEqual([row["name"] for row in self.calls()], ["rofi-ctl"])
+
+    def test_shell_select_dry_run_prints_the_picker_and_stops(self):
+        self.set_shell("atlanta")
+        self.reset()
+        result = self.call("--dry-run", "shell", "select")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("[dry] rofi-ctl shell -selected-row 1", result.stdout)
+        self.assertEqual(self.calls(), [])
+        self.assertEqual(self.shell_state().read_text().strip(), "atlanta")
+
+    def test_shell_select_takes_no_arguments(self):
+        result = self.call("shell", "select", "noctalia")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("takes no arguments", result.stderr)
+
+    def test_shell_select_needs_a_compositor(self):
+        result = self.call("shell", "select", CONSTELLIA_WM="",
+                           XDG_CURRENT_DESKTOP="")
+        self.assertEqual(result.returncode, 3)
+        self.assertIn("needs a compositor", result.stderr)
+
     # --- Start and stop -----------------------------------------------------
 
     def test_shell_start_starts_the_recorded_atlanta_stack(self):

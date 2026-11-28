@@ -10,7 +10,7 @@ Usage: rofi-ctl [command] [style] [rofi options...]
   run [apps|orbit]    Command launcher
   window             Window switcher, using Rofi's window mode
   toggle [apps|orbit] Open/close only the chosen launcher
-  shell              Choose Noctalia or Native; print the selected name
+  shell              Choose Noctalia or Atlanta; print the selected name
   menu               Text menu from stdin; custom input is allowed
   wallpaper [-d DIR] Wallpaper gallery: rows from stdin, or images in DIR
   password           Password prompt; print the entered text
@@ -167,7 +167,7 @@ rofi_args=(-config "$rofi_dir/config.rasi"
 
 case "$command_name" in
     shell|shell-select)
-        exec rofi "${rofi_args[@]}" <<< $'Noctalia\nNative'
+        exec rofi "${rofi_args[@]}" <<< $'Noctalia\nAtlanta'
         ;;
     password)
         exec rofi "${rofi_args[@]}" < /dev/null

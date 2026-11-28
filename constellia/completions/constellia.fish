@@ -54,6 +54,6 @@ complete -c constellia -n '__fish_seen_subcommand_from theme' -a 'palette status
 complete -c constellia -n '__fish_seen_subcommand_from theme; and __fish_seen_subcommand_from palette' \
     -a '(__fish_complete_path)' -d 'Wallpaper or blueprint'
 complete -c constellia -n '__fish_seen_subcommand_from feel' -a 'default'
-complete -c constellia -n '__fish_seen_subcommand_from shell' -a 'use switch start stop status'
+complete -c constellia -n '__fish_seen_subcommand_from shell' -a 'use select switch start stop status'
 complete -c constellia -n '__fish_seen_subcommand_from shell; and __fish_seen_subcommand_from use switch' \
     -a 'noctalia atlanta'

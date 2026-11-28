@@ -9,7 +9,7 @@ complete -c rofi-ctl -n '__fish_use_subcommand' -a apps -d 'Application launcher
 complete -c rofi-ctl -n '__fish_use_subcommand' -a run -d 'Command launcher'
 complete -c rofi-ctl -n '__fish_use_subcommand' -a window -d 'Window switcher'
 complete -c rofi-ctl -n '__fish_use_subcommand' -a toggle -d 'Open/close the launcher'
-complete -c rofi-ctl -n '__fish_use_subcommand' -a shell -d 'Choose Noctalia or Native'
+complete -c rofi-ctl -n '__fish_use_subcommand' -a shell -d 'Choose Noctalia or Atlanta'
 complete -c rofi-ctl -n '__fish_use_subcommand' -a menu -d 'Text menu from stdin'
 complete -c rofi-ctl -n '__fish_use_subcommand' -a wallpaper -d 'Wallpaper gallery'
 complete -c rofi-ctl -n '__fish_use_subcommand' -a password -d 'Password prompt'

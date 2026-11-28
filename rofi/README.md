@@ -24,7 +24,7 @@ untuk launcher aplikasi dan perintah. Opsi Rofi tambahan diletakkan setelahnya.
 | `run [apps\|orbit]` | Launcher perintah, mode `run` | Rofi menjalankan perintah |
 | `window` | Layout aplikasi, mode bawaan `window` | Rofi memilih jendela |
 | `toggle [apps\|orbit]` | Launcher dengan style yang dipilih | Buka/tutup launcher tersebut |
-| `shell` | Dua kartu: Noctalia / Native | Nama pilihan ke stdout |
+| `shell` | Dua kartu: Noctalia / Atlanta | Nama pilihan ke stdout |
 | `menu` | Daftar teks dari stdin, satu kolom | Pilihan atau input bebas ke stdout |
 | `wallpaper [-d DIR]` | Galeri fullscreen; baris dari stdin atau gambar di DIR | Nama pilihan, atau path absolut dengan `-d` |
 | `password` | Prompt input, stdin dikosongkan | Teks yang diketik ke stdout |
@@ -107,8 +107,13 @@ ditutup oleh toggle launcher.
 
 ## Data dan backend
 
-`rofi-ctl shell` menyediakan pilihan Noctalia / Native, lalu mencetak hasil.
-Tidak ada backend pergantian shell atau indikator shell aktif.
+`rofi-ctl shell` menyediakan pilihan Noctalia / Atlanta, lalu mencetak hasil.
+Skrip ini tetap murni presentasi: tidak ada backend pergantian shell dan tidak
+ada indikator shell aktif di dalamnya. Aksi dan sorotan kartu aktif dimiliki
+pemanggil — `constellia shell select` menjalankan `rofi-ctl shell
+-selected-row <0|1>` lalu memetakan hasilnya ke `constellia shell switch`.
+Karena `rofi-ctl` meneruskan opsi Rofi tambahan, `-selected-row` bekerja tanpa
+perubahan di wrapper ini.
 
 `rofi-ctl wallpaper` menampilkan daftar yang diberikan lewat stdin. Dengan
 `-d DIR` (atau `--dir`), ia membaca sendiri gambar satu level di DIR — `*.jpg`,
@@ -148,7 +153,7 @@ ikon aplikasi memakai Papirus. Klik tombol mode atau tekan `Ctrl+Tab` untuk
 berganti mode, gunakan panah untuk memilih, `Enter` untuk membuka, dan `Esc`
 untuk menutup. Layout menyediakan aturan media untuk layar sempit dan pendek.
 
-**Shell Select** menampilkan Noctalia dan Native dalam dua kartu di tengah layar,
+**Shell Select** menampilkan Noctalia dan Atlanta dalam dua kartu di tengah layar,
 dengan angka urutan dan sorotan pilihan. Dialog berukuran 720 × 520 piksel.
 Gunakan panah kiri/kanan, `Enter` untuk mengonfirmasi, dan `Esc` untuk membatalkan.
 

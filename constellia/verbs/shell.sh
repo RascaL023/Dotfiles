@@ -31,9 +31,9 @@ runtime_fail() {
 }
 
 case $verb in
-    status|use|switch|start|stop) ;;
-    '') fail 'shell needs a verb (status, use, switch, start, stop)' ;;
-    *) fail "unknown shell verb: $verb (status, use, switch, start, stop)" ;;
+    status|use|select|switch|start|stop) ;;
+    '') fail 'shell needs a verb (status, use, select, switch, start, stop)' ;;
+    *) fail "unknown shell verb: $verb (status, use, select, switch, start, stop)" ;;
 esac
 
 shell_use() {
@@ -104,6 +104,54 @@ switch_to_atlanta() {
     fi
 }
 
+# Shared by `switch` and `select`: prove the target, then write state last.
+shell_switch() {
+    local target=$1 current
+    current=$(shell_get)
+    if [[ $current == "$target" ]]; then
+        printf 'shell %s is already %s\n' "$CONSTELLIA_WM" "$target"
+        exit 0
+    fi
+    if (( CONSTELLIA_DRY_RUN )); then
+        plan_switch "$target"
+        exit 0
+    fi
+    case $target in
+        noctalia) switch_to_noctalia ;;
+        atlanta) switch_to_atlanta ;;
+    esac
+    shell_save "$target" || runtime_fail "cannot write state in $constellia_shell_dir"
+    printf 'shell %s: %s\n' "$CONSTELLIA_WM" "$target"
+}
+
+# Rofi owns the card; constellia owns the action. Let rofi exit first, so its
+# keyboard grab is gone before the other stack is stopped.
+shell_select() {
+    local choice target row=0 rofi status
+    (( $# == 0 )) || fail 'shell select takes no arguments'
+    require_wm 'shell select'
+    [[ $(shell_get) == atlanta ]] && row=1
+    if (( CONSTELLIA_DRY_RUN )); then
+        dry_print rofi-ctl shell -selected-row "$row"
+        return 0
+    fi
+    rofi=$(require_backend rofi-ctl) || exit $?
+    choice=$("$rofi" shell -selected-row "$row") || {
+        status=$?
+        # Cancelling the picker is not a failure and changes nothing.
+        (( status == 1 )) && exit 0
+        exit "$status"
+    }
+    case $choice in
+        # `Native` is accepted so an older card label keeps working.
+        Noctalia|noctalia)      target=noctalia ;;
+        Native|Atlanta|atlanta) target=atlanta ;;
+        '')                     exit 0 ;;
+        *)                      fail "unknown shell choice: $choice (Noctalia, Atlanta)" ;;
+    esac
+    shell_switch "$target"
+}
+
 shell_start() {
     local current
     require_wm 'shell start'
@@ -149,26 +197,15 @@ case $verb in
     use)
         shell_use "$@"
         ;;
+    select)
+        shell_select "$@"
+        ;;
     switch)
         target=${1:-}
         (( $# == 1 )) || fail 'shell switch needs exactly one shell (noctalia, atlanta)'
         shell_valid "$target" || fail "unknown shell: $target (noctalia, atlanta)"
         require_wm 'shell switch'
-        current=$(shell_get)
-        if [[ $current == "$target" ]]; then
-            printf 'shell %s is already %s\n' "$CONSTELLIA_WM" "$target"
-            exit 0
-        fi
-        if (( CONSTELLIA_DRY_RUN )); then
-            plan_switch "$target"
-            exit 0
-        fi
-        case $target in
-            noctalia) switch_to_noctalia ;;
-            atlanta) switch_to_atlanta ;;
-        esac
-        shell_save "$target" || runtime_fail "cannot write state in $constellia_shell_dir"
-        printf 'shell %s: %s\n' "$CONSTELLIA_WM" "$target"
+        shell_switch "$target"
         ;;
     start)
         (( $# == 0 )) || fail 'shell start takes no arguments'

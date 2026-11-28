@@ -14,7 +14,7 @@ Design and contract: `docs/DESIGN.md`.
 
 ## Status
 
-Implemented: per-WM shell state, `shell use|switch|start|stop|status`, the
+Implemented: per-WM shell state, `shell use|select|switch|start|stop|status`, the
 capability matrix, `theme palette`/`theme status`/`feel`, `status`, `doctor`,
 `--dry-run`, install and completions.
 
@@ -36,7 +36,7 @@ constellia/install.sh --remove    # remove only links back into this checkout
 
 ```bash
 constellia <capability> <verb> [args...]
-constellia shell use|switch|start|stop|status
+constellia shell use|select|switch|start|stop|status
 constellia status | doctor | help
 ```
 
@@ -117,6 +117,14 @@ stops the other stack, starts the target, proves it answers, and only then
 writes state. `shell start`/`stop` act on the recorded shell, never switch
 silently, and never write state.
 
+`shell select` is the interactive front end: it opens `rofi-ctl shell` (the two
+Noctalia / Native cards) with the active shell highlighted, waits for rofi to
+exit, maps `Noctalia`→`noctalia` and `Atlanta`→`atlanta` (the older `Native`
+label is still accepted), then runs the same
+`shell switch` path. Cancelling (`Esc`, rofi exit 1) is a success that changes
+nothing; selecting the recorded shell prints `already` and does nothing. Rofi
+handles presentation only — `rofi-ctl` never learns about shells.
+
 `switch` to noctalia runs, in order: `atlanta stop` → wait for
 `org.freedesktop.Notifications` to be free (3 s) → `noctalia -d` → poll
 `noctalia msg status` (10 s) → write state. If the bus is still owned the
@@ -190,5 +198,6 @@ python3 -m unittest discover -s constellia/tests -p 'test_*.py'
 
 Every backend is a fake in a temporary directory, so no compositor, Noctalia,
 atlanta, or D-Bus is required. The suite covers the capability matrix, state
-per WM, switch ordering and failure paths, idempotency, dry-run, JSON output,
-theme derivation and palette routing, and the installer.
+per WM, switch ordering and failure paths, `shell select` (choice, cancel,
+unknown label, active shell), idempotency, dry-run, JSON output, theme
+derivation and palette routing, and the installer.
