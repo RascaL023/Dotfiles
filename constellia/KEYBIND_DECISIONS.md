@@ -1,32 +1,28 @@
 # Constellia keybinding decisions
 
 The first pass of the #13 keybinding migration is in place: hypr and niri now
-call `constellia` for bar, notifications, session, capture, volume and mic. The
-items below were left untouched because they change behaviour, not just the
-entry point. Each one lists the options and a recommendation; none of them is
-implemented yet.
+call `constellia` for bar, notifications, session, capture, volume, mic and
+brightness. The remaining items below were left untouched because they change
+behaviour, not just the entry point. Each one lists the options and a
+recommendation; none of them is implemented yet.
 
 Branch: `feat/constellia-keybinds`.
 
-## 1. Brightness OSD on Noctalia
+## 1. Brightness OSD on Noctalia — resolved
 
-`constellia brightness up|down` changes the backlight on both shells. On
-atlanta it also shows the OSD; on noctalia it runs `noctalia msg
-brightness-up|down`. `constellia osd brightness` stays unsupported because
-`noctalia msg brightness-osd` requires a numeric value, unlike `volume-osd` and
-`mic-volume-osd`.
+Verified live: `noctalia msg brightness-up` draws Noctalia's own OSD (the probe
+captured the icon, bar and `5%`; `[osd] hide_delay_ms = 1500` controls how long
+it stays). `constellia brightness up|down` therefore keeps feedback on both
+shells — atlanta still shows its SwayNC bubble.
 
-- **A. Accept the gap** — migrate the brightness bindings as they are; atlanta
-  keeps its OSD, noctalia shows whatever `brightness-up|down` reports (needs a
-  live check; it may already draw its own OSD).
-- **B. Plumb the value** — add `constellia osd brightness <value>` and have the
-  binding compute the percentage with `brightnessctl g/m`. This changes the osd
-  contract, which is currently report-only with no arguments.
-- **C. Keep the direct binding** — leave `brightnessctl` in the binding until
-  noctalia exposes a value-less brightness OSD.
+The only unsupported surface is the standalone `constellia osd brightness`
+report: `noctalia msg brightness-osd` requires a value, unlike `volume-osd` and
+`mic-volume-osd`, which default to the current value. No binding calls it, and
+computing the percentage with `brightnessctl` would target a different backlight
+device than Noctalia (observed `0` while the OSD showed `5%`), so the capability
+stays atlanta-only.
 
-Recommendation: **A** if the live check shows noctalia already draws its own
-brightness OSD, otherwise **B**.
+Decision: migrate the brightness bindings, add no new capability.
 
 ## 2. Idle vs caffeine
 

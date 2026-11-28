@@ -17,19 +17,11 @@ binds {
     // XF86AudioPrev        allow-when-locked=true { spawn-sh "playerctl previous"; }
     // XF86AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
 
-    // Example brightness key mappings for brightnessctl.
-    // You can use regular spawn with multiple arguments too (to avoid going through "sh"),
-    // but you need to manually put each argument in separate "" quotes.
-    // XF86MonBrightnessUp allow-when-locked=true      { spawn "brightnessctl" "--class=backlight" "set" "+5%"; }
-    // XF86MonBrightnessDown allow-when-locked=true    { spawn "brightnessctl" "--class=backlight" "set" "5%-"; }
-
     XF86MonBrightnessUp allow-when-locked=true {
-        spawn "sh" "-c" "brightnessctl -q set +5%; noctalia msg brightness-osd"
-        // spawn "sh" "-c" "brightnessctl -q set +5%; notify-send -h string:x-canonical-private-synchronous:brightness \"Brightness: $((100 * $(brightnessctl g) / $(brightnessctl m)))%\" -t 800"
+        spawn-sh "$HOME/.local/bin/constellia brightness up";
     }
     XF86MonBrightnessDown allow-when-locked=true {
-        spawn "sh" "-c" "brightnessctl -q set 5%-; noctalia msg brightness-osd"
-        // spawn "sh" "-c" "brightnessctl -q set 5%-; notify-send -h string:x-canonical-private-synchronous:brightness \"Brightness: $((100 * $(brightnessctl g) / $(brightnessctl m)))%\" -t 800"
+        spawn-sh "$HOME/.local/bin/constellia brightness down";
     }
 
     // Screenshot
