@@ -871,6 +871,8 @@ class ConstelliaTests(unittest.TestCase):
         self.assertIn("noctalia", result.stdout)
         self.assertIn(str(self.binaries / "atlanta"), result.stdout)
         self.assertIn(str(self.binaries / "noctalia"), result.stdout)
+        self.assertIn(str(self.binaries / "noctalia-ctl"), result.stdout)
+        self.assertIn(str(self.binaries / "matugen-ctl"), result.stdout)
         self.assertIn(str(self.binaries / "busctl"), result.stdout)
 
     def test_doctor_json_is_valid(self):
@@ -880,6 +882,10 @@ class ConstelliaTests(unittest.TestCase):
         self.assertEqual(payload["wm"], "hypr")
         self.assertEqual(payload["backends"]["atlanta"],
                          str(self.binaries / "atlanta"))
+        self.assertEqual(payload["backends"]["noctalia-ctl"],
+                         str(self.binaries / "noctalia-ctl"))
+        self.assertEqual(payload["backends"]["matugen-ctl"],
+                         str(self.binaries / "matugen-ctl"))
 
     # --- Theme and feel -----------------------------------------------------
 
