@@ -202,6 +202,8 @@ N_ROUTES = (
     (("bar", "hide"), ["msg", "bar-hide"]),
     (("bar", "toggle"), ["msg", "bar-toggle"]),
     (("bar", "status"), ["msg", "status"]),
+    (("osd", "volume"), ["msg", "volume-osd"]),
+    (("osd", "mic"), ["msg", "mic-volume-osd"]),
 )
 
 UNSUPPORTED_ON_NOCTALIA = (
@@ -212,7 +214,7 @@ UNSUPPORTED_ON_NOCTALIA = (
     ("bar", "use", "eww"),
     ("bar", "switch", "waybar"),
     ("bar.panel", "toggle", "profile"),
-    ("osd", "volume"),
+    ("osd", "brightness"),
 )
 
 

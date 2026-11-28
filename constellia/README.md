@@ -57,7 +57,7 @@ constellia status | doctor | help
 | `brightness` | `up`, `down` | `atlanta brightness` | `brightness-*` |
 | `bar` | `show`, `hide`, `toggle`, `status`, `use`, `switch` | `atlanta bar` | `bar-*`, `status`; `use`/`switch` unsupported |
 | `bar.panel` | `toggle <panel>` | `atlanta bar.panel` | unsupported |
-| `osd` | `volume`, `mic`, `brightness` | `atlanta osd` | unsupported |
+| `osd` | `volume`, `mic`, `brightness` | `atlanta osd` | `volume-osd`, `mic-volume-osd`; `brightness` unsupported |
 | `theme` | `palette [source] [options]`, `status [--json]` | `matugen-ctl palette` | `noctalia-ctl palette` |
 | `feel` | `<profile>` | `matugen-ctl feel --wm` | same: feel always belongs to matugen |
 
@@ -191,6 +191,11 @@ Panel ids were verified against Noctalia 5.4.1 on a live niri session:
 `wallpaper`, and `session`. An unknown id makes `noctalia msg panel-toggle`
 fail with the available id list, and constellia forwards that failure instead
 of falling back.
+
+`osd brightness` stays atlanta-only: `noctalia msg brightness-osd` requires an
+explicit value, and constellia does not read the backlight just to report it.
+`osd volume` and `osd mic` map to `volume-osd` / `mic-volume-osd`, which report
+the current value with no argument.
 
 ## Tests
 

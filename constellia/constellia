@@ -34,7 +34,7 @@ Usage: constellia <capability> <verb> [args...]
   brightness up|down
   bar show|hide|toggle|status|use|switch [...]
   bar.panel toggle <panel>         Eww window (atlanta only)
-  osd volume|mic|brightness        Report the value only (atlanta only)
+  osd volume|mic|brightness        Report the value only (brightness: atlanta only)
   theme palette [source] [options] Active engine: matugen-ctl or noctalia-ctl
   theme status [--json]            Engine, palette, variant and feel
   feel <profile>                   matugen feel profile on both shells
