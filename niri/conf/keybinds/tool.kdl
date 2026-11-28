@@ -13,22 +13,22 @@ binds {
 
     // script calls
     Mod+C           { spawn "~/.config/hypr/sources/scripts/wifi-menu.sh"; }
-    Mod+O           { spawn "eww-ctl" "bar" "island" "toggle"; }
-    Mod+Escape      { spawn "~/.config/hypr/sources/scripts/wlogout-toggle.sh"; }
-    Mod+Space       { spawn "rofi-ctl" "toggle" "apps"; }
+    Mod+O           { spawn-sh "$HOME/.local/bin/constellia bar toggle"; }
+    Mod+Escape      { spawn-sh "$HOME/.local/bin/constellia session menu"; }
+    Mod+Space       { spawn-sh "$HOME/.local/bin/constellia launcher toggle"; }
     Mod+I           { spawn "~/.config/hypr/sources/scripts/idle-toggle.sh"; }
     Mod+W           { spawn "~/.config/hypr/sources/scripts/nextwall.sh"; }
     Mod+T           { spawn "~/.myenv/script/theme/theme-picker.sh"; }
 
     // tool calls
-    Mod+X           { spawn "eww-ctl" "toggle" "profile"; }
-    Mod+D           { spawn "eww-ctl" "toggle" "distro"; }
+    Mod+X           { spawn-sh "$HOME/.local/bin/constellia bar.panel toggle profile"; }
+    Mod+D           { spawn-sh "$HOME/.local/bin/constellia bar.panel toggle distro"; }
     Mod+Ctrl+X      { spawn "eww-ctl" "daemon" "restart"; }
     Mod+Ctrl+P      { spawn "sh" "-c" "hyprpicker -a | wl-copy && notify-send \"Color picked!\" \"$(wl-paste)\""; }
     // Mod+Ctrl+L      { spawn "hyprlock"; }
-    Mod+Alt+Print   { spawn "sh" "-c" "grim -o LVDS-1 ~/Pictures/Screenshots/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png && notify-send -t 2000 'Screenshot' 'Successfully take fullscreen screenshot!'" ; }
-    Mod+Print       { spawn "sh" "-c" "grim -g \"$(slurp)\" ~/Pictures/Screenshots/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png && notify-send -t 2000 'Screenshot' 'Successfully take partial screenshot!'" ; }
+    Mod+Alt+Print   { spawn-sh "$HOME/.local/bin/constellia screenshot screen"; }
+    Mod+Print       { spawn-sh "$HOME/.local/bin/constellia screenshot region"; }
     Mod+Shift+P     { spawn "mpc" "toggle"; }
     Mod+Alt+P       { spawn "pkill" "mpd"; }
-    Mod+N           { spawn "swaync-client" "-t"; }
+    Mod+N           { spawn-sh "$HOME/.local/bin/constellia notifications toggle"; }
 }

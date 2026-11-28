@@ -10,13 +10,13 @@ local home = kb.home
 local launcher = require("config.capability.launcher")
 
 -- ---------------------------------------------------------------------- bar --
-hl.bind(mod .. " + O",        script("waybar-toggle.sh"))
-hl.bind(mod .. " + X",        exec("eww-ctl toggle profile"))
-hl.bind(mod .. " + D",        exec("eww-ctl toggle distro"))
+hl.bind(mod .. " + O",        kb.constellia("bar", "toggle"))
+hl.bind(mod .. " + X",        kb.constellia("bar.panel", "toggle", "profile"))
+hl.bind(mod .. " + D",        kb.constellia("bar.panel", "toggle", "distro"))
 hl.bind(mod .. " + CTRL + X", exec("eww-ctl daemon restart"))
 
 -- ------------------------------------------------------------ notifications --
-hl.bind(mod .. " + N", exec("swaync-client -t"))
+hl.bind(mod .. " + N", kb.constellia("notifications", "toggle"))
 
 -- ---------------------------------------------------- wallpaper and theme ---
 -- `launcher.pick_wallpaper` arms a layer-animation override before launching.
