@@ -25,6 +25,9 @@ if (( $# )); then
 fi
 
 json=${CONSTELLIA_JSON:-0}
+# Every binary constellia may exec, in the order doctor prints them.
+doctor_backends=(atlanta rofi-ctl swaync-client noctalia noctalia-ctl
+                 matugen-ctl busctl pgrep pkill)
 
 # What is actually alive. Only the current WM can be attributed: noonctalia and
 # the atlanta stack are session-wide processes.
@@ -108,7 +111,7 @@ doctor_text() {
     printf '%-15s %s\n' wm "${CONSTELLIA_WM:-unknown}"
     printf '%-15s %s\n' shell "$(shell_get)"
     printf '%-15s %s\n' state "$constellia_shell_dir/${CONSTELLIA_WM:-unknown}"
-    for name in atlanta rofi-ctl swaync-client noctalia busctl pgrep pkill; do
+    for name in "${doctor_backends[@]}"; do
         if path=$(backend_path "$name"); then
             printf '%-15s %s\n' "$name" "$path"
         else
@@ -123,7 +126,7 @@ doctor_json() {
         "$(json_quote "${CONSTELLIA_WM:-unknown}")" \
         "$(json_quote "$(shell_get)")" \
         "$(json_quote "$constellia_shell_dir/${CONSTELLIA_WM:-unknown}")"
-    for name in atlanta rofi-ctl swaync-client noctalia busctl pgrep pkill; do
+    for name in "${doctor_backends[@]}"; do
         printf '%s%s:' "$separator" "$(json_quote "$name")"
         separator=,
         if path=$(backend_path "$name"); then
