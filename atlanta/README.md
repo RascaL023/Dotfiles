@@ -76,7 +76,9 @@ daemon status`; a timeout or an unreadable answer is `unknown`, so the stop is
 still attempted, and `depth-clock` is closed explicitly afterwards in case a
 window outlived a failed stop.
 
-For a Hyprland autostart, the equivalent replacement is:
+Hyprland and niri start the stack through `constellia shell start`, which calls
+`atlanta start` when the recorded shell for that WM is atlanta. Without
+constellia, the direct equivalent is:
 
 ```lua
 hl.on("hyprland.start", function()
@@ -84,10 +86,9 @@ hl.on("hyprland.start", function()
 end)
 ```
 
-This is documentation only; `hypr/` is not modified by atlanta. `atlanta stop`
-is the atlanta side of a future Noctalia/atlanta shell switch. Noctalia itself
-is not started or stopped yet; `noctalia -d` starts its daemon, but the handoff
-needs a verified stop path.
+That form is documentation only; `hypr/` and `niri/` call constellia, not
+atlanta directly. `atlanta stop` is the atlanta side of the Noctalia/atlanta
+shell switch; `constellia shell stop` is the user-facing entry point.
 
 ## Providers
 

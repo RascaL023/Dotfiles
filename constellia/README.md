@@ -18,8 +18,10 @@ Implemented: per-WM shell state, `shell use|select|switch|start|stop|status`, th
 capability matrix, `theme palette`/`theme status`/`feel`, `status`, `doctor`,
 `--dry-run`, install and completions.
 
-Not implemented yet (gated in the design): the autostart/keybind migration in
-`hypr/` and `niri/` (phase 6). `current-status.json` is no longer written;
+Autostart in both WMs now goes through `constellia shell start`
+(`hypr/config/core/autostart.lua`, `niri/conf/core/autostart.kdl`). Still
+pending (phase 6): the keybind migration in `hypr/` and `niri/`.
+`current-status.json` is no longer written;
 `constellia theme status [--json]` reports on demand instead.
 
 ## Install

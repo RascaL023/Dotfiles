@@ -1,1 +1,3 @@
-spawn-sh-at-startup "noctalia"
+// One question: which shell is recorded for this WM? constellia starts the
+// atlanta stack (awww, eww, swaync, bar) or noctalia, never both.
+spawn-sh-at-startup "$HOME/.local/bin/constellia shell start"

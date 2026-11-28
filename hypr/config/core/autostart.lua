@@ -1,7 +1,8 @@
 ------------------------------------------ AUTOSTART ----
+-- One question: which shell is recorded for this WM? constellia starts the
+-- atlanta stack (awww, eww, swaync, bar) or noctalia, never both.
+local home = os.getenv("HOME") or ""
+
 hl.on("hyprland.start", function()
-    hl.exec_cmd("awww-daemon")
-    hl.exec_cmd("eww-ctl daemon start")
-    hl.exec_cmd("swaync")
-    hl.exec_cmd("$HOME/.config/waybar/waybar-ctl start")
+    hl.exec_cmd(home .. "/.local/bin/constellia shell start")
 end)
