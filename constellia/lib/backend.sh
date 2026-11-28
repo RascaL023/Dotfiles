@@ -138,7 +138,7 @@ bus_owner_pid() {
     return 1
 }
 
-# 100 ms poll. 0 free, 1 still owned.
+# 100 ms poll. 0 free, 1 still owned after the timeout, 2 cannot be queried.
 wait_bus_free() {
     local attempt limit=$(( constellia_bus_ms / 100 ))
     (( limit > 0 )) || limit=1
@@ -150,8 +150,8 @@ wait_bus_free() {
         bus_has_owner
         case $? in
             0) sleep 0.1 ;;
-            # Free, or the bus cannot be queried: starting a daemon is safe.
-            1|2) return 0 ;;
+            1) return 0 ;;
+            2) return 2 ;;
         esac
     done
     return 1

@@ -130,9 +130,17 @@ handles presentation only — `rofi-ctl` never learns about shells.
 `switch` to noctalia runs, in order: `atlanta stop` → wait for
 `org.freedesktop.Notifications` to be free (3 s) → `noctalia -d` → poll
 `noctalia msg status` (10 s) → write state. If the bus is still owned the
-switch exits `4` with the owner PID. If noctalia is already running (hybrid
-session), the leftover atlanta stack is stopped and the daemon is adopted
-instead of refusing the switch.
+switch exits `4` with the owner PID; if it cannot be queried at all it also
+exits `4`. Both cases restore atlanta first, so a failed switch never leaves
+the session without a shell. A noctalia start or readiness failure restores
+atlanta the same way, and a failed atlanta start restores noctalia. If noctalia
+is already running (hybrid session), the leftover atlanta stack is stopped and
+the daemon is adopted instead of refusing the switch.
+
+`shell start` refuses with exit `4` when the other shell is already alive
+(noctalia while the WM records atlanta, or an atlanta stack while it records
+noctalia), because starting both would race for the notification bus. It
+suggests `constellia shell switch <running shell>` instead.
 
 `switch` to atlanta sends `SIGTERM` to `(^|/)noctalia$`, polls 5 s, then
 `SIGKILL`, then starts atlanta. The match is argv0-based because the Nix
