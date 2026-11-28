@@ -1,19 +1,12 @@
 binds {
-    XF86AudioRaiseVolume allow-when-locked=true { 
-        spawn "sh" "-c" \
-            "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05+ -l 1.0 && 
-            noctalia msg volume-osd"; 
-            // notify-send -h string:x-canonical-private-synchronous:volume \"Volume: $(pamixer --get-volume)%\" -t 800"; 
+    XF86AudioRaiseVolume allow-when-locked=true {
+        spawn-sh "$HOME/.local/bin/constellia volume up";
     }
-    XF86AudioLowerVolume allow-when-locked=true {  
-        spawn "sh" "-c" \
-            "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05- -l 1.0 && 
-            noctalia msg volume-osd"; 
-            // notify-send -h string:x-canonical-private-synchronous:volume \"Volume: $(pamixer --get-volume)%\" -t 800"; 
+    XF86AudioLowerVolume allow-when-locked=true {
+        spawn-sh "$HOME/.local/bin/constellia volume down";
     }
-    XF86AudioMute allow-when-locked=true { 
-        spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && noctalia msg volume-osd";
-        // spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && notify-send \"Volume toggled\" -t 1000";
+    XF86AudioMute allow-when-locked=true {
+        spawn-sh "$HOME/.local/bin/constellia volume mute";
     }
 
 
@@ -24,24 +17,16 @@ binds {
     // XF86AudioPrev        allow-when-locked=true { spawn-sh "playerctl previous"; }
     // XF86AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
 
-    // Example brightness key mappings for brightnessctl.
-    // You can use regular spawn with multiple arguments too (to avoid going through "sh"),
-    // but you need to manually put each argument in separate "" quotes.
-    // XF86MonBrightnessUp allow-when-locked=true      { spawn "brightnessctl" "--class=backlight" "set" "+5%"; }
-    // XF86MonBrightnessDown allow-when-locked=true    { spawn "brightnessctl" "--class=backlight" "set" "5%-"; }
-
     XF86MonBrightnessUp allow-when-locked=true {
-        spawn "sh" "-c" "brightnessctl -q set +5%; noctalia msg brightness-osd"
-        // spawn "sh" "-c" "brightnessctl -q set +5%; notify-send -h string:x-canonical-private-synchronous:brightness \"Brightness: $((100 * $(brightnessctl g) / $(brightnessctl m)))%\" -t 800"
+        spawn-sh "$HOME/.local/bin/constellia brightness up";
     }
     XF86MonBrightnessDown allow-when-locked=true {
-        spawn "sh" "-c" "brightnessctl -q set 5%-; noctalia msg brightness-osd"
-        // spawn "sh" "-c" "brightnessctl -q set 5%-; notify-send -h string:x-canonical-private-synchronous:brightness \"Brightness: $((100 * $(brightnessctl g) / $(brightnessctl m)))%\" -t 800"
+        spawn-sh "$HOME/.local/bin/constellia brightness down";
     }
 
     // Screenshot
-    Mod+S { screenshot; }
-    Mod+Ctrl+S { screenshot-window; }
-    Mod+Shift+S { screenshot-screen; }
+    Mod+S { spawn-sh "$HOME/.local/bin/constellia screenshot region"; }
+    Mod+Ctrl+S { spawn-sh "$HOME/.local/bin/constellia screenshot window"; }
+    Mod+Shift+S { spawn-sh "$HOME/.local/bin/constellia screenshot screen"; }
 
 }

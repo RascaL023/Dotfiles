@@ -17,6 +17,12 @@ function helpers.script(name)
     return hl.dsp.exec_cmd(home .. "/.config/hypr/sources/scripts/" .. name)
 end
 
+-- Shell surfaces (bar, notifications, session, capture) go through constellia so
+-- a binding never names the provider that currently owns them.
+function helpers.constellia(...)
+    return hl.dsp.exec_cmd(home .. "/.local/bin/constellia " .. table.concat({ ... }, " "))
+end
+
 local function tiled_layout()
     local ws = hl.get_active_workspace()
     return ws and ws.tiled_layout or "dwindle"
