@@ -15,6 +15,13 @@ launcher, bar, notifications, screenshots, session, idle, nightlight, and
 wallpaper to the native tool that already owns them. It is a router, not a
 shell — no daemon, no config, no duplicated state.
 
+Which desktop shell owns a session is decided by
+[`constellia/`](constellia): atlanta and Noctalia both provide a bar, a
+notification daemon, an OSD and a lock screen, so one of them is recorded per
+compositor (`hypr`, `niri`) and every capability is routed to that one. The
+switch is explicit, and it hands the notification bus over before writing
+state.
+
 > **No compositor lock-in.** The repo ships a `hypr/` config because that is what
 > is being used right now, but nothing in it, in the sync script, or in the
 > theming pipeline depends on Hyprland. Any Wayland/X11 setup works.
@@ -45,6 +52,7 @@ shell — no daemon, no config, no duplicated state.
 │   ├── noctalia-ctl        #   entry point (`palette …`) + store flip
 │   └── docs/               #   template skill + verified engine limits
 ├── atlanta/                # desktop CLI: launcher, bar, session, wallpaper
+├── constellia/             # shell router: atlanta ↔ noctalia, one per WM
 ├── nvim/ kitty/ foot/ alacritty/ …   # one directory per tool
 └── AGENTS.md               # rules for AI agents working in this repo
 ```
@@ -92,6 +100,43 @@ lives in the ignored `yazi/theme.toml.bak`. The generated files are the color
 flavor and the preview tmTheme, both reachable inside the same flavor directory:
 `~/.config/yazi/flavors/matugen.yazi/flavor.toml` and
 `.../tmtheme.xml` → `~/.myenv/theme/palette/current/yazi/`.
+
+---
+
+## Shell selection (constellia)
+
+[`constellia/`](constellia) answers one question per compositor — atlanta or
+Noctalia — then routes launcher, notifications, bar, screenshot, session, idle,
+nightlight, wallpaper, volume, mic, brightness, OSD, theme and feel to that
+shell. It is a router too: no daemon, and no state beyond which shell is
+recorded for each WM.
+
+```bash
+constellia shell status              # recorded shell for hypr and niri
+constellia shell select              # rofi card, then switch to the choice
+constellia shell switch noctalia     # stop atlanta, start noctalia, record it
+constellia shell start|stop          # act on the recorded shell
+constellia notifications toggle      # routed to the recorded shell
+constellia doctor                    # backend paths and the session
+```
+
+State lives in `~/.local/state/constellia/shell/<wm>`: one line, `atlanta` or
+`noctalia`, and a missing file means atlanta. `switch` checks and hands over
+`org.freedesktop.Notifications` before writing state, and a failed switch
+restores the shell it started from. `shell start` refuses to start a second
+stack while the other shell is alive.
+
+Autostart in both compositors calls `constellia shell start`
+(`hypr/config/core/autostart.lua`, `niri/conf/core/autostart.kdl`), so a new
+session starts exactly one shell. Install the CLI and its fish completion with:
+
+```bash
+constellia/install.sh
+```
+
+`constellia --help` lists every capability; `constellia/README.md` has the full
+matrix and the per-shell exceptions (for example `osd brightness` is
+atlanta-only).
 
 ---
 

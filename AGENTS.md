@@ -313,6 +313,7 @@ Rules:
 | `matugen/docs/WM_FEEL_MATRIX.md` | per-feature feel matrix: Hyprland-only, niri-only, differing semantics, app-level fallbacks, niri include gotchas |
 | `noctalia/README.md` | `noctalia-ctl palette` usage, palette sources, store layout |
 | `noctalia/docs/NOCTALIA_SKILLS.md` | Noctalia agent skill: palette sources, token/formats/filters, render config, verified engine limits, testing recipe, repo wiring |
+| `constellia/README.md` | shell selection per WM: verbs, capability matrix, switch/rollback contract, `doctor` |
 | `matugen/docs/NVIM_MAPPING.md` | which palette key colors which Neovim highlight group |
 | `matugen/core/palette/kanagawa-dragon-lotus/blueprint/README.md` | every key of the Flow B blueprint JSON |
 | `hypr/docs/ROADMAP_V57.md` | Hyprland 0.57 migration (breaking changes), unimplemented features: recipes, verification steps, backlog |
@@ -330,8 +331,11 @@ verified against the repo, so a stale line is a bug.
 
 1. `git clone <repo-url> ~/.dotfile`
 2. `bash ~/.dotfile/.synchronizer/.sync.sh link`
-3. Ensure `matugen` (4.x) is on `PATH`.
-4. Render both axes so `~/.myenv/theme/palette/current` and
+3. `bash ~/.dotfile/constellia/install.sh` — symlinks `constellia` into
+   `~/.local/bin` and installs the fish completion. Autostart in `hypr/` and
+   `niri/` calls that path, so without this step a new session starts no shell.
+4. Ensure `matugen` (4.x) is on `PATH`.
+5. Render both axes so `~/.myenv/theme/palette/current` and
    `~/.myenv/theme/feel/current` exist:
    `matugen-ctl palette <source>` and `matugen-ctl feel default`.
 
