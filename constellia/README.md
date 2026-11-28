@@ -43,10 +43,10 @@ constellia status | doctor | help
 | Capability | Verbs | atlanta | noctalia |
 |---|---|---|---|
 | `launcher` | `apps`, `run`, `window`, `toggle` | `rofi-ctl` | `panel-toggle launcher`, `window-switcher` |
-| `notifications` | `toggle`, `dnd [on\|off]`, `clear` | `swaync-client` | `panel-toggle notifications`, `notification-dnd-*`, `notification-clear-active` |
+| `notifications` | `toggle`, `dnd [on\|off]`, `clear` | `swaync-client` | `panel-toggle control-center notifications`, `notification-dnd-*`, `notification-clear-active` |
 | `screenshot` | `region`, `screen`, `window`, `annotate` | `atlanta screenshot` | `screenshot-*` |
-| `wallpaper` | `set`, `next`, `prev`, `random`, `pick`, `status` | `atlanta wallpaper` | `wallpaper-*` |
-| `session` | `lock`, `menu`, `logout`, `reboot`, `poweroff`, `dpms off\|on` | `atlanta session` | `session *`, `dpms-*`; `menu` unsupported |
+| `wallpaper` | `set`, `next`, `prev`, `random`, `pick`, `status` | `atlanta wallpaper` | `wallpaper-*`; `pick` opens `panel-toggle wallpaper` |
+| `session` | `lock`, `menu`, `logout`, `reboot`, `poweroff`, `dpms off\|on` | `atlanta session` | `session *`, `dpms-*`, `panel-toggle session` |
 | `idle` | `toggle`, `status` | `atlanta idle` | unsupported |
 | `caffeine` | `toggle`, `status` | unsupported | `caffeine-toggle`; `status` unsupported |
 | `nightlight` | `toggle`, `status` | `atlanta nightlight` | `nightlight-force-toggle`; `status` unsupported |
@@ -124,9 +124,12 @@ switch exits `4` with the owner PID. If noctalia is already running (hybrid
 session), the leftover atlanta stack is stopped and the daemon is adopted
 instead of refusing the switch.
 
-`switch` to atlanta sends `SIGTERM` to `^noctalia$` (argv0 anchored, because
-the Nix wrapper's `comm` is `.noctalia-wrapp`), polls 5 s, then `SIGKILL`,
-then starts atlanta.
+`switch` to atlanta sends `SIGTERM` to `(^|/)noctalia$`, polls 5 s, then
+`SIGKILL`, then starts atlanta. The match is argv0-based because the Nix
+wrapper's `comm` is `.noctalia-wrapp`, and it accepts both `noctalia` (session
+start) and an absolute path (`noctalia -d` daemonizes that way). Liveness and
+drift use the same pattern; the atlanta stack is matched by argv0 too, since
+its `comm` is `.eww-wrapped`.
 
 Timing knobs, mainly for tests: `CONSTELLIA_BUS_TIMEOUT_MS` (3000),
 `CONSTELLIA_NOCTALIA_TIMEOUT_MS` (10000), `CONSTELLIA_STOP_TIMEOUT_MS` (5000).
@@ -173,9 +176,11 @@ is never taken from the checkout.
 
 ## Known caveats
 
-Panel ids still need one live check (design §19): `notifications` and the
-`launcher` context for `run` (`panel-toggle launcher /`). `session menu` on
-noctalia stays unsupported until a panel id exists.
+Panel ids were verified against Noctalia 5.4.1 on a live niri session:
+`control-center notifications`, `launcher` (context `/` starts run mode),
+`wallpaper`, and `session`. An unknown id makes `noctalia msg panel-toggle`
+fail with the available id list, and constellia forwards that failure instead
+of falling back.
 
 ## Tests
 

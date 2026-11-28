@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Lock belongs to the active shell: hyprlock on atlanta, the Noctalia lockscreen
-# on noctalia. Noctalia has no verified session-menu panel, so menu is atlanta.
+# on noctalia. The session menu is the "session" panel, verified on 5.4.1.
 set -u
 
 dir=${CONSTELLIA_DIR:-$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/.." && pwd -P)} || exit 1
@@ -26,11 +26,6 @@ fail() {
     exit 2
 }
 
-unsupported() {
-    printf 'constellia: %s is not supported on the %s shell\n' "$capability $verb" "$shell" >&2
-    exit 3
-}
-
 case $verb in
     lock|menu|logout|reboot|poweroff) ;;
     dpms)
@@ -52,7 +47,7 @@ if [[ $shell == atlanta ]]; then
 fi
 
 case $verb in
-    menu) unsupported ;;
+    menu) run_backend noctalia msg panel-toggle session ;;
     lock) run_backend noctalia msg session lock ;;
     logout) run_backend noctalia msg session logout ;;
     reboot) run_backend noctalia msg session reboot ;;

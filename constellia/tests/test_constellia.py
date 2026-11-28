@@ -59,7 +59,13 @@ record = os.environ.get("MOCK_RECORD")
 if record:
     with open(record, "a", encoding="utf-8") as handle:
         handle.write(json.dumps({"name": name, "argv": sys.argv[1:]}) + "\n")
-slug = sys.argv[-1].strip("^$").replace("-", "_").upper()
+pattern = sys.argv[-1]
+for known in ("noctalia", "awww-daemon", "waybar", "eww"):
+    if known in pattern:
+        slug = known.upper().replace("-", "_")
+        break
+else:
+    slug = "".join(c if c.isalnum() else "_" for c in pattern).strip("_").upper()
 pidfile = pathlib.Path(os.environ["MOCK_PROC_DIR"]) / slug
 if pidfile.exists():
     print(pidfile.read_text().strip() or "4242")
@@ -81,7 +87,13 @@ if signal == "TERM" and os.environ.get("MOCK_PKILL_IGNORE_TERM") == "1":
     sys.exit(0)
 if signal == "KILL" and os.environ.get("MOCK_PKILL_IGNORE_KILL") == "1":
     sys.exit(0)
-slug = args[-1].strip("^$").replace("-", "_").upper()
+pattern = args[-1]
+for known in ("noctalia", "awww-daemon", "waybar", "eww"):
+    if known in pattern:
+        slug = known.upper().replace("-", "_")
+        break
+else:
+    slug = "".join(c if c.isalnum() else "_" for c in pattern).strip("_").upper()
 pidfile = pathlib.Path(os.environ["MOCK_PROC_DIR"]) / slug
 if pidfile.exists():
     pidfile.unlink()
@@ -155,7 +167,8 @@ N_ROUTES = (
     (("launcher", "run"), ["msg", "panel-toggle", "launcher", "/"]),
     (("launcher", "toggle"), ["msg", "panel-toggle", "launcher"]),
     (("launcher", "window"), ["msg", "window-switcher"]),
-    (("notifications", "toggle"), ["msg", "panel-toggle", "notifications"]),
+    (("notifications", "toggle"),
+     ["msg", "panel-toggle", "control-center", "notifications"]),
     (("notifications", "dnd"), ["msg", "notification-dnd-toggle"]),
     (("notifications", "dnd", "on"), ["msg", "notification-dnd-set", "true"]),
     (("notifications", "dnd", "off"), ["msg", "notification-dnd-set", "false"]),
@@ -168,8 +181,9 @@ N_ROUTES = (
     (("wallpaper", "next"), ["msg", "wallpaper-next"]),
     (("wallpaper", "prev"), ["msg", "wallpaper-previous"]),
     (("wallpaper", "random"), ["msg", "wallpaper-random"]),
-    (("wallpaper", "pick"), ["msg", "panel-toggle", "launcher"]),
+    (("wallpaper", "pick"), ["msg", "panel-toggle", "wallpaper"]),
     (("wallpaper", "status"), ["msg", "wallpaper-get"]),
+    (("session", "menu"), ["msg", "panel-toggle", "session"]),
     (("session", "lock"), ["msg", "session", "lock"]),
     (("session", "logout"), ["msg", "session", "logout"]),
     (("session", "reboot"), ["msg", "session", "reboot"]),
@@ -191,7 +205,6 @@ N_ROUTES = (
 )
 
 UNSUPPORTED_ON_NOCTALIA = (
-    ("session", "menu"),
     ("idle", "toggle"),
     ("idle", "status"),
     ("caffeine", "status"),
@@ -581,7 +594,7 @@ class ConstelliaTests(unittest.TestCase):
         sequence = [row["name"] for row in self.calls() if row["name"] != "pgrep"]
         self.assertEqual(sequence, ["pkill", "atlanta"])
         self.assertEqual(self.calls("pkill")[0]["argv"],
-                         ["-TERM", "-f", "^noctalia$"])
+                         ["-TERM", "-f", "(^|/)noctalia$"])
         self.assertEqual(self.calls("atlanta")[0]["argv"], ["start"])
 
     def test_switch_to_atlanta_escalates_to_kill(self):
@@ -592,8 +605,8 @@ class ConstelliaTests(unittest.TestCase):
                            MOCK_PKILL_IGNORE_TERM="1")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual([row["argv"] for row in self.calls("pkill")],
-                         [["-TERM", "-f", "^noctalia$"],
-                          ["-KILL", "-f", "^noctalia$"]])
+                         [["-TERM", "-f", "(^|/)noctalia$"],
+                          ["-KILL", "-f", "(^|/)noctalia$"]])
         self.assertEqual(self.shell_state().read_text().strip(), "atlanta")
 
     def test_switch_to_atlanta_gives_up_and_keeps_state(self):
@@ -666,7 +679,7 @@ class ConstelliaTests(unittest.TestCase):
         result = self.call("shell", "stop")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual([row["argv"] for row in self.calls("pkill")],
-                         [["-TERM", "-f", "^noctalia$"]])
+                         [["-TERM", "-f", "(^|/)noctalia$"]])
         self.assertEqual(self.shell_state().read_text().strip(), "noctalia")
 
     def test_shell_stop_stops_the_atlanta_stack(self):
@@ -691,8 +704,9 @@ class ConstelliaTests(unittest.TestCase):
         self.reset()
         result = self.call("--dry-run", "notifications", "toggle")
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("[dry] noctalia msg panel-toggle notifications",
-                      result.stdout)
+        self.assertIn(
+            "[dry] noctalia msg panel-toggle control-center notifications",
+            result.stdout)
         self.assertEqual(self.calls(), [])
 
     def test_dry_run_environment_variable(self):

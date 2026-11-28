@@ -54,7 +54,7 @@ plan_switch() {
             dry_print wait noctalia ready "${constellia_ready_ms}ms"
             ;;
         atlanta)
-            dry_print pkill -TERM -f '^noctalia$'
+            dry_print pkill -TERM -f "$noctalia_pattern"
             dry_print atlanta start
             ;;
     esac

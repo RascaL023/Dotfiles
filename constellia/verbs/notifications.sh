@@ -51,7 +51,7 @@ if [[ $shell == atlanta ]]; then
 fi
 
 case $verb in
-    toggle) run_backend noctalia msg panel-toggle notifications ;;
+    toggle) run_backend noctalia msg panel-toggle control-center notifications ;;
     clear) run_backend noctalia msg notification-clear-active ;;
     dnd)
         case ${1:-} in

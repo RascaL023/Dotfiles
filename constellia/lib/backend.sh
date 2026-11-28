@@ -89,10 +89,15 @@ note() {
 
 # --- Noctalia process (argv0-anchored; see DESIGN 17.1) ---------------------
 
+# argv0 is either `noctalia` (started by the session) or an absolute path
+# (started by `noctalia -d`), so anchor on both. `noctalia msg …` still
+# cannot match because those cmdlines continue past the name.
+noctalia_pattern='(^|/)noctalia$'
+
 noctalia_pid() {
     local pgrep_path
     pgrep_path=$(backend_path pgrep) || return 1
-    "$pgrep_path" -o -f '^noctalia$' 2>/dev/null
+    "$pgrep_path" -o -f "$noctalia_pattern" 2>/dev/null
 }
 
 noctalia_running() {
@@ -100,11 +105,13 @@ noctalia_running() {
 }
 
 # atlanta's stack: the bar daemon (waybar or eww) or the wallpaper daemon.
+# Nix wrappers rename the comm (.eww-wrapped), so match argv0 instead; the
+# trailing separator keeps `eww-ctl` and friends out.
 atlanta_running() {
     local pgrep_path name
     pgrep_path=$(backend_path pgrep) || return 1
     for name in waybar eww awww-daemon; do
-        "$pgrep_path" -x "$name" >/dev/null 2>&1 && return 0
+        "$pgrep_path" -f '(^|/)'"$name"'( |$)' >/dev/null 2>&1 && return 0
     done
     return 1
 }
@@ -195,7 +202,7 @@ start_noctalia() {
 stop_noctalia() {
     local pkill_path attempt limit
     if (( ${CONSTELLIA_DRY_RUN:-0} )); then
-        dry_print pkill -TERM -f '^noctalia$'
+        dry_print pkill -TERM -f "$noctalia_pattern"
         return 0
     fi
     if ! noctalia_running; then
@@ -205,7 +212,7 @@ stop_noctalia() {
     pkill_path=$(require_backend pkill) || exit $?
     limit=$(( constellia_stop_ms / 100 ))
     (( limit > 0 )) || limit=1
-    "$pkill_path" -TERM -f '^noctalia$' 2>/dev/null || :
+    "$pkill_path" -TERM -f "$noctalia_pattern" 2>/dev/null || :
     for (( attempt=0; attempt<limit; attempt++ )); do
         noctalia_running || {
             note stopped noctalia
@@ -214,7 +221,7 @@ stop_noctalia() {
         sleep 0.1
     done
     note 'still alive after TERM, sending KILL to' noctalia
-    "$pkill_path" -KILL -f '^noctalia$' 2>/dev/null || :
+    "$pkill_path" -KILL -f "$noctalia_pattern" 2>/dev/null || :
     for (( attempt=0; attempt<10; attempt++ )); do
         noctalia_running || {
             note stopped noctalia

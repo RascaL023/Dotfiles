@@ -42,6 +42,6 @@ case $verb in
     next) run_backend noctalia msg wallpaper-next ;;
     prev) run_backend noctalia msg wallpaper-previous ;;
     random) run_backend noctalia msg wallpaper-random ;;
-    pick) run_backend noctalia msg panel-toggle launcher ;;
+    pick) run_backend noctalia msg panel-toggle wallpaper ;;
     status) run_backend noctalia msg wallpaper-get ;;
 esac
