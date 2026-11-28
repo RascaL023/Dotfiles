@@ -109,6 +109,8 @@ record = os.environ.get("MOCK_RECORD")
 if record:
     with open(record, "a", encoding="utf-8") as handle:
         handle.write(json.dumps({"name": name, "argv": args}) + "\n")
+if os.environ.get("MOCK_BUSCTL_FAIL") == "1":
+    sys.exit(2)
 if "NameHasOwner" in args:
     print("b true" if os.environ.get("MOCK_BUS_OWNED") == "1" else "b false")
     sys.exit(0)
@@ -550,6 +552,20 @@ class ConstelliaTests(unittest.TestCase):
         self.assertEqual(result.returncode, 4)
         self.assertIn("4242", result.stderr)
         self.assertEqual(self.calls("noctalia"), [])
+        self.assertEqual([row["argv"] for row in self.calls("atlanta")],
+                         [["stop"], ["start"]])
+        self.assertEqual(self.shell_state().read_text().strip(), "atlanta")
+
+    def test_switch_to_noctalia_rolls_back_when_the_bus_cannot_be_queried(self):
+        self.set_shell("atlanta")
+        self.reset()
+        result = self.call("shell", "switch", "noctalia",
+                           MOCK_BUSCTL_FAIL="1")
+        self.assertEqual(result.returncode, 4)
+        self.assertIn("cannot query", result.stderr)
+        self.assertEqual(self.calls("noctalia"), [])
+        self.assertEqual([row["argv"] for row in self.calls("atlanta")],
+                         [["stop"], ["start"]])
         self.assertEqual(self.shell_state().read_text().strip(), "atlanta")
 
     def test_switch_to_noctalia_keeps_state_when_the_daemon_fails(self):
@@ -557,6 +573,8 @@ class ConstelliaTests(unittest.TestCase):
         result = self.call("shell", "switch", "noctalia",
                            MOCK_NOCTALIA_D_EXIT="1")
         self.assertEqual(result.returncode, 1)
+        self.assertEqual([row["argv"] for row in self.calls("atlanta")],
+                         [["stop"], ["start"]])
         self.assertEqual(self.shell_state().read_text().strip(), "atlanta")
 
     def test_switch_to_noctalia_keeps_state_when_it_never_answers(self):
@@ -564,6 +582,8 @@ class ConstelliaTests(unittest.TestCase):
         result = self.call("shell", "switch", "noctalia",
                            MOCK_NOCTALIA_MSG_EXIT="1")
         self.assertEqual(result.returncode, 1)
+        self.assertEqual([row["argv"] for row in self.calls("atlanta")],
+                         [["stop"], ["start"]])
         self.assertEqual(self.shell_state().read_text().strip(), "atlanta")
 
     def test_switch_to_noctalia_adopts_a_running_daemon(self):
@@ -623,12 +643,17 @@ class ConstelliaTests(unittest.TestCase):
         self.assertEqual(self.calls("atlanta"), [])
         self.assertEqual(self.shell_state().read_text().strip(), "noctalia")
 
-    def test_switch_to_atlanta_keeps_state_when_start_fails(self):
+    def test_switch_to_atlanta_rolls_back_when_start_fails(self):
         self.set_shell("noctalia")
         self.dead("noctalia")
+        self.reset()
         result = self.call("shell", "switch", "atlanta",
                            MOCK_ATLANTA_START_EXIT="1")
         self.assertEqual(result.returncode, 1)
+        self.assertEqual([row["argv"] for row in self.calls("atlanta")],
+                         [["start"], ["stop"]])
+        self.assertEqual([row["argv"] for row in self.calls("noctalia")],
+                         [["-d"], ["msg", "status"]])
         self.assertEqual(self.shell_state().read_text().strip(), "noctalia")
 
     def test_switch_does_not_touch_the_other_wm(self):
@@ -753,6 +778,26 @@ class ConstelliaTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("already running noctalia", result.stdout)
         self.assertEqual(self.calls("noctalia"), [])
+
+    def test_shell_start_refuses_atlanta_when_noctalia_is_alive(self):
+        self.set_shell("atlanta")
+        self.live("noctalia")
+        self.reset()
+        result = self.call("shell", "start")
+        self.assertEqual(result.returncode, 4)
+        self.assertIn("refusing to start a second stack", result.stderr)
+        self.assertEqual(self.calls("atlanta"), [])
+        self.assertEqual(self.shell_state().read_text().strip(), "atlanta")
+
+    def test_shell_start_refuses_noctalia_when_the_atlanta_stack_is_alive(self):
+        self.set_shell("noctalia")
+        self.live("eww")
+        self.reset()
+        result = self.call("shell", "start")
+        self.assertEqual(result.returncode, 4)
+        self.assertIn("refusing to start a second stack", result.stderr)
+        self.assertEqual(self.calls("noctalia"), [])
+        self.assertEqual(self.shell_state().read_text().strip(), "noctalia")
 
     def test_shell_start_does_not_write_a_missing_state_file(self):
         self.reset()

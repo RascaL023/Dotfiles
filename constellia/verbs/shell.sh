@@ -72,8 +72,34 @@ stop_atlanta() {
     fi
 }
 
+restore_atlanta() {
+    if invoke atlanta start; then
+        printf 'constellia: atlanta restored; state unchanged\n' >&2
+    else
+        printf 'constellia: atlanta could not be restored; run constellia shell start\n' >&2
+    fi
+}
+
+# A half-started atlanta stack can hold the notification bus, so stop it before
+# giving the bus back to noctalia.
+restore_noctalia() {
+    invoke atlanta stop >/dev/null 2>&1 || :
+    if start_noctalia && wait_noctalia_ready; then
+        printf 'constellia: noctalia restored; state unchanged\n' >&2
+    else
+        printf 'constellia: noctalia could not be restored; run constellia shell start\n' >&2
+    fi
+}
+
+refuse_second_stack() {
+    local running=$1 recorded=$2
+    printf 'constellia: %s is running while this WM records %s; refusing to start a second stack\n' "$running" "$recorded" >&2
+    printf 'hint: constellia shell switch %s\n' "$running" >&2
+    exit 4
+}
+
 switch_to_noctalia() {
-    local owner
+    local owner bus_state
     stop_atlanta
     if noctalia_running; then
         # Hybrid session: adopt the daemon that already holds the bus instead
@@ -84,14 +110,27 @@ switch_to_noctalia() {
         fi
         return 0
     fi
-    if ! wait_bus_free; then
-        owner=$(bus_owner_pid) || owner=unknown
-        printf 'constellia: org.freedesktop.Notifications is still owned (pid %s); nothing was started\n' "$owner" >&2
+    wait_bus_free
+    bus_state=$?
+    if (( bus_state != 0 )); then
+        if (( bus_state == 1 )); then
+            owner=$(bus_owner_pid) || owner=unknown
+            printf 'constellia: org.freedesktop.Notifications is still owned (pid %s); atlanta was stopped, restoring it\n' "$owner" >&2
+        else
+            printf 'constellia: cannot query org.freedesktop.Notifications; atlanta was stopped, restoring it\n' >&2
+        fi
+        restore_atlanta
         exit 4
     fi
-    start_noctalia || exit 1
+    if ! start_noctalia; then
+        printf 'constellia: noctalia failed to start; state not written\n' >&2
+        restore_atlanta
+        exit 1
+    fi
     if ! wait_noctalia_ready; then
         printf 'constellia: noctalia started but did not answer; state not written\n' >&2
+        stop_noctalia
+        restore_atlanta
         exit 1
     fi
 }
@@ -100,6 +139,7 @@ switch_to_atlanta() {
     stop_noctalia || exit 1
     if ! invoke atlanta start; then
         printf 'constellia: atlanta start failed; state not written\n' >&2
+        restore_noctalia
         exit 1
     fi
 }
@@ -158,6 +198,9 @@ shell_start() {
     current=$(shell_get)
     case $current in
         atlanta)
+            if (( ! CONSTELLIA_DRY_RUN )) && noctalia_running; then
+                refuse_second_stack noctalia atlanta
+            fi
             invoke atlanta start
             exit $?
             ;;
@@ -171,6 +214,7 @@ shell_start() {
                 note 'already running' noctalia
                 return 0
             fi
+            atlanta_running && refuse_second_stack atlanta noctalia
             start_noctalia || exit 1
             if ! wait_noctalia_ready; then
                 printf 'constellia: noctalia did not answer\n' >&2
